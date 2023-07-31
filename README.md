@@ -4,7 +4,8 @@
 1. git branch <- Make sure you are on your branch
 2. git status <- Make sure you are up-to-date
 3. git pull <- If you are not up-to-date (step2)
-4. git merge origin <- Pull origin (main) into your branch
+4. git fetch <- Pulls from origin (main)
+5. git merge origin <- Merge origin into your branch
 <br><br><br><br><br>
 
 # SETUP
