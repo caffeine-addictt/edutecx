@@ -26,6 +26,7 @@ https://marketplace.visualstudio.com/items?itemName=bierner.markdown-preview-git
 https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.vscodeintellicode
 https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.intellicode-api-usage-examples
 https://marketplace.visualstudio.com/items?itemName=Zignd.html-css-class-completion
+https://marketplace.visualstudio.com/items?itemName=wholroyd.jinja
 
 `Python`<br>
 https://marketplace.visualstudio.com/items?itemName=ms-python.python
