@@ -1,7 +1,10 @@
 # Important
 `DO NOT commit to main/origin`<br><br>
-`ALWAYS "git branch" before doing anything and ensure you are on your branch`<br><br>
-`ALWAYS "git status" before doing anything and ensure your local files are up-to-date`<br><br>
+`Before doing anything`<br>
+1. git branch <- Make sure you are on your branch
+2. git status <- Make sure you are up-to-date
+3. git pull <- If you are not up-to-date (step2)
+4. git merge origin <- Pull origin (main) into your branch
 
 # SETUP
 `How to setup your project for this?`
