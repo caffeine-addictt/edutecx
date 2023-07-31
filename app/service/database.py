@@ -18,6 +18,7 @@ class Database:
     return cls.__databaseInstance
   
   def __init__(self) -> None:
+    print('sss')
     pass
 
 
