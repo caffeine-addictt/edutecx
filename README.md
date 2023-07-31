@@ -48,15 +48,15 @@ git clone git+https://github.com/caffeine-addictt/NYP_Sem2_AppDev
 <br><br>
 
 ## 5. Virturalize
-`Install python virturalenv`
+`Install python virtualenv`
 ```sh
 // Try other commands if not working
-py -m pip install virturalenv
-python -m pip install virturalenv
-python3 -m pip install virturalenv
+py -m pip install virtualenv
+python -m pip install virtualenv
+python3 -m pip install virtualenv
 ```
 
-`Create virturalenv`<br>
+`Create virtualenv`<br>
 `!!IMPORTANT!!` Ensure you `cd` into the project root folder<br>
 If successfuly, you should see a new folder apepar in your project root
 ```sh
@@ -66,7 +66,7 @@ python -m venv venv
 python3 -m venv venv
 ```
 
-`Start virturalenv`<br>
+`Start virtualenv`<br>
 If successful, you should see `(venv)` in your terminal
 ```sh
 // Try other commands if not working
