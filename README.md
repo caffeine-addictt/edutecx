@@ -5,6 +5,7 @@
 2. git status <- Make sure you are up-to-date
 3. git pull <- If you are not up-to-date (step2)
 4. git merge origin <- Pull origin (main) into your branch
+<br><br><br><br><br>
 
 # SETUP
 `How to setup your project for this?`
