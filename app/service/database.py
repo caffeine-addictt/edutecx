@@ -31,7 +31,7 @@ class Database:
     Automatically `closes` shelve connection and `syncs` if ```writeback = True```
 
     ```
-    with Database().openSession() as (shelveObj: shelve.Shelf[any]) :
+    with Database().openSession() as (shelveObj: shelve.Shelf[any]):
       ...
     ```
 
