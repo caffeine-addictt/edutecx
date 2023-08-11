@@ -7,6 +7,10 @@ app = Flask(
   template_folder = 'pages'
 )
 
+# Initialize API route handler
+import api
+
+
 @app.route('/')
 def home():
   return render_template('home/index.html')
