@@ -1,14 +1,16 @@
 from flask import Flask, request, render_template
 from markupsafe import escape
 
+# Registering blueprints
+from api import api_handler
 
 app = Flask(
   import_name = __name__,
-  template_folder = 'pages'
+  template_folder = 'pages',
+  static_folder = 'pages',
+  static_url_path = ''
 )
-
-# Initialize API route handler
-import api
+app.register_blueprint(api_handler)
 
 
 @app.route('/')
