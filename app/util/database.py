@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from collections.abc import Generator
 
 from typing import Callable, Iterable, Union
-from typeDeclarations import Identifier
+from .typeDeclarations import Identifier
 
 
 @dataclass(frozen = True)

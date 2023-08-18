@@ -102,6 +102,25 @@ git checkout <Your name>
 ```sh
 git push -u origin <Your name>
 ```
+<br><br>
+
+# 7. Running Files
+`Setup enviroment variables`
+```sh
+$env:FLASK_APP = "app/app.py" #WINDOWS
+export FLASK_APP="app/app.py" # Linux/MacOS
+
+$env:FLASK_DEBUG=1 #WINDOWS
+export FLASK_DEBUG=1 # Linux/MacOS
+```
+`Start server`
+```sh
+# -B stops generation of pycache, remove if you want it
+py -B -m flask run
+python -B -m flask run
+python3 -B -m flask run
+```
+
 
 <br><br><br><br><br>
 
