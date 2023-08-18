@@ -3,15 +3,16 @@
   <head>
     <meta charset = 'UTF-8'>
     <meta name = 'viewport' content = 'width=device-width, initial-scale=1.0'>
+
+    <!-- Default Title -->
     <title>
       {% block title %}
-      <!-- Default Title -->
       Document
       {% endblock %}
     </title>
 
     <!-- Globals -->
-    <link href = 'global.scss' rel = 'stylesheet' />
+    <link href = '/global.scss' rel = 'stylesheet' />
 
     <!-- Bootstrap CSS v5.2.1 -->
     <link
@@ -26,6 +27,7 @@
     {% endblock %}
   </head>
 
+
   <body>
     <!-- Import Navbar -->
     {% block navComponent %}
@@ -34,7 +36,7 @@
 
 
     <!-- Content Block -->
-    <div class = ''>
+    <div id = 'main_content'>
       {% block mainContent %}
       {% endblock %}
     </div>
