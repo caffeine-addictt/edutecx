@@ -4,6 +4,7 @@ from markupsafe import escape
 # Registering blueprints
 from api import api_handler
 
+# Setup for merging native templates/ & static/
 app = Flask(
   import_name = __name__,
   template_folder = 'pages',
