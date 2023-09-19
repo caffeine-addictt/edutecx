@@ -1,21 +1,35 @@
 # Important
-`DO NOT commit to main/origin`<br><br>
-`Before doing anything`<br>
-1. git branch <- Make sure you are on your branch
-2. git status <- Make sure you are up-to-date
-3. git pull <- If you are not up-to-date (step2)
-4. git fetch <- Pulls from origin (main)
-5. git merge origin <- Merge origin into your branch
+`DO NOT commit directly to master`
+<br><br>
+Before doing anything:<br>
+
+> 1. `git branch`<br>
+>       Make sure you are on the expected branch
+>
+> 2. `git status`<br>
+        Make sure you are up-to-date
+>
+> 3. `git pull`<br>
+>       If you are not up-to-date (step2)
+>
+> 4. `git fetch <parent branch name / 'main'>`<br>
+>       Pulls from origin (main)
+>
+> 5. `git merge origin`<br>
+>       Merge origin into your branch
+
 <br><br><br><br><br>
 
 # SETUP
-`How to setup your project for this?`
+How to setup your project for this?
+<br><br><br>
+
 ## 1. Python Version
-`Make sure you're running v3.10.11+`
+Make sure you're running v3.10.11+
 <br><br>
 
 ## 2. Code Editor
-`Lets stick to VScode`
+Lets stick to VScode
 <br><br>
 
 ## 3. Extensions
@@ -35,11 +49,12 @@ https://marketplace.visualstudio.com/items?itemName=ms-python.isort
 <br><br>
 
 ## 4. Getting the project
-`Install git`<br>
+Install git
+<br><br>
 Ensure that you install both git CLI and git desktop<br>
 https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
-`Clone github repository`<br>
+Clone github repository<br>
 If successful, you should see a new folder appear
 ```sh
 git clone https://github.com/caffeine-addictt/NYP_Sem2_AppDev
@@ -48,7 +63,7 @@ git clone git+https://github.com/caffeine-addictt/NYP_Sem2_AppDev
 <br><br>
 
 ## 5. Virturalize
-`Install python virtualenv`
+Install python virtualenv
 ```sh
 // Try other commands if not working
 py -m pip install virtualenv
@@ -56,26 +71,32 @@ python -m pip install virtualenv
 python3 -m pip install virtualenv
 ```
 
-`Create virtualenv`<br>
-`!!IMPORTANT!!` Ensure you `cd` into the project root folder<br>
-If successfuly, you should see a new folder apepar in your project root
+Create virtualenv
 ```sh
+// !!IMPORTANT!!
+//
+// Ensure you `cd` into the project root folder
+// If successfuly, you should see a new folder apepar in your project root
+
 // Try other commands if not working
 py -m venv venv
 python -m venv venv
 python3 -m venv venv
 ```
 
-`Start virtualenv`<br>
+Start virtualenv<br>
 If successful, you should see `(venv)` in your terminal
 ```sh
 // Try other commands if not working
 venv\Scripts\activate
 venv\Scripts\activate.bat
 venv\Scripts\activate.ps1
+
+// Linux
+source venv/bin/activate
 ```
 
-`Install python packages`
+Install python packages
 ```sh
 // Try other commands if not working
 pip install -r requirements.txt
@@ -85,27 +106,77 @@ python3 -m pip install -r requirements.txt
 ```
 <br><br>
 
-## 6. Managing git
-`Ensure you do this before touching anything from git CLI`<br>
-If successful, run `git branch` and ensure it says "On branch \<Your name\>"
+## 6. Creating a feature
+Ensure there isn't already an exisitng branch for it by running:<br>
 ```sh
-git checkout -b <Your name>
+// Globally lists branches
+git branch -r
 ```
 
-If unsuccessful;
+If there is an existing branch, move on to **Step 7**<br>
+<br>
+Else, choose an all-encompassing name `(UserLoginPage, DatabaseHandler, etc.)`<br>
+Then create a branch;<br><br>
+If successful, running `git branch` will show your branch name.
+
 ```sh
-git branch <Your name>
-git checkout <Your name>
+// **from** > sub branch for structure:
+//   master:
+//     from:
+//       newFeature
+//
+// Leave blank if its a direct branch:
+//   master:
+//      newFeature
+
+
+// Creates branch and auto checkout(s) to branch
+git checkout -b <Your Feature Branch Name> <from>
+
+// OR //
+
+// Creates a branch
+git branch <Your Feature Branch Name> <from>
+
+// Checkout(s) to branch
+// **If it is a sub branch, checkout to the sub branch first**
+git checkout <Your Feature Branch Name> <from>
 ```
 
-`Next push your branch`
+Next push your branch
+
 ```sh
-git push -u origin <Your name>
+// Sets up origin remote for new branch
+git push -u origin <Your Feature Branch Name>
 ```
 <br><br>
 
-# 7. Running Files
-`Setup enviroment variables`
+# 7. Accessing a feature
+Search for the feature's branch name with:
+
+```sh
+// Globally lists branches
+git branch -r
+```
+
+Checkout the branch
+```sh
+// Checkout the whole branch trace from master if not successful
+git checkout <Feature Branch Name>
+```
+
+Next push your branch
+
+```sh
+// Sets up origin remote for new branch
+git push -u origin <Your Feature Branch Name>
+```
+
+
+<br><br>
+
+# 8. Running Files
+Setup enviroment variables
 ```sh
 $env:FLASK_APP = "app/app.py" #WINDOWS
 export FLASK_APP="app/app.py" # Linux/MacOS
@@ -113,7 +184,7 @@ export FLASK_APP="app/app.py" # Linux/MacOS
 $env:FLASK_DEBUG=1 #WINDOWS
 export FLASK_DEBUG=1 # Linux/MacOS
 ```
-`Start server`
+Start server
 ```sh
 # -B stops generation of pycache, remove if you want it
 py -B -m flask run
@@ -125,16 +196,16 @@ python3 -B -m flask run
 <br><br><br><br><br>
 
 # Coding Conventions
-Here is what we will follow to keep our code organized:
-
-`Indentation will be 2 spaces`
+`Here is what we will follow to keep our code organized`
+<br><br>
+Indentation will be 2 spaces
 ```py
 def testFunc():
 | ...
 | |
 ```
 
-`Paranthesis () should immediately follow`
+Paranthesis () should immediately follow
 ```py
 def myFunc(): ...  // YES
 print()            // YES
@@ -143,7 +214,7 @@ print ()           // NO
 def myFunc (): ... // NO
 ```
 
-`Brackets "() {} []" with more than 4 elements or with elements long enough should be spread across lines`
+Brackets "() {} []" with more than 4 elements or with elements long enough should be spread across lines
 ```py
 doThis = {
   'params': ['return_response'],
@@ -153,7 +224,7 @@ doThis = {
 }
 ```
 
-`Functions and variable names have to be in camel case`
+Functions and variable names have to be in camel case
 ```py
 myVariable = 'hi'           // YES
 def myFunctionForAPI(): ... // YES
@@ -163,7 +234,7 @@ MyVariable = 'hi'           // NO
 def MyFunctionForAPI(): ... // NO
 ```
 
-`Type and Class declarations have to be in title case`
+Type and Class declarations have to be in title case
 ```py
 class Vehicles: ...         // YES
 class MyVehicles: ...       // YES
