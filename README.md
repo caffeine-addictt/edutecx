@@ -197,15 +197,24 @@ python3 -B -m flask run
 
 # Coding Conventions
 `Here is what we will follow to keep our code organized`
-<br><br>
-Indentation will be 2 spaces
+<br>
+
+
+<br>
+Indentation should be 2 spaces
+
 ```py
 def testFunc():
-| ...
-| |
+**testString = 'aa'
+**
+**for i in testString:
+****print(i)
 ```
 
+
+<br>
 Paranthesis () should immediately follow
+
 ```py
 def myFunc(): ...  // YES
 print()            // YES
@@ -214,7 +223,10 @@ print ()           // NO
 def myFunc (): ... // NO
 ```
 
+
+<br>
 Brackets "() {} []" with more than 4 elements or with elements long enough should be spread across lines
+
 ```py
 doThis = {
   'params': ['return_response'],
@@ -224,7 +236,10 @@ doThis = {
 }
 ```
 
-Functions and variable names have to be in camel case
+
+<br>
+Functions and variable names should be in camel case
+
 ```py
 myVariable = 'hi'           // YES
 def myFunctionForAPI(): ... // YES
@@ -234,7 +249,10 @@ MyVariable = 'hi'           // NO
 def MyFunctionForAPI(): ... // NO
 ```
 
-Type and Class declarations have to be in title case
+
+<br>
+Type and Class declarations should be in title case
+
 ```py
 class Vehicles: ...         // YES
 class MyVehicles: ...       // YES
@@ -243,4 +261,44 @@ Registration = NewType(str) // YES
 class vehicles: ...         // NO
 class myVehicles: ...       // NO
 registration = NewType(str) // NO
+```
+
+
+<br>
+Doc strings should follow this convention
+
+```py
+HashedPassword = str
+
+def hashingPassword(
+  password: str,
+  encryption: str = 'sha256'
+) -> HashedPassword:
+  """
+  Hashes Password
+  Follows encryption conventions with sha256
+
+  Parameters
+  ----------
+  password : str, required
+    Should utilise sha256 if larger than 72 characaters
+
+  encryption : str, optional (default is 'sha265')
+    The encryption algorithm used to encode the password
+  
+    
+  Returns
+  -------
+  HashedPassword : str
+    The fully salted hash
+    
+
+  Raises
+  ------
+  NotImplementedError
+    If encryption algorithm is invalid
+
+  """
+  ...
+  return hashed
 ```
