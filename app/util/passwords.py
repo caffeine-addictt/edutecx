@@ -34,11 +34,12 @@ def _encode(toEncode: str | bytes) -> bytes:
     If the toEncode parameter is not of a valid type
   """
   assert(isinstance(toEncode, (str, bytes)))
+
+  encoded: bytes
+  if (isinstance(toEncode, str)): encoded = toEncode.encode()
+  else: encoded = toEncode
   
-  return (
-    (isinstance(toEncode, str) and toEncode.encode())
-    or toEncode
-  )
+  return encoded
 
 
 
