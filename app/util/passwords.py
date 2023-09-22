@@ -48,7 +48,7 @@ def _encode(toEncode: str | bytes) -> bytes:
 def hash_password(password: str | bytes) -> bytes:
   """
   Hashes Password
-  Follows encryption conventions with sha256
+  Follows encryption conventions with random salted hashing
 
   Parameters
   ----------
@@ -82,7 +82,7 @@ def hash_password(password: str | bytes) -> bytes:
 def compare_password(password: str | bytes, hashed: bytes) -> bool:
   """
   Hashes Password
-  Follows encryption conventions with sha256
+  Follows encryption conventions with random salted hashing
 
   Parameters
   ----------
