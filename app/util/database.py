@@ -3,8 +3,13 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from collections.abc import Generator
 
-from typing import Callable, Iterable, Union
 from .typeDeclarations import Identifier
+from typing import (
+  Callable,
+  Iterable,
+  Literal,
+  Union
+)
 
 
 @dataclass(frozen = True)
@@ -54,6 +59,7 @@ class Database:
 
 
   # Private Functions
+  @staticmethod
   def _urlFor(filename: str):
     """
     Converts filename to database path
@@ -72,7 +78,7 @@ class Database:
   @contextmanager
   def openSession(
     databaseName: str,
-    flag: str = 'c',
+    flag: Literal['r', 'w', 'c', 'n', 'rf', 'wf', 'cf'] = 'c',
     protocol: int | None = None,
     writeback: bool = False
   ) -> Generator[shelve.Shelf, None, None]:
@@ -86,7 +92,7 @@ class Database:
     ```
 
     :param: databaseName: str
-    :param: flag: _TKFlag[str] = 'c'
+    :param: flag: _TKFlag[str] | Literal['r', 'w', 'c', 'n', 'rf', 'wf', 'cf'] = 'c'
     :param: protocall: int | None = None
     :param: writeback: bool = Falses
 
@@ -109,7 +115,7 @@ class Database:
   def extend(
     databaseName: str,
     listDir: Callable[[shelve.Shelf], list],
-    arg: Iterable[Union[str, int, any]]
+    arg: Iterable[str | int]
   ) -> None:
     """
     Invokes `Database.extend()`
@@ -122,7 +128,7 @@ class Database:
     """
     try:
       with Database.openSession(databaseName, writeback = True) as data:
-        to_extend: list[any] | None = listDir(data)
+        to_extend: list | None = listDir(data)
         to_extend.extend(arg)
 
     except AttributeError as e: raise AttributeError(e)
@@ -132,7 +138,7 @@ class Database:
   def append(
     databaseName: str,
     listDir: Callable[[shelve.Shelf], list],
-    arg: Union[str, int, any]
+    arg: Union[str, int]
   ) -> None:
     """
     Invokes `Database.extend()`
@@ -143,7 +149,7 @@ class Database:
 
     :return: None
     """
-    Database.extend(databaseName, listDir, (arg))
+    Database.extend(databaseName, listDir, list([arg]))
 
 
       
