@@ -12,7 +12,7 @@
     </title>
 
     <!-- Globals -->
-    <link href = '/global.scss' rel = 'stylesheet' />
+    <link href = '{{ url_for("static", filename = "global.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
 
     <!-- Bootstrap CSS v5.2.1 -->
     <link
@@ -28,7 +28,7 @@
   </head>
 
 
-  <body>
+  <body class='flex flex-col min-h-screen w-screen max-w-full'>
     <!-- Import Navbar -->
     {% block navComponent %}
       {% include 'components/Nav/index.html' %}
@@ -36,9 +36,10 @@
 
 
     <!-- Content Block -->
-    <div id = 'main_content'>
+    <div class='flex flex-auto flex-col'>
       {% block mainContent %}
       {% endblock %}
+      body
     </div>
 
 
@@ -63,6 +64,8 @@
       integrity = 'sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz'
       crossorigin = 'anonymous'
     ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/less@4.1.1" ></script>
   </body>
 </html>
 
