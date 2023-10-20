@@ -8,4 +8,4 @@ api_handler = Blueprint(
 
 @api_handler.route('/api')
 def api_catchall():
-  ...
+  return render_template('')
