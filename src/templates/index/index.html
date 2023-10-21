@@ -1,10 +1,10 @@
 <!doctype html>
-{% extends '/layout.html' %}
+{% extends 'layout.html' %}
 
 
 <!-- Styles -->
 {% block styles %}
-  <link href = '/user/signin/index.scss' rel = 'stylesheet' />
+  <link href = '{{ url_for("static", filename = "/index/index.scss") }}' rel = 'stylesheet' />
 {% endblock %}
 
 
@@ -17,5 +17,5 @@
 
 <!-- Scripts -->
 {% block scripts %}
-  <script src = '/user/signin/index.js'></script>
+  <script src = '{{ url_for("static", filename = "/index/index.js") }} '></script>
 {% endblock %}
