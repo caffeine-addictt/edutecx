@@ -1,5 +1,10 @@
 {
   "editor.indentSize": "tabSize",
   "editor.tabSize": 2,
-  "python.analysis.typeCheckingMode": "basic"
+  "python.analysis.typeCheckingMode": "basic",
+  "python.testing.pytestArgs": [
+    "test"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

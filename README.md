@@ -176,22 +176,31 @@ git push -u origin <Your Feature Branch Name>
 <br><br>
 
 # 8. Running Files
-Setup enviroment variables
-```sh
-$env:FLASK_APP = "app/app.py" #WINDOWS
-export FLASK_APP="app/app.py" # Linux/MacOS
-
-$env:FLASK_DEBUG=1 #WINDOWS
-export FLASK_DEBUG=1 # Linux/MacOS
-```
 Start server
 ```sh
 # -B stops generation of pycache, remove if you want it
-py -B -m flask run
-python -B -m flask run
-python3 -B -m flask run
+py -B -m run.py
+python -B -m run.py
+python3 -B -m run.py
 ```
 
+
+
+<br><br>
+
+# 9. Clean Up
+After running, you may notice generation of pycache folders.
+These folders are useful as they speed up runtime execution through caching.
+
+If you wish to remove them, Run the following:
+  - (etc) Between testing or cache issues
+  - Note that it will not remove pytest cache in proj root
+
+```sh
+py -B -m clear_pycache.py
+python -B -m clear_pycache.py
+python3 -B -m clear_pycache.py
+```
 
 <br><br><br><br><br>
 
