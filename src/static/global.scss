@@ -1,0 +1,54 @@
+:root {
+  --background-color: rgba(255, 255, 255, 0);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+/* // Tailwind Classes implmentation in CSS
+// if you know the bootstrap eq, feel free to update */
+
+.flex { display: flex; }
+
+.sticky { position: sticky; }
+
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-auto { flex: 1 1 auto; }
+.justify-between { justify-content: space-between; }
+
+// Sizing
+.w-full { width: 100%; }
+.w-screen { width: 100vw; }
+.w-\[90\%\] { width: 90%; }
+.max-w-full { max-width: 100%; }
+
+.h-fit { height: fit-content; }
+.min-h-screen { min-height: 100vh; }
+
+//
+.top-0 { top: 0px; }
+
+// Z-index
+.z-50 { z-index: 50; }
+
+// Padding
+.py-2 {
+  padding-top: 0.5rem/* 8px */;
+  padding-bottom: 0.5rem/* 8px */;
+}
+.px-4 {
+  padding-left: 1rem/* 16px */;
+  padding-right: 1rem/* 16px */;
+}
+.pt-4 { padding-top: 1rem/* 16px */; }
+.pb-2 { padding-bottom: 0.5rem/* 8px */; }
+
+// Margin
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
