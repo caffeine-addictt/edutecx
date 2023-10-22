@@ -1,6 +1,8 @@
-from flask import jsonify
+from flask import (
+  jsonify,
+  current_app as app
+)
 
-from ..app import app
 
 @app.route('/api/v1/')
 def root():
