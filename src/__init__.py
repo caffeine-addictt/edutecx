@@ -9,7 +9,6 @@ from config import Config
 
 db = SQLAlchemy()
 
-
 def init_app() -> Flask:
   """
   Initializes Flask Application
@@ -23,6 +22,10 @@ def init_app() -> Flask:
   db.init_app(app = app)
 
   with app.app_context():
+    # Import Database models
+    from .util import database
+
+    # Import modules
     from . import modules
 
     db.create_all()
