@@ -3,7 +3,7 @@
 import os
 import importlib
 
-print('\nImporting modules...')
+print('Importing modules...')
 
 modules = [
   filename for filename in os.listdir(os.path.dirname(os.path.abspath(__file__)))
@@ -19,4 +19,4 @@ for filename in modules:
 
   print(f'{filename} OK')
 
-print('\nSuccessfully imported modules\n')
+print('Successfully imported modules')

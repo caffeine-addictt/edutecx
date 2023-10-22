@@ -5,8 +5,8 @@ from flask import Flask
 # testing app startup
 @pytest.fixture()
 def app():
-  from src.app import app
-  yield app
+  from src import init_app
+  yield init_app()
 
 @pytest.fixture()
 def client(app: Flask):
