@@ -289,24 +289,31 @@ def hashingPassword(
 
   Parameters
   ----------
-  password : str, required
+  `password : str`, required
     Should utilise sha256 if larger than 72 characaters
 
-  encryption : str, optional (default is 'sha265')
+  `encryption : str`, optional (default is 'sha256')
     The encryption algorithm used to encode the password
   
     
   Returns
   -------
-  HashedPassword : str
+  `HashedPassword : str`
     The fully salted hash
     
 
   Raises
   ------
-  NotImplementedError
+  `NotImplementedError`
     If encryption algorithm is invalid
 
+
+  Examples
+  --------
+  >>> hashingPassword('myPass', 'sha256')
+  hash: wdjUW8w8dh8awhd83dj
+  >>> hashingPassword('myPass')
+  hash: wdjUW8w8dh8awhd83dj
   """
   ...
   return hashed
