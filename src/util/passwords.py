@@ -16,21 +16,21 @@ Hash is then stored
 
 def _encode(toEncode: str | bytes) -> bytes:
   """
-  Encodes string for hashing/comparison
+  Encodes string for hashing/comparison\n
   Utilises utf8
 
   Parameters
   ----------
-  toEncode : str | bytes, required
+  `toEncode : str | bytes`, required
   
   Returns
   -------
-  encoded : bytes
+  `encoded : bytes`
     Byte-string representation of the utf8 encoded input
 
   Raises
   ------
-  TypeError
+  `TypeError`
     If the toEncode parameter is not of a valid type
   """
   assert(isinstance(toEncode, (str, bytes)))
@@ -47,24 +47,24 @@ def _encode(toEncode: str | bytes) -> bytes:
 
 def hash_password(password: str | bytes) -> bytes:
   """
-  Hashes Password
+  Hashes Password\n
   Follows encryption conventions with random salted hashing
 
   Parameters
   ----------
-  password : str, required
+  `password : str`, required
     Should be in plaintext
   
     
   Returns
   -------
-  HashedPassword : bytes
+  `HashedPassword : bytes`
     Byte-string representation of the fully salted password
 
 
   Raises
   ------
-  TypeError
+  `TypeError`
     If the password parameter is of a valid type
   """
   assert(isinstance(password, (str, bytes)))
@@ -81,27 +81,27 @@ def hash_password(password: str | bytes) -> bytes:
 
 def compare_password(password: str | bytes, hashed: bytes) -> bool:
   """
-  Hashes Password
+  Hashes Password\n
   Follows encryption conventions with random salted hashing
 
   Parameters
   ----------
-  password : str, required
+  `password : str`, required
     Should be in plaintext, will be encoded within the function.
 
-  hashed : bytes, required
+  `hashed : bytes`, required
     Should be the byte representation of the hashed password to comapre against
   
     
   Returns
   -------
-  Password is equal : bool
+  `Password is equal : bool`
     Byte-string representation of the fully salted password
 
 
   Raises
   ------
-  TypeError
+  `TypeError`
     If the password or hashed parameter is of a valid type
   """
   assert(isinstance(password, (str, bytes)))
