@@ -1,18 +1,13 @@
 import os
-
-
-# Load .env variables
-from dotenv import load_dotenv
-load_dotenv()
-
-print('\nImported environment variables')
-
-
-from src.app import app
+from src import init_app
 
 if __name__ == '__main__':
+  app = init_app()
+
+  print()
+  
   app.run(
     host = '127.0.0.1',
-    port = int(os.getenv('PORT', '8080')),
-    debug = True
+    port = int(os.getenv('FLASK_RUN_PORT', 8080)),
+    debug = 'True' == os.getenv('FLASK_DEBUG', 'False')
   )
