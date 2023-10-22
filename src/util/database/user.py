@@ -8,7 +8,6 @@ import uuid
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import (
-  UUID,
   String,
   Boolean,
   DateTime
