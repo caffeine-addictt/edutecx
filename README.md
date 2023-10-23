@@ -46,6 +46,9 @@ https://marketplace.visualstudio.com/items?itemName=wholroyd.jinja
 https://marketplace.visualstudio.com/items?itemName=ms-python.python
 https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance
 https://marketplace.visualstudio.com/items?itemName=ms-python.isort
+
+`SQLite Viewer`<br>
+https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer
 <br><br>
 
 ## 4. Getting the project
