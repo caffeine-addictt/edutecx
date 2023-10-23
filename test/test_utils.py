@@ -4,7 +4,7 @@ def test_exponentialBackoff_success():
   def check(x):
     return x == 1
 
-  @s.exponential_backoff(retries = 1, validate = check)
+  @s.exponentialBackoff(retries = 1, validate = check)
   def func():
     return 1
 
@@ -17,7 +17,7 @@ def test_exponentialBackoff_failure():
   def check(x):
     return x == 1
 
-  @s.exponential_backoff(retries = 1, validate = check)
+  @s.exponentialBackoff(retries = 1, validate = check)
   def func():
     return 2
   
