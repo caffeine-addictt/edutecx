@@ -1,37 +1,87 @@
 """
-Setup Flask Environment
+Setup Flask Environment Variables
+
+.env - imported variables should only be private keys etc.
 """
 
 import os
-from dotenv import load_dotenv
+from typing import Literal, Union, Optional, Required
 
+from dotenv import load_dotenv
 load_dotenv()
 
-class Config:
+class ConfigBase:
   """
-  Containing environment variables from .env
+  Base Config Class for Flask Environment
+  Imports from .env
+
+  Setup to favor development
+
+  `SHOULD CONTAIN ALL ENV VARIABLES OF CHILD CLASSES`\n
+  `SHOULD NEVER BE USED DIRECTLY`
   """
 
-  # General
-  PRODUCTION = os.getenv('PRODUCTION', 'development')
+  # \\\\\\ General ////// #
+  # Production ENV
+  ENV: Literal['development', 'production'] = 'development'
 
-  # Flask
+
+  # \\\\\\ Flask ////// #
   # Docs https://flask.palletsprojects.com/en/3.0.x/config/
-  SECRET_KEY = os.getenv('SECRET_KEY', 'mysecretkey')
-  FLASK_DEBUG = 'True' == os.getenv('FLASK_DEBUG', 'False')
-  FLASK_RUN_PORT = os.getenv('FLASK_RUN_PORT', 8000)
+  DEBUG: Optional[bool] = True
+  SECRET_KEY: str
 
-  # Session
+
+  # \\\\\\ Session ////// #
   # Docs https://flask-session.readthedocs.io/en/latest/config.html
-  SESSION_TYPE = os.getenv('SESSION_TYPE', 'filesystem')
-  PERMANENT_SESSION_LIFETIME = int(os.getenv('PERMANENT_SESSION_LIFETIME', 2 * 60 * 60)) # 2h in Seconds
+  SESSION_TYPE : Literal['filesystem', 'sqlalchemy']
+  PERMANENT_SESSION_LIFETIME: int = 2 * 60 * 60 # 2h in seconds
 
-  # SQL
+
+  # \\\\\\ SQL ////// #
   # Docs https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/config/
-  SQLALCHEMY_ECHO = 'True' == os.getenv('SQLALCHEMY_ECHO', False)
-  SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///testing.sqlite3')
+  SQLALCHEMY_ECHO: Optional[bool] = True
+  SQLALCHEMY_DATABASE_URI: Required[str] = 'sqlite:///testing.sqlite3'
 
 
-class DeploymentConfig(Config):
+
+# Configs to export
+class DevelopmentConfig(ConfigBase):
+  """
+  Configurations for `Development`
+  """
+
+  ENV = 'development'
+
+  SECRET_KEY = 'mysecretkey'
+
+  SESSION_TYPE = 'sqlalchemy'
+
+
+
+class ProductionConfig(ConfigBase):
+  """
+  Configurations for `Production`
+  """
+
+  ENV = 'production'
+  DEBUG = False
+
   SECRET_KEY = 'L&>SdT@-Z*y[%(fxN6L>Us1PQ{WAp7&u'
-  FLASK_DEBUG = False
+  SESSION_TYPE = 'sqlalchemy'
+
+  SQLALCHEMY_ECHO = False
+
+
+
+
+
+
+def get_production_config() -> str:
+  match os.getenv('PROD', 'development'):
+    case 'development':
+      return 'config.DevelopmentConfig'
+    case 'production':
+      return 'config.ProductionConfig'
+    
+  return 'config.DevelopmentConfig'
