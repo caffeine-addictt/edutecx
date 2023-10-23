@@ -23,7 +23,7 @@ class ExponentialBackoffError(Exception):
     super().__init__(message, *args, **kwargs)
 
 
-def exponential_backoff(
+def exponentialBackoff(
   retries: int = 5,
   scale: int = 1,
   validate: Union[Callable[..., bool], None] = None
@@ -63,21 +63,29 @@ def exponential_backoff(
 
   Examples
   --------
-  >>> def check(returnedValue: Any) -> bool:
-  >>>   return returnedValue == 1
-  >>>
-  >>> @exponential_backoff(retries = 5, scale = 1, validate = check)
-  >>> def func1(arg1: int, arg2: int) -> int:
-  >>>   return arg1 + arg2
-  >>>
-  >>> @exponential_backoff(validate = check)
-  >>> def func2(arg1: int, arg2: int) -> float:
-  >>>  return arg1 / arg2
-  >>>
-  >>> func1(1, 2)
+  ```py
+    def check(returnedValue: Any) -> bool:
+      return returnedValue == 1
+
+    @exponentialBackoff(retries = 5, scale = 1, validate = check)
+    def func1(arg1: int, arg2: int):
+      return arg1 + arg2
+  ```
+  ```sh
+  > func1(1, 2)
   3
-  >>> func2(2, 3)
+  ```
+
+
+  ```py
+    @exponential_backoff(validate = lamda x: x==1)
+    def func2(arg1: int, arg2: int):
+      return arg1 / arg2
+  ```
+  ```sh
+  > func2(2, 3)
   ExponentialBackoffError ...
+  ```
 
   """
   def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
