@@ -6,7 +6,7 @@ from flask import Flask
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 
-from config import Config, DeploymentConfig
+from config import get_production_config
 
 db = SQLAlchemy()
 
@@ -16,11 +16,7 @@ def init_app() -> Flask:
   """
 
   app = Flask(__name__)
-
-  if Config.PRODUCTION == 'development':
-    app.config.from_object(Config)
-  else:
-    app.config.from_object(DeploymentConfig)
+  app.config.from_object(get_production_config())
 
   print('\nImported environment variables')
 
