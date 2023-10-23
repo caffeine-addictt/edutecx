@@ -3,9 +3,10 @@ Initalizes Flask Application
 """
 
 from flask import Flask
+from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 
-from config import Config
+from config import Config, DeploymentConfig
 
 db = SQLAlchemy()
 
@@ -15,11 +16,20 @@ def init_app() -> Flask:
   """
 
   app = Flask(__name__)
-  app.config.from_object(Config)
+
+  if Config.PRODUCTION == 'development':
+    app.config.from_object(Config)
+  else:
+    app.config.from_object(DeploymentConfig)
 
   print('\nImported environment variables')
 
+  # Init DB
   db.init_app(app = app)
+
+  # Init Session
+  app.config['SESSION_SQLALCHEMY'] = db
+  Session(app = app)
 
   with app.app_context():
     # Import Database models
