@@ -6,6 +6,7 @@ print('Importing modules...')
 
 from . import (
   index,
+  auth,
   api_v1,
 )
 

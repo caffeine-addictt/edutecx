@@ -5,10 +5,12 @@ Initalizes Flask Application
 from flask import Flask
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+from custom_lib.flask_login import LoginManager
 
 from config import get_production_config
 
 db = SQLAlchemy()
+loginManager = LoginManager()
 
 def init_app() -> Flask:
   """
@@ -22,6 +24,9 @@ def init_app() -> Flask:
 
   # Init DB
   db.init_app(app = app)
+
+  # Init Login
+  loginManager.init_app(app = app)
 
   # Init Session
   app.config['SESSION_SQLALCHEMY'] = db

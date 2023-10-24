@@ -6,6 +6,7 @@ from . import db
 
 import uuid
 from datetime import datetime
+from custom_lib.flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import (
   String,
@@ -15,7 +16,7 @@ from sqlalchemy import (
 
 
 
-class UserModel(db.Model):
+class UserModel(db.Model, UserMixin):
   """
   User Model
   """
