@@ -11,6 +11,7 @@ from custom_lib.flask_login import LoginManager
 from config import get_production_config
 
 db = SQLAlchemy()
+migrate = Migrate()
 loginManager = LoginManager()
 
 def init_app() -> Flask:
@@ -33,16 +34,14 @@ def init_app() -> Flask:
   app.config['SESSION_SQLALCHEMY'] = db
   Session(app = app)
 
-  # Migrate DB
-  migrate = Migrate(app = app, db = db)
-
   with app.app_context():
     # Import Database models
-    from .util import database
+    from . import database
 
     # Import modules
     from . import modules
 
     db.create_all()
+    migrate.init_app(app = app, db = db)
 
     return app
