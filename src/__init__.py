@@ -3,6 +3,7 @@ Initalizes Flask Application
 """
 
 from flask import Flask
+from flask_migrate import Migrate
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from custom_lib.flask_login import LoginManager
@@ -31,6 +32,9 @@ def init_app() -> Flask:
   # Init Session
   app.config['SESSION_SQLALCHEMY'] = db
   Session(app = app)
+
+  # Migrate DB
+  migrate = Migrate(app = app, db = db)
 
   with app.app_context():
     # Import Database models
