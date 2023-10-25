@@ -3,8 +3,8 @@ Managing user login/logout
 """
 
 from .. import loginManager
-from ..util import HTTPStatusCode
-from ..util.database import UserModel
+from ..utils.http import HTTPStatusCode
+from ..database import UserModel
 
 from urllib import parse
 from custom_lib.flask_login import login_user, logout_user, login_required, current_user
