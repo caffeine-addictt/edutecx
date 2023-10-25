@@ -2,6 +2,5 @@
 Load database modules
 """
 
-from . import (
-  user
-)
+from .user import UserModel
+from .token import TokenModel
