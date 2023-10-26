@@ -6,11 +6,12 @@ managing verification token and  password reset token
 
 from src import db
 from src.utils.ext import utc_time
-from . import UserModel
 
 import uuid
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column, Relationship, backref
+from typing import TYPE_CHECKING, Literal
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
   String,
   Boolean,
@@ -19,32 +20,38 @@ from sqlalchemy import (
   literal
 )
 
+# Import UserModel at runtime to prevent circular imports
+if TYPE_CHECKING:
+  from .user import UserModel
 
-# TODO: Add ForeignKey reference to UserModel.token
+TokenTypes = Literal['Verification', 'PasswordReset']
+
+
+
 class TokenModel(db.Model):
   """
   Token Model
   Verification and Password Reset
   """
-  __tablename__ = 'tokens'
+  __tablename__ = 'token_table'
 
-  user_id        : Mapped[str]      = mapped_column(String, ForeignKey('users.id'), primary_key = True, nullable = False)
-  user: Mapped[UserModel] = Relationship('UserModel', backref = backref('tokens', uselist = False))
+  id        : Mapped[str]         = mapped_column(ForeignKey('user_table.id'), primary_key = True, nullable = False)
+  user      : Mapped['UserModel'] = relationship(back_populates = 'token')
 
-  token: Mapped[str] = mapped_column(String, nullable = False, unique = True, default = lambda: uuid.uuid4().hex)
-  token_type: Mapped[str] = mapped_column(String, nullable = False)
+  token     : Mapped[str]         = mapped_column(String, nullable = False, unique = True, default = lambda: uuid.uuid4().hex)
+  token_type: Mapped[str]         = mapped_column(String, nullable = False)
 
-  expires_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = lambda: utc_time.skip('1day'))
-  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = lambda: utc_time.get())
+  expires_at: Mapped[datetime]    = mapped_column(DateTime, nullable = False, default = lambda: utc_time.skip('1day'))
+  created_at: Mapped[datetime]    = mapped_column(DateTime, nullable = False, default = lambda: utc_time.get())
 
-  def __init__(self, user_id: str, token_type: str, token: str | None = None) -> None:
+  def __init__(self, user: 'UserModel', token_type: TokenTypes, token: str | None = None) -> None:
     """
     Parameters
     ----------
-    `user_id: str`, required
-      The UserID of the UserModel to assign the token to
+    `user: UserModel`, required
+      The UserModel to assign the token to
 
-    `token_type: str`, required
+    `token_type: TokenTypes[str]`, required
       The token type
 
     `token: str`, optional (defaults to None)
@@ -54,7 +61,8 @@ class TokenModel(db.Model):
     -------
     `None`
     """
-    self.user_id = user_id
+    self.id = user.id
+    self.user = user
     self.token_type = token_type
     
     if isinstance(token, str):
