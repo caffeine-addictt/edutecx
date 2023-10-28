@@ -1,5 +1,5 @@
 """
-Utility Functions
+Exponential Backoff Implementation
 """
 
 import time
