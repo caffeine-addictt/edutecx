@@ -6,14 +6,13 @@ from src import db
 
 import uuid
 from datetime import datetime
-from typing import Literal, Optional, TYPE_CHECKING
+from typing import Literal, List, Optional, TYPE_CHECKING
 
 from custom_lib.flask_login import UserMixin
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
   String,
-  DateTime,
-  ForeignKey,
+  DateTime
 )
 
 
@@ -21,8 +20,22 @@ from sqlalchemy import (
 if TYPE_CHECKING:
   from .token import TokenModel
   from .classroom import ClassroomModel
+  from .submission import SubmissionModel
+  from .comment import CommentModel
+  from .document import DocumentModel
 
 
+PrivilegeTypes = Literal['User', 'Admin']
+ClassroomMemberType = Literal['Student', 'Educator', 'Owner']
+
+class ClassroomMember:
+  """ClassroomMember"""
+  def __init__(self, user: 'UserModel', classroom: 'ClassroomModel', role: ClassroomMemberType) -> None:
+    self.classroom = classroom
+    self.role = role
+    self.user = user
+
+# TODO: A way to persist document edits per user
 class UserModel(db.Model, UserMixin):
   """
   User Model
@@ -31,32 +44,153 @@ class UserModel(db.Model, UserMixin):
   __tablename__ = 'user_table'
 
   # Identifiers
-  id        : Mapped[str]                  = mapped_column(String, primary_key = True, default = lambda: uuid.uuid4().hex)
-  email     : Mapped[str]                  = mapped_column(String, unique = True, nullable = False)
-  username  : Mapped[str]                  = mapped_column(String, unique = True, nullable = False)
+  id      : Mapped[str] = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
+  email   : Mapped[str] = mapped_column(String, unique = True, nullable = False)
+  username: Mapped[str] = mapped_column(String, unique = True, nullable = False)
 
   # Auth
-  privilege : Mapped[str]                  = mapped_column(String, default = False)
-  password  : Mapped[str]                  = mapped_column(String, nullable = False)
+  privilege: Mapped[str] = mapped_column(String, default = False)
+  password : Mapped[str] = mapped_column(String, nullable = False)
 
   # Token
-  token     : Mapped[Optional['TokenModel']] = relationship(back_populates = 'user')
+  token: Mapped[Optional['TokenModel']] = relationship('TokenModel', back_populates = 'user')
 
   # Class (Classroom feature)
-  classroom : Mapped[Optional['ClassroomModel']] = relationship(back_populates = 'members')
+  comments        : Mapped[List['CommentModel']]    = relationship('CommentModel', back_populates = 'author')
+  submissions     : Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'student')
+  owned_classrooms: Mapped[List['ClassroomModel']]  = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner')
+
+  # Documents
+  documents      : Mapped[str]                   = mapped_column(String, nullable = True)
+  owned_documents: Mapped[List['DocumentModel']] = relationship('DocumentModel', primaryjoin = 'UserModel.id == DocumentModel.author_id', back_populates = 'author')
 
   # Logs
-  created_at: Mapped[datetime]             = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
-  updated_at: Mapped[datetime]             = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+  updated_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
   def __init__(self,
     email: str,
     username: str,
     password: str,
-    privilege: Literal['User', 'Admin']
+    privilege: PrivilegeTypes
   ) -> None:
     self.email     = email
     self.username  = username
     self.privilege = privilege
     self.password  = password
+
+
+  # Private
+  @staticmethod
+  def _clean_id_str(data: Optional[str] = '', separator: str = '|') -> list[str]:
+    """
+    Turns DB model saved data str('id1|id2|id3|...) to list[str, ...]
+
     
+    Parameters
+    ----------
+    `data: str`, required
+    `separator: str`, optional (defaults to '|')
+
+
+    Returns
+    -------
+    `data: list[str]`
+    """
+    return [i for i in (data or '').split(separator) if i]
+
+    
+  # Properties
+  @property
+  def classrooms(self) -> list[ClassroomMember]:
+    from .classroom import ClassroomModel as cm # Import in runtime to prevent circular imports
+
+    asStudent: list['ClassroomModel'] = cm.query.filter(cm.student_ids.contains(self.id)).all()
+    asEducator: list['ClassroomModel'] = cm.query.filter(cm.educator_ids.contains(self.id)).all()
+    asOwner: list['ClassroomModel'] = self.owned_classrooms
+
+    classes: list[ClassroomMember] = []
+    for i in asStudent: classes.append(ClassroomMember(self, i, 'Student'))
+    for i in asEducator: classes.append(ClassroomMember(self, i, 'Educator'))
+    for i in asOwner: classes.append(ClassroomMember(self, i, 'Owner'))
+
+    return classes
+  
+
+  # Editing
+  def join_class(self, *classrooms: 'ClassroomModel') -> None:
+    """
+    Add user to the classroom\n
+    `COMMITS`
+
+    
+    Parameters
+    ----------
+    `*classrooms: ClassroomModel`
+
+    
+    Returns
+    -------
+    `None`
+
+    
+    Examples
+    --------
+    ```py
+      join_class(class1)
+      join_class(class2, class3)
+    ```
+    """
+    cleaned_classroms = set(classrooms)
+    joined_classes = self.classrooms
+
+    for class_ in cleaned_classroms:
+      already_joined: bool = any([i.classroom.id == class_.id for i in joined_classes])
+      if not already_joined:
+        class_.add_students(self)
+
+    db.session.commit()
+    return None
+
+  def exit_class(self, *classrooms: 'ClassroomModel') -> None:
+    """
+    Remove user from the classroom\n
+    `COMMITS`
+
+    
+    Parameters
+    ----------
+    `*classrooms: ClassroomModel`
+
+    
+    Returns
+    -------
+    `None`
+
+    
+    Examples
+    --------
+    ```py
+      exit_class(class1)
+      exit_class(class2, class3)
+    ```
+    """
+    cleanedClassroms = set(classrooms)
+    joinedClasses = self.classrooms
+
+    for class_ in joinedClasses:
+      matched: bool = any([ i.id == class_.classroom.id for i in cleanedClassroms])
+      match (matched and class_.role):
+        case 'Student':
+          class_.classroom.remove_students(self)
+          break
+
+        case 'Educator':
+          class_.classroom.remove_educators(self)
+          break
+
+    db.session.commit()
+    return None
+
+
+
