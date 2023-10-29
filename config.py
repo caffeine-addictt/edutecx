@@ -38,6 +38,13 @@ class ConfigBase:
   PERMANENT_SESSION_LIFETIME: int = 2 * 60 * 60 # 2h in seconds
 
 
+  # \\\\\\ Mail ////// #
+  MAIL_PORT: int = 25
+  MAIL_USE_TLS: bool = False
+  MAIL_USE_SSL: bool = True
+  MAIL_SERVER: Literal['localhost', 'smtp.google.com'] = 'smtp.google.com'
+
+
   # \\\\\\ SQL ////// #
   # Docs https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/config/
   SQLALCHEMY_ECHO: Optional[bool] = True
