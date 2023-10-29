@@ -3,6 +3,7 @@ User Model
 """
 
 from src import db
+from src.utils import passwords
 
 import uuid
 from datetime import datetime
@@ -49,8 +50,8 @@ class UserModel(db.Model, UserMixin):
   username: Mapped[str] = mapped_column(String, unique = True, nullable = False)
 
   # Auth
-  privilege: Mapped[str] = mapped_column(String, default = False)
-  password : Mapped[str] = mapped_column(String, nullable = False)
+  privilege     : Mapped[str] = mapped_column(String, default = False)
+  password_hash : Mapped[str] = mapped_column(String, nullable = False)
 
   # Token
   token: Mapped[Optional['TokenModel']] = relationship('TokenModel', back_populates = 'user')
@@ -77,7 +78,7 @@ class UserModel(db.Model, UserMixin):
     self.email     = email
     self.username  = username
     self.privilege = privilege
-    self.password  = password
+    self.password_hash  = password
 
 
   # Private
@@ -101,6 +102,10 @@ class UserModel(db.Model, UserMixin):
 
     
   # Properties
+  @property
+  def password(self) -> None:
+    raise AttributeError('Password is not reaadable!')
+
   @property
   def classrooms(self) -> list[ClassroomMember]:
     from .classroom import ClassroomModel as cm # Import in runtime to prevent circular imports
@@ -193,4 +198,10 @@ class UserModel(db.Model, UserMixin):
     return None
 
 
-
+  # Verification
+  def verify_password(self, password: str) -> bool:
+    try:
+      is_equal = passwords.compare_password(password, self.password_hash.encode())
+      return is_equal
+    except Exception:
+      return False
