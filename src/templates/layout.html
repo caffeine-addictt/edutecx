@@ -7,7 +7,7 @@
     <!-- Default Title -->
     <title>
       {% block title %}
-      Document
+        Document
       {% endblock %}
     </title>
 
@@ -28,7 +28,7 @@
   </head>
 
 
-  <body class='flex flex-col min-h-screen w-screen max-w-full'>
+  <body class='d-flex flex-column min-vh-100 vw-100 mw-100'>
     <!-- Import Navbar -->
     {% block navComponent %}
       {% include 'components/navbar.html' %}
@@ -36,10 +36,10 @@
 
 
     <!-- Content Block -->
-    <div class='flex flex-auto flex-col'>
+    <div class='d-flex flex-column flex-fill'>
       {% block mainContent %}
+        body
       {% endblock %}
-      body
     </div>
 
 
