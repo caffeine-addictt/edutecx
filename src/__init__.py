@@ -3,6 +3,7 @@ Initalizes Flask Application
 """
 
 from flask import Flask
+from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
@@ -25,6 +26,7 @@ metadata = MetaData(naming_convention = convention)
 
 # Setup app init variables to be publically accessible
 db = SQLAlchemy(metadata = metadata)
+mail = Mail()
 migrate = Migrate()
 loginManager = LoginManager()
 
@@ -53,6 +55,9 @@ def init_app(testing: bool = False) -> Flask:
   # Init Session
   # app.config['SESSION_SQLALCHEMY'] = db
   # Session(app = app)
+
+  # Init Mail
+  mail.init_app(app = app)
 
   with app.app_context():
     # Import Database models
