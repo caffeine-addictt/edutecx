@@ -28,6 +28,8 @@ class DocumentModel(db.Model):
   Document Model
   """
 
+  __tablename__ = 'document_table'
+
   # Identifier
   id       : Mapped[str] = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
   author_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
@@ -35,7 +37,7 @@ class DocumentModel(db.Model):
   # Attributes
   price   : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
   author  : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_documents')
-  filename: Mapped[str] = mapped_column(String, nullable = False)
+  filename: Mapped[str] = mapped_column(String, nullable = False, unique = True)
   data    : Mapped[LargeBinary] = mapped_column(LargeBinary, nullable = False)
 
   # Logs
