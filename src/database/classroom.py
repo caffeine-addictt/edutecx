@@ -65,6 +65,10 @@ class ClassroomModel(db.Model):
     self.title = title
     self.description = description
 
+  def __repr__(self):
+    """To be used with cache indexing"""
+    return '%s(%s)' % (self.__class__.__name__, self.id)
+
   
   # Private
   @staticmethod

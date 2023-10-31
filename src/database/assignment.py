@@ -60,3 +60,7 @@ class AssignmentModel(db.Model):
 
     if due_date is not None:
       self.due_date = due_date
+
+  def __repr__(self):
+    """To be used with cache indexing"""
+    return '%s(%s)' % (self.__class__.__name__, self.id)
