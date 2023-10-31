@@ -2,13 +2,13 @@
 Register form
 """
 
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, SubmitField, StringField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 from typing import Optional
 
-class RegisterForm(Form):
+class RegisterForm(FlaskForm):
   """
   Register Form
   """
@@ -20,8 +20,8 @@ class RegisterForm(Form):
   agree       = BooleanField('I agree to the <a href="/">privacy policy</a>', validators = [DataRequired()])
   submit      = SubmitField('Log In')
 
-  def validate(self) -> bool:
-    field_validation = super().validate()
+  def validate(self, *args, **kwargs) -> bool:
+    field_validation = super().validate(*args, **kwargs)
     if not field_validation: return False
 
     # Import at runtime to prevent circular imports
