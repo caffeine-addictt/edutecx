@@ -64,3 +64,7 @@ class TokenModel(db.Model):
     
     if isinstance(token, str):
       self.token = token
+
+  def __repr__(self):
+    """To be used with cache indexing"""
+    return '%s(%s)' % (self.__class__.__name__, self.id)

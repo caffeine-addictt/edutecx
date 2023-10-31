@@ -3,8 +3,10 @@ User Model
 """
 
 from src import db
+from src.utils import passwords
 
 import uuid
+from functools import cache, cached_property
 from datetime import datetime
 from typing import Literal, List, Optional, TYPE_CHECKING
 
@@ -35,6 +37,11 @@ class ClassroomMember:
     self.role = role
     self.user = user
 
+  def __repr__(self):
+    """To be used with cache indexing"""
+    return '%s(%s-%s)' % (self.__class__.__name__, self.user.id, self.classroom.id)
+  
+
 # TODO: A way to persist document edits per user
 class UserModel(db.Model, UserMixin):
   """
@@ -49,8 +56,8 @@ class UserModel(db.Model, UserMixin):
   username: Mapped[str] = mapped_column(String, unique = True, nullable = False)
 
   # Auth
-  privilege: Mapped[str] = mapped_column(String, default = False)
-  password : Mapped[str] = mapped_column(String, nullable = False)
+  privilege     : Mapped[str] = mapped_column(String, default = False)
+  password_hash : Mapped[str] = mapped_column(String, nullable = False)
 
   # Token
   token: Mapped[Optional['TokenModel']] = relationship('TokenModel', back_populates = 'user')
@@ -77,7 +84,11 @@ class UserModel(db.Model, UserMixin):
     self.email     = email
     self.username  = username
     self.privilege = privilege
-    self.password  = password
+    self.password_hash  = password
+
+  def __repr__(self):
+    """To be used with cache indexing"""
+    return '%s(%s)' % (self.__class__.__name__, self.id)
 
 
   # Private
@@ -102,6 +113,10 @@ class UserModel(db.Model, UserMixin):
     
   # Properties
   @property
+  def password(self) -> None:
+    raise AttributeError('Password is not reaadable!')
+
+  @cached_property
   def classrooms(self) -> list[ClassroomMember]:
     from .classroom import ClassroomModel as cm # Import in runtime to prevent circular imports
 
@@ -193,4 +208,32 @@ class UserModel(db.Model, UserMixin):
     return None
 
 
+  # Querying
+  @staticmethod
+  @cache
+  def query_by(primary_key: Optional[str], **kwargs) -> List['UserModel']:
+    """
+    Query with caching
 
+    Parameters
+    ----------
+    `primary_key: str`, optional (defaults to None)
+    `**kwargs: dict[str, Any]`, optional (defaults to {})
+
+    Returns
+    -------
+    `list['UserModel']`
+    """
+    if primary_key is not None:
+      kwargs['id'] = primary_key
+
+    return UserModel.query.filter_by(**kwargs).all()
+
+
+  # Verification
+  def verify_password(self, password: str) -> bool:
+    try:
+      is_equal = passwords.compare_password(password, self.password_hash.encode())
+      return is_equal
+    except Exception:
+      return False

@@ -28,21 +28,30 @@ class DocumentModel(db.Model):
   Document Model
   """
 
+  __tablename__ = 'document_table'
+
   # Identifier
   id       : Mapped[str] = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
   author_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
 
   # Attributes
-  price   : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
-  author  : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_documents')
-  filename: Mapped[str] = mapped_column(String, nullable = False)
-  data    : Mapped[LargeBinary] = mapped_column(LargeBinary, nullable = False)
+  price    : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
+  author   : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_documents')
+  filename : Mapped[str] = mapped_column(String, nullable = False, unique = True)
+  data     : Mapped[LargeBinary] = mapped_column(LargeBinary, nullable = False)
+  cover_img: Mapped[LargeBinary] = mapped_column(LargeBinary, nullable = True)
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
   updated_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
-  def __init__(self, author: 'UserModel', file: FileStorage, price: Optional[float]) -> None:
+  def __init__(
+    self,
+    author: 'UserModel',
+    file: FileStorage,
+    price: Optional[float],
+    cover_img: Optional[FileStorage]
+  ) -> None:
     self.author_id = author.id
 
     # ? Or might it be better to save file to local $path and save the abs path to it?
@@ -51,3 +60,9 @@ class DocumentModel(db.Model):
 
     if price is not None:
       self.price = price
+    if cover_img is not None:
+      self.cover_img = cover_img.read()
+      
+  def __repr__(self):
+    """To be used with cache indexing"""
+    return '%s(%s)' % (self.__class__.__name__, self.id)
