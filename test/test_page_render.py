@@ -14,3 +14,45 @@ def test_home(app: Flask, client: FlaskClient):
     response = client.get('/')
     assert response.status_code == 200, response
     
+
+def test_routesExist(app: Flask, client: FlaskClient):
+  """
+  Testing that all routes are added properly
+  """
+  with app.app_context():
+    passed = set()
+    failed = set()
+
+    for route in [
+      # Normal routes
+      '/',
+      '/home',
+      '/store',
+      '/checkout',
+
+      '/login',
+      '/logout',
+      '/register',
+
+      '/textbooks',
+      '/classrooms',
+      '/assignments',
+      '/submissions',
+
+
+      # Protected routes
+      '/dashboard',
+      '/dashboard/users',
+      '/dashboard/sales'
+    ]:
+      response = client.get(route)
+
+      if response.status_code == 404:
+        failed.add(f'{route}: {response.status_code}')
+      else:
+        passed.add(f'{route}: {response.status_code}')
+
+    assert len(failed) == 0, (
+      f'\n\nLog:\n\nFailed [{len(failed)}]\n>>>>>>>>>>\n%s\n<<<<<<<<<<\n\nPassed [{len(passed)}]\n>>>>>>>>>>\n%s\n<<<<<<<<<<\n'
+      % ('\n'.join(failed), '\n'.join(passed))
+    )
