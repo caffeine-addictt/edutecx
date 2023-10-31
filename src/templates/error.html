@@ -1,0 +1,51 @@
+<!doctype html>
+{% extends 'layout.html' %}
+
+<!-- Title -->
+{% block title %}
+  {{ params.page_title }}
+{% endblock %}
+
+
+<!-- Styles -->
+{% block styles %}
+  <link href='{{ url_for("static", filename = "error.scss") }}' rel='stylesheet/less' type='text/css' />
+{% endblock %}
+
+
+<!-- Body -->
+{% block mainContent %}
+  <div
+    id='error-container'
+    class='d-flex flex-column flex-fill justify-content-center align-items-center'
+  >
+
+    <div class="d-flex flex-column py-5 align-items-center justify-content-center text-center rounded-3">
+
+      <!-- Title -->
+      <h1 class='mb-0 text-secondary'>
+        {{ params.header1 }}
+      </h1>
+
+      <!-- Header 2 -->
+      <h2 class='mb-4 text-white'>
+        {{ params.header2 }}
+      </h2>
+
+      <!-- Description -->
+      <p class='w-sm-80 mx-auto mb-4 text-white'>
+        {{ params.description | safe }}
+      </p>
+
+      <!-- CTA -->
+      <a
+        href='{{ params.return_route }}'
+        class='btn btn-info btn-lg mt-5'
+      >
+        {{ params.return_title }}
+      </a>
+
+    </div>
+
+  </div>
+{% endblock %}

@@ -1,0 +1,35 @@
+// Styling for error pages
+
+div#error-container {
+  background-image: url('/static/assets/images/error_bg.jpg');
+
+  div {
+    height: auto;
+    width: auto;
+
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    background-color: rgba(63, 68, 71, 0.3);
+    border: 1px solid rgba(54, 58, 61, 0.2);
+
+    padding-left: 20rem;
+    padding-right: 20rem;
+
+    h1 {
+      color: rgb(160, 201, 233) !important;
+      font-size: 200px;
+      line-height: 1;
+      font-weight: 600;
+    };
+
+    h2 {
+      font-weight: 500;
+      line-height: 1.2;
+    };
+
+    p {
+      color: rgb(232, 230, 227) !important;
+    };
+  };
+}
