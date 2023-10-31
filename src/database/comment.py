@@ -47,3 +47,7 @@ class CommentModel(db.Model):
     self.author_id = author.id
     self.submission_id = submission.id
     self.text = text
+
+  def __repr__(self):
+    """To be used with cache indexing"""
+    return '%s(%s)' % (self.__class__.__name__, self.id)

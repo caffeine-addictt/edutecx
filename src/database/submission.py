@@ -49,3 +49,7 @@ class SubmissionModel(db.Model):
   def __init__(self, student: 'UserModel', assignment: 'AssignmentModel') -> None:
     self.student_id = student.id
     self.assignment_id = assignment.id
+
+  def __repr__(self):
+    """To be used with cache indexing"""
+    return '%s(%s)' % (self.__class__.__name__, self.id)
