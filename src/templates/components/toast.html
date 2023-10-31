@@ -1,0 +1,62 @@
+<!doctype html>
+
+<!-- Managing Flask "flash" as a toast -->
+
+<div
+  id="toast-stack-container"
+  style="top: 80px;"
+  class="toast-container position-fixed end-0 p-3 pt-0 toast-container-extra"
+>
+  {% for category, message in messages %}
+
+    {% if category == 'danger' %}
+      <div class="toast mt-0 border-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-stack-toast-category="error">
+        <div class="toast-header">
+          <i class="fa-light fa-circle-exclamation text-danger" style="font-size: 1.0rem;"></i> &nbsp;&nbsp;
+          <strong class="me-auto text-black">Action Needed</strong>
+          <small>Just Now</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body toast-message">
+            {{ message }}
+        </div>
+      </div>
+
+    {% elif category == 'info' %}
+      <div class="toast mt-0 border-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-stack-toast-category="error">
+        <div class="toast-header">
+          <i class="fa-light fa-circle-exclamation text-danger" style="font-size: 1.0rem;"></i> &nbsp;&nbsp;
+          <strong class="me-auto text-black">Action Needed</strong>
+          <small>Just Now</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body toast-message">
+            {{ message }}
+        </div>
+      </div>
+      
+    {% elif category == 'success' %}
+      <div class="toast mt-0 border-success" role="alert" aria-live="polite" aria-atomic="true" data-stack-toast-category="info">
+        <div class="toast-header">
+          <i class="fa-light fa-check text-success" style="font-size: 1.0rem;"></i> &nbsp;&nbsp;
+          <strong class="me-auto text-black">Success</strong>
+          <small>Just Now</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body toast-message">
+        {{ message }}
+        </div>
+      </div>
+
+    {% endif %}
+  {% endfor %}
+</div>
+
+
+<!-- Javascript to handle toasts -->
+<script src='https://cdn.jsdelivr.net/npm/jquery@3.6.3/dist/jquery.slim.min.js'></script>
+<script>
+  $(document).ready(() => {
+    $('.toast').toast('show');
+  });
+</script>
