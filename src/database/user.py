@@ -25,6 +25,7 @@ if TYPE_CHECKING:
   from .submission import SubmissionModel
   from .comment import CommentModel
   from .document import DocumentModel
+  from .receipt import ReceiptModel
 
 
 PrivilegeTypes = Literal['User', 'Admin']
@@ -71,9 +72,12 @@ class UserModel(db.Model, UserMixin):
   documents      : Mapped[str]                   = mapped_column(String, nullable = True)
   owned_documents: Mapped[List['DocumentModel']] = relationship('DocumentModel', primaryjoin = 'UserModel.id == DocumentModel.author_id', back_populates = 'author')
 
+  # Orders
+  orders: Mapped[List['ReceiptModel']] = relationship('ReceiptModel', back_populates = 'user')
+
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
-  updated_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+  last_login: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
   def __init__(self,
     email: str,

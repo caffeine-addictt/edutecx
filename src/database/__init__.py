@@ -9,3 +9,4 @@ from .comment import CommentModel
 from .submission import SubmissionModel
 from .assignment import AssignmentModel
 from .document import DocumentModel
+from .receipt import ReceiptModel
