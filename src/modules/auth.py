@@ -2,17 +2,21 @@
 Managing user login/logout
 """
 
-from src import loginManager
+from src import db, loginManager
 from src.database import UserModel
+
 from src.utils.http import HTTPStatusCode
 from src.utils.forms import LoginForm, RegisterForm
+from src.utils.passwords import hash_password
+from src.utils.ext.login import loggedin_required, not_loggedin_required
 
 from typing import Optional
 
 from urllib import parse
-from custom_lib.flask_login import login_user, logout_user, login_required, current_user
+from custom_lib.flask_login import login_user, logout_user, current_user
 from flask import (
   g,
+  flash,
   request,
   url_for,
   redirect,
@@ -41,7 +45,7 @@ def loadUser(userID: str) -> Optional['UserModel']:
 def login():
   # Auto redirect to callbackURI
   if g.user.is_authenticated:
-    callbackURI: str = parse.quote(request.args.get('callbackURI', '/'))
+    callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
     return redirect(callbackURI, code = HTTPStatusCode.PERMANENT_REDIRECT)
   
   form = LoginForm(request.form)
@@ -51,16 +55,43 @@ def login():
 
     if user is not None and user.verify_password(form.password.data):
       login_user(user)
-      callbackURI: str = parse.quote(request.args.get('callbackURI', '/'))
-      return redirect(callbackURI, code = HTTPStatusCode.PERMANENT_REDIRECT)
+      flash('Welcome, %s' % user.username, 'info')
 
-  return render_template('(auth)/login/index.html', form = form)
+      callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
+      return redirect(callbackURI, code = HTTPStatusCode.PERMANENT_REDIRECT)
+    
+  flash('hi', category = 'success')
+  return render_template('(auth)/login.html', form = form)
 
 
 @app.route('/logout', methods = ['GET', 'POST'])
+@loggedin_required(login_uri = '/login')
 def logout():
-  if g.user.is_authenticated:
-    logout_user()
-    return redirect('/', code = HTTPStatusCode.PERMANENT_REDIRECT)
+  logout_user()
+  flash('Successfully logged out, cya soon!', 'message')
+  return redirect('/', code = HTTPStatusCode.PERMANENT_REDIRECT)
   
-  return redirect(url_for(endpoint = 'login'), code = HTTPStatusCode.PERMANENT_REDIRECT)
+
+@app.route('/register')
+@not_loggedin_required(logout_uri = '/logout')
+def register():
+
+  form = RegisterForm()
+  if form.validate_on_submit():
+    assert form.email.data is not None   , 'Invalid email'
+    assert form.username.data is not None, 'Invalid username'
+    assert form.password.data is not None, 'Invalid password'
+
+    newUser: 'UserModel' = UserModel(
+      email     = form.email.data,
+      username  = form.username.data,
+      password  = str(hash_password(form.password.data)),
+      privilege = 'User'
+    )
+    db.session.add(newUser)
+    db.session.commit()
+
+    flash('Created account, please log in!', 'info')
+    return redirect('/login', code = HTTPStatusCode.PERMANENT_REDIRECT)
+
+  return render_template('(auth)/register.html', form = form)

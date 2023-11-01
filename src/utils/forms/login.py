@@ -18,8 +18,8 @@ class LoginForm(FlaskForm):
   remember_me = BooleanField('Keep me logged in')
   submit      = SubmitField('Log In')
 
-  def validate(self) -> bool:
-    field_validation = super().validate()
+  def validate(self, *args, **kwargs) -> bool:
+    field_validation = super().validate(*args, **kwargs)
     if not field_validation: return False
 
     # Import at runtime to prevent circular imports
