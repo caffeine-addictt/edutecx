@@ -4,6 +4,7 @@ Assignment model
 
 from src import db
 
+import re
 import uuid
 from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
@@ -40,6 +41,7 @@ class AssignmentModel(db.Model):
   description: Mapped[str]                     = mapped_column(String, nullable = False)
   due_date   : Mapped[datetime]                = mapped_column(DateTime, nullable = True)
   documents  : Mapped[str]                     = mapped_column(String, nullable = True)
+  requirement: Mapped[str]                     = mapped_column(String, nullable = True)
   submissions: Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'assignment')
 
   # Logs
@@ -60,3 +62,18 @@ class AssignmentModel(db.Model):
 
     if due_date is not None:
       self.due_date = due_date
+
+  
+  def set_requirement(self, requirement: Optional[str] = '') -> None:
+    """
+    Set the assignment requirement
+
+
+    Parameters
+    ----------
+    `requirement: str`, optional
+      Format = str(docID:pageNum) | str(docID:pageNum:pageNum) | str(docID:pageNum:pageNum,...)
+    """
+    assert re.match(r'^([a-zA-Z0-9]+:\d+(:[\d*+])?(,)?)*$', requirement or ''), 'Invalid requirement format [%s]' % requirement
+
+
