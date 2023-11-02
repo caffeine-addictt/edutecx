@@ -1,14 +1,16 @@
 """
-Import modules
+Import routes
 """
 
-print('Importing modules...')
+print('Importing routes...')
 
 from . import (
-  auth,
   api_v1,
   error,
-  misc
+
+  misc,
+  auth,
+  admin,
 )
 
-print('Successfully imported modules')
+print('Successfully imported routes')
