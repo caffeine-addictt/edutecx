@@ -44,6 +44,8 @@ class ClassroomMember:
   
 
 # TODO: A way to persist document edits per user
+# TODO: Store user sessions
+# TODO: Add a help method for fetching uploaded and bought documents
 class UserModel(db.Model, UserMixin):
   """
   User Model
