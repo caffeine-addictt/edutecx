@@ -23,7 +23,6 @@ if TYPE_CHECKING:
   from.submission import SubmissionModel
 
 
-# TODO: Add required pages to be submitted
 class AssignmentModel(db.Model):
   """
   Assignment Model
@@ -54,11 +53,46 @@ class AssignmentModel(db.Model):
     classroom: 'ClassroomModel',
     title: str,
     description: str,
-    due_date: Optional[datetime] = None
+    due_date: Optional[datetime] = None,
+    requirement: str = ''
   ) -> None:
+    """
+    Assignment model
+
+    Parameters
+    ----------
+    `classroom: ClassroomModel`, required
+      The class to allocate the assignment to
+
+    `title: str`, required
+      The title of the assignment
+
+    `description: str`, required
+      The description of the assignment
+
+    `due_date: Optional[datetime]`, optional (defaults to None)
+      The due date of the assignment
+
+    `requirement: str`, optional (defaults to '')
+      Format = str(docID:pageNum) | str(docID:pageNum:pageNum) | str(docID:pageNum:pageNum,...)
+
+    
+    Returns
+    -------
+    `AssignmentModel`
+
+
+    Raises
+    ------
+    `AssertionError`
+      The format for requirement is invalid
+    """
+    assert re.match(r'^([a-zA-Z0-9]+:\d+(:[\d*+])?(,)?)*$', requirement or ''), 'Invalid requirement format [%s]' % requirement
+
     self.classroom_id = classroom.id
     self.title = title
     self.description = description
+    self.requirement = requirement
 
     if due_date is not None:
       self.due_date = due_date
@@ -66,18 +100,3 @@ class AssignmentModel(db.Model):
   def __repr__(self):
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
-
-  
-  def set_requirement(self, requirement: Optional[str] = '') -> None:
-    """
-    Set the assignment requirement
-
-
-    Parameters
-    ----------
-    `requirement: str`, optional
-      Format = str(docID:pageNum) | str(docID:pageNum:pageNum) | str(docID:pageNum:pageNum,...)
-    """
-    assert re.match(r'^([a-zA-Z0-9]+:\d+(:[\d*+])?(,)?)*$', requirement or ''), 'Invalid requirement format [%s]' % requirement
-
-
