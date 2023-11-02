@@ -9,7 +9,6 @@ from datetime import datetime
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Optional, List, Dict, TYPE_CHECKING
-from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
