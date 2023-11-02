@@ -54,7 +54,7 @@ def dashboard_user(id: str):
 @admin_required()
 def dashboard_sales():
 
-  return render_template('(admin)/store.html', data = Parser(
+  return render_template('(admin)/sale_list.html', data = Parser(
 
   ))
 
@@ -64,5 +64,5 @@ def dashboard_sale(id: str):
   id = escape_id(id)
 
   return render_template('(auth)/sale.html', data = Parser(
-    
+
   ))
