@@ -2,7 +2,30 @@
 HTTP Utils
 """
 
+import re
 from typing import Any, Union
+
+class Parser:
+  """
+  Default Parser to client\n
+  Allow Jinja to access values with "dot" syntax
+
+  Examples
+  --------
+  ```python
+  render_template('', data = Parser())
+  render_template('', data = Parser( name = 'hi' ))
+  ```
+  """
+  def __init__(self, **kwargs: Any) -> None:
+    """
+    Parameters
+    ----------
+    `**kwargs: Any`, optional (defaults to None)
+    """
+    for i, v in kwargs.items():
+      object.__setattr__(self, i, v)
+
 
 class StatusCodeNotFoundError(Exception):
   """
@@ -73,3 +96,20 @@ class HTTPStatusCode:
         return name
       
     raise StatusCodeNotFoundError(f'{code} is not a valid status code!')
+  
+
+def escape_id(id: str) -> str:
+  """
+  Escapes a ID parameters generated from uuid4().hex
+
+  Allowed characters are a-z and 0-9
+
+  Parameters
+  ----------
+  `id: str`, required
+
+  Returns
+  `Escaped ID: str`
+  """
+  regex = re.compile(r'[a-z0-9]')
+  return regex.sub('', id)
