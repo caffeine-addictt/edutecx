@@ -28,7 +28,9 @@ class ErrorPageVariables:
 # Route to error pages
 @app.errorhandler(Exception)
 def handle_errorNotFound(error: Union[Exception, HTTPException]):
-  match (isinstance(error, HTTPException) and error.code):
+  
+  isHTTPException = isinstance(error, HTTPException)
+  match (isHTTPException and error.code):
 
     case HTTPStatusCode.ERROR_NOT_FOUND:
       return render_template('error.html', params = ErrorPageVariables(
@@ -49,4 +51,4 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
         page_title = 'Oops!',
         header1 = 'Oops!',
         header2 = 'Looks like something went wrong!'
-      )), HTTPStatusCode.INTERNAL_SERVER_ERROR
+      )), (isHTTPException and error.code or HTTPStatusCode.INTERNAL_SERVER_ERROR)

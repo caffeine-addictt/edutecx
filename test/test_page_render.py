@@ -27,20 +27,29 @@ def test_routesExist(app: Flask, client: FlaskClient):
       # Normal routes
       '/',
       '/home',
+      
+      # Purchasing routes
       '/store',
+      '/cart',
       '/checkout',
 
+      # Auth routes
       '/login',
       '/logout',
       '/register',
 
+      # user routes
       '/textbooks',
       '/classrooms',
       '/assignments',
       '/submissions',
 
+      # Legal
+      '/privacy-policy',
+      '/contact-us',
+      '/terms-of-service',
 
-      # Protected routes
+      # Admin routes
       '/dashboard',
       '/dashboard/users',
       '/dashboard/sales'

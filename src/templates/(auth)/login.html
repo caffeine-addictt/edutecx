@@ -22,6 +22,12 @@
     {{ form.hidden_tag() }}
 
     <!-- Render Inputs -->
+    {% for field in form %}
+      <div>
+        {{ field.label }}
+        {{ filed }}
+      </div>
+    {% endfor %}
 
     <input class = 'btn btn-default btn-submit' type = 'submit' value = 'Login'/>
   </form>

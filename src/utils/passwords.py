@@ -33,7 +33,7 @@ def _encode(toEncode: str | bytes) -> bytes:
   `TypeError`
     If the toEncode parameter is not of a valid type
   """
-  assert(isinstance(toEncode, (str, bytes)))
+  assert isinstance(toEncode, (str, bytes))
 
   encoded: bytes
   if (isinstance(toEncode, str)): encoded = toEncode.encode()
@@ -67,7 +67,7 @@ def hash_password(password: str | bytes) -> bytes:
   `TypeError`
     If the password parameter is of a valid type
   """
-  assert(isinstance(password, (str, bytes)))
+  assert isinstance(password, (str, bytes))
   
   encoded: bytes = _encode(password)
   return bcrypt.hashpw(
@@ -104,8 +104,8 @@ def compare_password(password: str | bytes, hashed: bytes) -> bool:
   `TypeError`
     If the password or hashed parameter is of a valid type
   """
-  assert(isinstance(password, (str, bytes)))
-  assert(isinstance(hashed, bytes))
+  assert isinstance(password, (str, bytes))
+  assert isinstance(hashed, bytes)
 
   encoded: bytes = _encode(password)
   return bcrypt.checkpw(

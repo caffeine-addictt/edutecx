@@ -63,8 +63,8 @@ def init_app(testing: bool = False) -> Flask:
     # Import Database models
     from . import database
 
-    # Import modules
-    from . import modules
+    # Import routes
+    from . import routes
 
     db.create_all()
     migrate.init_app(app = app, db = db)

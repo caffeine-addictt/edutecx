@@ -18,7 +18,6 @@ from flask import (
   g,
   flash,
   request,
-  url_for,
   redirect,
   render_template,
   current_app as app,

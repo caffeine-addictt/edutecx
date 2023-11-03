@@ -36,6 +36,7 @@ class DocumentModel(db.Model):
 
   # Attributes
   price    : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
+  discount : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
   author   : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_documents')
   filename : Mapped[str] = mapped_column(String, nullable = False, unique = True)
   data     : Mapped[LargeBinary] = mapped_column(LargeBinary, nullable = False)
@@ -49,17 +50,22 @@ class DocumentModel(db.Model):
     self,
     author: 'UserModel',
     file: FileStorage,
-    price: Optional[float],
-    cover_img: Optional[FileStorage]
+    cover_img: Optional[FileStorage],
+    price: float = 0.0,
+    discount: float = 0.0,
   ) -> None:
+    assert isinstance(price, float)
+    assert isinstance(discount, float) and (0 <= discount <= 1)
+    assert (not cover_img) or isinstance(cover_img, FileStorage)
+
     self.author_id = author.id
+    self.price = price
+    self.discount = discount
 
     # ? Or might it be better to save file to local $path and save the abs path to it?
     self.filename = self.id + (file.filename or '.pdf')[-4:]
     self.data = file.read()
 
-    if price is not None:
-      self.price = price
     if cover_img is not None:
       self.cover_img = cover_img.read()
       

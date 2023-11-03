@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  app:
+    image: appdev
+    container_name: development
+
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+
+    ports:
+      - 8080:80
+    
+    volumes:
+      - ..:/app

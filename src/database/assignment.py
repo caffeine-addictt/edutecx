@@ -4,6 +4,7 @@ Assignment model
 
 from src import db
 
+import re
 import uuid
 from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
@@ -22,7 +23,6 @@ if TYPE_CHECKING:
   from.submission import SubmissionModel
 
 
-# TODO: Add required pages to be submitted
 class AssignmentModel(db.Model):
   """
   Assignment Model
@@ -40,6 +40,7 @@ class AssignmentModel(db.Model):
   description: Mapped[str]                     = mapped_column(String, nullable = False)
   due_date   : Mapped[datetime]                = mapped_column(DateTime, nullable = True)
   documents  : Mapped[str]                     = mapped_column(String, nullable = True)
+  requirement: Mapped[str]                     = mapped_column(String, nullable = True)
   submissions: Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'assignment')
 
   # Logs
@@ -52,11 +53,46 @@ class AssignmentModel(db.Model):
     classroom: 'ClassroomModel',
     title: str,
     description: str,
-    due_date: Optional[datetime] = None
+    due_date: Optional[datetime] = None,
+    requirement: str = ''
   ) -> None:
+    """
+    Assignment model
+
+    Parameters
+    ----------
+    `classroom: ClassroomModel`, required
+      The class to allocate the assignment to
+
+    `title: str`, required
+      The title of the assignment
+
+    `description: str`, required
+      The description of the assignment
+
+    `due_date: Optional[datetime]`, optional (defaults to None)
+      The due date of the assignment
+
+    `requirement: str`, optional (defaults to '')
+      Format = str(docID:pageNum) | str(docID:pageNum:pageNum) | str(docID:pageNum:pageNum,...)
+
+    
+    Returns
+    -------
+    `AssignmentModel`
+
+
+    Raises
+    ------
+    `AssertionError`
+      The format for requirement is invalid
+    """
+    assert re.match(r'^([a-zA-Z0-9]+:\d+(:[\d*+])?(,)?)*$', requirement or ''), 'Invalid requirement format [%s]' % requirement
+
     self.classroom_id = classroom.id
     self.title = title
     self.description = description
+    self.requirement = requirement
 
     if due_date is not None:
       self.due_date = due_date
