@@ -19,7 +19,6 @@ from flask import (
 
 # General routes
 @app.route('/')
-@loggedin_required()
 def index():
   return render_template('(misc)/root.html')
 
@@ -37,6 +36,11 @@ def store():
   documents: List['DocumentModel'] = DocumentModel.query.all()
 
   return render_template('(misc)/store.html')
+
+@app.route('/profile')
+@loggedin_required()
+def profile():
+  return render_template('(misc)/profile.html')
 
 
 # Textbooks
@@ -104,6 +108,7 @@ def assignment(id: str):
 @app.route('/submissions')
 @loggedin_required()
 def submissions():
+  # Get submissions
   return render_template('(misc)/submission_list.html')
 
 @app.route('/submissions/<string:id>')
