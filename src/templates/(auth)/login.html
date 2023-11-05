@@ -24,12 +24,16 @@
     <!-- Render Inputs -->
     {% for field in form %}
       <div>
-        {{ field.label }}
-        {{ filed }}
+        <div>
+          {{ field.label }} {% if field.flags.required %}*{% endif %}
+        </div>
+        
+        <div>{{ field }}</div>
       </div>
     {% endfor %}
+    {{ url }}
 
-    <input class = 'btn btn-default btn-submit' type = 'submit' value = 'Login'/>
+    <input class = 'btn btn-default btn-submit' type = 'submit' value = 'Log In'/>
   </form>
 {% endblock %}
 
