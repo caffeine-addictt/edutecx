@@ -10,10 +10,10 @@ from functools import cache, cached_property
 from datetime import datetime
 from typing import Literal, List, Optional, TYPE_CHECKING
 
-from custom_lib.flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
   String,
+  Boolean,
   DateTime
 )
 
@@ -46,7 +46,7 @@ class ClassroomMember:
 # TODO: A way to persist document edits per user
 # TODO: Store user sessions
 # TODO: Add a help method for fetching uploaded and bought documents
-class UserModel(db.Model, UserMixin):
+class UserModel(db.Model):
   """
   User Model
   """
@@ -61,6 +61,7 @@ class UserModel(db.Model, UserMixin):
   # Auth
   privilege     : Mapped[str] = mapped_column(String, default = False)
   password_hash : Mapped[str] = mapped_column(String, nullable = False)
+  email_verified: Mapped[bool] = mapped_column(Boolean, nullable = False, default = False)
 
   # Token
   token: Mapped[Optional['TokenModel']] = relationship('TokenModel', back_populates = 'user')

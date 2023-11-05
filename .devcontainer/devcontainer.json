@@ -23,11 +23,11 @@
 				"ecmel.vscode-html-css",
 				"VisualStudioExptTeam.intellicode-api-usage-examples",
 				"Zignd.html-css-class-completion",
+				"ms-python.python",
 				"ms-python.isort",
 				"wholroyd.jinja",
 				"bierner.markdown-preview-github-styles",
 				"ms-python.vscode-pylance",
-				"ms-python.python",
 				"qwtel.sqlite-viewer",
 				"TabNine.tabnine-vscode"
 			]

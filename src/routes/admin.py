@@ -4,10 +4,10 @@ Managing Admin-Only routes
 
 from src import db
 from src.utils.http import Parser, escape_id
-from src.utils.ext.login import admin_required
-
+from src.service.auth_provider import require_admin
 from src.database import (
-  ReceiptModel
+  ReceiptModel,
+  UserModel
 )
 
 from flask import (
@@ -22,8 +22,8 @@ from flask import (
 basePath: str = '/dashboard'
 
 @app.route(basePath)
-@admin_required()
-def dashboard():
+@require_admin
+def dashboard(user: UserModel):
   
   return render_template('(admin)/index.html', data = Parser(
     
@@ -32,7 +32,6 @@ def dashboard():
 
 # Users
 @app.route(f'{basePath}/users')
-@admin_required()
 def dashboard_users():
 
   return render_template('(admin)/user_list.html', data = Parser(
@@ -40,7 +39,6 @@ def dashboard_users():
   ))
 
 @app.route(f'{basePath}/users/<string:id>')
-@admin_required()
 def dashboard_user(id: str):
   id = escape_id(id)
 
@@ -51,7 +49,6 @@ def dashboard_user(id: str):
 
 # Store
 @app.route(f'{basePath}/sales')
-@admin_required()
 def dashboard_sales():
 
   return render_template('(admin)/sale_list.html', data = Parser(
@@ -59,7 +56,6 @@ def dashboard_sales():
   ))
 
 @app.route(f'{basePath}/sales/<string:id>')
-@admin_required()
 def dashboard_sale(id: str):
   id = escape_id(id)
 

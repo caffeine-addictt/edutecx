@@ -38,6 +38,15 @@ class ConfigBase:
   PERMANENT_SESSION_LIFETIME: int = 2 * 60 * 60 # 2h in seconds
 
 
+  # \\\\\\ JWT ////// #
+  # Docs https://flask-jwt-extended.readthedocs.io/en/3.0.0_release/options/
+  JWT_SECRET_KEY: str = 'jwt-secret'
+  JWT_TOKEN_LOCATION: list[str] = ['headers', 'cookies']
+  JWT_ACCESS_TOKEN_EXPIRES: int = 1 * 60 # 1h in seconds
+  JWT_REFRESH_TOKEN_EXPIRES: int = 30 * 24 * 60 * 60 #30 days in seconds
+  PROPAGATE_EXCEPTIONS: bool = True
+
+
   # \\\\\\ Mail ////// #
   MAIL_PORT: int = 25
   MAIL_USE_TLS: bool = False

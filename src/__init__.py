@@ -5,10 +5,11 @@ Initalizes Flask Application
 from flask import Flask
 from flask_mail import Mail
 from flask_migrate import Migrate
-from flask_session import Session
+from flask_limiter import Limiter, util
 from flask_sqlalchemy import SQLAlchemy
-from custom_lib.flask_login import LoginManager
+from flask_jwt_extended import JWTManager
 
+from logging import config
 from sqlalchemy import MetaData
 from config import get_production_config
 
@@ -27,8 +28,49 @@ metadata = MetaData(naming_convention = convention)
 # Setup app init variables to be publically accessible
 db = SQLAlchemy(metadata = metadata)
 mail = Mail()
+jwt = JWTManager()
 migrate = Migrate()
-loginManager = LoginManager()
+limiter = Limiter(
+  key_func = util.get_remote_address,
+  default_limits = ['100 per hour', '1 per second'],
+  storage_uri = 'memory://0.0.0.0:11211',
+  storage_options = {}
+)
+
+
+# Setup Logging
+config.dictConfig({
+  'version': 1,
+  'formatters': {
+    'file_fmt': {'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'},
+    'console_fmt': {'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'}
+  },
+  'handlers': {
+    'general': {
+      'class': 'logging.handlers.RotatingFileHandler',
+      'filename': 'logs/general.log',
+      'formatter': 'file_fmt',
+      'level': 'DEBUG'
+    },
+    'error': {
+      'class': 'logging.handlers.RotatingFileHandler',
+      'filename': 'logs/error.log',
+      'formatter': 'file_fmt',
+      'level': 'ERROR'
+    },
+    'console': {
+      'class': 'logging.StreamHandler',
+      'formatter': 'console_fmt',
+      'stream': 'ext://sys.stdout',
+      'level': 'DEBUG',
+    }
+  },
+  'root': {
+    'level': 'DEBUG',
+    'handlers': ['general', 'error', 'console']
+  }
+})
+
 
 def init_app(testing: bool = False) -> Flask:
   """
@@ -49,21 +91,21 @@ def init_app(testing: bool = False) -> Flask:
   # Init DB
   db.init_app(app = app)
 
-  # Init Login
-  loginManager.init_app(app = app)
-
-  # Init Session
-  # app.config['SESSION_SQLALCHEMY'] = db
-  # Session(app = app)
+  # Init Limiting
+  limiter.init_app(app = app)
 
   # Init Mail
   mail.init_app(app = app)
+
+  # Init JWT
+  jwt.init_app(app = app)
 
   with app.app_context():
     # Import Database models
     from . import database
 
     # Import routes
+    from . import api
     from . import routes
 
     db.create_all()
