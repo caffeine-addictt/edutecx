@@ -2,9 +2,8 @@
 Handles misc routing
 """
 
-from src.database import DocumentModel
+from src.database import DocumentModel, UserModel
 from src.utils.http import escape_id
-from src.utils.ext.login import loggedin_required
 
 from typing import List
 from flask import (
@@ -16,21 +15,27 @@ from flask import (
   current_app as app
 )
 
+from src.service import auth_provider
+
 
 # General routes
 @app.route('/')
 def index():
   return render_template('(misc)/root.html')
 
+@app.route('/home')
+@auth_provider.require_login
+def home(user: UserModel):
+  flash(message = user.username, category = 'danger')
+  return render_template('(misc)/home.html')
+
 # TODO: Get stored user session
 @app.route('/cart')
-@loggedin_required()
 def cart():
   return render_template('(misc)/cart.html')
 
 # TODO: Add SQL sanitization and caching to all DB models
 @app.route('/store')
-@loggedin_required()
 def store():
   query = request.args.get('search', '')
   documents: List['DocumentModel'] = DocumentModel.query.all()
@@ -38,21 +43,18 @@ def store():
   return render_template('(misc)/store.html')
 
 @app.route('/profile')
-@loggedin_required()
 def profile():
   return render_template('(misc)/profile.html')
 
 
 # Textbooks
 @app.route('/textbooks')
-@loggedin_required()
 def textbooks():
   user = g.current_user
   documents = None # TODO: UserModel helper method
   return render_template('(misc)/textbook_list.html', documents = documents)
 
 @app.route('/textbooks/<string:id>')
-@loggedin_required()
 def textbooks_id(id: str):
   id = escape_id(id)
   document = None # TODO: UserModel helper method
@@ -61,7 +63,6 @@ def textbooks_id(id: str):
 
 # Classrooms
 @app.route('/classrooms')
-@loggedin_required()
 def classrooms():
   user = g.current_user
 
@@ -75,7 +76,6 @@ def classrooms():
   return render_template('(misc)/classroom_list.html', classes = classes)
 
 @app.route('/classrooms/<string:id>')
-@loggedin_required()
 def classroom():
   user = g.current_user
 
@@ -91,13 +91,11 @@ def classroom():
 
 # Assignments
 @app.route('/assignments')
-@loggedin_required()
 def assignments():
   # Get assignments
   return render_template('(misc)/assignment_list.html')
 
 @app.route('/assignments/<string:id>')
-@loggedin_required()
 def assignment(id: str):
   id = escape_id(id)
 
@@ -106,12 +104,10 @@ def assignment(id: str):
 
 # Submissions
 @app.route('/submissions')
-@loggedin_required()
 def submissions():
   # Get submissions
   return render_template('(misc)/submission_list.html')
 
 @app.route('/submissions/<string:id>')
-@loggedin_required()
 def submission():
   return render_template('(misc)/submission.html')

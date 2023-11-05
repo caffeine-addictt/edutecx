@@ -9,6 +9,7 @@ from typing import Union
 
 from dataclasses import dataclass
 from flask import (
+  request,
   render_template,
   current_app as app,
 )
@@ -28,16 +29,25 @@ class ErrorPageVariables:
 # Route to error pages
 @app.errorhandler(Exception)
 def handle_errorNotFound(error: Union[Exception, HTTPException]):
-  
   isHTTPException = isinstance(error, HTTPException)
-  match (isHTTPException and error.code):
 
-    case HTTPStatusCode.ERROR_NOT_FOUND:
+  # Handle errors for API
+  if request.method == 'POST':
+    app.logger.error(error.__repr__())
+
+    return {
+      'message': (isHTTPException and error.description) or HTTPStatusCode.getNameFromCode(500),
+      'status': (isHTTPException and error.code) or HTTPStatusCode.INTERNAL_SERVER_ERROR,
+    }, (isHTTPException and error.code) or HTTPStatusCode.INTERNAL_SERVER_ERROR
+  
+
+  match (isHTTPException and error.code):
+    case HTTPStatusCode.NOT_FOUND:
       return render_template('error.html', params = ErrorPageVariables(
         page_title = 'Page not found',
         header1 = '404',
         header2 = 'Looks like you\'re lost!'
-      )), HTTPStatusCode.ERROR_NOT_FOUND
+      )), HTTPStatusCode.NOT_FOUND
     
     case HTTPStatusCode.UNAUTHORIZED:
       return render_template('error.html', params = ErrorPageVariables(
