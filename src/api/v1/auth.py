@@ -113,7 +113,7 @@ def apiV1Register():
   user: UserModel = UserModel(
     email = email,
     username = username,
-    password = str(hash_password(password)),
+    password = hash_password(password).decode('utf-8'),
     privilege = 'User'
   )
 
