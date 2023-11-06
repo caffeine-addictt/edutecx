@@ -5,7 +5,7 @@ Managing user login/logout
 """
 
 from src import jwt
-from src.database import UserModel
+from src.database import UserModel, JWTBlocklistModel
 
 from src.utils.ext import utc_time
 from src.utils.http import HTTPStatusCode, APIResponse
@@ -99,6 +99,11 @@ def expired_token_loader(jwtHeader, jwtPayload):
     ))
     unset_jwt_cookies(response)
     return response, HTTPStatusCode.SEE_OTHER
+  
+@jwt.token_in_blocklist_loader
+def token_in_blocklist_loader(jwtHeader, jwtPayload) -> bool:
+  jti = jwtPayload['jti']
+  return JWTBlocklistModel.query.get(jti) is not None
 
 
 
@@ -114,8 +119,9 @@ def login():
     return redirect(callbackURI, code = HTTPStatusCode.PERMANENT_REDIRECT)
   
   form = LoginForm(request.form)
+  validatedForm = form.validate_on_submit()
 
-  if request.method == 'POST' and form.validate_on_submit():
+  if request.method == 'POST' and validatedForm:
     response = requests.post(
       f'{request.url_root}api/v1/login',
       headers = {'Content-Type': 'application/json'},
@@ -125,6 +131,7 @@ def login():
       }
     )
     body: APIResponse = response.json()
+    app.logger.error(body)
     
     if response.status_code != HTTPStatusCode.OK:
       flash(body.get('message'), 'danger')
@@ -153,12 +160,16 @@ def login():
 def logout(user: UserModel):
   form = LogoutForm(request.form)
   if request.method == 'POST' and form.validate_on_submit():
+    # Add to token blocklist
+    jti = get_jwt()['jti']
+    newBlacklist = JWTBlocklistModel(jti)
+    newBlacklist.save()
+
     successfulLogout = make_response(
       redirect('/', code = HTTPStatusCode.SEE_OTHER),
       HTTPStatusCode.SEE_OTHER
     )
     unset_jwt_cookies(successfulLogout)
-    # TODO: Add to token blocklist
 
     flash('Successfully logged out', 'info')
     return successfulLogout
@@ -196,4 +207,4 @@ def register():
   elif request.method == 'POST':
     flash('Failed to create user account', 'danger')
 
-  return render_template('(auth)/register.html', code = HTTPStatusCode.OK), HTTPStatusCode.OK
+  return render_template('(auth)/register.html', form = form)
