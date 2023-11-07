@@ -1,11 +1,11 @@
 """
-RESTful auth api for session persistence with jwt
+RESTful auth api for session persistence with jwt w/ rate limiting
 """
 
 from src import db, limiter
+from flask_limiter import util
 from src.utils.http import HTTPStatusCode
 from src.utils.passwords import hash_password
-from src.service import auth_provider
 from src.database import UserModel
 from sqlalchemy import or_
 
@@ -16,14 +16,14 @@ from flask import (
 )
 from flask_jwt_extended import (
   jwt_required,
-  get_jwt_identity,
+  get_current_user,
   create_access_token,
   create_refresh_token,
 )
 
 # Routes
 basePath: str = '/api/v1'
-auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host)
+auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host, key_func = util.get_remote_address)
 
 
 @app.route(f'{basePath}/login', methods = ['POST'])
@@ -32,9 +32,11 @@ def apiv1_Login():
   if request.json:
     email = request.json.get('email', None)
     password = request.json.get('password', None)
+    remember_me = request.json.get('remember_me', None)
   else:
     email = request.form.get('email', None)
     password = request.form.get('password', None)
+    remember_me = request.form.get('remember_me', None)
 
   # Ensure email and password exist
   if not email or not password:
@@ -52,8 +54,12 @@ def apiv1_Login():
     }, HTTPStatusCode.BAD_REQUEST
 
   # Create tokens
+  add_claims = {
+    'aud': request.host,
+    'remember_me': bool(remember_me),
+  }
+  refresh_token = create_refresh_token(identity = user, additional_claims = add_claims)
   access_token = create_access_token(identity = user, fresh = True)
-  refresh_token = create_refresh_token(identity = user)
 
   return {
     'message': 'Login successful',
@@ -61,23 +67,10 @@ def apiv1_Login():
       'access_token': access_token,
       'refresh_token': refresh_token
     },
-    'status': 200
-  }, 200
+    'status': HTTPStatusCode.OK
+  }, HTTPStatusCode.OK
 
 
-@app.route(f'{basePath}/refresh', methods = ['POST'])
-@auth_limit
-@jwt_required(refresh = True)
-def apiV1Refresh():
-  identity = get_jwt_identity()
-  access_token = create_access_token(identity = identity, fresh = False)
-  return {
-    'message': 'Refreshed access token',
-    'status': HTTPStatusCode.OK,
-    'data': {
-      'access_token': access_token
-    }
-  }
 
 
 @app.route(f'{basePath}/register', methods = ['POST'])
@@ -113,7 +106,7 @@ def apiV1Register():
   user: UserModel = UserModel(
     email = email,
     username = username,
-    password = str(hash_password(password)),
+    password = hash_password(password).decode('utf-8'),
     privilege = 'User'
   )
 
@@ -124,4 +117,20 @@ def apiV1Register():
     'message': 'Registered successfully',
     'status': HTTPStatusCode.OK
   }, HTTPStatusCode.OK
-  
+
+
+
+
+@app.route(f'{basePath}/refresh', methods = ['POST'])
+@limiter.limit('10/hour', key_func = util.get_remote_address)
+@jwt_required(refresh = True)
+def apiV1Refresh():
+  identity = get_current_user()
+  access_token = create_access_token(identity = identity, fresh = False)
+  return {
+    'message': 'Refreshed access token',
+    'status': HTTPStatusCode.OK,
+    'data': {
+      'access_token': access_token
+    }
+  }, HTTPStatusCode.OK

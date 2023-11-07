@@ -10,8 +10,17 @@
 
 <!-- Body -->
 {% block mainContent %}
-<!-- Everything goes here -->
-
+  <!-- Everything goes here -->
+  <form
+    id='logoutForm'
+    action=''
+    method='POST'
+    role='form'
+    class='d-flex flex-column gap-2 align-items-center'
+  >
+    {{ form.hidden_tag() }}
+    <input class = 'btn btn-default btn-submit' type = 'submit' value = 'Log Out'/>
+  </form>
 {% endblock %}
 
 

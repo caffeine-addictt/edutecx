@@ -21,17 +21,5 @@ class LoginForm(FlaskForm):
   def validate(self, *args, **kwargs) -> bool:
     field_validation = super().validate(*args, **kwargs)
     if not field_validation: return False
-
-    # Import at runtime to prevent circular imports
-    from src.database import UserModel
-    user: Optional['UserModel'] = UserModel.query.filter_by(email = self.email.data).first()
-
-    if user is None:
-      self.password.errors = ['Invalid email or password']
-      return False
-    
-    if not user.verify_password(self.password.data):
-      self.password.errors = ['Invalid email or password']
-      return False
     
     return True

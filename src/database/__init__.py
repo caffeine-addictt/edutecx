@@ -10,3 +10,4 @@ from .submission import SubmissionModel
 from .assignment import AssignmentModel
 from .document import DocumentModel
 from .receipt import ReceiptModel
+from .jwtblocklist import JWTBlocklistModel

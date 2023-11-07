@@ -1,0 +1,35 @@
+<!doctype html>
+{% extends 'layout.html' %}
+
+{% block title %}
+  Register
+{% endblock %}
+
+<!-- Body -->
+{% block mainContent %}
+  <!-- Everything goes here -->
+
+  <form
+    id='registerForm'
+    action=''
+    method='POST'
+    role='form'
+    class='d-flex flex-column gap-2 align-items-center'
+  >
+    {{ form.hidden_tag() }}
+
+    <!-- Render Inputs -->
+    {% for field in form %}
+      <div>
+        <div>
+          {{ field.label }} {% if field.flags.required %}*{% endif %}
+        </div>
+        
+        <div>{{ field }}</div>
+      </div>
+    {% endfor %}
+    {{ url }}
+
+    <input class = 'btn btn-default btn-submit' type = 'submit' value = 'Register'/>
+  </form>
+{% endblock %}

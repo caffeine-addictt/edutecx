@@ -32,7 +32,7 @@ jwt = JWTManager()
 migrate = Migrate()
 limiter = Limiter(
   key_func = util.get_remote_address,
-  default_limits = ['100 per hour', '1 per second'],
+  default_limits = ['5 per second'],
   storage_uri = 'memory://0.0.0.0:11211',
   storage_options = {}
 )

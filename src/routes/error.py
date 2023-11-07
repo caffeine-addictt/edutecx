@@ -32,8 +32,8 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
   isHTTPException = isinstance(error, HTTPException)
 
   # Handle errors for API
-  if request.method == 'POST':
-    app.logger.error(error.__repr__())
+  if request.path.startswith('/api/'):
+    app.logger.error(f'API error: %s' % error.__repr__())
 
     return {
       'message': (isHTTPException and error.description) or HTTPStatusCode.getNameFromCode(500),
@@ -41,24 +41,32 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
     }, (isHTTPException and error.code) or HTTPStatusCode.INTERNAL_SERVER_ERROR
   
 
+  app.logger.error(f'Non-API error: %s' % error.__repr__())
   match (isHTTPException and error.code):
     case HTTPStatusCode.NOT_FOUND:
       return render_template('error.html', params = ErrorPageVariables(
-        page_title = 'Page not found',
+        page_title = '404 Page not found',
         header1 = '404',
         header2 = 'Looks like you\'re lost!'
       )), HTTPStatusCode.NOT_FOUND
     
     case HTTPStatusCode.UNAUTHORIZED:
       return render_template('error.html', params = ErrorPageVariables(
-        page_title = 'Unauthorized',
+        page_title = '401 Unauthorized',
         header1 = 'Unauthorized!',
         header2 = 'You are not allowed to access this page!'
       )), HTTPStatusCode.UNAUTHORIZED
     
+    case HTTPStatusCode.TOO_MANY_REQUESTS:
+      return render_template('error.html', params = ErrorPageVariables(
+        page_title = '429 Rate Limited',
+        header1 = 'Too Many Requests!',
+        header2 = 'Let\'s take a chill pill'
+      ))
+    
     case _:
       return render_template('error.html', params = ErrorPageVariables(
-        page_title = 'Oops!',
+        page_title = '500 Oops!',
         header1 = 'Oops!',
         header2 = 'Looks like something went wrong!'
       )), (isHTTPException and error.code or HTTPStatusCode.INTERNAL_SERVER_ERROR)
