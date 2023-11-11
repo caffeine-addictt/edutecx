@@ -21,7 +21,7 @@ from sqlalchemy import (
 # Import at runtime to prevent circular imports
 if TYPE_CHECKING:
   from .user import UserModel
-  from .document import DocumentModel
+  from .textbook import TextbookModel
 
 
 @dataclass(init = True)
@@ -51,7 +51,7 @@ class ReceiptModel(db.Model):
   def __init__(
     self,
     user: 'UserModel',
-    products: List['DocumentModel']
+    products: List['TextbookModel']
   ) -> None:
     self.user_id = user.id
     self.products_raw = ','.join([

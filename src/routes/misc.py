@@ -2,7 +2,7 @@
 Handles misc routing
 """
 
-from src.database import DocumentModel, UserModel
+from src.database import TextbookModel, UserModel
 from src.utils.http import escape_id
 
 from typing import List
@@ -38,7 +38,7 @@ def cart():
 @app.route('/store')
 def store():
   query = request.args.get('search', '')
-  documents: List['DocumentModel'] = DocumentModel.query.all()
+  textbooks: List['TextbookModel'] = TextbookModel.query.all()
 
   return render_template('(misc)/store.html')
 
@@ -51,14 +51,14 @@ def profile():
 @app.route('/textbooks')
 def textbooks():
   user = g.current_user
-  documents = None # TODO: UserModel helper method
-  return render_template('(misc)/textbook_list.html', documents = documents)
+  textbooks = None # TODO: UserModel helper method
+  return render_template('(misc)/textbook_list.html', textbooks = textbooks)
 
 @app.route('/textbooks/<string:id>')
 def textbooks_id(id: str):
   id = escape_id(id)
-  document = None # TODO: UserModel helper method
-  return render_template('(misc)/textbook.html', document = document)
+  textbook = None # TODO: UserModel helper method
+  return render_template('(misc)/textbook.html', textbook = textbook)
 
 
 # Classrooms

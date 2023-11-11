@@ -24,7 +24,7 @@ if TYPE_CHECKING:
   from .classroom import ClassroomModel
   from .submission import SubmissionModel
   from .comment import CommentModel
-  from .document import DocumentModel
+  from .textbook import TextbookModel
   from .receipt import ReceiptModel
 
 
@@ -43,9 +43,9 @@ class ClassroomMember:
     return '%s(%s-%s)' % (self.__class__.__name__, self.user.id, self.classroom.id)
   
 
-# TODO: A way to persist document edits per user
+# TODO: A way to persist textbook edits per user
 # TODO: Store user sessions
-# TODO: Add a help method for fetching uploaded and bought documents
+# TODO: Add a help method for fetching uploaded and bought textbooks
 class UserModel(db.Model):
   """
   User Model
@@ -71,9 +71,9 @@ class UserModel(db.Model):
   submissions     : Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'student')
   owned_classrooms: Mapped[List['ClassroomModel']]  = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner')
 
-  # Documents
-  documents      : Mapped[str]                   = mapped_column(String, nullable = True)
-  owned_documents: Mapped[List['DocumentModel']] = relationship('DocumentModel', primaryjoin = 'UserModel.id == DocumentModel.author_id', back_populates = 'author')
+  # Textbooks
+  textbooks      : Mapped[str]                   = mapped_column(String, nullable = True)
+  owned_textbooks: Mapped[List['TextbookModel']] = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author')
 
   # Orders
   orders: Mapped[List['ReceiptModel']] = relationship('ReceiptModel', back_populates = 'user')

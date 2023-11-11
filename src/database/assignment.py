@@ -39,7 +39,7 @@ class AssignmentModel(db.Model):
   title      : Mapped[str]                     = mapped_column(String, nullable = False)
   description: Mapped[str]                     = mapped_column(String, nullable = False)
   due_date   : Mapped[datetime]                = mapped_column(DateTime, nullable = True)
-  documents  : Mapped[str]                     = mapped_column(String, nullable = True)
+  textbooks  : Mapped[str]                     = mapped_column(String, nullable = True)
   requirement: Mapped[str]                     = mapped_column(String, nullable = True)
   submissions: Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'assignment')
 

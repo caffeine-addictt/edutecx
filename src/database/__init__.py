@@ -8,6 +8,6 @@ from .classroom import ClassroomModel
 from .comment import CommentModel
 from .submission import SubmissionModel
 from .assignment import AssignmentModel
-from .document import DocumentModel
+from .textbook import TextbookModel
 from .receipt import ReceiptModel
 from .jwtblocklist import JWTBlocklistModel

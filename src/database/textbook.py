@@ -1,5 +1,5 @@
 """
-Document Model
+Textbook Model
 """
 
 from src import db
@@ -23,12 +23,12 @@ if TYPE_CHECKING:
   from .user import UserModel
 
 
-class DocumentModel(db.Model):
+class TextbookModel(db.Model):
   """
-  Document Model
+  Textbook Model
   """
 
-  __tablename__ = 'document_table'
+  __tablename__ = 'textbook_table'
 
   # Identifier
   id       : Mapped[str] = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
@@ -37,7 +37,7 @@ class DocumentModel(db.Model):
   # Attributes
   price    : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
   discount : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
-  author   : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_documents')
+  author   : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_textbooks')
   filename : Mapped[str] = mapped_column(String, nullable = False, unique = True)
   data     : Mapped[LargeBinary] = mapped_column(LargeBinary, nullable = False)
   cover_img: Mapped[LargeBinary] = mapped_column(LargeBinary, nullable = True)

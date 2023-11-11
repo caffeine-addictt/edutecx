@@ -23,7 +23,7 @@ if TYPE_CHECKING:
   from .comment import CommentModel
 
 
-# TODO: Add the edited page of documentModel (after figuring out how to edit it :'>)
+# TODO: Add the edited page of textbookModel (after figuring out how to edit it :'>)
 class SubmissionModel(db.Model):
   """
   Submission Model
