@@ -22,6 +22,7 @@ if TYPE_CHECKING:
   from .user import UserModel
   from .textbook import TextbookModel
   from .assignment import AssignmentModel
+  from .image import ImageModel
 
 
 class ClassroomModel(db.Model):
@@ -45,6 +46,7 @@ class ClassroomModel(db.Model):
   title      : Mapped[str]                     = mapped_column(String, nullable = False, default = 'My Classroom')
   description: Mapped[str]                     = mapped_column(String, nullable = True, default = None)
   assignments: Mapped[List['AssignmentModel']] = relationship('AssignmentModel', back_populates = 'classroom')
+  cover_image: Mapped[Optional['ImageModel']]  = relationship('ImageModel', back_populates = 'classroom')
 
   # Invite
   invite_id     : Mapped[str]  = mapped_column(String, unique = True, nullable = False, default = lambda: uuid.uuid4().hex)
@@ -283,3 +285,18 @@ class ClassroomModel(db.Model):
     filtered_data = set([i for i in current_data if i not in to_exclude]) # Casted to set to prevent duplicates
     self.textbook_ids = '|'.join(filtered_data)
     return None
+
+
+  # DB
+  def save(self) -> None:
+    """Commits the model"""
+    db.session.add(self)
+    db.session.commit()
+
+  def delete(self, commit: bool = True) -> None:
+    """Deletes the model and cleans up references"""
+    if self.cover_image: self.cover_image.delete(commit = False)
+    for i in self.assignments: i.delete(commit = False)
+
+    db.session.delete(self)
+    if commit: db.session.commit()
