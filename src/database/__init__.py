@@ -17,4 +17,4 @@ from .assignment import AssignmentModel
 from .image import ImageModel
 from .textbook import TextbookModel
 
-from .receipt import ReceiptModel
+from .sale import SaleModel
