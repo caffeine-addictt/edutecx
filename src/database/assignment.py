@@ -100,3 +100,17 @@ class AssignmentModel(db.Model):
   def __repr__(self):
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
+
+
+  # DB
+  def save(self) -> None:
+    """Commits the model"""
+    db.session.add(self)
+    db.session.commit()
+
+  def delete(self, commit: bool = True) -> None:
+    """Deletes the model and its references"""
+    for i in self.submissions: i.delete(commit = False)
+
+    db.session.delete(self)
+    if commit: db.session.commit()
