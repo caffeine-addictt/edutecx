@@ -7,6 +7,7 @@ print('Importing routes...')
 from . import (
   error,
 
+  cdn,
   misc,
   auth,
   admin,
