@@ -15,6 +15,7 @@ from werkzeug.datastructures import FileStorage
 
 # Setup
 UploadBaseLocation = os.path.join(os.getcwd(), 'src', 'uploads')
+EditableTextbookLocation = os.path.join(UploadBaseLocation, 'textbook_forks')
 TextbookLocation = os.path.join(UploadBaseLocation, 'textbooks')
 ImageLocation = os.path.join(UploadBaseLocation, 'images')
 
@@ -35,6 +36,9 @@ def _dirCheck():
   """Ensure that the upload directories exist"""
   if not os.path.isdir(UploadBaseLocation):
     os.mkdir(UploadBaseLocation)
+
+  if not os.path.isdir(EditableTextbookLocation):
+    os.mkdir(EditableTextbookLocation)
 
   if not os.path.isdir(TextbookLocation):
     os.mkdir(TextbookLocation)
@@ -96,7 +100,6 @@ def _upload(
     location = os.path.join(TextbookLocation, filename)
     file.save(location)
     return location
-
 
 def uploadTextbook(file: FileStorage, filename: str) -> str:
   """
@@ -171,16 +174,16 @@ def cloneTextbook(fileLocation: str, newfilename: str) -> str:
     raise BadFileEXT()
   
   newfilename = _get_unique_filename(
-    TextbookLocation,
+    EditableTextbookLocation,
     newfilename,
     ext
   )
 
-  newfileLocation = os.path.join(TextbookLocation, newfilename)
+  newfileLocation = os.path.join(EditableTextbookLocation, newfilename)
   shutil.copy2(fileLocation, newfileLocation)
   return newfileLocation
 
-def updateTextbook(fileLocation: str, file: FileStorage) -> None:
+def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
   """Replace current upload with new file"""
   _dirCheck()
 

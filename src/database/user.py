@@ -45,7 +45,6 @@ class ClassroomMember:
   
 
 # TODO: A way to persist textbook edits per user
-# TODO: Store user sessions
 class UserModel(db.Model):
   """
   User Model
