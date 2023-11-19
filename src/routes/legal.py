@@ -6,6 +6,7 @@ from src.utils.forms import ContactForm
 from flask import (
   g,
   flash,
+  request,
   render_template,
   current_app as app
 )
@@ -21,7 +22,7 @@ def terms_of_service():
 @app.route('/contact-us')
 def contact_us():
   user = g.current_user
-  form = ContactForm()
+  form = ContactForm(request.form)
 
   if form.email.data == '':
     form.email.data = (user.is_authenticated and user.email) or ''
