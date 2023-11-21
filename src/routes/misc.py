@@ -29,33 +29,23 @@ def home(user: UserModel):
   flash(message = user.username, category = 'danger')
   return render_template('(misc)/home.html')
 
-# TODO: Get stored user session
-@app.route('/cart')
-def cart():
-  return render_template('(misc)/cart.html')
-
-# TODO: Add SQL sanitization and caching to all DB models
-@app.route('/store')
-def store():
-  query = request.args.get('search', '')
-  documents: List['DocumentModel'] = DocumentModel.query.all()
-
-  return render_template('(misc)/store.html')
-
 @app.route('/profile')
-def profile():
+@auth_provider.require_login
+def profile(user: UserModel):
   return render_template('(misc)/profile.html')
 
 
 # Textbooks
 @app.route('/textbooks')
-def textbooks():
+@auth_provider.require_login
+def textbooks(user: UserModel):
   user = g.current_user
   documents = None # TODO: UserModel helper method
   return render_template('(misc)/textbook_list.html', documents = documents)
 
 @app.route('/textbooks/<string:id>')
-def textbooks_id(id: str):
+@auth_provider.require_login
+def textbooks_id(user: UserModel, id: str):
   id = escape_id(id)
   document = None # TODO: UserModel helper method
   return render_template('(misc)/textbook.html', document = document)
@@ -63,9 +53,8 @@ def textbooks_id(id: str):
 
 # Classrooms
 @app.route('/classrooms')
-def classrooms():
-  user = g.current_user
-
+@auth_provider.require_login
+def classrooms(user: UserModel):
   # Check if user is in a classroom
   isInClassroom = False
   if not isInClassroom:
@@ -76,9 +65,8 @@ def classrooms():
   return render_template('(misc)/classroom_list.html', classes = classes)
 
 @app.route('/classrooms/<string:id>')
-def classroom():
-  user = g.current_user
-
+@auth_provider.require_login
+def classroom(user: UserModel):
   # Check if user is in a classroom
   isInClassroom = False
   if not isInClassroom:
@@ -91,12 +79,14 @@ def classroom():
 
 # Assignments
 @app.route('/assignments')
-def assignments():
+@auth_provider.require_login
+def assignments(user: UserModel):
   # Get assignments
   return render_template('(misc)/assignment_list.html')
 
 @app.route('/assignments/<string:id>')
-def assignment(id: str):
+@auth_provider.require_login
+def assignment(user: UserModel, id: str):
   id = escape_id(id)
 
   return render_template('(misc)/assignment.html')
@@ -104,10 +94,12 @@ def assignment(id: str):
 
 # Submissions
 @app.route('/submissions')
-def submissions():
+@auth_provider.require_login
+def submissions(user: UserModel):
   # Get submissions
   return render_template('(misc)/submission_list.html')
 
 @app.route('/submissions/<string:id>')
-def submission():
+@auth_provider.require_login
+def submission(user: UserModel):
   return render_template('(misc)/submission.html')
