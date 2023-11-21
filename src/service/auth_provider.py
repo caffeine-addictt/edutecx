@@ -26,7 +26,7 @@ def optional_jwt() -> bool:
     return False
 
 
-def require_admin(func: Callable[[UserModel], Any]) -> Callable[..., Any]:
+def require_admin(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[..., Any]:
   """
   Enforces Admin-Only JWT authentication for routes
 
