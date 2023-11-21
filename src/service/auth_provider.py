@@ -3,7 +3,7 @@ Auth Provider
 """
 
 from functools import wraps
-from typing import Optional, Callable, Any, Literal
+from typing import Optional, Callable, Any, Literal, Concatenate
 
 from src.database.user import PrivilegeTypes, UserModel
 from src.utils.http import HTTPStatusCode
@@ -56,7 +56,7 @@ def require_admin(func: Callable[[UserModel], Any]) -> Callable[..., Any]:
 
 
 
-def require_login(func: Callable[[UserModel], Any]) -> Callable[..., Any]:
+def require_login(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[..., Any]:
   """
   Decorator for enforcing loggedin only routes
 
