@@ -8,7 +8,7 @@ from src.service.cdn_provider import uploadTextbook
 
 import uuid
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING, Union, List
+from typing import Optional, TYPE_CHECKING, List
 from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -23,6 +23,7 @@ from sqlalchemy import (
 if TYPE_CHECKING:
   from .user import UserModel
   from .image import ImageModel
+  from .editabletextbook import EditableTextbookModel
 
 
 # TODO: Textbook PDF upload
@@ -46,6 +47,7 @@ class TextbookModel(db.Model):
   iuri       : Mapped[str]                    = mapped_column(String, nullable = True)
   status     : Mapped[str]                    = mapped_column(String, nullable = False, default = 'Uploading')
   cover_image: Mapped[Optional['ImageModel']] = relationship('ImageModel', back_populates = 'textbook')
+  derrived   : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'origin')
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
