@@ -27,6 +27,7 @@ if TYPE_CHECKING:
   from .textbook import TextbookModel
   from .sale import SaleModel
   from .image import ImageModel
+  from .editabletextbook import EditableTextbookModel
 
 
 PrivilegeTypes = Literal['User', 'Admin']
@@ -72,6 +73,7 @@ class UserModel(db.Model):
   owned_classrooms: Mapped[List['ClassroomModel']]  = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner')
 
   # Textbooks
+  textbooks      : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'user')
   owned_textbooks: Mapped[List['TextbookModel']] = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author')
 
   # Transactions
@@ -136,14 +138,6 @@ class UserModel(db.Model):
     for i in asOwner: classes.append(ClassroomMember(self, i, 'Owner'))
 
     return classes
-  
-  @cached_property
-  def textbooks(self) -> list['TextbookModel']:
-    _textbooks = []
-    for sale in self.transactions:
-      _textbooks += list([ i.textbook for _,i in sale.textbooks.items() ])
-
-    return _textbooks
 
   # Editing
   def join_class(self, *classrooms: 'ClassroomModel', commits: bool = True) -> None:
@@ -269,6 +263,7 @@ class UserModel(db.Model):
     for i in self.comments: i.delete(commit = False)
     for i in self.submissions: i.delete(commit = False)
 
+    for i in self.textbooks: i.delete(commit = False)
     for i in self.transactions: i.delete(commit = False)
     for i in self.owned_textbooks: i.delete(commit = False)
     for i in self.owned_classrooms: i.delete(commit = False)
