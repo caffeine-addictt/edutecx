@@ -26,6 +26,10 @@ class ConfigBase:
   ENV: Literal['development', 'production'] = 'development'
 
 
+  # \\\\\\ Stripe ////// #
+  STRIPE_API_KEY: str = 'sk_test_51No3X2JZ5VDTodh10QYO5W45LIMqQwTJ6e2JjCSKp7l0xL13SoxKTTlmezkkKmpfRsfN8KVybXkfOevFeGbkyqBe007gkNlRRc'
+
+
   # \\\\\\ Flask ////// #
   # Docs https://flask.palletsprojects.com/en/3.0.x/config/
   DEBUG: Optional[bool] = True
@@ -82,6 +86,8 @@ class ProductionConfig(ConfigBase):
 
   ENV = 'production'
   DEBUG = False
+
+  STRIPE_API_KEY = ''
 
   SECRET_KEY = 'L&>SdT@-Z*y[%(fxN6L>Us1PQ{WAp7&u'
   SESSION_TYPE = 'sqlalchemy'

@@ -3,7 +3,7 @@ Auth Provider
 """
 
 from functools import wraps
-from typing import Callable, Any, Concatenate
+from typing import Optional, Callable, Any, Literal, Concatenate
 
 from src.database.user import PrivilegeTypes, UserModel
 from src.utils.http import HTTPStatusCode
