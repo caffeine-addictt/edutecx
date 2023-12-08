@@ -19,7 +19,7 @@ from sqlalchemy import (
   ForeignKey
 )
 
-# Import TokenModel at runtime to prevent circular imports
+# Import at runtime to prevent circular imports
 if TYPE_CHECKING:
   from .user import UserModel
   from .image import ImageModel
@@ -39,6 +39,10 @@ class TextbookModel(db.Model):
   author_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
 
   # Attributes
+  title      : Mapped[str] = mapped_column(String, nullable = False)
+  description: Mapped[str] = mapped_column(String, nullable = True, default = '')
+  categories : Mapped[str] = mapped_column(String, nullable = False, default = '') # 'category1|gaategory2...'
+
   price      : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
   discount   : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
   author     : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_textbooks')
@@ -57,6 +61,11 @@ class TextbookModel(db.Model):
     self,
     author: 'UserModel',
     file: FileStorage,
+
+    title: str,
+    description: str = '',
+    categories: List[str] = [],
+
     price: float = 0.0,
     discount: float = 0.0,
   ) -> None:
@@ -64,6 +73,10 @@ class TextbookModel(db.Model):
     assert isinstance(discount, float) and (0 <= discount <= 1)
 
     self.author_id = author.id
+    self.title = title
+    self.description = description
+    self.categories = '|'.join(categories)
+
     self.price = price
     self.discount = discount
     self._upload_handler(file)
