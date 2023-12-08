@@ -22,7 +22,7 @@ from sqlalchemy import (
 if TYPE_CHECKING:
   from .user import UserModel
 
-TokenTypes = Literal['Verification', 'PasswordReset']
+TokenType = Literal['Verification', 'PasswordReset']
 
 
 class TokenModel(db.Model):
@@ -41,7 +41,7 @@ class TokenModel(db.Model):
   expires_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = lambda: utc_time.skip('1day'))
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = lambda: utc_time.get())
 
-  def __init__(self, user: 'UserModel', token_type: TokenTypes, token: Optional[str] = None) -> None:
+  def __init__(self, user: 'UserModel', token_type: TokenType, token: Optional[str] = None) -> None:
     """
     Parameters
     ----------
