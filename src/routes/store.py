@@ -33,11 +33,8 @@ def store(user: Optional[UserModel]):
   page = request.args.get('page', 1, type = int)
   criteria = request.args.get('criteria', 'or', type = lambda x: (x.lower() == 'and' and 'and') or 'or') # 'and' or 'or'
   queryString = request.args.get('query', '', type = str)
-  priceLimit = request.args.get('price_limit', [], type = float)
+  priceLimit = request.args.get('price_limit', float('inf'), type = float)
   categoryFilter = request.args.get('category', [], type = lambda x: x.lower().split(','))
-
-  # TODO: Validate search params
-  
 
   # Filter
   textbooks: Pagination = filterTextbooks(
@@ -81,6 +78,9 @@ def checkout(user: UserModel):
   return render_template('(misc)/checkout.html')
 
 
+
+
+# Functions
 @cache
 def filterTextbooks(
   criteria: str,
