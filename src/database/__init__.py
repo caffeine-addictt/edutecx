@@ -3,8 +3,8 @@ Load database modules
 """
 
 # Auth
-from .user import UserModel
-from .token import TokenModel
+from .user import UserModel, ClassroomMember, PrivilegeTypes, ClassroomMemberType
+from .token import TokenModel, TokenType
 from .jwtblocklist import JWTBlocklistModel
 
 # Misc
@@ -17,4 +17,4 @@ from .assignment import AssignmentModel
 from .image import ImageModel
 from .textbook import TextbookModel
 
-from .sale import SaleModel
+from .sale import SaleModel, SaleInfo
