@@ -1,8 +1,7 @@
 # TODO:
 1. Build up UserModel (TODO: [user model](user.py))
 2. Build up SubmissionModel (TODO: [submission model](submission.py))
-3. Build up EditableTextbookModel
-4. Build up SubmittedSnippetModel
+3. Build up SubmittedSnippetModel
 
 # Done:
 1. Build up TokenModel
@@ -12,6 +11,7 @@
 5. Build up ClassroomModel
 6. Build up AssignmentModel
 7. Add images to classes, textbooks and user
+8. Build up EditableTextbookModel
 
 # Note
 sqlite3 only supports list/arrays for ORM relations,
