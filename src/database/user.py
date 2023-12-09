@@ -201,12 +201,11 @@ class UserModel(db.Model):
       exit_class(class2, class3)
     ```
     """
-    cleanedClassroms = set(classrooms)
-    joinedClasses = self.classrooms
+    cleanedClassroms = set( i.id for i in classrooms )
+    joinedClasses = set(self.classrooms)
 
     for class_ in joinedClasses:
-      matched: bool = any([ i.id == class_.classroom.id for i in cleanedClassroms])
-      match (matched and class_.role):
+      match ((class_.classroom.id in cleanedClassroms) and class_.role):
         case 'Student':
           class_.classroom.remove_students(self)
           break
