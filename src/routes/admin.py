@@ -6,7 +6,7 @@ from src import db
 from src.utils.http import Parser, escape_id
 from src.service.auth_provider import require_admin
 from src.database import (
-  ReceiptModel,
+  SaleModel,
   UserModel
 )
 

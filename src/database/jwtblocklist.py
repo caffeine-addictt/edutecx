@@ -47,6 +47,11 @@ class JWTBlocklistModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
+  def delete(self, commit: bool = True) -> None:
+    """Deletes the model and its references"""
+    db.session.delete(self)
+    if commit: db.session.commit()
+
   @classmethod
   def clear_expired(
     cls,
@@ -63,4 +68,3 @@ class JWTBlocklistModel(db.Model):
       (cls.token_type.like('refresh') and cls.created_at.timestamp() <= refresh_lowest_limit.timestamp())
     )).delete()
     if commit: db.session.commit()
-

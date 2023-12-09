@@ -35,3 +35,6 @@ Flask_JWT_Extended==4.5.3
 requests==2.31.0
 email_validator==2.1.0.post1
 dnspython==2.4.2
+stripe==7.6.0
+numpy==1.26.2
+thread==0.1.2

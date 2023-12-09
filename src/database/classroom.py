@@ -20,8 +20,9 @@ from sqlalchemy import (
 # Import UserModel at runtime to prevent circular imports
 if TYPE_CHECKING:
   from .user import UserModel
-  from .document import DocumentModel
+  from .textbook import TextbookModel
   from .assignment import AssignmentModel
+  from .image import ImageModel
 
 
 class ClassroomModel(db.Model):
@@ -38,13 +39,14 @@ class ClassroomModel(db.Model):
   owner_id    : Mapped[str] = mapped_column(String, ForeignKey('user_table.id'), nullable = False)
   educator_ids: Mapped[str] = mapped_column(String, nullable = True, default = None)
   student_ids : Mapped[str] = mapped_column(String, nullable = True, default = None)
-  document_ids: Mapped[str] = mapped_column(String, nullable = True, default = None)
+  textbook_ids: Mapped[str] = mapped_column(String, nullable = True, default = None)
 
   # Attributes
   owner      : Mapped['UserModel']             = relationship('UserModel', back_populates = 'owned_classrooms')
   title      : Mapped[str]                     = mapped_column(String, nullable = False, default = 'My Classroom')
   description: Mapped[str]                     = mapped_column(String, nullable = True, default = None)
   assignments: Mapped[List['AssignmentModel']] = relationship('AssignmentModel', back_populates = 'classroom')
+  cover_image: Mapped[Optional['ImageModel']]  = relationship('ImageModel', back_populates = 'classroom')
 
   # Invite
   invite_id     : Mapped[str]  = mapped_column(String, unique = True, nullable = False, default = lambda: uuid.uuid4().hex)
@@ -102,9 +104,9 @@ class ClassroomModel(db.Model):
     return usr.query.filter(ClassroomModel.educator_ids.contains(usr.id)).all()
     
   @property
-  def documents(self) -> list['DocumentModel'] | None:
+  def textbooks(self) -> list['TextbookModel'] | None:
     if TYPE_CHECKING:
-      return db.session.query('UserModel').filter(ClassroomModel.document_ids.contains(DocumentModel.id)).all()
+      return db.session.query('UserModel').filter(ClassroomModel.textbook_ids.contains(TextbookModel.id)).all()
   
 
   # Editing
@@ -226,16 +228,16 @@ class ClassroomModel(db.Model):
     return None
 
 
-  def add_documents(self, *documents: 'DocumentModel') -> None:
+  def add_textbooks(self, *textbooks: 'TextbookModel') -> None:
     """
-    Add documents to the classroom\n
+    Add textbooks to the classroom\n
     `DOES NOT ENFORCE OWNED CLAUSE`\n
     `DOES NOT COMMIT`
 
     
     Parameters
     ----------
-    `*documents: DocumentModel`
+    `*textbooks: TextbookModel`
 
     
     Returns
@@ -246,24 +248,24 @@ class ClassroomModel(db.Model):
     Examples
     --------
     ```py
-      add_documents(doc1)
-      add_documents(doc2, doc3)
+      add_textbooks(doc1)
+      add_textbooks(doc2, doc3)
     ```
     """
-    current_data = self._clean_id_str(self.document_ids)
-    appended_data = set(current_data + [i.id for i in documents]) # Casted to set to prevent duplicates
-    self.document_ids = '|'.join(appended_data)
+    current_data = self._clean_id_str(self.textbook_ids)
+    appended_data = set(current_data + [i.id for i in textbooks]) # Casted to set to prevent duplicates
+    self.textbook_ids = '|'.join(appended_data)
     return None
 
-  def remove_documents(self, *documents: 'DocumentModel') -> None:
+  def remove_textbooks(self, *textbooks: 'TextbookModel') -> None:
     """
-    Remove documents from the classroom\n
+    Remove textbooks from the classroom\n
     `DOES NOT COMMIT`
 
     
     Parameters
     ----------
-    `*documents: DocumentModel`
+    `*textbooks: TextbookModel`
 
     
     Returns
@@ -274,12 +276,27 @@ class ClassroomModel(db.Model):
     Examples
     --------
     ```py
-      remove_documents(doc1)
-      remove_documents(doc2, doc3)
+      remove_textbooks(doc1)
+      remove_textbooks(doc2, doc3)
     ```
     """
-    to_exclude = set([str(i.id) for i in documents]) # Casted to set to prevent duplicates
-    current_data = self._clean_id_str(self.document_ids)
+    to_exclude = set([str(i.id) for i in textbooks]) # Casted to set to prevent duplicates
+    current_data = self._clean_id_str(self.textbook_ids)
     filtered_data = set([i for i in current_data if i not in to_exclude]) # Casted to set to prevent duplicates
-    self.document_ids = '|'.join(filtered_data)
+    self.textbook_ids = '|'.join(filtered_data)
     return None
+
+
+  # DB
+  def save(self) -> None:
+    """Commits the model"""
+    db.session.add(self)
+    db.session.commit()
+
+  def delete(self, commit: bool = True) -> None:
+    """Deletes the model and cleans up references"""
+    if self.cover_image: self.cover_image.delete(commit = False)
+    for i in self.assignments: i.delete(commit = False)
+
+    db.session.delete(self)
+    if commit: db.session.commit()

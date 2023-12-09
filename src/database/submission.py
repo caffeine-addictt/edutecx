@@ -6,7 +6,7 @@ from src import db
 
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
   from .comment import CommentModel
 
 
-# TODO: Add the edited page of documentModel (after figuring out how to edit it :'>)
+# TODO: Add the edited page of textbookModel (after figuring out how to edit it :'>)
 class SubmissionModel(db.Model):
   """
   Submission Model
@@ -37,9 +37,9 @@ class SubmissionModel(db.Model):
   assignment_id: Mapped[str] = mapped_column(ForeignKey('assignment_table.id'), nullable = False)
 
   # Attributes
-  student   : Mapped['UserModel']       = relationship('UserModel', back_populates = 'submissions')
-  assignment: Mapped['AssignmentModel'] = relationship('AssignmentModel', back_populates = 'submissions')
-  comments  : Mapped['CommentModel']    = relationship('CommentModel', back_populates = 'submission')
+  student   : Mapped['UserModel']          = relationship('UserModel', back_populates = 'submissions')
+  comments  : Mapped[List['CommentModel']] = relationship('CommentModel', back_populates = 'submission')
+  assignment: Mapped['AssignmentModel']    = relationship('AssignmentModel', back_populates = 'submissions')
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
@@ -50,6 +50,18 @@ class SubmissionModel(db.Model):
     self.student_id = student.id
     self.assignment_id = assignment.id
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
+  
+  def save(self) -> None:
+    """Commits the model"""
+    db.session.add(self)
+    db.session.commit()
+
+  def delete(self, commit: bool = True) -> None:
+    """Deletes the model and its references"""
+    for i in self.comments: i.delete(commit = False)
+    
+    db.session.delete(self)
+    if commit: db.session.commit()

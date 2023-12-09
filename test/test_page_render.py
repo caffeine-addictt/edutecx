@@ -56,7 +56,7 @@ def test_routesExist(app: Flask, client: FlaskClient):
     ]:
       response = client.get(route)
 
-      if response.status_code == 404:
+      if response.status_code >= 400:
         failed.add(f'{route}: {response.status_code}')
       else:
         passed.add(f'{route}: {response.status_code}')

@@ -46,6 +46,18 @@ def user_lookup_loader(jwtHeader, jwtPayload):
   identity = jwtPayload["sub"]
   return UserModel.query.filter(UserModel.id == identity).first()
 
+@jwt.user_lookup_error_loader
+def user_lookup_error_loader(jwtHeader, jwtPayload):
+  reloginResponse = make_response(redirect(
+    request.path,
+    HTTPStatusCode.SEE_OTHER
+  ))
+
+  unset_access_cookies(reloginResponse)
+  unset_refresh_cookies(reloginResponse)
+  unset_jwt_cookies(reloginResponse)
+  return reloginResponse, HTTPStatusCode.SEE_OTHER
+
 @app.after_request
 def refresh_token(response):
   if request.method != 'GET' or request.path.startswith('/api/') or request.path.startswith('/static'):

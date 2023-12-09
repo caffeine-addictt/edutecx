@@ -18,11 +18,11 @@ from sqlalchemy import (
   ForeignKey
 )
 
-# Import UserModel at runtime to prevent circular imports
+# Import at runtime to prevent circular imports
 if TYPE_CHECKING:
   from .user import UserModel
 
-TokenTypes = Literal['Verification', 'PasswordReset']
+TokenType = Literal['Verification', 'PasswordReset']
 
 
 class TokenModel(db.Model):
@@ -41,7 +41,7 @@ class TokenModel(db.Model):
   expires_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = lambda: utc_time.skip('1day'))
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = lambda: utc_time.get())
 
-  def __init__(self, user: 'UserModel', token_type: TokenTypes, token: Optional[str] = None) -> None:
+  def __init__(self, user: 'UserModel', token_type: TokenType, token: Optional[str] = None) -> None:
     """
     Parameters
     ----------
@@ -68,3 +68,13 @@ class TokenModel(db.Model):
   def __repr__(self):
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
+
+  def save(self) -> None:
+    """Commits the model"""
+    db.session.add(self)
+    db.session.commit()
+
+  def delete(self, commit: bool = True) -> None:
+    """Deletes the model and its references"""
+    db.session.delete(self)
+    if commit: db.session.commit()

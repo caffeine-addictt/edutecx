@@ -24,8 +24,10 @@ if TYPE_CHECKING:
   from .classroom import ClassroomModel
   from .submission import SubmissionModel
   from .comment import CommentModel
-  from .document import DocumentModel
-  from .receipt import ReceiptModel
+  from .textbook import TextbookModel
+  from .sale import SaleModel
+  from .image import ImageModel
+  from .editabletextbook import EditableTextbookModel
 
 
 PrivilegeTypes = Literal['User', 'Admin']
@@ -38,14 +40,12 @@ class ClassroomMember:
     self.role = role
     self.user = user
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     """To be used with cache indexing"""
     return '%s(%s-%s)' % (self.__class__.__name__, self.user.id, self.classroom.id)
   
 
-# TODO: A way to persist document edits per user
-# TODO: Store user sessions
-# TODO: Add a help method for fetching uploaded and bought documents
+# TODO: A way to persist textbook edits per user
 class UserModel(db.Model):
   """
   User Model
@@ -59,24 +59,25 @@ class UserModel(db.Model):
   username: Mapped[str] = mapped_column(String, unique = True, nullable = False)
 
   # Auth
-  privilege     : Mapped[str] = mapped_column(String, default = False)
-  password_hash : Mapped[str] = mapped_column(String, nullable = False)
+  privilege     : Mapped[str]  = mapped_column(String, default = False)
+  password_hash : Mapped[str]  = mapped_column(String, nullable = False)
   email_verified: Mapped[bool] = mapped_column(Boolean, nullable = False, default = False)
 
-  # Token
-  token: Mapped[Optional['TokenModel']] = relationship('TokenModel', back_populates = 'user')
+  # Misc
+  token        : Mapped[Optional['TokenModel']] = relationship('TokenModel', back_populates = 'user')
+  profile_image: Mapped[Optional['ImageModel']] = relationship('ImageModel', back_populates = 'user')
 
   # Class (Classroom feature)
   comments        : Mapped[List['CommentModel']]    = relationship('CommentModel', back_populates = 'author')
   submissions     : Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'student')
   owned_classrooms: Mapped[List['ClassroomModel']]  = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner')
 
-  # Documents
-  documents      : Mapped[str]                   = mapped_column(String, nullable = True)
-  owned_documents: Mapped[List['DocumentModel']] = relationship('DocumentModel', primaryjoin = 'UserModel.id == DocumentModel.author_id', back_populates = 'author')
+  # Textbooks
+  textbooks      : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'user')
+  owned_textbooks: Mapped[List['TextbookModel']] = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author')
 
-  # Orders
-  orders: Mapped[List['ReceiptModel']] = relationship('ReceiptModel', back_populates = 'user')
+  # Transactions
+  transactions: Mapped[List['SaleModel']] = relationship('SaleModel', back_populates = 'user')
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
@@ -93,7 +94,7 @@ class UserModel(db.Model):
     self.privilege = privilege
     self.password_hash  = password
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
 
@@ -137,10 +138,9 @@ class UserModel(db.Model):
     for i in asOwner: classes.append(ClassroomMember(self, i, 'Owner'))
 
     return classes
-  
 
   # Editing
-  def join_class(self, *classrooms: 'ClassroomModel') -> None:
+  def join_class(self, *classrooms: 'ClassroomModel', commits: bool = True) -> None:
     """
     Add user to the classroom\n
     `COMMITS`
@@ -149,6 +149,8 @@ class UserModel(db.Model):
     Parameters
     ----------
     `*classrooms: ClassroomModel`
+
+    `commits: bool`
 
     
     Returns
@@ -164,17 +166,17 @@ class UserModel(db.Model):
     ```
     """
     cleaned_classroms = set(classrooms)
-    joined_classes = self.classrooms
+    joined_classes = set( i.classroom.id for i in self.classrooms )
 
     for class_ in cleaned_classroms:
-      already_joined: bool = any([i.classroom.id == class_.id for i in joined_classes])
-      if not already_joined:
+      if class_.id in joined_classes:
         class_.add_students(self)
+        
 
-    db.session.commit()
+    if commits: db.session.commit()
     return None
 
-  def exit_class(self, *classrooms: 'ClassroomModel') -> None:
+  def exit_class(self, *classrooms: 'ClassroomModel', commits: bool = True) -> None:
     """
     Remove user from the classroom\n
     `COMMITS`
@@ -183,6 +185,8 @@ class UserModel(db.Model):
     Parameters
     ----------
     `*classrooms: ClassroomModel`
+
+    `commits: bool`
 
     
     Returns
@@ -197,12 +201,10 @@ class UserModel(db.Model):
       exit_class(class2, class3)
     ```
     """
-    cleanedClassroms = set(classrooms)
-    joinedClasses = self.classrooms
+    cleanedClassroms = set( i.id for i in classrooms )
 
-    for class_ in joinedClasses:
-      matched: bool = any([ i.id == class_.classroom.id for i in cleanedClassroms])
-      match (matched and class_.role):
+    for class_ in self.classrooms:
+      match ((class_.classroom.id in cleanedClassroms) and class_.role):
         case 'Student':
           class_.classroom.remove_students(self)
           break
@@ -211,7 +213,7 @@ class UserModel(db.Model):
           class_.classroom.remove_educators(self)
           break
 
-    db.session.commit()
+    if commits: db.session.commit()
     return None
 
 
@@ -244,3 +246,26 @@ class UserModel(db.Model):
       return is_equal
     except Exception:
       return False
+
+  # DB
+  def save(self) -> None:
+    """Commit the model"""
+    db.session.add(self)
+    db.session.commit()
+
+  def delete(self, commit: bool = True) -> None:
+    """Deletes the model and its references"""
+    if self.token: self.token.delete(commit = False)
+    if self.profile_image: self.profile_image.delete(commit = False)
+
+    for i in self.comments: i.delete(commit = False)
+    for i in self.submissions: i.delete(commit = False)
+
+    for i in self.textbooks: i.delete(commit = False)
+    for i in self.transactions: i.delete(commit = False)
+    for i in self.owned_textbooks: i.delete(commit = False)
+    for i in self.owned_classrooms: i.delete(commit = False)
+    self.exit_class(*[ i.classroom for i in self.classrooms], commits = False)
+
+    db.session.delete(self)
+    if commit: db.session.commit()
