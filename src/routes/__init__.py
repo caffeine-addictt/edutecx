@@ -7,10 +7,13 @@ print('Importing routes...')
 from . import (
   error,
 
-  cdn,
-  misc,
   auth,
+  misc,
+  store,
   admin,
+
+  cdn,
+  legal,
 )
 
 print('Successfully imported routes')
