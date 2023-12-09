@@ -13,7 +13,7 @@ class ContactForm(FlaskForm):
   """
 
   form_type   = SelectField('Form Type', choices = [(1, 'Feedback'), (2, 'Bug Report'), (3, 'User Report')])
-  email       = StringField('Email', validators = [DataRequired(), Length(1, 64), Email()])
+  email       = StringField('Email', validators = [DataRequired(), Length(1, 64), Email('Invalid Email', check_deliverability = True)])
   subject     = StringField('Title', validators = [DataRequired(), Length(1, 64)])
   message     = StringField('Message', validators = [DataRequired(), Length(1, 300)])
   submit      = SubmitField('Log In')
