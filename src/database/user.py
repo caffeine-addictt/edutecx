@@ -166,12 +166,12 @@ class UserModel(db.Model):
     ```
     """
     cleaned_classroms = set(classrooms)
-    joined_classes = self.classrooms
+    joined_classes = set( i.classroom.id for i in self.classrooms )
 
     for class_ in cleaned_classroms:
-      already_joined: bool = any([i.classroom.id == class_.id for i in joined_classes])
-      if not already_joined:
+      if class_.id in joined_classes:
         class_.add_students(self)
+        
 
     if commits: db.session.commit()
     return None
