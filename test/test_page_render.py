@@ -1,7 +1,6 @@
 from flask import Flask
 from flask.testing import FlaskClient
 
-# ! Issue #23
 def test_home(app: Flask, client: FlaskClient):
   """
   Testing page routing
