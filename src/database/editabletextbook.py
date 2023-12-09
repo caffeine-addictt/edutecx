@@ -3,10 +3,10 @@ EditableTextbook Model
 """
 
 from src import db
-from src.utils.ext.threading import Thread
 from src.service.cdn_provider import cloneTextbook, updateEditableTextbook, deleteEditableTextbook
 
 import uuid
+from thread import Thread
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from werkzeug.datastructures import FileStorage
@@ -51,18 +51,24 @@ class EditableTextbookModel(db.Model):
   def _handle_upload(self, textbook: 'TextbookModel') -> None:
     filename = f'{self.id}-{self.user_id or ""}{self.textbook_id}'
 
-    uploadJob = Thread(cloneTextbook)
+    uploadJob = Thread(cloneTextbook, kwargs = {
+      'fileLocation': textbook.iuri,
+      'newfilename': filename
+    })
     uploadJob.add_hook(self._updateURI)
-    uploadJob.start(fileLocation = textbook.iuri, newfilename = filename)
+    uploadJob.start()
 
 
   def update(self, file: FileStorage) -> None:
     """Update the file content"""
     self.status = 'Updating'
 
-    job = Thread(updateEditableTextbook)
+    job = Thread(updateEditableTextbook, kwargs = {
+      'fileLocation': self.iuri,
+      'file': file
+    })
     job.add_hook(lambda x: self._updateURI(self.iuri))
-    job.start(fileLocation = self.iuri, file = file)
+    job.start()
 
   
   def save(self) -> None:
@@ -72,8 +78,10 @@ class EditableTextbookModel(db.Model):
 
   def delete(self, commit = True) -> None:
     """Deletes the model and its references"""
-    job = Thread(deleteEditableTextbook)
-    job.start(fileLocation = self.iuri)
+    job = Thread(deleteEditableTextbook, kwargs = {
+      'fileLocation': self.iuri
+    })
+    job.start()
     
     db.session.delete(self)
     if commit: db.session.commit()

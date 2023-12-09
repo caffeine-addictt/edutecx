@@ -4,9 +4,9 @@ Image Model
 
 from src import db
 from src.service.cdn_provider import uploadImage
-from src.utils.ext.threading import Thread
 
 import uuid
+from thread import Thread
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from werkzeug.datastructures import FileStorage
@@ -78,9 +78,12 @@ class ImageModel(db.Model):
 
     filename = f'{self.id}-{self.user_id or ""}{self.textbook_id or ""}{self.classroom_id or ""}'
 
-    uploadJob = Thread(uploadImage)
+    uploadJob = Thread(uploadImage, kwargs = {
+      'file': file,
+      'filename': filename
+    })
     uploadJob.add_hook(updateURI)
-    uploadJob.start(file = file, filename = filename)
+    uploadJob.start()
 
 
   # DB

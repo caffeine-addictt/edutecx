@@ -3,10 +3,10 @@ Textbook Model
 """
 
 from src import db
-from src.utils.ext.threading import Thread
 from src.service.cdn_provider import uploadTextbook
 
 import uuid
+from thread import Thread
 from datetime import datetime
 from typing import Optional, TYPE_CHECKING, List
 from werkzeug.datastructures import FileStorage
@@ -95,9 +95,12 @@ class TextbookModel(db.Model):
 
     filename = f'{self.id}-{self.author_id or ""}'
 
-    uploadJob = Thread(uploadTextbook)
+    uploadJob = Thread(uploadTextbook, kwargs = {
+      'file': file,
+      'filename': filename
+    })
     uploadJob.add_hook(updateURI)
-    uploadJob.start(file = file, filename = filename)
+    uploadJob.start()
   
   
   # DB
