@@ -16,5 +16,6 @@ from .assignment import AssignmentModel
 # Uploads
 from .image import ImageModel
 from .textbook import TextbookModel
+from .editabletextbook import EditableTextbookModel
 
 from .sale import SaleModel, SaleInfo
