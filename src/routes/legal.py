@@ -2,9 +2,12 @@
 Handles legal routes
 """
 
+from src.service import auth_provider
+from src.database import UserModel
 from src.utils.forms import ContactForm
+
+from typing import Optional
 from flask import (
-  g,
   flash,
   request,
   render_template,
@@ -20,12 +23,12 @@ def terms_of_service():
   return render_template('(legal)/terms_of_service.html')
 
 @app.route('/contact-us')
-def contact_us():
-  user = g.current_user
+@auth_provider.optional_login
+def contact_us(user: Optional[UserModel]):
   form = ContactForm(request.form)
 
   if form.email.data == '':
-    form.email.data = (user.is_authenticated and user.email) or ''
+    form.email.data = (user and user.email) or ''
 
   if form.validate_on_submit():
     ...
