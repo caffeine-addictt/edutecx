@@ -202,9 +202,8 @@ class UserModel(db.Model):
     ```
     """
     cleanedClassroms = set( i.id for i in classrooms )
-    joinedClasses = set(self.classrooms)
 
-    for class_ in joinedClasses:
+    for class_ in self.classrooms:
       match ((class_.classroom.id in cleanedClassroms) and class_.role):
         case 'Student':
           class_.classroom.remove_students(self)
