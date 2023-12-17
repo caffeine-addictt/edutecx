@@ -30,14 +30,14 @@ class SubmissionSnippetModel(db.Model):
 
   __tablename__ = 'submission_snippet_table'
 
-  id: Mapped[str] = mapped_column(String, primary_key = True, unique = True, nullable = False, default = lambda: uuid.uuid4())
-  student_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
+  id           : Mapped[str] = mapped_column(String, primary_key = True, unique = True, nullable = False, default = lambda: uuid.uuid4())
+  student_id   : Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
   submission_id: Mapped[str] = mapped_column(ForeignKey('submission_table.id'), nullable = False)
 
-  uri      : Mapped[str] = mapped_column(String, nullable = True)
-  iuri     : Mapped[str] = mapped_column(String, nullable = True)
-  status   : Mapped[str] = mapped_column(String, nullable = False, default = 'Uploading')
-  student   : Mapped['UserModel']          = relationship('UserModel', back_populates = 'submissions')
+  uri       : Mapped[str]               = mapped_column(String, nullable = True)
+  iuri      : Mapped[str]               = mapped_column(String, nullable = True)
+  status    : Mapped[str]               = mapped_column(String, nullable = False, default = 'Uploading')
+  student   : Mapped['UserModel']       = relationship('UserModel', back_populates = 'snippets')
   submission: Mapped['SubmissionModel'] = relationship('SubmissionModel', back_populates = 'snippet')
 
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
