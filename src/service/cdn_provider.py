@@ -195,7 +195,7 @@ def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
   file.close()
 
 def deleteEditableTextbook(fileLocation: str) -> None:
-  """Deelte upload"""
+  """Delete upload"""
   _dirCheck()
 
   if not os.path.exists(fileLocation):
