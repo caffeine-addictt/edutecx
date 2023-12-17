@@ -65,6 +65,7 @@ class SubmissionModel(db.Model):
   def delete(self, commit: bool = True) -> None:
     """Deletes the model and its references"""
     for i in self.comments: i.delete(commit = False)
+    self.snippet.delete(commit = False)
     
     db.session.delete(self)
     if commit: db.session.commit()
