@@ -28,6 +28,7 @@ if TYPE_CHECKING:
   from .sale import SaleModel
   from .image import ImageModel
   from .editabletextbook import EditableTextbookModel
+  from .submissionsnippet import SubmissionSnippetModel
 
 
 PrivilegeTypes = Literal['User', 'Admin']
@@ -70,6 +71,7 @@ class UserModel(db.Model):
   # Class (Classroom feature)
   comments        : Mapped[List['CommentModel']]    = relationship('CommentModel', back_populates = 'author')
   submissions     : Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'student')
+  snippets        : Mapped[List['SubmissionSnippetModel']] = relationship('SubmissionSnippetModel', back_populates = 'student')
   owned_classrooms: Mapped[List['ClassroomModel']]  = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner')
 
   # Textbooks
