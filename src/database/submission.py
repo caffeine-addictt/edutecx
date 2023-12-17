@@ -35,13 +35,12 @@ class SubmissionModel(db.Model):
   # Identifiers
   id           : Mapped[str] = mapped_column(String, primary_key = True, unique = True, nullable = False, default = lambda: uuid.uuid4().hex)
   student_id   : Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
-  snippet_id   : Mapped[str] = mapped_column(ForeignKey('submission_snippet_table.id'), nullable = False)
   assignment_id: Mapped[str] = mapped_column(ForeignKey('assignment_table.id'), nullable = False)
 
   # Attributes
-  student   : Mapped['UserModel']          = relationship('UserModel', back_populates = 'submissions')
-  comments  : Mapped[List['CommentModel']] = relationship('CommentModel', back_populates = 'submission')
-  assignment: Mapped['AssignmentModel']    = relationship('AssignmentModel', back_populates = 'submissions')
+  student   : Mapped['UserModel']              = relationship('UserModel', back_populates = 'submissions')
+  comments  : Mapped[List['CommentModel']]     = relationship('CommentModel', back_populates = 'submission')
+  assignment: Mapped['AssignmentModel']        = relationship('AssignmentModel', back_populates = 'submissions')
   snippet   : Mapped['SubmissionSnippetModel'] = relationship('SubmissionSnippetModel', back_populates = 'submission')
 
   # Logs
