@@ -2,6 +2,7 @@
 Initalizes Flask Application
 """
 
+import thread
 from flask import Flask
 from flask_mail import Mail
 from flask_migrate import Migrate
@@ -26,6 +27,8 @@ metadata = MetaData(naming_convention = convention)
 
 
 # Setup app init variables to be publically accessible
+thread.Settings.set_graceful_exit(False)
+
 db = SQLAlchemy(metadata = metadata)
 mail = Mail()
 jwt = JWTManager()
