@@ -8,6 +8,7 @@ import os
 import re
 import uuid
 import shutil
+from pypdf import PdfReader, PdfWriter
 
 from typing import Literal
 from werkzeug.datastructures import FileStorage
@@ -15,6 +16,7 @@ from werkzeug.datastructures import FileStorage
 
 # Setup
 UploadBaseLocation = os.path.join(os.getcwd(), 'src', 'uploads')
+SubmittedSnippetLocation = os.path.join(UploadBaseLocation, 'textbook_snippets')
 EditableTextbookLocation = os.path.join(UploadBaseLocation, 'textbook_forks')
 TextbookLocation = os.path.join(UploadBaseLocation, 'textbooks')
 ImageLocation = os.path.join(UploadBaseLocation, 'images')
@@ -183,6 +185,47 @@ def cloneTextbook(fileLocation: str, newfilename: str) -> str:
   shutil.copy2(fileLocation, newfileLocation)
   return newfileLocation
 
+def clonePage(fileLocation: str, newfilename: str, pages: int | tuple[int, int]) -> str:
+  """Clone a textbook's pages"""
+  _dirCheck()
+
+
+  # Validate inputs
+  if isinstance(pages, tuple):
+    assert len(pages) == 2, 'Pages tuple argument must contain exactly two numbers (start_index, end_index)'
+    assert all([ isinstance(i, int) for i in pages ]), 'Pages argument must contain exactly two numbers (start_index, end_index)'
+
+  if not os.path.exists(fileLocation):
+    raise FileDoesNotExistError()
+
+  ext = fileLocation.split('.')[-1]
+  if ext not in TextbookFileEXT:
+    raise BadFileEXT()
+  
+  
+  # Fetch filename
+  newfilename = _get_unique_filename(
+    SubmittedSnippetLocation,
+    newfilename,
+    ext
+  )
+  
+  
+  # Write PDF
+  reader = PdfReader(fileLocation)
+  written = PdfWriter()
+
+  # TODO: Add copyright notice
+
+  for pageIndex in range( *(pages[0], pages[1]) if isinstance(pages, tuple) else (pages, pages + 1) ):
+    written.add_page(reader.pages[pageIndex])
+
+  newfileLocation = os.path.join(SubmittedSnippetLocation, newfilename)
+  with open(newfileLocation, 'wb') as out:
+    written.write(out)
+
+  return newfileLocation
+
 def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
   """Replace current upload with new file"""
   _dirCheck()
@@ -194,7 +237,7 @@ def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
   file.save(fileLocation)
   file.close()
 
-def deleteEditableTextbook(fileLocation: str) -> None:
+def deleteFile(fileLocation: str) -> None:
   """Delete upload"""
   _dirCheck()
 
