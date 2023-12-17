@@ -16,6 +16,8 @@ from werkzeug.datastructures import FileStorage
 
 # Setup
 UploadBaseLocation = os.path.join(os.getcwd(), 'src', 'uploads')
+CopyrightNoticeLocation = os.path.join(UploadBaseLocation, 'copyright.pdf')
+
 SubmittedSnippetLocation = os.path.join(UploadBaseLocation, 'textbook_snippets')
 EditableTextbookLocation = os.path.join(UploadBaseLocation, 'textbook_forks')
 TextbookLocation = os.path.join(UploadBaseLocation, 'textbooks')
@@ -34,6 +36,8 @@ class FileDoesNotExistError(Exception):
     super().__init__(message, *args, **kwargs)
 
 
+
+
 def _dirCheck():
   """Ensure that the upload directories exist"""
   if not os.path.isdir(UploadBaseLocation):
@@ -48,6 +52,18 @@ def _dirCheck():
   if not os.path.isdir(ImageLocation):
     os.mkdir(ImageLocation)
 
+
+
+
+def _injectCopyright(file: PdfReader) -> PdfWriter:
+  """Injects copyright notice"""
+
+  writer = PdfWriter()
+  writer.add_page(PdfReader(CopyrightNoticeLocation).pages[0])
+  writer.append_pages_from_reader(file)
+  return writer
+
+
 def _get_unique_filename(dir: str, filename: str, extension: str) -> str:
   """Ensure edge case where file already exists (although unliekly as filename would be uuid, but doesn't hurt to be sure)"""
   regex = re.compile(r'[^a-zA-Z0-9-]')
@@ -58,6 +74,7 @@ def _get_unique_filename(dir: str, filename: str, extension: str) -> str:
     if os.path.exists(os.path.join(dir, filename)):
       filename = uuid.uuid4().hex
     else: return filename
+
 
 def _upload(
   fileType: Literal['Image', 'Textbook'],
@@ -98,10 +115,17 @@ def _upload(
       ext
     )
 
-    # Save the file
+    # Inject copyright notice
+    writer = _injectCopyright(PdfReader(file.stream))
+
     location = os.path.join(TextbookLocation, filename)
-    file.save(location)
+    with open(location, 'wb') as out:
+      writer.write(out)
+      
     return location
+
+
+
 
 def uploadTextbook(file: FileStorage, filename: str) -> str:
   """
@@ -156,7 +180,7 @@ def uploadImage(file: FileStorage, filename: str) -> str:
   return _upload('Image', file, filename)
 
 
-# No delete textbook method
+
 def deleteImage(filename: str) -> None:
   _dirCheck()
 
@@ -185,6 +209,8 @@ def cloneTextbook(fileLocation: str, newfilename: str) -> str:
   shutil.copy2(fileLocation, newfileLocation)
   return newfileLocation
 
+
+
 def clonePage(fileLocation: str, newfilename: str, pages: int | tuple[int, int]) -> str:
   """Clone a textbook's pages"""
   _dirCheck()
@@ -212,12 +238,13 @@ def clonePage(fileLocation: str, newfilename: str, pages: int | tuple[int, int])
   
   
   # Write PDF
-  reader = PdfReader(fileLocation)
+  reader = _injectCopyright(PdfReader(fileLocation))
   written = PdfWriter()
 
-  # TODO: Add copyright notice
+  # Add copyright notice
+  written.add_page(reader.pages[0])
 
-  for pageIndex in range( *(pages[0], pages[1]) if isinstance(pages, tuple) else (pages, pages + 1) ):
+  for pageIndex in range( *(pages[0] + 1, pages[1] + 1) if isinstance(pages, tuple) else (pages + 1, pages + 2) ):
     written.add_page(reader.pages[pageIndex])
 
   newfileLocation = os.path.join(SubmittedSnippetLocation, newfilename)
@@ -226,6 +253,8 @@ def clonePage(fileLocation: str, newfilename: str, pages: int | tuple[int, int])
 
   return newfileLocation
 
+
+
 def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
   """Replace current upload with new file"""
   _dirCheck()
@@ -233,9 +262,13 @@ def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
   if not os.path.exists(fileLocation):
     raise FileDoesNotExistError()
   
+  writer = _injectCopyright(PdfReader(file.stream))
+
   os.remove(fileLocation)
-  file.save(fileLocation)
-  file.close()
+  with open(fileLocation, 'wb') as out:
+    writer.write(out)
+
+
 
 def deleteFile(fileLocation: str) -> None:
   """Delete upload"""
