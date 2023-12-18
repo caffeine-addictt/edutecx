@@ -105,8 +105,9 @@ class ClassroomModel(db.Model):
     
   @property
   def textbooks(self) -> list['TextbookModel'] | None:
-    if TYPE_CHECKING:
-      return db.session.query('UserModel').filter(ClassroomModel.textbook_ids.contains(TextbookModel.id)).all()
+    from .user import UserModel as usr
+    from .textbook import TextbookModel as tm
+    return usr.query.filter(ClassroomModel.textbook_ids.contains(tm.id)).all()
   
 
   # Editing
