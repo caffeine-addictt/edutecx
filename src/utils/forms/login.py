@@ -1,7 +1,3 @@
-"""
-Login form
-"""
-
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, SubmitField, StringField
 from wtforms.validators import DataRequired, Email, Length
@@ -9,9 +5,7 @@ from wtforms.validators import DataRequired, Email, Length
 from typing import Optional
 
 class LoginForm(FlaskForm):
-  """
-  Login Form
-  """
+  """Login Form"""
 
   email       = StringField('Email', validators = [DataRequired(), Length(1, 64), Email()])
   password    = PasswordField('Password', validators = [DataRequired(), Length(1, 20)])

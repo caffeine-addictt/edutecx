@@ -17,6 +17,9 @@ from flask_jwt_extended import (
 
 
 def optional_jwt() -> bool:
+  """
+  Checks for and verifies JWT in cookies/header
+  """
   try:
     if verify_jwt_in_request():
       return True
@@ -32,6 +35,12 @@ def require_admin(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[
   Returns
   -------
   `decorator: (...) -> ...`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_admin
+  >>> def myRoute(user: UserModel): ...
   """
   @wraps(func)
   def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -62,6 +71,12 @@ def require_login(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[
   Returns
   -------
   `decorator: (...) -> ...`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_login
+  >>> def myRoute(user: UserModel): ...
   """
   @wraps(func)
   def wrapper(*args, **kwargs):
@@ -79,6 +94,12 @@ def optional_login(func: Callable[Concatenate[UserModel | None, ...], Any]) -> C
   Returns
   -------
   `decorator: (...) -> ...`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @optional_login
+  >>> def myRoute(user: UserModel | None): ...
   """
   @wraps(func)
   def wrapper(*args, **kwargs):

@@ -24,9 +24,7 @@ if TYPE_CHECKING:
 
 
 class AssignmentModel(db.Model):
-  """
-  Assignment Model
-  """
+  """Assignment Model"""
 
   __tablename__ = 'assignment_table'
 

@@ -26,9 +26,7 @@ if TYPE_CHECKING:
 
 
 class ClassroomModel(db.Model):
-  """
-  Classroom model
-  """
+  """Classroom model"""
   
   __tablename__ = 'classroom_table'
 
@@ -63,6 +61,20 @@ class ClassroomModel(db.Model):
     title: str,
     description: str
   ) -> None:
+    """
+    Classroom Model
+
+    Parameters
+    ----------
+    `owner: UserModel`, required
+      The owner model
+    
+    `title: str`, required
+      The title of the classroom
+
+    `description: str`, required
+      The description of the classroom
+    """
     self.owner_id = owner.id
     self.title = title
     self.description = description
