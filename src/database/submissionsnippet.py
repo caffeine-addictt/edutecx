@@ -1,5 +1,5 @@
 """
-
+Submission Snippet Model
 """
 
 from src import db
