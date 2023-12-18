@@ -21,6 +21,7 @@ if TYPE_CHECKING:
   from .user import UserModel
   from .assignment import AssignmentModel
   from .comment import CommentModel
+  from .submissionsnippet import SubmissionSnippetModel
 
 
 # TODO: Add the edited page of textbookModel (after figuring out how to edit it :'>)
@@ -37,9 +38,10 @@ class SubmissionModel(db.Model):
   assignment_id: Mapped[str] = mapped_column(ForeignKey('assignment_table.id'), nullable = False)
 
   # Attributes
-  student   : Mapped['UserModel']          = relationship('UserModel', back_populates = 'submissions')
-  comments  : Mapped[List['CommentModel']] = relationship('CommentModel', back_populates = 'submission')
-  assignment: Mapped['AssignmentModel']    = relationship('AssignmentModel', back_populates = 'submissions')
+  student   : Mapped['UserModel']              = relationship('UserModel', back_populates = 'submissions')
+  comments  : Mapped[List['CommentModel']]     = relationship('CommentModel', back_populates = 'submission')
+  assignment: Mapped['AssignmentModel']        = relationship('AssignmentModel', back_populates = 'submissions')
+  snippet   : Mapped['SubmissionSnippetModel'] = relationship('SubmissionSnippetModel', back_populates = 'submission')
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
@@ -62,6 +64,7 @@ class SubmissionModel(db.Model):
   def delete(self, commit: bool = True) -> None:
     """Deletes the model and its references"""
     for i in self.comments: i.delete(commit = False)
+    self.snippet.delete(commit = False)
     
     db.session.delete(self)
     if commit: db.session.commit()

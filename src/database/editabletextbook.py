@@ -3,7 +3,7 @@ EditableTextbook Model
 """
 
 from src import db
-from src.service.cdn_provider import cloneTextbook, updateEditableTextbook, deleteEditableTextbook
+from src.service.cdn_provider import cloneTextbook, updateEditableTextbook, deleteFile
 
 import uuid
 from thread import Thread
@@ -36,6 +36,9 @@ class EditableTextbookModel(db.Model):
   status   : Mapped[str] = mapped_column(String, nullable = False, default = 'Uploading')
   user: Mapped['UserModel'] =  relationship('UserModel', back_populates = 'textbooks')
   origin: Mapped['TextbookModel'] = relationship('TextbookModel', back_populates = 'derrived')
+
+  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+
 
   def __init__(self, user: 'UserModel', textbook: 'TextbookModel'):
     self.user_id = user.id
@@ -78,10 +81,7 @@ class EditableTextbookModel(db.Model):
 
   def delete(self, commit = True) -> None:
     """Deletes the model and its references"""
-    job = Thread(deleteEditableTextbook, kwargs = {
-      'fileLocation': self.iuri
-    })
-    job.start()
+    Thread(deleteFile, args = [self.iuri]).start()
     
     db.session.delete(self)
     if commit: db.session.commit()

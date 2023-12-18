@@ -3,7 +3,7 @@ Textbook Model
 """
 
 from src import db
-from src.service.cdn_provider import uploadTextbook
+from src.service.cdn_provider import uploadTextbook, deleteFile
 
 import uuid
 from thread import Thread
@@ -110,11 +110,12 @@ class TextbookModel(db.Model):
     db.session.commit()
 
   def delete(self, commit: bool = True) -> None:
-    # """Deletes the model and its references"""
-    # if self.cover_image: self.cover_image.delete(commit = False)
+    """Deletes the model and its references"""
+    Thread(deleteFile, args = [self.iuri]).start()
 
-    # db.session.delete(self)
-    # if commit: db.session.commit()
-    
-    # Deleting textbooks are not allowed
+    if self.cover_image: self.cover_image.delete(commit = False)
+
+
+    db.session.delete(self)
+    if commit: db.session.commit()
     pass

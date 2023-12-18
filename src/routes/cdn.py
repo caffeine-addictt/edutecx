@@ -32,8 +32,9 @@ def uploaded_textbooks(user: UserModel, filename: str):
       as_attachment = True
     )
   
-  if any([ i.iuri.endswith(filename) for i in user.textbooks ]):
-    return send_from_directory(
+  for book in user.textbooks:
+    if book.iuri.endswith(filename):
+      return send_from_directory(
       cdn_provider.TextbookLocation,
       filename,
       as_attachment = True

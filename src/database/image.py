@@ -3,7 +3,7 @@ Image Model
 """
 
 from src import db
-from src.service.cdn_provider import uploadImage
+from src.service.cdn_provider import uploadImage, deleteFile
 
 import uuid
 from thread import Thread
@@ -94,6 +94,8 @@ class ImageModel(db.Model):
 
   def delete(self, commit: bool = True) -> None:
     """Deletes model and its references"""
-    # TODO: Add delete method
+    deleteJob = Thread(target = deleteFile, args = [self.iuri])
+    deleteJob.start()
+
     db.session.delete(self)
     if commit: db.session.commit()
