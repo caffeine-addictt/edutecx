@@ -28,9 +28,7 @@ if TYPE_CHECKING:
 
 # TODO: Textbook PDF upload
 class TextbookModel(db.Model):
-  """
-  Textbook Model
-  """
+  """Textbook Model"""
 
   __tablename__ = 'textbook_table'
 
@@ -69,6 +67,28 @@ class TextbookModel(db.Model):
     price: float = 0.0,
     discount: float = 0.0,
   ) -> None:
+    """
+    Textbook Model
+
+    Parameters
+    ----------
+    `author: UserModel`, required
+
+    `file: FileStorage`, required
+      From request.form.files[0]
+
+    `title: str`, required
+
+    `description: str, optional
+
+    `categories: str[]`, optional
+
+    `price: float`, optional
+
+    `discount: float`, optional
+      The discount amount between 0 and 1 inclusive.
+      CurrentPrice = Price * (1 - `discount`)
+    """
     assert isinstance(price, float)
     assert isinstance(discount, float) and (0 <= discount <= 1)
 

@@ -17,9 +17,7 @@ from sqlalchemy import (
 )
 
 class JWTBlocklistModel(db.Model):
-  """
-  Stores revoked tokens
-  """
+  """Stores revoked tokens"""
 
   __tablename__ = 'jwtblocklist_table'
 
@@ -28,6 +26,16 @@ class JWTBlocklistModel(db.Model):
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
   def __init__(self, jti: str, token_type: Literal['access', 'refresh']) -> None:
+    """
+    JWT Blocklist Model
+
+    Parameters
+    ----------
+    `jti: str`, required
+      The JWT token jti
+
+    `token_type: access | refresh`, required
+    """
     self.jti = jti
     self.token_type = token_type
 

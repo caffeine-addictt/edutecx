@@ -23,9 +23,7 @@ if TYPE_CHECKING:
 
 
 class CommentModel(db.Model):
-  """
-  Comment Model
-  """
+  """Comment Model"""
 
   __tablename__ = 'comment_table'
 
@@ -44,6 +42,17 @@ class CommentModel(db.Model):
   updated_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
   def __init__(self, author: 'UserModel', submission: 'SubmissionModel', text: str) -> None:
+    """
+    Comment Model
+
+    Parameters
+    ----------
+    `author: UserModel`, required
+    
+    `submission: SubmissionModel`, required
+
+    `text: String`, required
+    """
     self.author_id = author.id
     self.submission_id = submission.id
     self.text = text

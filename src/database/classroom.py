@@ -26,9 +26,7 @@ if TYPE_CHECKING:
 
 
 class ClassroomModel(db.Model):
-  """
-  Classroom model
-  """
+  """Classroom model"""
   
   __tablename__ = 'classroom_table'
 
@@ -63,6 +61,20 @@ class ClassroomModel(db.Model):
     title: str,
     description: str
   ) -> None:
+    """
+    Classroom Model
+
+    Parameters
+    ----------
+    `owner: UserModel`, required
+      The owner model
+    
+    `title: str`, required
+      The title of the classroom
+
+    `description: str`, required
+      The description of the classroom
+    """
     self.owner_id = owner.id
     self.title = title
     self.description = description
@@ -105,8 +117,9 @@ class ClassroomModel(db.Model):
     
   @property
   def textbooks(self) -> list['TextbookModel'] | None:
-    if TYPE_CHECKING:
-      return db.session.query('UserModel').filter(ClassroomModel.textbook_ids.contains(TextbookModel.id)).all()
+    from .user import UserModel as usr
+    from .textbook import TextbookModel as tm
+    return usr.query.filter(ClassroomModel.textbook_ids.contains(tm.id)).all()
   
 
   # Editing

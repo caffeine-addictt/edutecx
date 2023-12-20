@@ -1,18 +1,5 @@
-# Password manager module
 import bcrypt
 
-"""
-Password Handling Roadmap
-
-Client enters plaintext
-Encrypt with client's public key
-Encrypted text is sent to the server
-Encrypted text is decoded with clients private key to plaintext
-Plaintext is then encoded to utf8 in  _encode()
-Encoded text is then hashed
-Hash is then stored
-
-"""
 
 def _encode(toEncode: str | bytes) -> bytes:
   """

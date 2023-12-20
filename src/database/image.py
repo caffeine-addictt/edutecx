@@ -27,9 +27,7 @@ if TYPE_CHECKING:
 
 # TODO: Filepath (iURI) -> URI
 class ImageModel(db.Model):
-  """
-  Image Model
-  """
+  """Image Model"""
 
   __tablename__ = 'image_table'
 
@@ -55,6 +53,19 @@ class ImageModel(db.Model):
     textbook: Optional['TextbookModel'] = None,
     classroom: Optional['ClassroomModel'] = None
   ) -> None:
+    """
+    Image Model
+
+    Parameters
+    ----------
+    `file: FileStorage`, required
+
+    `user: UserModel`, optional
+
+    `textbook: TextbookModel`, optional
+
+    `classroom: ClassroomModel`, optional
+    """
     # Make use of the fact that Boolean is a subclass of INT
     if (bool(user) + bool(textbook)+ bool(classroom)) != 1:
       raise Exception('Only 1 parent reference is allowed')

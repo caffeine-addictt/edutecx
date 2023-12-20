@@ -1,7 +1,3 @@
-"""
-Register form
-"""
-
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, SubmitField, StringField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
@@ -9,9 +5,7 @@ from wtforms.validators import DataRequired, Email, Length, EqualTo
 from typing import Optional
 
 class RegisterForm(FlaskForm):
-  """
-  Register Form
-  """
+  """Register Form"""
 
   username    = StringField('Username', validators = [DataRequired(), Length(1, 20)])
   email       = StringField('Email', validators = [DataRequired(), Length(1, 64), Email('Invalid Email', check_deliverability = True)])
