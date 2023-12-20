@@ -141,6 +141,19 @@ class _LoginData(_APIBase):
   refresh_token: str
 
 @dataclass
+class _AssignmentGetData(_APIBase):
+  id          : str
+  classroom_id: str
+  title       : str
+  description : str
+  due_date    : Union[float, str]
+  textbooks   : str
+  requirement : str
+  submissions : list[str]
+  created_at  : float
+  updated_at  : float
+
+@dataclass
 class _AssignmentCreateData(_APIBase):
   assignment_id: str
 
@@ -184,6 +197,10 @@ class RegisterRequest(_APIRequest):
   username: str
   password: str
 
+class AssignmentGetRequest(_APIRequest):
+  """API Request for assignment fetching"""
+  assignment_id: str
+
 class AssignmentCreateRequest(_APIRequest):
   """
   API Request for assignment creation
@@ -193,7 +210,7 @@ class AssignmentCreateRequest(_APIRequest):
   classroom_id: str
   title: str
   description: str
-  due_date: Union[int, str]
+  due_date: Union[float, str]
   requirement: str
 
 class AssignmentEditRequest(_APIRequest):
@@ -202,7 +219,7 @@ class AssignmentEditRequest(_APIRequest):
   ignore_none = True
   title: Union[str, None]
   description: Union[str, None]
-  due_date: Union[int, str, None]
+  due_date: Union[float, str, None]
   requirement: Union[str, None]
 
 
@@ -237,6 +254,11 @@ class TokenRefreshReply(_APIReply):
 class LoginReply(_APIReply):
   """API Reply for login"""
   data: _LoginData
+
+@dataclass
+class AssignmentGetReply(_APIReply):
+  """API Reply for fetching assignment"""
+  data: _AssignmentGetData
 
 @dataclass
 class AssignmentCreateReply(_APIReply):

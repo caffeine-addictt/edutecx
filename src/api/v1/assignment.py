@@ -8,6 +8,7 @@ from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.ext import utc_time
 from src.utils.api import (
+  AssignmentGetRequest, AssignmentGetReply, _AssignmentGetData,
   AssignmentCreateRequest, AssignmentCreateReply, _AssignmentCreateData,
   AssignmentEditRequest,
   AssignmentDeleteRequest,
@@ -28,6 +29,50 @@ from sqlalchemy import and_, or_
 # Routes
 basePath: str = '/api/v1/assignment'
 auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host, key_func = util.get_remote_address)
+
+
+
+
+@app.route(f'{basePath}/get', methods = ['GET'])
+@auth_limit
+@require_login
+def assignment_get_api(user: UserModel):
+  req = AssignmentGetRequest(request)
+
+  assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
+  if not assignment or not isinstance(assignment, AssignmentModel):
+    return GenericReply(
+      message = 'Unable to locate assignment',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if (user.privilege != 'Admin') and (
+    user.id not in [
+      assignment.classroom.owner_id,
+      *assignment.classroom.educator_ids,
+      *assignment.classroom.student_ids
+  ]):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  return AssignmentGetReply(
+    message = 'Successfully fetched assignment information',
+    status = HTTPStatusCode.OK,
+    data = _AssignmentGetData(
+      id = assignment.id,
+      classroom_id = assignment.classroom.id,
+      title = assignment.title,
+      description = assignment.description,
+      due_date = assignment.due_date.timestamp(),
+      textbooks = assignment.textbooks,
+      requirement = assignment.requirement,
+      submissions = [ i.id for i in assignment.submissions ],
+      created_at = assignment.created_at.timestamp(),
+      updated_at = assignment.updated_at.timestamp()
+    )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -99,7 +144,7 @@ def assignment_create_api(user: UserModel):
 
 
 
-@app.route(f'{basePath}/edit', method = ['POST'])
+@app.route(f'{basePath}/edit', methods = ['POST'])
 @auth_limit
 @require_login
 def assignment_edit_api(user: UserModel):
