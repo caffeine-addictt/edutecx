@@ -5,12 +5,6 @@ from typing import Any, Union, TypedDict, Optional
 class HashableDict(dict):
   def __hash__(self):
     return hash(frozenset(self))
-  
-
-class APIResponse(TypedDict):
-  message: str
-  status: int
-  data: Optional[dict[str, Any] | Any]
 
 
 class Parser:

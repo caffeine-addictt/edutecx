@@ -8,9 +8,13 @@ from src import db, jwt
 from src.database import UserModel, JWTBlocklistModel
 
 from src.utils.ext import utc_time
-from src.utils.http import HTTPStatusCode, APIResponse
+from src.utils.http import HTTPStatusCode
+from src.utils.api import TokenRefreshResponse, LoginResponse
 from src.utils.forms import LoginForm, LogoutForm, RegisterForm
 from src.service.auth_provider import optional_jwt
+from src.utils.api import (
+  GenericResponse
+)
 
 import requests
 from urllib import parse
@@ -75,8 +79,8 @@ def refresh_token(response):
 
     if refresh_decoded['exp'] <= utc_time.get().timestamp():
       raise Exception('Refresh token expired')
-
-    if utc_time.skip('30min').timestamp() < access_decoded['exp']:
+    
+    if utc_time.skip('1h').timestamp() < access_decoded['exp']:
       raise Exception('Access token not close to being expired')
     
     # Try to refresh access token
@@ -84,13 +88,13 @@ def refresh_token(response):
       f'{request.url_root}api/v1/refresh',
       headers = {'Authorization': f'Bearer {refresh_token}'}
     )
-    data: APIResponse = refresh_response.json()
+    data = TokenRefreshResponse(refresh_response)
 
-    if data['status'] != HTTPStatusCode.OK:
-      raise Exception(f'{data["message"]}')
+    if data.status != HTTPStatusCode.OK:
+      raise Exception(f'{data.message}')
     
-    set_access_cookies(response, str((data.get('data') or {}).get('access_token')))
-    app.logger.info(f'Successfully Auto-Refreshed expiring access token')
+    set_access_cookies(response, str(data.data.get('access_token')))
+    app.logger.info('Successfully Auto-Refreshed expiring access token')
 
     return response
   except Exception as e:
@@ -151,9 +155,9 @@ def expired_token_loader(jwtHeader, jwtPayload):
         f'{request.root_url}api/v1/refresh',
         headers = {'Authorization': f'Bearer {refresh_token}'}
       )
-      data: APIResponse = response.json()
+      data = TokenRefreshResponse(response)
 
-      if (data['status'] == HTTPStatusCode.OK) and not (data.get('data') or {}).get('access_token'):
+      if (data.status == HTTPStatusCode.OK) and not data.data.get('access_token'):
         raise Exception('Unable to refresh')
       
       successfulRefresh = make_response(
@@ -162,7 +166,7 @@ def expired_token_loader(jwtHeader, jwtPayload):
       )
 
       app.logger.error('Auto-Refreshed expired access token with refresh token')
-      set_access_cookies(successfulRefresh, str((data.get('data') or {}).get('access_token')))
+      set_access_cookies(successfulRefresh, str(data.data.get('access_token')))
       return successfulRefresh, HTTPStatusCode.FOUND
 
     except Exception as e:
@@ -207,10 +211,10 @@ def login():
         'remember_me': form.remember_me.data,
       }
     )
-    body: APIResponse = response.json()
+    body = LoginResponse(response)
     
     if response.status_code != HTTPStatusCode.OK:
-      flash(body.get('message'), 'danger')
+      flash(body.message, 'danger')
     else:
       # Handle Login and cookie
       callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
@@ -219,8 +223,8 @@ def login():
         HTTPStatusCode.SEE_OTHER
       )
 
-      set_access_cookies(successfulLogin, str((body.get('data') or {}).get('access_token')))
-      set_refresh_cookies(successfulLogin, str((body.get('data') or {}).get('refresh_token')))
+      set_access_cookies(successfulLogin, body.data.access_token)
+      set_refresh_cookies(successfulLogin, body.data.access_token)
       flash('Welcome back!', 'success')
 
       return successfulLogin
@@ -296,16 +300,16 @@ def register():
         'password': form.password.data
       }
     )
-    body: APIResponse = response.json()
+    body = GenericResponse(response)
 
     if response.status_code != HTTPStatusCode.OK:
-      flash(body.get('message'), 'danger')
+      flash(body.message, 'danger')
     else:
-      flash(body.get('message'), 'success')
+      flash(body.message, 'success')
 
       callbackURI: str = parse.quote(request.args.get('callbackURI', '/login'))
       return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
   elif request.method == 'POST':
-    flash('Failed to create user account', 'danger')
+    flash(f'Failed to create user account: {form.errors}', 'danger')
 
   return render_template('(auth)/register.html', form = form)
