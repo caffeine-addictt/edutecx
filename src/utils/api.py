@@ -3,7 +3,8 @@ API Parser
 """
 
 import inspect
-from typing import Any
+import _typing
+from typing import Any, Union
 
 from requests import Response as ReqResponse
 from flask import Request, Response as FlaskResponse
@@ -33,7 +34,8 @@ class _APIBase:
   
   def get(self, name: Any, default = None) -> Any | None:
     return self.__dict__.get(name, default)
-  
+
+
 class _APIParser(_APIBase):
   """
   API Parser
@@ -69,23 +71,24 @@ class _APIParser(_APIBase):
 
   def _interpret(self, var: Any, varName: str, varType: Any) -> None:
     isClass = inspect.isclass(varType)
+    unionArgs: Union[tuple[type], None] = (isClass and (varType.__dict__.get('__args__', None))) or None
 
-    if isClass and isinstance(var, varType):
-      self.__dict__[varName] = var
-      return
-    
-    else:
+    for type_ in unionArgs or [varType if isClass else type(varType)]:
       try:
-        interpreted = varType(var) if isClass else type(varType)(var)
-        if isinstance(interpreted, varType if isClass else type(varType)):
+        interpreted = type_(var)
+
+        if isinstance(interpreted, type_):
           self.__dict__[varName] = interpreted
-        else:
-          raise Exception()
+          return
         
-      except Exception:
-        raise BadRequest('Invalid variable type')
-      
-    raise BadRequest('Invalid variable')
+      except Exception: pass
+
+    # Handle case with default argument
+    if not isClass:
+      self.__dict__[varName] = varType
+      return
+    else:
+      raise BadRequest('Invalid variable')
 
 
 
@@ -138,6 +141,10 @@ class _LoginData(_APIBase):
   access_token: str
   refresh_token: str
 
+@dataclass
+class _AssignmentCreateData(_APIBase):
+  assignment_id: str
+
 
 
 
@@ -169,7 +176,23 @@ class RegisterRequest(_APIRequest):
   email: str
   username: str
   password: str
+
+class AssignmentCreateRequest(_APIRequest):
+  """
+  API Request for assignment creation
   
+  due_date: int (UNIX Millies) | str ('infinity')
+  """
+  classroom_id: str
+  title: str
+  description: str
+  due_date: Union[int, str]
+  requirement: str
+
+class AssignmentDeleteRequest(_APIRequest):
+  """API Request for assignment deletion"""
+  assignment_id: str
+
 
 
 
@@ -187,3 +210,9 @@ class TokenRefreshReply(_APIReply):
 class LoginReply(_APIReply):
   """API Reply for login"""
   data: _LoginData
+
+@dataclass
+class AssignmentCreateReply(_APIReply):
+  """API Reply for creating a new assignment"""
+  data: _AssignmentCreateData
+
