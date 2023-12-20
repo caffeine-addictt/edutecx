@@ -9,6 +9,14 @@ from src.utils.passwords import hash_password
 from src.database import UserModel
 from sqlalchemy import or_
 
+from src.utils.api import (
+  TokenRefreshReply, _TokenRefreshData,
+  LoginRequest, LoginReply, _LoginData,
+  RegisterRequest,
+  
+  GenericReply
+)
+
 from typing import Optional
 from flask import (
   request,
@@ -29,46 +37,39 @@ auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host
 @app.route(f'{basePath}/login', methods = ['POST'])
 @auth_limit
 def apiv1_Login():
-  if request.json:
-    email = request.json.get('email', None)
-    password = request.json.get('password', None)
-    remember_me = request.json.get('remember_me', None)
-  else:
-    email = request.form.get('email', None)
-    password = request.form.get('password', None)
-    remember_me = request.form.get('remember_me', None)
+  req = LoginRequest(request)
 
   # Ensure email and password exist
-  if not email or not password:
+  if not req.email or not req.password:
     return {
       'message': 'Missing email or password',
       'status': HTTPStatusCode.BAD_REQUEST
     }, HTTPStatusCode.BAD_REQUEST
   
   # Ensure user exists
-  user: Optional[UserModel] = UserModel.query.filter(UserModel.email == email).first()
-  if not user or not user.verify_password(password):
-    return {
-      'message': 'Invalid email or password',
-      'status': HTTPStatusCode.BAD_REQUEST
-    }, HTTPStatusCode.BAD_REQUEST
+  user: UserModel | None = UserModel.query.filter(UserModel.email == req.email).first()
+  if not user or not isinstance(user, UserModel) or not user.verify_password(req.password):
+    return GenericReply(
+      message = 'Invalid email or password',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   # Create tokens
   add_claims = {
     'aud': request.host,
-    'remember_me': bool(remember_me),
+    'remember_me': bool(req.remember_me),
   }
   refresh_token = create_refresh_token(identity = user, additional_claims = add_claims)
   access_token = create_access_token(identity = user, fresh = True)
 
-  return {
-    'message': 'Login successful',
-    'data': {
-      'access_token': access_token,
-      'refresh_token': refresh_token
-    },
-    'status': HTTPStatusCode.OK
-  }, HTTPStatusCode.OK
+  return LoginReply(
+    message = 'Login successful',
+    status = HTTPStatusCode.OK,
+    data = _LoginData(
+      access_token = access_token,
+      refresh_token = refresh_token
+    )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -76,47 +77,37 @@ def apiv1_Login():
 @app.route(f'{basePath}/register', methods = ['POST'])
 @auth_limit
 def apiV1Register():
-  if request.json:
-    email = request.json.get('email', None)
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
-  else:
-    email = request.form.get('email', None)
-    username = request.form.get('username', None)
-    password = request.form.get('password', None)
+  req = RegisterRequest(request)
 
   # Ensure email and password exist
-  if not email or not username or not password:
-    return {
-      'message': 'Missing email or username',
-      'status': HTTPStatusCode.BAD_REQUEST
-    }, HTTPStatusCode.BAD_REQUEST
+  if not req.email or not req.username or not req.password:
+    return GenericReply(
+      message = 'Missing email or username',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   # Check if user exists
   existing: Optional[UserModel] = UserModel.query.filter(or_(
-    UserModel.email == email,
-    UserModel.username == username
+    UserModel.email == req.email,
+    UserModel.username == req.username
   )).first()
   if existing:
-    return {
-      'message': 'Email or username already exists',
-      'status': HTTPStatusCode.BAD_REQUEST
-    }, HTTPStatusCode.BAD_REQUEST
+    return GenericReply(
+      message = 'Email or username already exists',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  user: UserModel = UserModel(
-    email = email,
-    username = username,
-    password = hash_password(password).decode('utf-8'),
+  UserModel(
+    email = req.email,
+    username = req.username,
+    password = hash_password(req.password).decode('utf-8'),
     privilege = 'User'
-  )
+  ).save()
 
-  db.session.add(user)
-  db.session.commit()
-
-  return {
-    'message': 'Registered successfully',
-    'status': HTTPStatusCode.OK
-  }, HTTPStatusCode.OK
+  return GenericReply(
+    message = 'Registered successfully',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -127,10 +118,11 @@ def apiV1Register():
 def apiV1Refresh():
   identity = get_current_user()
   access_token = create_access_token(identity = identity, fresh = False)
-  return {
-    'message': 'Refreshed access token',
-    'status': HTTPStatusCode.OK,
-    'data': {
-      'access_token': access_token
-    }
-  }, HTTPStatusCode.OK
+
+  return TokenRefreshReply(
+    message = 'Refreshed access token',
+    status = HTTPStatusCode.OK,
+    data = _TokenRefreshData(
+      access_token = access_token
+    )
+  ).to_dict(), HTTPStatusCode.OK
