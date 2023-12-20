@@ -3,7 +3,6 @@ API Parser
 """
 
 import inspect
-import _typing
 from typing import Any, Union
 
 from requests import Response as ReqResponse
@@ -145,6 +144,10 @@ class _LoginData(_APIBase):
 class _AssignmentCreateData(_APIBase):
   assignment_id: str
 
+@dataclass
+class _ClassroomCreateData(_APIBase):
+  classroom_id: str
+
 
 
 
@@ -159,6 +162,10 @@ class TokenRefreshResponse(_APIResponse):
 class LoginResponse(_APIResponse):
   """API Response for login"""
   data: _LoginData
+
+class ClassroomCreateResponse(_APIResponse):
+  """API Response for creating a classroom"""
+  data: _ClassroomCreateData
 
 
 
@@ -193,6 +200,16 @@ class AssignmentDeleteRequest(_APIRequest):
   """API Request for assignment deletion"""
   assignment_id: str
 
+class ClassroomCreateRequest(_APIRequest):
+  """API Request for classroom creation"""
+  owner_id: str
+  title: str
+  description: str
+
+class ClassroomDeleteRequest(_APIRequest):
+  """API Request for classroom deletion"""
+  classroom_id: str
+
 
 
 
@@ -215,4 +232,9 @@ class LoginReply(_APIReply):
 class AssignmentCreateReply(_APIReply):
   """API Reply for creating a new assignment"""
   data: _AssignmentCreateData
+
+@dataclass
+class ClassroomCreateReply(_APIReply):
+  """API Reply for creating a new classroom"""
+  data: _ClassroomCreateData
 
