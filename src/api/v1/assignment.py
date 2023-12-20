@@ -8,6 +8,8 @@ from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.ext import utc_time
 from src.utils.api import (
+  AssignmentCreateRequest, AssignmentCreateReply, _AssignmentCreateData,
+  AssignmentDeleteRequest,
   GenericReply
 )
 
@@ -33,28 +35,11 @@ auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host
 @auth_limit
 @require_login
 def assignment_create_api(user: UserModel):
-  if request.json:
-    classroom_id = request.json.get('classroom_id', None)
-    title = request.json.get('title', None)
-    description = request.json.get('description', None)
-    due_date = request.json.get('due_date', None)
-    requirement = request.json.get('requirement', None)
-  else:
-    classroom_id = request.form.get('classroom_id', None)
-    title = request.form.get('title', None)
-    description = request.form.get('description', None)
-    due_date = request.form.get('due_date', None) # UNIX Millies / infinity
-    requirement = request.form.get('requirement', None)
-
-
-  # Validate
-  title = str(title)
-  description = str(description)
-  requirement = str(requirement)
+  req = AssignmentCreateRequest(request)
 
 
   # Validate requirement
-  if not re.match(r'^[\d|(\d:\d)]$', requirement):
+  if not re.match(r'^[\d|(\d:\d)]$', req.requirement):
     return GenericReply(
       message = 'Invalid requirement',
       status = HTTPStatusCode.BAD_REQUEST
@@ -62,20 +47,18 @@ def assignment_create_api(user: UserModel):
   
 
   # Validate due_date
-  if (due_date != 'infinity' and not isinstance(due_date, int)) or (utc_time.get().timestamp() >= int(due_date)):
+  if (req.due_date != 'infinity' and not isinstance(req.due_date, int)) or (utc_time.get().timestamp() >= int(req.due_date)):
     return GenericReply(
       message = 'Invalid due date',
       status = HTTPStatusCode.BAD_REQUEST
     ), HTTPStatusCode.BAD_REQUEST
   
-  else:
-    due_date = datetime.fromtimestamp(int(due_date))
-
+  due_date = datetime.fromtimestamp(req.due_date) if isinstance(req.due_date, int) else None
 
 
   # Validate classroom
   classroom = ClassroomModel.query.filter(and_(
-    ClassroomModel.id == classroom_id,
+    ClassroomModel.id == req.classroom_id,
     or_(
       ClassroomModel.owner_id == user.id,
       ClassroomModel.educator_ids.contains(user.id)
@@ -92,20 +75,20 @@ def assignment_create_api(user: UserModel):
 
   newAssignment: AssignmentModel = AssignmentModel(
     classroom = classroom,
-    title = title,
-    description = description,
+    title = req.title,
+    description = req.description,
     due_date = due_date,
-    requirement = requirement
+    requirement = req.requirement
   )
   newAssignment.save()
 
-  return {
-    'message': 'Assignment created successfully',
-    'data': {
-      'assignment_id': newAssignment.id,
-    },
-    'status': HTTPStatusCode.OK
-  }, HTTPStatusCode.OK
+  return AssignmentCreateReply(
+    message = 'Assignment created successfully',
+    status = HTTPStatusCode.OK,
+    data = _AssignmentCreateData(
+      assignment_id = newAssignment.id
+    )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -114,14 +97,10 @@ def assignment_create_api(user: UserModel):
 @auth_limit
 @require_login
 def assignment_delete_api(user: UserModel):
-  if request.json:
-    assignment_id = request.json.get('id', None)
-  else:
-    assignment_id = request.form.get('id', None)
-
+  req = AssignmentDeleteRequest(request)
 
   # Validate
-  assignment = AssignmentModel.query.filter(AssignmentModel.id == assignment_id).first()
+  assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
   if not assignment or not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Could not located assignment',
@@ -137,7 +116,7 @@ def assignment_delete_api(user: UserModel):
   assignment.delete()
 
 
-  return {
-    'message': 'Classroom deleted successfully',
-    'status': HTTPStatusCode.OK
-  }, HTTPStatusCode.OK
+  return GenericReply(
+    message = 'Assignment deleted successfully',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
