@@ -196,6 +196,16 @@ class AssignmentCreateRequest(_APIRequest):
   due_date: Union[int, str]
   requirement: str
 
+class AssignmentEditRequest(_APIRequest):
+  """API Request for assignment editing"""
+  assignment_id: str
+  ignore_none = True
+  title: Union[str, None]
+  description: Union[str, None]
+  due_date: Union[int, str, None]
+  requirement: Union[str, None]
+
+
 class AssignmentDeleteRequest(_APIRequest):
   """API Request for assignment deletion"""
   assignment_id: str

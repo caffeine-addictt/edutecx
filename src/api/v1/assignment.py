@@ -9,6 +9,7 @@ from src.utils.http import HTTPStatusCode
 from src.utils.ext import utc_time
 from src.utils.api import (
   AssignmentCreateRequest, AssignmentCreateReply, _AssignmentCreateData,
+  AssignmentEditRequest,
   AssignmentDeleteRequest,
   GenericReply
 )
@@ -72,7 +73,6 @@ def assignment_create_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
 
-
   newAssignment: AssignmentModel = AssignmentModel(
     classroom = classroom,
     title = req.title,
@@ -89,6 +89,46 @@ def assignment_create_api(user: UserModel):
       assignment_id = newAssignment.id
     )
   ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/edit', method = ['POST'])
+@auth_limit
+@require_login
+def assignment_edit_api(user: UserModel):
+  req = AssignmentEditRequest(request)
+
+  assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
+  if not assignment or not isinstance(assignment, AssignmentModel):
+    return GenericReply(
+      message = 'Unable to locate assignment',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if (user.privilege != 'Admin') and (user.id not in [assignment.classroom.owner_id, *assignment.classroom.educator_ids]):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  # Manually state allow list
+  for key in [
+    'title',
+    'description',
+    'due_date',
+    'requirement'
+  ]:
+    value = req.get(key, None)
+
+    if (value is not None) or (not req.ignore_none):
+      assignment.__setattr__(key, value)
+  
+  return GenericReply(
+    message = 'Successfully edited assignment',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
 
 
 
