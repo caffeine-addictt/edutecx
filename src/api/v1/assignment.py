@@ -8,7 +8,9 @@ from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.ext import utc_time
 from src.utils.api import (
+  AssignmentGetRequest, AssignmentGetReply, _AssignmentGetData,
   AssignmentCreateRequest, AssignmentCreateReply, _AssignmentCreateData,
+  AssignmentEditRequest,
   AssignmentDeleteRequest,
   GenericReply
 )
@@ -31,6 +33,50 @@ auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host
 
 
 
+@app.route(f'{basePath}/get', methods = ['GET'])
+@auth_limit
+@require_login
+def assignment_get_api(user: UserModel):
+  req = AssignmentGetRequest(request)
+
+  assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
+  if not assignment or not isinstance(assignment, AssignmentModel):
+    return GenericReply(
+      message = 'Unable to locate assignment',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if (user.privilege != 'Admin') and (
+    user.id not in [
+      assignment.classroom.owner_id,
+      *assignment.classroom.educator_ids,
+      *assignment.classroom.student_ids
+  ]):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  return AssignmentGetReply(
+    message = 'Successfully fetched assignment information',
+    status = HTTPStatusCode.OK,
+    data = _AssignmentGetData(
+      id = assignment.id,
+      classroom_id = assignment.classroom.id,
+      title = assignment.title,
+      description = assignment.description,
+      due_date = assignment.due_date.timestamp(),
+      textbooks = assignment.textbooks,
+      requirement = assignment.requirement,
+      submissions = [ i.id for i in assignment.submissions ],
+      created_at = assignment.created_at.timestamp(),
+      updated_at = assignment.updated_at.timestamp()
+    )
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
 @app.route(f'{basePath}/create', methods = ['POST'])
 @auth_limit
 @require_login
@@ -39,7 +85,13 @@ def assignment_create_api(user: UserModel):
 
 
   # Validate requirement
-  if not re.match(r'^[\d|(\d:\d)]$', req.requirement):
+  if (not re.match(r'^(\d+(:\d+)?)$', req.requirement)) or (
+    (i := req.requirement.split(':')) and (
+      (len(i) > 2)
+      or
+      ((len(i) == 2) and (i[1] < i[0]))
+    )
+  ):
     return GenericReply(
       message = 'Invalid requirement',
       status = HTTPStatusCode.BAD_REQUEST
@@ -72,7 +124,6 @@ def assignment_create_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
 
-
   newAssignment: AssignmentModel = AssignmentModel(
     classroom = classroom,
     title = req.title,
@@ -89,6 +140,46 @@ def assignment_create_api(user: UserModel):
       assignment_id = newAssignment.id
     )
   ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/edit', methods = ['POST'])
+@auth_limit
+@require_login
+def assignment_edit_api(user: UserModel):
+  req = AssignmentEditRequest(request)
+
+  assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
+  if not assignment or not isinstance(assignment, AssignmentModel):
+    return GenericReply(
+      message = 'Unable to locate assignment',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if (user.privilege != 'Admin') and (user.id not in [assignment.classroom.owner_id, *assignment.classroom.educator_ids]):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  # Manually state allow list
+  for key in [
+    'title',
+    'description',
+    'due_date',
+    'requirement'
+  ]:
+    value = req.get(key, None)
+
+    if (value is not None) or (not req.ignore_none):
+      assignment.__setattr__(key, value)
+  
+  return GenericReply(
+    message = 'Successfully edited assignment',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
 
 
 
