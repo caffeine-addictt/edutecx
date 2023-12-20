@@ -40,7 +40,13 @@ def assignment_create_api(user: UserModel):
 
 
   # Validate requirement
-  if not re.match(r'^[\d|(\d:\d)]$', req.requirement):
+  if (not re.match(r'^(\d+(:\d+)?)$', req.requirement)) or (
+    (i := req.requirement.split(':')) and (
+      (len(i) > 2)
+      or
+      ((len(i) == 2) and (i[1] < i[0]))
+    )
+  ):
     return GenericReply(
       message = 'Invalid requirement',
       status = HTTPStatusCode.BAD_REQUEST
