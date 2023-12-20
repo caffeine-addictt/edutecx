@@ -31,9 +31,7 @@ class SaleInfo:
 
 
 class SaleModel(db.Model):
-  """
-  Sale Model
-  """
+  """Sale Model"""
 
   __tablename__ = 'sale_table'
 
@@ -54,6 +52,15 @@ class SaleModel(db.Model):
     user: 'UserModel',
     textbooks: List['TextbookModel']
   ) -> None:
+    """
+    Sale Model
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+
+    `textbooks: TextbookModel[]`, required
+    """
     self.user_id = user.id
     self.textbook_ids = ','.join([
       f'{i.id}:{i.price}' for i in textbooks

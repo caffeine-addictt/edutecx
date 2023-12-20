@@ -48,9 +48,7 @@ class ClassroomMember:
 
 # TODO: A way to persist textbook edits per user
 class UserModel(db.Model):
-  """
-  User Model
-  """
+  """User Model"""
 
   __tablename__ = 'user_table'
 
@@ -91,6 +89,21 @@ class UserModel(db.Model):
     password: str,
     privilege: PrivilegeTypes
   ) -> None:
+    """
+    User Model
+
+    Parameters
+    ----------
+    `email: str`, required
+
+    `username: str`, required
+
+    `password: str`, required
+      The hashed password
+
+    `privilege: PrivilegeTypes`
+      Look at src.database.PrivilegeTypes
+    """
     self.email     = email
     self.username  = username
     self.privilege = privilege

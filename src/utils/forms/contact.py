@@ -1,16 +1,10 @@
-"""
-Contact Us Form
-"""
-
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, SelectField
 from wtforms.validators import DataRequired, Email, Length
 
 
 class ContactForm(FlaskForm):
-  """
-  Contact Us Form
-  """
+  """Contact Us Form"""
 
   form_type   = SelectField('Form Type', choices = [(1, 'Feedback'), (2, 'Bug Report'), (3, 'User Report')])
   email       = StringField('Email', validators = [DataRequired(), Length(1, 64), Email('Invalid Email', check_deliverability = True)])

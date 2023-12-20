@@ -1,7 +1,3 @@
-"""
-HTTP Utils
-"""
-
 import re
 from typing import Any, Union, TypedDict, Optional
 

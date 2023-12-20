@@ -189,7 +189,16 @@ def deleteImage(filename: str) -> None:
     os.remove(fileLocation)
 
 def cloneTextbook(fileLocation: str, newfilename: str) -> str:
-  """Clone a textbook upload"""
+  """
+  Clone a textbook upload
+
+  Parameters
+  ----------
+  `fileLocation: str`, required
+    The iuri of the file to clone
+
+  `newfilename: str`, required
+  """
   _dirCheck()
 
   if not os.path.exists(fileLocation):
@@ -212,7 +221,20 @@ def cloneTextbook(fileLocation: str, newfilename: str) -> str:
 
 
 def clonePage(fileLocation: str, newfilename: str, pages: int | tuple[int, int]) -> str:
-  """Clone a textbook's pages"""
+  """
+  Clone a textbook's pages
+  
+  Parameters
+  ----------
+  `fileLocation: str`, required
+    The iuri of the file to clone
+  
+  `newfilename: str`, required
+
+  `pages: int | tuple[int, int]`, required
+    The page indexes (Page 1 => index 0)
+    Tuple is the same as pageList[index1 : index2]
+  """
   _dirCheck()
 
 
@@ -256,7 +278,17 @@ def clonePage(fileLocation: str, newfilename: str, pages: int | tuple[int, int])
 
 
 def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
-  """Replace current upload with new file"""
+  """
+  Replace current upload with new file
+  
+  Parameters
+  ----------
+  `fileLocation: str`, required
+    The iuri of the file to replace
+  
+  `file: FileStorage`, required
+    From request.form.files[0]
+  """
   _dirCheck()
 
   if not os.path.exists(fileLocation):
@@ -271,7 +303,14 @@ def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
 
 
 def deleteFile(fileLocation: str) -> None:
-  """Delete upload"""
+  """
+  Delete file
+  
+  Parameters
+  ----------
+  `fileLocation: str`, required
+    The iuri of the file to delete
+  """
   _dirCheck()
 
   if not os.path.exists(fileLocation):

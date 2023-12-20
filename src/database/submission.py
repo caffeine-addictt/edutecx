@@ -26,9 +26,7 @@ if TYPE_CHECKING:
 
 # TODO: Add the edited page of textbookModel (after figuring out how to edit it :'>)
 class SubmissionModel(db.Model):
-  """
-  Submission Model
-  """
+  """Submission Model"""
 
   __tablename__ = 'submission_table'
 
@@ -49,6 +47,15 @@ class SubmissionModel(db.Model):
 
   
   def __init__(self, student: 'UserModel', assignment: 'AssignmentModel') -> None:
+    """
+    Submission Model
+
+    Parameters
+    ----------
+    `student: UserModel`, required
+
+    `assignment: AssignmentModel`, required
+    """
     self.student_id = student.id
     self.assignment_id = assignment.id
 

@@ -41,6 +41,15 @@ class EditableTextbookModel(db.Model):
 
 
   def __init__(self, user: 'UserModel', textbook: 'TextbookModel'):
+    """
+    Editable Textbook Model
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+
+    `textbook: TextbookModel`, required
+    """
     self.user_id = user.id
     self.textbook_id = textbook.id
 

@@ -1,5 +1,5 @@
 """
-
+Submission Snippet Model
 """
 
 from src import db
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 class SubmissionSnippetModel(db.Model):
-  """"""
+  """Submission Snippet Model"""
 
   __tablename__ = 'submission_snippet_table'
 
@@ -50,6 +50,22 @@ class SubmissionSnippetModel(db.Model):
     editabletextbook: 'EditableTextbookModel',
     pages: int | tuple[int, int]
   ) -> None:
+    """
+    Submission Snippet Model
+
+    Parameters
+    ----------
+    `student: UserModel`, required
+
+    `submission: SubmissionModel`, required
+
+    `editabletextbook: EditableTextbookModel`, required
+      The pages to clone from
+
+    `pages: int | tuple[int, int]`, required
+      The page indexes (Page 1 => index 0)
+      Tuple is the same as pageList[index1 : index2]
+    """
     self.student_id = student.id
     self.submission_id = submission.id
     self._handle_upload(editabletextbook, pages)
