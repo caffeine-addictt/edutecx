@@ -12,9 +12,11 @@ from flask import (
 )
 
 
-Routes
+# Routes
 basePath: str = '/api/v1/assignment'
-auth_limit = limiter.sharedlimit('100 per hour', scope = lambda : request.host, key_func = util.get_remote_address)
+auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host, key_func = util.get_remote_address)
+
+
 
 
 @app.route(f'{basePath}/create', methods = ['POST'])
@@ -52,6 +54,8 @@ def assignment_create_api():
     },
     'status': HTTPStatusCode.OK
   }, HTTPStatusCode.OK
+
+
 
 
 @app.route(f'{basePath}/delete', methods = ['POST'])
