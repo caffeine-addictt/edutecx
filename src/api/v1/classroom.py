@@ -7,7 +7,9 @@ from src.database import ClassroomModel, UserModel
 from src.utils.http import HTTPStatusCode
 from src.service.auth_provider import require_login
 from src.utils.api import (
+  ClassroomGetRequest, ClassroomGetReply, _ClassroomGetData,
   ClassroomCreateRequest, ClassroomCreateReply, _ClassroomCreateData,
+  ClassroomEditRequest,
   ClassroomDeleteRequest,
   GenericReply
 )
@@ -27,18 +29,67 @@ auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host
 
 
 
+@app.route(f'{basePath}/get', methods = ['GET'])
+@auth_limit
+@require_login
+def classroom_get_api(user: UserModel):
+  req = ClassroomGetRequest(request)
+
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
+  if not classroom or not isinstance(classroom, ClassroomModel):
+    return GenericReply(
+      message = 'Classroom could not be located',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  if (user.privilege != 'Admin') and (user.id not in [
+    classroom.owner_id,
+    *classroom.educator_ids,
+    *classroom.student_ids
+  ]):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+
+  return ClassroomGetReply(
+    message = 'Successfully fetched classroom information',
+    status = HTTPStatusCode.OK,
+    data = _ClassroomGetData(
+      id = classroom.id,
+      owner_id = classroom.owner_id,
+      educator_ids = classroom.educator_ids.split('|'),
+      student_ids = classroom.student_ids.split('|'),
+      textbook_ids = classroom.textbook_ids.split('|'),
+      title = classroom.title,
+      description = classroom.description,
+      assignments = [ i.id for i in classroom.assignments ],
+      cover_image = classroom.cover_image.uri if classroom.cover_image else None,
+      invite_id = classroom.invite_id,
+      invite_enabled = classroom.invite_enabled,
+      created_at = classroom.created_at.timestamp(),
+      updated_at = classroom.updated_at.timestamp(),
+    )
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
 @app.route(f'{basePath}/create', methods = ['POST'])
 @auth_limit
 @require_login
 def classroom_create_api(user: UserModel):
   req = ClassroomCreateRequest(request)
 
-  # Validate
+
   if (user.id != req.owner_id) and (user.privilege != 'Admin'):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED,
     ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+
 
   owner = user if user.id == req.owner_id else UserModel.query.filter(UserModel.id == req.owner_id).first()
   if not owner or not isinstance(owner, UserModel):
@@ -47,12 +98,14 @@ def classroom_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
+
   newClassroom: ClassroomModel = ClassroomModel(
     owner = owner,
     title = req.title,
     description = req.description
   )
   newClassroom.save()
+
 
   return ClassroomCreateReply(
     message = 'Classroom created successfully',
@@ -65,17 +118,17 @@ def classroom_create_api(user: UserModel):
 
 
 
-@app.route(f'{basePath}/delete', methods = ['POST'])
+@app.route(f'{basePath}/edit', methods = ['POST'])
 @auth_limit
 @require_login
-def classroom_delete_api(user: UserModel):
-  req = ClassroomDeleteRequest(request)
+def classroom_edit_api(user: UserModel):
+  req = ClassroomEditRequest(request)
+
 
   classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
-
   if not classroom or not isinstance(classroom, ClassroomModel):
     return GenericReply(
-      message = 'Invalid classroom',
+      message = 'Classroom could not be located',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
@@ -84,6 +137,51 @@ def classroom_delete_api(user: UserModel):
       message = 'Unauthorized',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  # Allow list
+  for key in [
+    'classroom_id',
+    'title',
+    'description',
+    'cover_image',
+    'invite_enabled'
+  ]:
+    value = req.get(key, None)
+
+    if (value is not None) or (not req.ignore_none):
+      classroom.__setattr__(key, value)
+  
+  
+  classroom.save()
+  return GenericReply(
+    message = 'Successfully edited classroom',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/delete', methods = ['POST'])
+@auth_limit
+@require_login
+def classroom_delete_api(user: UserModel):
+  req = ClassroomDeleteRequest(request)
+
+
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
+  if not classroom or not isinstance(classroom, ClassroomModel):
+    return GenericReply(
+      message = 'Classroom could not be located',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if (user.privilege != 'Admin') and (classroom.owner_id != user.id):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
 
   classroom.delete()
   return GenericReply(
