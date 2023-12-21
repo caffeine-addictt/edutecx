@@ -158,6 +158,23 @@ class _AssignmentCreateData(_APIBase):
   assignment_id: str
 
 @dataclass
+class _ClassroomGetData(_APIBase):
+  id            : str
+  owner_id      : str
+  educator_ids  : list[str]
+  student_ids   : list[str]
+  textbook_ids  : list[str]
+  title         : str
+  description   : str
+  assignments   : list[str]
+  cover_image   : Union[str, None]
+  invite_id     : str
+  invite_enabled: bool
+  created_at    : float
+  updated_at    : float
+
+
+@dataclass
 class _ClassroomCreateData(_APIBase):
   classroom_id: str
 
@@ -227,11 +244,24 @@ class AssignmentDeleteRequest(_APIRequest):
   """API Request for assignment deletion"""
   assignment_id: str
 
+class ClassroomGetRequest(_APIRequest):
+  """API Request for classroom fetching"""
+  classroom_id: str
+
 class ClassroomCreateRequest(_APIRequest):
   """API Request for classroom creation"""
   owner_id: str
   title: str
   description: str
+
+class ClassroomEditRequest(_APIRequest):
+  """API Request for classroom editing"""
+  ignore_none   = True
+  classroom_id  : Union[str, None]
+  title         : Union[str, None]
+  description   : Union[str, None]
+  cover_image   : Union[str, None]
+  invite_enabled: Union[bool, None]
 
 class ClassroomDeleteRequest(_APIRequest):
   """API Request for classroom deletion"""
@@ -264,6 +294,11 @@ class AssignmentGetReply(_APIReply):
 class AssignmentCreateReply(_APIReply):
   """API Reply for creating a new assignment"""
   data: _AssignmentCreateData
+
+@dataclass
+class ClassroomGetReply(_APIReply):
+  """API Reply for fetching classroom"""
+  data: _ClassroomGetData
 
 @dataclass
 class ClassroomCreateReply(_APIReply):
