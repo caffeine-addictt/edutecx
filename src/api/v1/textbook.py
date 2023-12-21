@@ -4,9 +4,18 @@ Textbook Endpoint
 
 from src import db, limiter
 from src.utils.http import HTTPStatusCode
-from src.database import TextbookModel, UserModel
+from src.database import TextbookModel, UserModel, ImageModel
 from src.service.auth_provider import require_login
+from src.utils.ext import utc_time
+from src.utils.api import (
+  TextbookGetRequest, TextbookGetReply, _TextbookGetData,
+  TextbookCreateRequest, TextbookCreateReply, _TextbookCreateData,
+  TextbookEditRequest,
+  TextbookDeleteRequest,
+  GenericReply
+)
 
+from werkzeug.datastructures import FileStorage
 from flask_limiter import util
 from flask import (
   request,
@@ -25,7 +34,34 @@ auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host
 @auth_limit
 @require_login
 def textbooks_get_api(user: UserModel):
-  ...
+  req = TextbookGetRequest(request)
+
+  textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
+  if (not textbook) or (not isinstance(textbook, TextbookModel)):
+    return GenericReply(
+      message = 'Unable to locate textbook',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  return TextbookGetReply(
+    message = 'Successfully fetched textbook',
+    status = HTTPStatusCode.OK,
+    data = _TextbookGetData(
+      id = textbook.id,
+      author_id = textbook.author_id,
+      title = textbook.title,
+      description = textbook.description,
+      categories = textbook.categories.split('|'),
+      price = textbook.price,
+      discount = textbook.discount,
+      uri = textbook.uri,
+      status = textbook.status,
+      cover_image = textbook.cover_image.uri if textbook.cover_image else None,
+      created_at = textbook.created_at.timestamp(),
+      updated_at = textbook.updated_at.timestamp(),
+    )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -34,40 +70,40 @@ def textbooks_get_api(user: UserModel):
 @auth_limit
 @require_login
 def textbook_create_api(user: UserModel):
-  if request.json:
-    author = request.json.get('author', None)
-    file = request.json.get('file', None)
-    title = request.json.get('title', None)
-    description = request.json.get('description', None)
-    price = request.json.get('price', None)
-    discount = request.json.get('discount', None)
+  req = TextbookCreateRequest(request)
 
-  else:
-    author = request.form.get('author', None)
-    file = request.form.get('file', None)
-    title = request.form.get('title', None)
-    description = request.form.get('description', None)
-    price = request.form.get('price', None)
-    discount = request.form.get('discount', None)
-
-  newTextbook: TextbookModel = TextbookModel(
-    author = author,
-    file = file,
-    title = title,
-    description = description,
-    price = price,
-    discount = discount
-  )
-
-  newTextbook.save()
+  author = user if user.id == req.author_id else UserModel.query.filter(UserModel.id == req.author_id).first()
+  if not author or not isinstance(author, UserModel):
+    return GenericReply(
+      message = 'Invalid user',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  return {
-    'message': 'Textbook created successfully',
-    'data': {
-      'textbook_id': newTextbook.id,
-    },
-    'status': HTTPStatusCode.OK
-  }, HTTPStatusCode.OK
+
+  newTextbook = TextbookModel(
+    author = author,
+    file = req.files['upload'],
+    title = req.title,
+    description = req.description,
+    price = req.price,
+    discount = req.discount
+  )
+  newTextbook.save()
+
+  if cover_img := req.files.get('cover_img'):
+    ImageModel(
+      file = cover_img,
+      textbook = newTextbook
+    ).save()
+
+
+  return TextbookCreateReply(
+    message = 'Textbook created successfully',
+    status = HTTPStatusCode.OK,
+    data = _TextbookCreateData(
+      textbook_id = newTextbook.id
+    )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -76,7 +112,60 @@ def textbook_create_api(user: UserModel):
 @auth_limit
 @require_login
 def textbooks_edit_api(user: UserModel):
-  ...
+  req = TextbookEditRequest(request)
+
+  toChange = {key: req.get(key, None) for key in [
+    'title',
+    'description',
+    'categories',
+    'price',
+    'discount'
+  ] if ((req.get(key, None) is not None) or (not req.ignore_none))}
+
+  if (i := req.files.get('cover_img')) or (not req.ignore_none):
+    toChange['cover_img'] = i
+
+  if not any(toChange.values()):
+    return GenericReply(
+      message = 'No change supplied',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
+  if not textbook or not isinstance(textbook, TextbookModel):
+    return GenericReply(
+      message = 'Unable to locate textbook',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if (user.privilege != 'Admin') and (user.id != textbook.author_id):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  
+  for key, value in toChange.items():
+    if isinstance(value, FileStorage):
+      curr: ImageModel | None = textbook.__getattribute__(key)
+      if curr: curr.delete()
+
+      ImageModel(
+        file = value,
+        textbook = textbook
+      ).save()
+    
+    else:
+      textbook.__setattr__(key, value)
+    
+  textbook.updated_at = utc_time.get()
+  textbook.save()
+
+  return GenericReply(
+    message = 'Successfully edited textbook',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -85,17 +174,24 @@ def textbooks_edit_api(user: UserModel):
 @auth_limit
 @require_login
 def textbook_delete_api(user: UserModel):
-  if request.json:
-    textbook_id = request.json.get('id', None)
-  else:
-    textbook_id = request.form.get('id', None)
+  req = TextbookDeleteRequest(request)
 
-  textbook = TextbookModel.query.filter(TextbookModel.id == textbook_id).first_or_404()
+  textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
+  if (not textbook) or (not isinstance(textbook, TextbookModel)):
+    return GenericReply(
+      message = 'Unable to locate textbook',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if (user.privilege != 'Admin') and (user.id != textbook.author_id):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+
 
   textbook.delete()
-
-  return {
-    'message': 'Textbook deleted successfully',
-    'status': HTTPStatusCode.OK
-  }, HTTPStatusCode.OK
-  
+  return GenericReply(
+    message = 'Textbook deleted successfully',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
