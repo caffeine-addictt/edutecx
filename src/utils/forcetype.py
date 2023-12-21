@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Optional, Union, Sequence, get_args, get_origin
+from typing import Any, Optional, Union, Sequence, Mapping, get_args, get_origin
 
 def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
   """
@@ -50,19 +50,38 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
       
   elif origin:
     try:
-      if (not isinstance(x, Sequence)) or isinstance(x, str):
-        return x if isinstance(x, type_) else None
-      
-      validatedX: Sequence = origin()
-      for t in get_args(type_):
-        for y in x:
-          interpretated = recursiveValidation(y, t)
-          if interpretated:
-            validatedX = origin([*validatedX, interpretated])
-          else:
+      if isinstance(x, Sequence) and (not isinstance(x, str)):
+        validatedX: Sequence = origin()
+        for t in get_args(type_):
+          for y in x:
+            interpretated = recursiveValidation(y, t)
+            if interpretated:
+              validatedX = origin([*validatedX, interpretated])
+            else:
+              return None
+        
+        return validatedX
+
+      elif isinstance(x, Mapping):
+        mappedX: Mapping = origin()
+        keyTypes, valueTypes = get_args(type_)
+
+        for k,v in x.items():
+          interpretatedKey = recursiveValidation(k, keyTypes)
+          interpretatedValue = recursiveValidation(v, valueTypes)
+
+          if (not interpretatedKey) or (not interpretatedValue):
             return None
+          else:
+            mappedX = origin(
+              **mappedX,
+              **{interpretatedKey: interpretatedValue},
+            )
+        
+        return mappedX
       
-      return validatedX
+      else:
+        return x if isinstance(x, type_) else None
 
     except Exception:
       return None

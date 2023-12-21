@@ -149,6 +149,19 @@ def assignment_create_api(user: UserModel):
 @require_login
 def assignment_edit_api(user: UserModel):
   req = AssignmentEditRequest(request)
+  toChange = {key: req.get(key, None) for key in [
+    'title',
+    'description',
+    'due_date',
+    'requirement'
+  ] if ((req.get(key, None) is not None) or (not req.ignore_none))}
+
+  if not any(toChange.values()):
+    return GenericReply(
+      message = 'No change supplied',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
 
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
   if not assignment or not isinstance(assignment, AssignmentModel):
@@ -163,19 +176,13 @@ def assignment_edit_api(user: UserModel):
       status = HTTPStatusCode.UNAUTHORIZED
     ).to_dict(), HTTPStatusCode.UNAUTHORIZED
   
-  # Manually state allow list
-  for key in [
-    'title',
-    'description',
-    'due_date',
-    'requirement'
-  ]:
-    value = req.get(key, None)
-
-    if (value is not None) or (not req.ignore_none):
-      assignment.__setattr__(key, value)
   
+  for key, value in toChange.items():
+    assignment.__setattr__(key, value)
+    
+  assignment.updated_at = utc_time.get()
   assignment.save()
+
   return GenericReply(
     message = 'Successfully edited assignment',
     status = HTTPStatusCode.OK

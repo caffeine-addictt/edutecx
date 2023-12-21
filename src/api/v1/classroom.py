@@ -6,6 +6,7 @@ from src import db, limiter
 from src.database import ClassroomModel, UserModel
 from src.utils.http import HTTPStatusCode
 from src.service.auth_provider import require_login
+from src.utils.ext import utc_time
 from src.utils.api import (
   ClassroomGetRequest, ClassroomGetReply, _ClassroomGetData,
   ClassroomCreateRequest, ClassroomCreateReply, _ClassroomCreateData,
@@ -123,6 +124,19 @@ def classroom_create_api(user: UserModel):
 @require_login
 def classroom_edit_api(user: UserModel):
   req = ClassroomEditRequest(request)
+  toChange = {key: req.get(key) for key in [
+    'classroom_id',
+    'title',
+    'description',
+    'cover_image',
+    'invite_enabled'
+  ] if ((req.get(key, None) is not None) or (not req.ignore_none))}
+
+  if not any(toChange.values()):
+    return GenericReply(
+      message = 'No change supplied',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
 
   classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
@@ -139,21 +153,12 @@ def classroom_edit_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
-  # Allow list
-  for key in [
-    'classroom_id',
-    'title',
-    'description',
-    'cover_image',
-    'invite_enabled'
-  ]:
-    value = req.get(key, None)
-
-    if (value is not None) or (not req.ignore_none):
-      classroom.__setattr__(key, value)
-  
-  
+  for key, value in toChange.items():
+    classroom.__setattr__(key, value)
+    
+  classroom.updated_at = utc_time.get()
   classroom.save()
+  
   return GenericReply(
     message = 'Successfully edited classroom',
     status = HTTPStatusCode.OK
