@@ -183,6 +183,20 @@ class _TextbookGetData(_APIBase):
 class _TextbookCreateData(_APIBase):
   textbook_id: str
 
+@dataclass
+class _CommentGetData(_APIBase):
+  author_id: str
+  submission_id: str
+  assignment_id: str
+  classroom_id: str
+  text: str
+  created_at: float
+  updated_at: float
+
+@dataclass
+class _CommentCreateData(_APIBase):
+  comment_id: str
+
 
 
 
@@ -301,6 +315,15 @@ class TextbookDeleteRequest(_APIRequest):
   """API Request for textbook deletion"""
   textbook_id: str
 
+class CommentGetRequest(_APIRequest):
+  """API Request for comment fetching"""
+  comment_id: str
+
+class CommentCreateRequest(_APIRequest):
+  """API Request for comment creation"""
+  submission_id: str
+  text: str
+
 
 
 
@@ -348,3 +371,12 @@ class TextbookCreateReply(_APIReply):
   """API Reply for creating a new textbook"""
   data: _TextbookCreateData
 
+@dataclass
+class CommentGetReply(_APIReply):
+  """API Reply for getting comments"""
+  data: _CommentGetData
+
+@dataclass
+class CommentCreateReply(_APIReply):
+  """API Reply for creating a comment"""
+  data: _CommentCreateData

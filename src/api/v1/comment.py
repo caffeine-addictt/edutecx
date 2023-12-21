@@ -3,8 +3,14 @@ Comment Endpoint
 """
 
 from src import db, limiter
-from src.database import CommentModel, UserModel
+from src.database import CommentModel, UserModel, SubmissionModel
 from src.service.auth_provider import require_login
+from src.utils.http import HTTPStatusCode
+from src.utils.api import (
+  CommentGetRequest, CommentGetReply, _CommentGetData,
+  CommentCreateRequest, CommentCreateReply, _CommentCreateData,
+  GenericReply
+)
 
 from flask_limiter import util
 from flask import (
@@ -24,7 +30,40 @@ auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host
 @auth_limit
 @require_login
 def comment_get_api(user: UserModel):
-  ...
+  req = CommentGetRequest(request)
+
+  comment = CommentModel.query.filter(CommentModel.id == req.comment_id).first()
+  if (not comment) or (not isinstance(comment, CommentModel)):
+    return GenericReply(
+      message = 'Could not locate comment',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  if (user.privilege != 'Admin') and (user.id not in [
+    comment.author_id,
+    comment.submission.assignment.classroom.owner_id,
+    *comment.submission.assignment.classroom.educator_ids
+  ]):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  
+  return CommentGetReply(
+    message = 'Successfully fetched comment',
+    status = HTTPStatusCode.OK,
+    data = _CommentGetData(
+      author_id = comment.author_id,
+      submission_id = comment.submission_id,
+      assignment_id = comment.submission.assignment_id,
+      classroom_id = comment.submission.assignment.classroom_id,
+      text = comment.text,
+      created_at = comment.created_at.timestamp(),
+      updated_at = comment.updated_at.timestamp()
+    )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -33,23 +72,38 @@ def comment_get_api(user: UserModel):
 @auth_limit
 @require_login
 def comment_create_api(user: UserModel):
-  ...
+  req = CommentCreateRequest(request)
+
+  submission = SubmissionModel.query.filter(SubmissionModel.id == req.submission_id).first()
+  if (not submission) or (not isinstance(submission, SubmissionModel)):
+    return GenericReply(
+      message = 'Could not locate submission',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if (user.privilege != 'Admin') and (user.id not in [
+    submission.student_id,
+    submission.assignment.classroom.owner_id,
+    *submission.assignment.classroom.educator_ids
+  ]):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+
+  newComment = CommentModel(
+    author = user,
+    submission = submission,
+    text = req.text
+  )
+  newComment.save()
 
 
-
-
-@app.route(f'{basePath}/edit', methods = ['POST'])
-@auth_limit
-@require_login
-def comment_edit_api(user: UserModel):
-  ...
-
-
-
-
-
-@app.route(f'{basePath}/delete', methods = ['POST'])
-@auth_limit
-@require_login
-def comment_delete_api(user: UserModel):
-  ...
+  return CommentCreateReply(
+    message = 'Successfully created comment',
+    status = HTTPStatusCode.OK,
+    data = _CommentCreateData(
+      comment_id = newComment.id
+    )
+  ).to_dict(), HTTPStatusCode.OK
