@@ -3,8 +3,10 @@ Textbook Endpoint
 """
 
 from src import db, limiter
-from src.database import TextbookModel
 from src.utils.http import HTTPStatusCode
+from src.database import TextbookModel, UserModel
+from src.service.auth_provider import require_login
+
 from flask_limiter import util
 from flask import (
   request,
@@ -16,9 +18,22 @@ from flask import (
 basePath: str = '/api/v1/textbook'
 auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host, key_func = util.get_remote_address)
 
+
+
+
+@app.route(f'{basePath}/get', methods = ['GET'])
+@auth_limit
+@require_login
+def textbooks_get_api(user: UserModel):
+  ...
+
+
+
+
 @app.route(f'{basePath}/create', methods = ['POST'])
 @auth_limit
-def textbook_create_api():
+@require_login
+def textbook_create_api(user: UserModel):
   if request.json:
     author = request.json.get('author', None)
     file = request.json.get('file', None)
@@ -53,10 +68,23 @@ def textbook_create_api():
     },
     'status': HTTPStatusCode.OK
   }, HTTPStatusCode.OK
-  
+
+
+
+
+@app.route(f'{basePath}/edit', methods = ['POST'])
+@auth_limit
+@require_login
+def textbooks_edit_api(user: UserModel):
+  ...
+
+
+
+
 @app.route(f'{basePath}/delete', methods = ['POST'])
 @auth_limit
-def textbook_delete_api():
+@require_login
+def textbook_delete_api(user: UserModel):
   if request.json:
     textbook_id = request.json.get('id', None)
   else:
