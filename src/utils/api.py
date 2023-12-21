@@ -2,8 +2,8 @@
 API Parser
 """
 
-import inspect
-from typing import Any, Union
+from .forcetype import recursiveValidation
+from typing import Any, Union, Optional
 
 from requests import Response as ReqResponse
 from flask import Request, Response as FlaskResponse
@@ -65,29 +65,12 @@ class _APIParser(_APIBase):
       else:
         variable = req.get(variableName, None)
 
-      self._interpret(variable, variableName, variableType)
-
-
-  def _interpret(self, var: Any, varName: str, varType: Any) -> None:
-    isClass = inspect.isclass(varType)
-    unionArgs: Union[tuple[type], None] = (isClass and (varType.__dict__.get('__args__', None))) or None
-
-    for type_ in unionArgs or [varType if isClass else type(varType)]:
-      try:
-        interpreted = type_(var)
-
-        if isinstance(interpreted, type_):
-          self.__dict__[varName] = interpreted
-          return
-        
-      except Exception: pass
-
-    # Handle case with default argument
-    if not isClass:
-      self.__dict__[varName] = varType
-      return
-    else:
-      raise BadRequest('Invalid variable')
+      
+      interpreted = recursiveValidation(variable, variableType)
+      if (interpreted is not None) or self.get('ignore_none'):
+        self.__dict__[variableName] = interpreted
+      else:
+        raise BadRequest('%s is not valid' % variableName)
 
 
 
