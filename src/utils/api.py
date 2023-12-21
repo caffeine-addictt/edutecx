@@ -3,11 +3,12 @@ API Parser
 """
 
 from .forcetype import recursiveValidation
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, Mapping
 
 from requests import Response as ReqResponse
 from flask import Request, Response as FlaskResponse
 from werkzeug.exceptions import BadRequest
+from werkzeug.datastructures import FileStorage
 
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -106,6 +107,9 @@ class _APIReply(_APIBase):
   message: str
   status: int
 
+class _Files(dict[str, FileStorage]):
+  def __init__(self, requestFiles: Mapping[str, FileStorage]):
+    super().__init__(requestFiles)
 
 
 
@@ -156,10 +160,29 @@ class _ClassroomGetData(_APIBase):
   created_at    : float
   updated_at    : float
 
-
 @dataclass
 class _ClassroomCreateData(_APIBase):
   classroom_id: str
+
+@dataclass
+class _TextbookGetData(_APIBase):
+  id         : str
+  author_id  : str
+  title      : str
+  description: str
+  categories : list[str]
+  price      : float
+  discount   : float
+  uri        : str
+  status     : str
+  cover_image: Optional[str]
+  created_at : float
+  updated_at : float
+
+@dataclass
+class _TextbookCreateData(_APIBase):
+  textbook_id: str
+
 
 
 
@@ -250,6 +273,33 @@ class ClassroomDeleteRequest(_APIRequest):
   """API Request for classroom deletion"""
   classroom_id: str
 
+class TextbookGetRequest(_APIRequest):
+  """API Request for textbook fetching"""
+  textbook_id: str
+
+class TextbookCreateRequest(_APIRequest):
+  """API Request for textbook creation"""
+  author_id  : str
+  files      : _Files
+  title      : str
+  description: str
+  price      : float
+  discount   : float
+
+class TextbookEditRequest(_APIRequest):
+  """API Request for textbook editing"""
+  ignore_none = True
+  textbook_id: str
+  files      : _Files
+  title      : Optional[str]
+  description: Optional[str]
+  categories : Optional[list[str]]
+  price      : Optional[float]
+  discount   : Optional[float]
+
+class TextbookDeleteRequest(_APIRequest):
+  """API Request for textbook deletion"""
+  textbook_id: str
 
 
 
@@ -287,4 +337,14 @@ class ClassroomGetReply(_APIReply):
 class ClassroomCreateReply(_APIReply):
   """API Reply for creating a new classroom"""
   data: _ClassroomCreateData
+
+@dataclass
+class TextbookGetReply(_APIReply):
+  """API Reply for fetching textbook"""
+  data: _TextbookGetData
+
+@dataclass
+class TextbookCreateReply(_APIReply):
+  """API Reply for creating a new textbook"""
+  data: _TextbookCreateData
 
