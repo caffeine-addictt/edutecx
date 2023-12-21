@@ -175,6 +175,7 @@ def assignment_edit_api(user: UserModel):
     if (value is not None) or (not req.ignore_none):
       assignment.__setattr__(key, value)
   
+  assignment.save()
   return GenericReply(
     message = 'Successfully edited assignment',
     status = HTTPStatusCode.OK
