@@ -140,17 +140,6 @@ def image_create_api(user: UserModel):
 
 
 
-@app.route(f'{basePath}/edit', methods = ['POST'])
-@auth_limit
-@require_login
-def image_edit_api(user: UserModel):
-  ...
-  
-
-
-
-
-
 @app.route(f'{basePath}/delete', methods = ['POST'])
 @auth_limit
 @require_login
