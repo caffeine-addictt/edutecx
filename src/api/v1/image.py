@@ -4,7 +4,7 @@ Image Endpoint
 
 from src import limiter
 from src.utils.http import HTTPStatusCode
-from src.database import ImageModel, UserModel
+from src.database import ImageModel, UserModel, ClassroomModel, TextbookModel
 from src.service.auth_provider import require_login
 from src.utils.api import (
   ImageGetRequest, ImageGetReply, _ImageGetData,
@@ -13,6 +13,7 @@ from src.utils.api import (
   GenericReply
 )
 
+from typing import Mapping, Literal, Union
 from flask_limiter import util
 from flask import (
   request,
@@ -40,6 +41,20 @@ def image_get_api(user: UserModel):
       message = 'Unable to locate image',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  # Validate
+  if (
+    image.classroom and (user.privilege != 'Admin') and (user.id not in [
+      image.classroom.owner_id,
+      *image.classroom.student_ids,
+      *image.classroom.educator_ids
+    ])
+  ):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
 
   
   return ImageGetReply(
@@ -60,25 +75,59 @@ def image_get_api(user: UserModel):
 def image_create_api(user: UserModel):
   req = ImageCreateRequest(request)
 
-  # TODO: Make sure at least one id is not none 
-
-  author = user if user.id == req.author_id else UserModel.query.filter(UserModel.id == req.author_id).first()
-  if not author or not isinstance(author, UserModel):
+  # Validate
+  if len(list(filter(None, [req.classroom_id, req.textbook_id, req.user_id]))) != 1:
     return GenericReply(
-      message = 'Invalid user',
+      message = 'Invalid identifier',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(),  HTTPStatusCode.BAD_REQUEST
+  
+  upload = req.files.get('upload')
+  if not upload:
+    return GenericReply(
+      message = 'No file supplied',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
 
+  if req.user_id:
+    author = user if user.id == req.user_id else UserModel.query.filter(UserModel.id == req.user_id).first()
+    if not author or not isinstance(author, UserModel):
+      return GenericReply(
+        message = 'Invalid user',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+    
+    newImage = ImageModel(upload, user = user)
+  
+  elif req.classroom_id:
+    classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
+    if not isinstance(classroom, ClassroomModel):
+      return GenericReply(
+        message = 'Invalid classroom',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+    
+    newImage = ImageModel(upload, classroom = classroom)
+  
+  elif req.textbook_id:
+    textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
+    if not isinstance(textbook, TextbookModel):
+      return GenericReply(
+        message = 'Invalid textbook',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+    
+    newImage = ImageModel(upload, textbook = textbook)
+  
+  else:
+    return GenericReply(
+      message = 'No parent supplied',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
 
-  newImage = ImageModel(
-    file = req.files.get('upload')
-    user = user
-    textbook = textbook
-    classroom = classroom
-  )
   newImage.save()
-
-
   return ImageCreateReply(
     message = 'Image created successfully',
     status = HTTPStatusCode.OK,
@@ -95,6 +144,7 @@ def image_create_api(user: UserModel):
 @auth_limit
 @require_login
 def image_edit_api(user: UserModel):
+  ...
   
 
 
@@ -113,8 +163,20 @@ def image_delete_api(user: UserModel):
       message = 'Unable to locate image',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
 
-# TODO Authorisation to delete image
+  if (
+    (image.user and (user.privilege != 'Admin') and (user.id != image.user.id))
+    or
+    (image.classroom and (user.privilege != 'Admin') and (user.id != image.classroom.owner_id))
+    or
+    (image.textbook and (user.privilege != 'Admin') and (user.id != image.textbook.author_id))
+  ):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
   
   image.delete()
   return ImageDeleteReply(
