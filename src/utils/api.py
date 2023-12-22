@@ -608,3 +608,34 @@ class EditableTextbookCreateReply(_APIReply):
 class EditableTextbookCreateResponse(_APIResponse):
   """API Response for creating a new editable textbook"""
   data: _EditableTextbookCreateData
+
+
+
+
+
+
+
+
+# EditableTextbook EDIT
+class EditableTextbookEditRequest(_APIRequest):
+  """API Request for editing editable textbook"""
+  editabletextbook_id: str
+  files: _Files
+
+EditableTextbookEditReply = GenericReply
+EditableTextbookEditResponse = GenericResponse
+
+
+
+
+
+
+
+
+# EditableTextbook DELETE
+class EditableTextbookDeleteRequest(_APIRequest):
+  """API Request for deleting editable textbook"""
+  editabletextbook_id: str
+
+EditableTextbookDeleteReply = GenericReply
+EditableTextbookDeleteResponse = GenericResponse

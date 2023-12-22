@@ -9,6 +9,8 @@ from src.utils.http import HTTPStatusCode
 from src.utils.api import (
   EditableTextbookGetRequest, EditableTextbookGetReply, _EditableTextbookGetData,
   EditableTextbookCreateRequest, EditableTextbookCreateReply, _EditableTextbookCreateData,
+  EditableTextbookEditRequest, EditableTextbookEditReply,
+  EditableTextbookDeleteRequest, EditableTextbookDeleteReply,
   GenericReply
 )
 
@@ -101,8 +103,35 @@ def editabletextbook_create_api(user: UserModel):
 @auth_limit
 @require_login
 def editabletextbook_edit_api(user: UserModel):
-  ...
+  req = EditableTextbookEditRequest(request)
+  upload = req.files.get('upload')
 
+  if not upload:
+    return GenericReply(
+      message = 'No change supplied',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  
+  etextbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == req.editabletextbook_id).first()
+  if (not etextbook) and (not isinstance(etextbook, EditableTextbookModel)):
+    return GenericReply(
+      message = 'Unable to locate editable textbook',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if (user.privilege != 'Admin') and (user.id != etextbook.user_id):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+
+  etextbook.update(upload)
+  return EditableTextbookEditReply(
+    message = 'Successfully edited editable textbook',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -111,4 +140,23 @@ def editabletextbook_edit_api(user: UserModel):
 @auth_limit
 @require_login
 def editabletextbook_delete_api(user: UserModel):
-  ...
+  req = EditableTextbookDeleteRequest(request)
+
+  etextbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == req.editabletextbook_id).first()
+  if (not etextbook) and (not isinstance(etextbook, EditableTextbookModel)):
+    return GenericReply(
+      message = 'Unable to locate editable textbook',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if (user.privilege != 'Admin') and (user.id != etextbook.user_id):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  etextbook.delete()
+  return EditableTextbookDeleteReply(
+    message = 'Successfully deleted editable textbook',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
