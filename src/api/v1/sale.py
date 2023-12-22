@@ -8,8 +8,6 @@ from src.database import SaleModel, UserModel
 from src.service.auth_provider import require_login
 from src.utils.api import (
   SaleGetRequest, SaleGetReply, _SaleGetData,
-  ImageCreateRequest, ImageCreateReply, _ImageCreateData,
-  ImageDeleteRequest, ImageDeleteReply,
   GenericReply
 )
 from flask_limiter import util
