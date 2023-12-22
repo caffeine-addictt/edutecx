@@ -639,3 +639,101 @@ class EditableTextbookDeleteRequest(_APIRequest):
 
 EditableTextbookDeleteReply = GenericReply
 EditableTextbookDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Image GET
+@dataclass
+class _ImageGetData(_APIBase):
+  uri: str
+  image_id: str
+
+class ImageGetRequest(_APIRequest):
+  """API Request for image fetching"""
+  files: _Files
+  image_id: str
+
+@dataclass
+class ImageGetReply(_APIReply):
+  """API Reply for fetching image"""
+  data: _ImageGetData
+
+class ImageGetResponse(_APIResponse):
+  """API Response for fetching image"""
+  data: _ImageGetData
+
+
+
+
+
+
+
+
+# Image CREATE
+@dataclass
+class _ImageCreateData(_APIBase):
+  image_id: str
+  uri: str
+
+class ImageCreateRequest(_APIRequest):
+  """API Request for image creation"""
+  files       : _Files
+  user_id     : Optional[str]
+  textbook_id : Optional[str]
+  classroom_id: Optional[str]
+
+@dataclass
+class ImageCreateReply(_APIReply):
+  """API Reply for creating a new image"""
+  data: _ImageCreateData
+
+class ImageCreateResponse(_APIResponse):
+  """API Response for creating a new image"""
+  data: _ImageCreateData
+
+
+
+
+
+
+
+
+# Image DELETE
+class ImageDeleteRequest(_APIRequest):
+  """API Request for image deletion"""
+  image_id: str
+
+ImageDeleteReply = GenericReply
+ImageDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Image GET
+@dataclass
+class _SaleGetData(_APIBase):
+  sale_id: str
+  user_id: str
+  textbook_ids: list[str]
+
+class SaleGetRequest(_APIRequest):
+  """API Request for sale fetching"""
+  sale_id: str
+
+@dataclass
+class SaleGetReply(_APIReply):
+  """API Reply for sale fetching image"""
+  data: _SaleGetData
+
+class SaleaGetResponse(_APIResponse):
+  """API Response for sale fetching image"""
+  data: _SaleGetData
