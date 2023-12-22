@@ -808,3 +808,48 @@ class TokenDeleteRequest(_APIRequest):
 
 TokenDeleteReply = GenericReply
 TokenDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# User GET
+@dataclass
+class _UserGetData(_APIBase):
+  user_id      : str
+  username     : str
+  privilege    : str
+  profile_image: Optional[str]
+  created_at   : float
+  last_login   : float
+
+class UserGetRequest(_APIRequest):
+  """API Request for fetching user"""
+  user_id: str
+
+@dataclass
+class UserGetReply(_APIReply):
+  """API Reply for fetching user"""
+  data: _UserGetData
+
+class UserGetResponse(_APIResponse):
+  """API Response for fetching user"""
+  data: _UserGetData
+
+
+
+
+
+
+
+
+# User DELETE
+class UserDeleteRequest(_APIRequest):
+  """API Request for deleting user"""
+  user_id: str
+
+UserDeleteReply = GenericReply
+UserDeleteResponse = GenericResponse
