@@ -553,3 +553,58 @@ class CommentCreateReply(_APIReply):
 class CommentCreateResponse(_APIResponse):
   """API Response for creating a comment"""
   data: _CommentCreateData
+
+
+
+
+
+
+
+
+# EditableTextbook GET
+@dataclass
+class _EditableTextbookGetData(_APIBase):
+  editabletextbook_id: str
+  user_id            : str
+  textbook_id        : str
+  uri                : str
+  status             : str
+  created_at         : float
+
+class EditableTextbookGetRequest(_APIRequest):
+  """API Request for fetching editable textbook"""
+  editabletextbook_id: str
+
+@dataclass
+class EditableTextbookGetReply(_APIReply):
+  """API Reply for fetching editable textbook"""
+  data: _EditableTextbookGetData
+
+class EditableTextbookGetResponse(_APIResponse):
+  """API Response for fetching editable textbook"""
+  data: _EditableTextbookGetData
+
+
+
+
+
+
+
+
+# EditableTextbook CREATE
+@dataclass
+class _EditableTextbookCreateData(_APIBase):
+  editabletextbook_id: str
+
+class EditableTextbookCreateRequest(_APIRequest):
+  """API Request for creating a new editable textbook"""
+  textbook_id: str
+
+@dataclass
+class EditableTextbookCreateReply(_APIReply):
+  """API Reply for creating a new editable textbook"""
+  data: _EditableTextbookCreateData
+
+class EditableTextbookCreateResponse(_APIResponse):
+  """API Response for creating a new editable textbook"""
+  data: _EditableTextbookCreateData
