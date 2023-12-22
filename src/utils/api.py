@@ -718,7 +718,7 @@ ImageDeleteResponse = GenericResponse
 
 
 
-# Image GET
+# Sale GET
 @dataclass
 class _SaleGetData(_APIBase):
   sale_id: str
@@ -737,6 +737,37 @@ class SaleGetReply(_APIReply):
 class SaleaGetResponse(_APIResponse):
   """API Response for sale fetching image"""
   data: _SaleGetData
+
+
+
+
+
+
+
+
+# Submission GET
+@dataclass
+class _SubmissionGetData(_APIBase):
+  submission_id: str
+  student_id   : str
+  assignment_id: str
+  comments     : list[str]
+  snippet      : str
+  created_at   : float
+  updated_at   : float
+
+class SubmissionGetRequest(_APIRequest):
+  """API Request for fetching submissions"""
+  submission_id: str
+
+@dataclass
+class SubmissionGetReply(_APIReply):
+  """API Reply for fetching submissions"""
+  data: _SubmissionGetData
+
+class SubmissionGetResponse(_APIResponse):
+  """API Response for fetching submissions"""
+  data: _SubmissionGetData
 
 
 
