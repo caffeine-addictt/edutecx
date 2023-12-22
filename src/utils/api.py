@@ -639,3 +639,74 @@ class EditableTextbookDeleteRequest(_APIRequest):
 
 EditableTextbookDeleteReply = GenericReply
 EditableTextbookDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Token GET
+@dataclass
+class _TokenGetData(_APIBase):
+  token     : str
+  token_type: str
+  expires_at: float
+  created_at: float
+
+class TokenGetRequest(_APIRequest):
+  """API Request for fetching token"""
+  token: str
+
+@dataclass
+class TokenGetReply(_APIReply):
+  """API Reply for fetching token"""
+  data: _TokenGetData
+
+class TokenGetResponse(_APIResponse):
+  """API Response for fetching token"""
+  data: _TokenGetData
+
+
+
+
+
+
+
+
+# Token CREATE
+@dataclass
+class _TokenCreateData(_APIBase):
+  token   : str
+  token_id: str
+
+class TokenCreateRequest(_APIRequest):
+  """API Request for creating token"""
+  token_type: str
+  user_id: str
+
+@dataclass
+class TokenCreateReply(_APIReply):
+  """API Reply for creating token"""
+  data: _TokenCreateData
+
+class TokenCreateResponse(_APIResponse):
+  """API Response for creating token"""
+  data: _TokenCreateData
+
+
+
+
+
+
+
+
+# Token DELETE
+class TokenDeleteRequest(_APIRequest):
+  """API Request for deleting token"""
+  token_id: Optional[str]
+  token   : Optional[str]
+
+TokenDeleteReply = GenericReply
+TokenDeleteResponse = GenericResponse
