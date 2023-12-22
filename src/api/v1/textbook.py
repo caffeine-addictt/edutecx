@@ -10,8 +10,8 @@ from src.utils.ext import utc_time
 from src.utils.api import (
   TextbookGetRequest, TextbookGetReply, _TextbookGetData,
   TextbookCreateRequest, TextbookCreateReply, _TextbookCreateData,
-  TextbookEditRequest,
-  TextbookDeleteRequest,
+  TextbookEditRequest, TextbookEditReply,
+  TextbookDeleteRequest, TextbookDeleteReply,
   GenericReply
 )
 
@@ -162,7 +162,7 @@ def textbooks_edit_api(user: UserModel):
   textbook.updated_at = utc_time.get()
   textbook.save()
 
-  return GenericReply(
+  return TextbookEditReply(
     message = 'Successfully edited textbook',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
@@ -191,7 +191,7 @@ def textbook_delete_api(user: UserModel):
 
 
   textbook.delete()
-  return GenericReply(
+  return TextbookDeleteReply(
     message = 'Textbook deleted successfully',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK

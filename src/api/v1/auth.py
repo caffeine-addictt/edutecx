@@ -12,8 +12,7 @@ from sqlalchemy import or_
 from src.utils.api import (
   TokenRefreshReply, _TokenRefreshData,
   LoginRequest, LoginReply, _LoginData,
-  RegisterRequest,
-  
+  RegisterRequest, RegisterReply,
   GenericReply
 )
 
@@ -104,7 +103,7 @@ def apiV1Register():
     privilege = 'User'
   ).save()
 
-  return GenericReply(
+  return RegisterReply(
     message = 'Registered successfully',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK

@@ -10,8 +10,8 @@ from src.utils.ext import utc_time
 from src.utils.api import (
   ClassroomGetRequest, ClassroomGetReply, _ClassroomGetData,
   ClassroomCreateRequest, ClassroomCreateReply, _ClassroomCreateData,
-  ClassroomEditRequest,
-  ClassroomDeleteRequest,
+  ClassroomEditRequest, ClassroomEditReply,
+  ClassroomDeleteRequest, ClassroomDeleteReply,
   GenericReply
 )
 
@@ -159,7 +159,7 @@ def classroom_edit_api(user: UserModel):
   classroom.updated_at = utc_time.get()
   classroom.save()
   
-  return GenericReply(
+  return ClassroomEditReply(
     message = 'Successfully edited classroom',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
@@ -189,7 +189,7 @@ def classroom_delete_api(user: UserModel):
 
 
   classroom.delete()
-  return GenericReply(
+  return ClassroomDeleteReply(
     message = 'Classroom deleted successfully',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
