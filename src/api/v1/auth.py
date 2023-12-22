@@ -33,6 +33,8 @@ basePath: str = '/api/v1'
 auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host, key_func = util.get_remote_address)
 
 
+
+
 @app.route(f'{basePath}/login', methods = ['POST'])
 @auth_limit
 def apiv1_Login():
@@ -40,10 +42,10 @@ def apiv1_Login():
 
   # Ensure email and password exist
   if not req.email or not req.password:
-    return {
-      'message': 'Missing email or password',
-      'status': HTTPStatusCode.BAD_REQUEST
-    }, HTTPStatusCode.BAD_REQUEST
+    return GenericReply(
+      message = 'Missing email or password',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   # Ensure user exists
   user: UserModel | None = UserModel.query.filter(UserModel.email == req.email).first()
