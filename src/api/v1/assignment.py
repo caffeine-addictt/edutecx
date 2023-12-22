@@ -10,8 +10,8 @@ from src.utils.ext import utc_time
 from src.utils.api import (
   AssignmentGetRequest, AssignmentGetReply, _AssignmentGetData,
   AssignmentCreateRequest, AssignmentCreateReply, _AssignmentCreateData,
-  AssignmentEditRequest,
-  AssignmentDeleteRequest,
+  AssignmentEditRequest, AssignmentEditReply,
+  AssignmentDeleteRequest, AssignmentDeleteReply,
   GenericReply
 )
 
@@ -183,7 +183,7 @@ def assignment_edit_api(user: UserModel):
   assignment.updated_at = utc_time.get()
   assignment.save()
 
-  return GenericReply(
+  return AssignmentEditReply(
     message = 'Successfully edited assignment',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
@@ -215,7 +215,7 @@ def assignment_delete_api(user: UserModel):
   assignment.delete()
 
 
-  return GenericReply(
+  return AssignmentDeleteReply(
     message = 'Assignment deleted successfully',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
