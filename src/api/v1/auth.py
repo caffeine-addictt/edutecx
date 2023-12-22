@@ -2,7 +2,7 @@
 RESTful auth api for session persistence with jwt w/ rate limiting
 """
 
-from src import db, limiter
+from src import limiter
 from flask_limiter import util
 from src.utils.http import HTTPStatusCode
 from src.utils.passwords import hash_password

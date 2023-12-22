@@ -2,14 +2,13 @@
 Sale Endpoint
 """
 
-from src import db, limiter
+from src import limiter
 from src.utils.http import HTTPStatusCode
 from src.database import SaleModel, UserModel
 from src.service.auth_provider import require_login
 from src.utils.api import (
   SaleGetRequest, SaleGetReply, _SaleGetData,
   ImageCreateRequest, ImageCreateReply, _ImageCreateData,
-  # TextbookEditRequest, TextbookEditReply,
   ImageDeleteRequest, ImageDeleteReply,
   GenericReply
 )

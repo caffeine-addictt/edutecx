@@ -2,7 +2,7 @@
 Textbook Endpoint
 """
 
-from src import db, limiter
+from src import limiter
 from src.utils.http import HTTPStatusCode
 from src.database import TextbookModel, UserModel, ImageModel
 from src.service.auth_provider import require_login

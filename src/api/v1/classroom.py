@@ -2,7 +2,7 @@
 Classroom Endpoint
 """
 
-from src import db, limiter
+from src import limiter
 from src.database import ClassroomModel, UserModel
 from src.utils.http import HTTPStatusCode
 from src.service.auth_provider import require_login
