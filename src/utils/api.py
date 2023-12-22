@@ -110,6 +110,7 @@ class _APIReply(_APIBase):
 class _Files(dict[str, FileStorage]):
   def __init__(self, requestFiles: Mapping[str, FileStorage]):
     super().__init__(requestFiles)
+  
 
 
 
@@ -117,16 +118,89 @@ class _Files(dict[str, FileStorage]):
 
 
 
-# Data
+# Generic
+class GenericResponse(_APIResponse):
+  """Generic Response"""
+
+class GenericReply(_APIReply):
+  """Generic Reply"""
+
+
+
+
+
+
+
+
+# Register
+class RegisterRequest(_APIRequest):
+  """API Request for register"""
+  email: str
+  username: str
+  password: str
+
+RegisterReply = GenericReply
+RegisterResponse = GenericResponse
+
+
+
+
+
+
+
+
+
+
+# Token
 @dataclass
 class _TokenRefreshData(_APIBase):
   access_token: str
 
 @dataclass
+class TokenRefreshReply(_APIReply):
+  """API Reply for refreshing JWT access token"""
+  data: _TokenRefreshData
+
+class TokenRefreshResponse(_APIResponse):
+  """API Response for refreshing JWT access token"""
+  data: _TokenRefreshData
+
+
+
+
+
+
+
+
+# Login
+@dataclass
 class _LoginData(_APIBase):
   access_token: str
   refresh_token: str
 
+class LoginRequest(_APIRequest):
+  """API Request for login"""
+  email: str
+  password: str
+  remember_me: bool
+
+class LoginResponse(_APIResponse):
+  """API Response for login"""
+  data: _LoginData
+
+@dataclass
+class LoginReply(_APIReply):
+  """API Reply for login"""
+  data: _LoginData
+
+
+
+
+
+
+
+
+# Assignment GET
 @dataclass
 class _AssignmentGetData(_APIBase):
   id          : str
@@ -140,10 +214,95 @@ class _AssignmentGetData(_APIBase):
   created_at  : float
   updated_at  : float
 
+class AssignmentGetRequest(_APIRequest):
+  """API Request for assignment fetching"""
+  assignment_id: str
+
+@dataclass
+class AssignmentGetReply(_APIReply):
+  """API Reply for fetching assignment"""
+  data: _AssignmentGetData
+
+class AssignmentGetResponse(_APIResponse):
+  """API Response for fetching assignment"""
+  data: _AssignmentGetData
+
+
+
+
+
+
+
+
+# Assignment CREATE
 @dataclass
 class _AssignmentCreateData(_APIBase):
   assignment_id: str
 
+class AssignmentCreateRequest(_APIRequest):
+  """
+  API Request for assignment creation
+  
+  due_date: int (UNIX Millies) | str ('infinity')
+  """
+  classroom_id: str
+  title: str
+  description: str
+  due_date: Union[float, str]
+  requirement: str
+
+@dataclass
+class AssignmentCreateReply(_APIReply):
+  """API Reply for creating a new assignment"""
+  data: _AssignmentCreateData
+
+class AssignmentCreateResponse(_APIResponse):
+  """API Response for creating a new assignment"""
+  data: _AssignmentCreateData
+
+
+
+
+
+
+
+
+# Assignment EDIT
+class AssignmentEditRequest(_APIRequest):
+  """API Request for assignment editing"""
+  assignment_id: str
+  ignore_none = True
+  title: Union[str, None]
+  description: Union[str, None]
+  due_date: Union[float, str, None]
+  requirement: Union[str, None]
+
+AssignmentEditReply = GenericReply
+AssignmentEditResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Assignment DELETE
+class AssignmentDeleteRequest(_APIRequest):
+  """API Request for assignment deletion"""
+  assignment_id: str
+
+AssignmentDeleteReply = GenericReply
+AssignmentDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Classroom GET
 @dataclass
 class _ClassroomGetData(_APIBase):
   id            : str
@@ -160,10 +319,89 @@ class _ClassroomGetData(_APIBase):
   created_at    : float
   updated_at    : float
 
+class ClassroomGetRequest(_APIRequest):
+  """API Request for classroom fetching"""
+  classroom_id: str
+
+@dataclass
+class ClassroomGetReply(_APIReply):
+  """API Reply for fetching classroom"""
+  data: _ClassroomGetData
+
+class ClassroomGetResponse(_APIResponse):
+  """API Response for fetching classroom"""
+  data: _ClassroomGetData
+
+
+
+
+
+
+
+
+# Classroom CREATE
 @dataclass
 class _ClassroomCreateData(_APIBase):
   classroom_id: str
 
+class ClassroomCreateRequest(_APIRequest):
+  """API Request for classroom creation"""
+  owner_id: str
+  title: str
+  description: str
+
+@dataclass
+class ClassroomCreateReply(_APIReply):
+  """API Reply for creating a new classroom"""
+  data: _ClassroomCreateData
+
+class ClassroomCreateResponse(_APIResponse):
+  """API Response for creating a classroom"""
+  data: _ClassroomCreateData
+
+
+
+
+
+
+
+
+# Classroom EDIT
+class ClassroomEditRequest(_APIRequest):
+  """API Request for classroom editing"""
+  ignore_none   = True
+  classroom_id  : Optional[str]
+  title         : Optional[str]
+  description   : Optional[str]
+  cover_image   : Optional[str]
+  invite_enabled: Optional[bool]
+
+ClassroomEditReply = GenericReply
+ClassroomEditResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Classroom DELETE
+class ClassroomDeleteRequest(_APIRequest):
+  """API Request for classroom deletion"""
+  classroom_id: str
+
+ClassroomDeleteReply = GenericReply
+ClassroomDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Textbook GET
 @dataclass
 class _TextbookGetData(_APIBase):
   id         : str
@@ -179,116 +417,29 @@ class _TextbookGetData(_APIBase):
   created_at : float
   updated_at : float
 
-@dataclass
-class _TextbookCreateData(_APIBase):
+class TextbookGetRequest(_APIRequest):
+  """API Request for textbook fetching"""
   textbook_id: str
 
 @dataclass
-class _CommentGetData(_APIBase):
-  author_id: str
-  submission_id: str
-  assignment_id: str
-  classroom_id: str
-  text: str
-  created_at: float
-  updated_at: float
+class TextbookGetReply(_APIReply):
+  """API Reply for fetching textbook"""
+  data: _TextbookGetData
 
+class TextbookGetResponse(_APIResponse):
+  """API Response for fetching textbook"""
+  data: _TextbookGetData
+
+
+
+
+
+
+
+
+# Textbook CREATE
 @dataclass
-class _CommentCreateData(_APIBase):
-  comment_id: str
-
-
-
-
-
-# API Responses
-class GenericResponse(_APIResponse):
-  """Generic Response"""
-  
-class TokenRefreshResponse(_APIResponse):
-  """API Response for refreshing JWT access token"""
-  data: _TokenRefreshData
-
-class LoginResponse(_APIResponse):
-  """API Response for login"""
-  data: _LoginData
-
-class ClassroomCreateResponse(_APIResponse):
-  """API Response for creating a classroom"""
-  data: _ClassroomCreateData
-
-
-
-
-
-# API Requests
-class LoginRequest(_APIRequest):
-  """API Request for login"""
-  email: str
-  password: str
-  remember_me: bool
-
-class RegisterRequest(_APIRequest):
-  """API Request for register"""
-  email: str
-  username: str
-  password: str
-
-class AssignmentGetRequest(_APIRequest):
-  """API Request for assignment fetching"""
-  assignment_id: str
-
-class AssignmentCreateRequest(_APIRequest):
-  """
-  API Request for assignment creation
-  
-  due_date: int (UNIX Millies) | str ('infinity')
-  """
-  classroom_id: str
-  title: str
-  description: str
-  due_date: Union[float, str]
-  requirement: str
-
-class AssignmentEditRequest(_APIRequest):
-  """API Request for assignment editing"""
-  assignment_id: str
-  ignore_none = True
-  title: Union[str, None]
-  description: Union[str, None]
-  due_date: Union[float, str, None]
-  requirement: Union[str, None]
-
-
-class AssignmentDeleteRequest(_APIRequest):
-  """API Request for assignment deletion"""
-  assignment_id: str
-
-class ClassroomGetRequest(_APIRequest):
-  """API Request for classroom fetching"""
-  classroom_id: str
-
-class ClassroomCreateRequest(_APIRequest):
-  """API Request for classroom creation"""
-  owner_id: str
-  title: str
-  description: str
-
-class ClassroomEditRequest(_APIRequest):
-  """API Request for classroom editing"""
-  ignore_none   = True
-  classroom_id  : Union[str, None]
-  title         : Union[str, None]
-  description   : Union[str, None]
-  cover_image   : Union[str, None]
-  invite_enabled: Union[bool, None]
-
-class ClassroomDeleteRequest(_APIRequest):
-  """API Request for classroom deletion"""
-  classroom_id: str
-
-class TextbookGetRequest(_APIRequest):
-  """API Request for textbook fetching"""
+class _TextbookCreateData(_APIBase):
   textbook_id: str
 
 class TextbookCreateRequest(_APIRequest):
@@ -300,6 +451,23 @@ class TextbookCreateRequest(_APIRequest):
   price      : float
   discount   : float
 
+@dataclass
+class TextbookCreateReply(_APIReply):
+  """API Reply for creating a new textbook"""
+  data: _TextbookCreateData
+
+class TextbookCreateResponse(_APIResponse):
+  """API Response for creating a new textbook"""
+  data: _TextbookCreateData
+
+
+
+
+
+
+
+
+# Textbook EDIT
 class TextbookEditRequest(_APIRequest):
   """API Request for textbook editing"""
   ignore_none = True
@@ -311,12 +479,65 @@ class TextbookEditRequest(_APIRequest):
   price      : Optional[float]
   discount   : Optional[float]
 
+TextbookEditReply = GenericReply
+TextbookEditResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Textbook DELETE
 class TextbookDeleteRequest(_APIRequest):
   """API Request for textbook deletion"""
   textbook_id: str
 
+TextbookDeleteReply = GenericReply
+TextbookDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Comment GET
+@dataclass
+class _CommentGetData(_APIBase):
+  author_id: str
+  submission_id: str
+  assignment_id: str
+  classroom_id: str
+  text: str
+  created_at: float
+  updated_at: float
+
 class CommentGetRequest(_APIRequest):
   """API Request for comment fetching"""
+  comment_id: str
+
+@dataclass
+class CommentGetReply(_APIReply):
+  """API Reply for getting comments"""
+  data: _CommentGetData
+
+class CommentGetResponse(_APIResponse):
+  """API Response for getting comments"""
+  data: _CommentGetData
+
+
+
+
+
+
+
+
+# Comment CREATE
+@dataclass
+class _CommentCreateData(_APIBase):
   comment_id: str
 
 class CommentCreateRequest(_APIRequest):
@@ -324,59 +545,11 @@ class CommentCreateRequest(_APIRequest):
   submission_id: str
   text: str
 
-
-
-
-# API Replies
-class GenericReply(_APIReply):
-  """Generic Reply"""
-
-@dataclass
-class TokenRefreshReply(_APIReply):
-  """API Reply for refreshing JWT access token"""
-  data: _TokenRefreshData
-
-@dataclass
-class LoginReply(_APIReply):
-  """API Reply for login"""
-  data: _LoginData
-
-@dataclass
-class AssignmentGetReply(_APIReply):
-  """API Reply for fetching assignment"""
-  data: _AssignmentGetData
-
-@dataclass
-class AssignmentCreateReply(_APIReply):
-  """API Reply for creating a new assignment"""
-  data: _AssignmentCreateData
-
-@dataclass
-class ClassroomGetReply(_APIReply):
-  """API Reply for fetching classroom"""
-  data: _ClassroomGetData
-
-@dataclass
-class ClassroomCreateReply(_APIReply):
-  """API Reply for creating a new classroom"""
-  data: _ClassroomCreateData
-
-@dataclass
-class TextbookGetReply(_APIReply):
-  """API Reply for fetching textbook"""
-  data: _TextbookGetData
-
-@dataclass
-class TextbookCreateReply(_APIReply):
-  """API Reply for creating a new textbook"""
-  data: _TextbookCreateData
-
-@dataclass
-class CommentGetReply(_APIReply):
-  """API Reply for getting comments"""
-  data: _CommentGetData
-
 @dataclass
 class CommentCreateReply(_APIReply):
   """API Reply for creating a comment"""
+  data: _CommentCreateData
+
+class CommentCreateResponse(_APIResponse):
+  """API Response for creating a comment"""
   data: _CommentCreateData
