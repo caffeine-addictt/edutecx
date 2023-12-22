@@ -2,7 +2,7 @@
 Submission Snippet Endpoint
 """
 
-from src import db, limiter
+from src import limiter
 from src.database import SubmissionSnippetModel, UserModel
 from src.service.auth_provider import require_login
 

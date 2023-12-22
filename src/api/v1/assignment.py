@@ -2,7 +2,7 @@
 Assignment Endpoint
 """
 
-from src import db, limiter
+from src import limiter
 from src.database import AssignmentModel, ClassroomModel, UserModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode

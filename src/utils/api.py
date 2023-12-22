@@ -639,3 +639,172 @@ class EditableTextbookDeleteRequest(_APIRequest):
 
 EditableTextbookDeleteReply = GenericReply
 EditableTextbookDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Image GET
+@dataclass
+class _ImageGetData(_APIBase):
+  uri: str
+  image_id: str
+
+class ImageGetRequest(_APIRequest):
+  """API Request for image fetching"""
+  files: _Files
+  image_id: str
+
+@dataclass
+class ImageGetReply(_APIReply):
+  """API Reply for fetching image"""
+  data: _ImageGetData
+
+class ImageGetResponse(_APIResponse):
+  """API Response for fetching image"""
+  data: _ImageGetData
+
+
+
+
+
+
+
+
+# Image CREATE
+@dataclass
+class _ImageCreateData(_APIBase):
+  image_id: str
+  uri: str
+
+class ImageCreateRequest(_APIRequest):
+  """API Request for image creation"""
+  files       : _Files
+  user_id     : Optional[str]
+  textbook_id : Optional[str]
+  classroom_id: Optional[str]
+
+@dataclass
+class ImageCreateReply(_APIReply):
+  """API Reply for creating a new image"""
+  data: _ImageCreateData
+
+class ImageCreateResponse(_APIResponse):
+  """API Response for creating a new image"""
+  data: _ImageCreateData
+
+
+
+
+
+
+
+
+# Image DELETE
+class ImageDeleteRequest(_APIRequest):
+  """API Request for image deletion"""
+  image_id: str
+
+ImageDeleteReply = GenericReply
+ImageDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Image GET
+@dataclass
+class _SaleGetData(_APIBase):
+  sale_id: str
+  user_id: str
+  textbook_ids: list[str]
+
+class SaleGetRequest(_APIRequest):
+  """API Request for sale fetching"""
+  sale_id: str
+
+@dataclass
+class SaleGetReply(_APIReply):
+  """API Reply for sale fetching image"""
+  data: _SaleGetData
+
+class SaleaGetResponse(_APIResponse):
+  """API Response for sale fetching image"""
+  data: _SaleGetData
+
+
+
+
+
+
+
+
+# Token GET
+@dataclass
+class _TokenGetData(_APIBase):
+  token     : str
+  token_type: str
+  expires_at: float
+  created_at: float
+
+class TokenGetRequest(_APIRequest):
+  """API Request for fetching token"""
+  token: str
+
+@dataclass
+class TokenGetReply(_APIReply):
+  """API Reply for fetching token"""
+  data: _TokenGetData
+
+class TokenGetResponse(_APIResponse):
+  """API Response for fetching token"""
+  data: _TokenGetData
+
+
+
+
+
+
+
+
+# Token CREATE
+@dataclass
+class _TokenCreateData(_APIBase):
+  token   : str
+  token_id: str
+
+class TokenCreateRequest(_APIRequest):
+  """API Request for creating token"""
+  token_type: str
+  user_id: str
+
+@dataclass
+class TokenCreateReply(_APIReply):
+  """API Reply for creating token"""
+  data: _TokenCreateData
+
+class TokenCreateResponse(_APIResponse):
+  """API Response for creating token"""
+  data: _TokenCreateData
+
+
+
+
+
+
+
+
+# Token DELETE
+class TokenDeleteRequest(_APIRequest):
+  """API Request for deleting token"""
+  token_id: Optional[str]
+  token   : Optional[str]
+
+TokenDeleteReply = GenericReply
+TokenDeleteResponse = GenericResponse
