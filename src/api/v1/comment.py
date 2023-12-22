@@ -43,7 +43,7 @@ def comment_get_api(user: UserModel):
   if (user.privilege != 'Admin') and (user.id not in [
     comment.author_id,
     comment.submission.assignment.classroom.owner_id,
-    *comment.submission.assignment.classroom.educator_ids
+    *comment.submission.assignment.classroom.educator_ids.split('|')
   ]):
     return GenericReply(
       message = 'Unauthorized',
@@ -84,7 +84,7 @@ def comment_create_api(user: UserModel):
   if (user.privilege != 'Admin') and (user.id not in [
     submission.student_id,
     submission.assignment.classroom.owner_id,
-    *submission.assignment.classroom.educator_ids
+    *submission.assignment.classroom.educator_ids.split('|')
   ]):
     return GenericReply(
       message = 'Unauthorized',

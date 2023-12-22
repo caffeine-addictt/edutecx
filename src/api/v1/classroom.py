@@ -46,8 +46,8 @@ def classroom_get_api(user: UserModel):
 
   if (user.privilege != 'Admin') and (user.id not in [
     classroom.owner_id,
-    *classroom.educator_ids,
-    *classroom.student_ids
+    *classroom.educator_ids.split('|'),
+    *classroom.student_ids.split('|')
   ]):
     return GenericReply(
       message = 'Unauthorized',

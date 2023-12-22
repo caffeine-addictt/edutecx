@@ -47,8 +47,8 @@ def image_get_api(user: UserModel):
   if (
     image.classroom and (user.privilege != 'Admin') and (user.id not in [
       image.classroom.owner_id,
-      *image.classroom.student_ids,
-      *image.classroom.educator_ids
+      *image.classroom.student_ids.split('|'),
+      *image.classroom.educator_ids.split('|')
     ])
   ):
     return GenericReply(
