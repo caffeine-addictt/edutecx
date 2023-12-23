@@ -40,7 +40,7 @@ def assignment_get_api(user: UserModel):
   req = AssignmentGetRequest(request)
 
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Unable to locate assignment',
       status = HTTPStatusCode.BAD_REQUEST
@@ -164,7 +164,7 @@ def assignment_edit_api(user: UserModel):
   
 
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Unable to locate assignment',
       status = HTTPStatusCode.BAD_REQUEST
@@ -200,7 +200,7 @@ def assignment_delete_api(user: UserModel):
 
   # Validate
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Could not located assignment',
       status = HTTPStatusCode.BAD_REQUEST

@@ -167,7 +167,7 @@ def submission_delete_api(user: UserModel):
   req = SubmissionDeleteRequest(request)
 
   submission = SubmissionModel.query.filter(SubmissionModel.id == req.submission_id).first()
-  if (not submission) or (not isinstance(submission, SubmissionModel)):
+  if not isinstance(submission, SubmissionModel):
     return GenericReply(
       message = 'Unable to locate submission',
       status = HTTPStatusCode.BAD_REQUEST

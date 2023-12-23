@@ -32,7 +32,7 @@ def submissionsnippet_get_api(user: UserModel):
   req = SubmissionSnippetGetRequest(request)
 
   submissionSnippet = SubmissionSnippetModel.query.filter(SubmissionSnippetModel.id == req.submissionSnippet_id).first()
-  if not submissionSnippet or not isinstance(submissionSnippet, SubmissionSnippetModel):
+  if not isinstance(submissionSnippet, SubmissionSnippetModel):
     return GenericReply(
       message = 'Unable to locate submission snippet',
       status = HTTPStatusCode.BAD_REQUEST

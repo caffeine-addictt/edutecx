@@ -37,7 +37,7 @@ def classroom_get_api(user: UserModel):
   req = ClassroomGetRequest(request)
 
   classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
-  if not classroom or not isinstance(classroom, ClassroomModel):
+  if not isinstance(classroom, ClassroomModel):
     return GenericReply(
       message = 'Classroom could not be located',
       status = HTTPStatusCode.BAD_REQUEST
@@ -93,7 +93,7 @@ def classroom_create_api(user: UserModel):
 
 
   owner = user if user.id == req.owner_id else UserModel.query.filter(UserModel.id == req.owner_id).first()
-  if not owner or not isinstance(owner, UserModel):
+  if not isinstance(owner, UserModel):
     return GenericReply(
       message = 'Invalid user',
       status = HTTPStatusCode.BAD_REQUEST
@@ -140,7 +140,7 @@ def classroom_edit_api(user: UserModel):
 
 
   classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
-  if not classroom or not isinstance(classroom, ClassroomModel):
+  if not isinstance(classroom, ClassroomModel):
     return GenericReply(
       message = 'Classroom could not be located',
       status = HTTPStatusCode.BAD_REQUEST
@@ -175,7 +175,7 @@ def classroom_delete_api(user: UserModel):
 
 
   classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
-  if not classroom or not isinstance(classroom, ClassroomModel):
+  if not isinstance(classroom, ClassroomModel):
     return GenericReply(
       message = 'Classroom could not be located',
       status = HTTPStatusCode.BAD_REQUEST

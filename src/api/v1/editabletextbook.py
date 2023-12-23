@@ -36,7 +36,7 @@ def editabletextbook_get_api(user: UserModel):
 
 
   etextbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == req.editabletextbook_id).first()
-  if (not etextbook) and (not isinstance(etextbook, EditableTextbookModel)):
+  if not isinstance(etextbook, EditableTextbookModel):
     return GenericReply(
       message = 'Unable to locate editable textbook',
       status = HTTPStatusCode.BAD_REQUEST
@@ -114,7 +114,7 @@ def editabletextbook_edit_api(user: UserModel):
   
   
   etextbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == req.editabletextbook_id).first()
-  if (not etextbook) and (not isinstance(etextbook, EditableTextbookModel)):
+  if not isinstance(etextbook, EditableTextbookModel):
     return GenericReply(
       message = 'Unable to locate editable textbook',
       status = HTTPStatusCode.BAD_REQUEST
@@ -143,7 +143,7 @@ def editabletextbook_delete_api(user: UserModel):
   req = EditableTextbookDeleteRequest(request)
 
   etextbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == req.editabletextbook_id).first()
-  if (not etextbook) and (not isinstance(etextbook, EditableTextbookModel)):
+  if not isinstance(etextbook, EditableTextbookModel):
     return GenericReply(
       message = 'Unable to locate editable textbook',
       status = HTTPStatusCode.BAD_REQUEST
