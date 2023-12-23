@@ -9,6 +9,7 @@ from src.utils.http import HTTPStatusCode
 from src.utils.api import (
   SubmissionGetRequest, SubmissionGetReply, _SubmissionGetData,
   SubmissionCreateRequest, SubmissionCreateReply, _SubmissionCreateData,
+  SubmissionDeleteRequest, SubmissionDeleteReply,
   GenericReply
 )
 
@@ -163,4 +164,28 @@ def submission_create_api(user: UserModel):
 @auth_limit
 @require_login
 def submission_delete_api(user: UserModel):
-  ...
+  req = SubmissionDeleteRequest(request)
+
+  submission = SubmissionModel.query.filter(SubmissionModel.id == req.submission_id).first()
+  if (not submission) or (not isinstance(submission, SubmissionModel)):
+    return GenericReply(
+      message = 'Unable to locate submission',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+ 
+  if (user.privilege != 'Admin') and (user.id not in [
+    submission.assignment.classroom.owner_id,
+    *submission.assignment.classroom.educator_ids.split('|')
+  ]):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  
+  submission.delete()
+  return SubmissionDeleteReply(
+    message = 'Submission deleted successfully',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
