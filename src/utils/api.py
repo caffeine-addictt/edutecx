@@ -797,6 +797,51 @@ class SubmissionCreateReply(_APIReply):
 class SubmissionCreateResponse(_APIResponse):
   """API Response for creating submission"""
   data: _SubmissionCreateData
+  
+  
+  
+  
+  
+  
+  
+  
+# Submission DELETE
+class SubmissionDeleteRequest(_APIRequest):
+  """API Request for deleting submission"""
+  submission_id: str
+
+SubmissionDeleteReply = GenericReply
+SubmissionDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# SubmissionSnipet GET
+@dataclass
+class _SubmissionSnippetGetData(_APIBase):
+  id           : str
+  student_id   : str
+  submission_id: str
+  uri          : str
+  status       : str
+  created_at   : float
+
+class SubmissionSnippetGetRequest(_APIRequest):
+  """API Request for submission snippet fetching"""
+  submissionSnippet_id: str
+
+@dataclass
+class SubmissionSnippetGetReply(_APIReply):
+  """API Reply for fetching submission snippet"""
+  data: _SubmissionSnippetGetData
+
+class SubmissionSnippetGetResponse(_APIResponse):
+  """API Response for fetching submission snippet"""
+  data: _SubmissionSnippetGetData
 
 
 
