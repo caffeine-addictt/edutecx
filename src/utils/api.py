@@ -776,6 +776,35 @@ class SubmissionGetResponse(_APIResponse):
 
 
 
+# Submission CREATE
+@dataclass
+class _SubmissionCreateData(_APIBase):
+  submission_id: str
+  snippet_id: str
+
+class SubmissionCreateRequest(_APIRequest):
+  """API Request for creating submission"""
+  files              : _Files
+  student_id         : str
+  assignment_id      : str
+  editabletextbook_id: str
+
+@dataclass
+class SubmissionCreateReply(_APIReply):
+  """API Reply for creating submission"""
+  data: _SubmissionCreateData
+
+class SubmissionCreateResponse(_APIResponse):
+  """API Response for creating submission"""
+  data: _SubmissionCreateData
+
+
+
+
+
+
+
+
 # Token GET
 @dataclass
 class _TokenGetData(_APIBase):
