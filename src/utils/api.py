@@ -718,7 +718,7 @@ ImageDeleteResponse = GenericResponse
 
 
 
-# Image GET
+# Sale GET
 @dataclass
 class _SaleGetData(_APIBase):
   sale_id: str
@@ -737,6 +737,111 @@ class SaleGetReply(_APIReply):
 class SaleaGetResponse(_APIResponse):
   """API Response for sale fetching image"""
   data: _SaleGetData
+
+
+
+
+
+
+
+
+# Submission GET
+@dataclass
+class _SubmissionGetData(_APIBase):
+  submission_id: str
+  student_id   : str
+  assignment_id: str
+  comments     : list[str]
+  snippet      : str
+  created_at   : float
+  updated_at   : float
+
+class SubmissionGetRequest(_APIRequest):
+  """API Request for fetching submissions"""
+  submission_id: str
+
+@dataclass
+class SubmissionGetReply(_APIReply):
+  """API Reply for fetching submissions"""
+  data: _SubmissionGetData
+
+class SubmissionGetResponse(_APIResponse):
+  """API Response for fetching submissions"""
+  data: _SubmissionGetData
+
+
+
+
+
+
+
+
+# Submission CREATE
+@dataclass
+class _SubmissionCreateData(_APIBase):
+  submission_id: str
+  snippet_id: str
+
+class SubmissionCreateRequest(_APIRequest):
+  """API Request for creating submission"""
+  files              : _Files
+  student_id         : str
+  assignment_id      : str
+  editabletextbook_id: str
+
+@dataclass
+class SubmissionCreateReply(_APIReply):
+  """API Reply for creating submission"""
+  data: _SubmissionCreateData
+
+class SubmissionCreateResponse(_APIResponse):
+  """API Response for creating submission"""
+  data: _SubmissionCreateData
+  
+  
+  
+  
+  
+  
+  
+  
+# Submission DELETE
+class SubmissionDeleteRequest(_APIRequest):
+  """API Request for deleting submission"""
+  submission_id: str
+
+SubmissionDeleteReply = GenericReply
+SubmissionDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# SubmissionSnipet GET
+@dataclass
+class _SubmissionSnippetGetData(_APIBase):
+  id           : str
+  student_id   : str
+  submission_id: str
+  uri          : str
+  status       : str
+  created_at   : float
+
+class SubmissionSnippetGetRequest(_APIRequest):
+  """API Request for submission snippet fetching"""
+  submissionSnippet_id: str
+
+@dataclass
+class SubmissionSnippetGetReply(_APIReply):
+  """API Reply for fetching submission snippet"""
+  data: _SubmissionSnippetGetData
+
+class SubmissionSnippetGetResponse(_APIResponse):
+  """API Response for fetching submission snippet"""
+  data: _SubmissionSnippetGetData
 
 
 

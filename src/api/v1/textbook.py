@@ -37,7 +37,7 @@ def textbooks_get_api(user: UserModel):
   req = TextbookGetRequest(request)
 
   textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
-  if (not textbook) or (not isinstance(textbook, TextbookModel)):
+  if not isinstance(textbook, TextbookModel):
     return GenericReply(
       message = 'Unable to locate textbook',
       status = HTTPStatusCode.BAD_REQUEST
@@ -73,7 +73,7 @@ def textbook_create_api(user: UserModel):
   req = TextbookCreateRequest(request)
 
   author = user if user.id == req.author_id else UserModel.query.filter(UserModel.id == req.author_id).first()
-  if not author or not isinstance(author, UserModel):
+  if not isinstance(author, UserModel):
     return GenericReply(
       message = 'Invalid user',
       status = HTTPStatusCode.BAD_REQUEST
@@ -133,7 +133,7 @@ def textbooks_edit_api(user: UserModel):
   
 
   textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
-  if not textbook or not isinstance(textbook, TextbookModel):
+  if not isinstance(textbook, TextbookModel):
     return GenericReply(
       message = 'Unable to locate textbook',
       status = HTTPStatusCode.BAD_REQUEST
@@ -177,7 +177,7 @@ def textbook_delete_api(user: UserModel):
   req = TextbookDeleteRequest(request)
 
   textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
-  if (not textbook) or (not isinstance(textbook, TextbookModel)):
+  if not isinstance(textbook, TextbookModel):
     return GenericReply(
       message = 'Unable to locate textbook',
       status = HTTPStatusCode.BAD_REQUEST

@@ -49,7 +49,7 @@ def apiv1_Login():
   
   # Ensure user exists
   user: UserModel | None = UserModel.query.filter(UserModel.email == req.email).first()
-  if not user or not isinstance(user, UserModel) or not user.verify_password(req.password):
+  if not isinstance(user, UserModel) or not user.verify_password(req.password):
     return GenericReply(
       message = 'Invalid email or password',
       status = HTTPStatusCode.BAD_REQUEST

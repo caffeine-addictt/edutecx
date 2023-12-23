@@ -36,7 +36,7 @@ def image_get_api(user: UserModel):
   req = ImageGetRequest(request)
 
   image = ImageModel.query.filter(ImageModel.id == req.image_id).first()
-  if (not image) or (not isinstance(image, ImageModel)):
+  if not isinstance(image, ImageModel):
     return GenericReply(
       message = 'Unable to locate image',
       status = HTTPStatusCode.BAD_REQUEST
@@ -47,8 +47,8 @@ def image_get_api(user: UserModel):
   if (
     image.classroom and (user.privilege != 'Admin') and (user.id not in [
       image.classroom.owner_id,
-      *image.classroom.student_ids,
-      *image.classroom.educator_ids
+      *image.classroom.student_ids.split('|'),
+      *image.classroom.educator_ids.split('|')
     ])
   ):
     return GenericReply(
@@ -92,7 +92,7 @@ def image_create_api(user: UserModel):
 
   if req.user_id:
     author = user if user.id == req.user_id else UserModel.query.filter(UserModel.id == req.user_id).first()
-    if not author or not isinstance(author, UserModel):
+    if not isinstance(author, UserModel):
       return GenericReply(
         message = 'Invalid user',
         status = HTTPStatusCode.BAD_REQUEST
@@ -147,7 +147,7 @@ def image_delete_api(user: UserModel):
   req = ImageDeleteRequest(request)
 
   image = ImageModel.query.filter(ImageModel.id == req.image_id).first()
-  if (not image) or (not isinstance(image, ImageModel)):
+  if not isinstance(image, ImageModel):
     return GenericReply(
       message = 'Unable to locate image',
       status = HTTPStatusCode.BAD_REQUEST

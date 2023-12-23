@@ -31,7 +31,7 @@ def sale_get_api(user: UserModel):
   req = SaleGetRequest(request)
 
   sale = SaleModel.query.filter(SaleModel.id == req.sale_id).first()
-  if (not sale) or (not isinstance(sale, SaleModel)):
+  if not isinstance(sale, SaleModel):
     return GenericReply(
       message = 'Unable to locate sale',
       status = HTTPStatusCode.BAD_REQUEST

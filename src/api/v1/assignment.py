@@ -40,7 +40,7 @@ def assignment_get_api(user: UserModel):
   req = AssignmentGetRequest(request)
 
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Unable to locate assignment',
       status = HTTPStatusCode.BAD_REQUEST
@@ -49,8 +49,8 @@ def assignment_get_api(user: UserModel):
   if (user.privilege != 'Admin') and (
     user.id not in [
       assignment.classroom.owner_id,
-      *assignment.classroom.educator_ids,
-      *assignment.classroom.student_ids
+      *assignment.classroom.educator_ids.split('|'),
+      *assignment.classroom.student_ids.split('|')
   ]):
     return GenericReply(
       message = 'Unauthorized',
@@ -164,7 +164,7 @@ def assignment_edit_api(user: UserModel):
   
 
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Unable to locate assignment',
       status = HTTPStatusCode.BAD_REQUEST
@@ -200,13 +200,13 @@ def assignment_delete_api(user: UserModel):
 
   # Validate
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Could not located assignment',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if user.id not in set(assignment.classroom.owner_id, *assignment.classroom.educator_ids):
+  if user.id not in set(assignment.classroom.owner_id, *assignment.classroom.educator_ids.split('|')):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED

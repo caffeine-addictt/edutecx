@@ -33,7 +33,7 @@ def comment_get_api(user: UserModel):
   req = CommentGetRequest(request)
 
   comment = CommentModel.query.filter(CommentModel.id == req.comment_id).first()
-  if (not comment) or (not isinstance(comment, CommentModel)):
+  if not isinstance(comment, CommentModel):
     return GenericReply(
       message = 'Could not locate comment',
       status = HTTPStatusCode.BAD_REQUEST
@@ -43,7 +43,7 @@ def comment_get_api(user: UserModel):
   if (user.privilege != 'Admin') and (user.id not in [
     comment.author_id,
     comment.submission.assignment.classroom.owner_id,
-    *comment.submission.assignment.classroom.educator_ids
+    *comment.submission.assignment.classroom.educator_ids.split('|')
   ]):
     return GenericReply(
       message = 'Unauthorized',
@@ -75,7 +75,7 @@ def comment_create_api(user: UserModel):
   req = CommentCreateRequest(request)
 
   submission = SubmissionModel.query.filter(SubmissionModel.id == req.submission_id).first()
-  if (not submission) or (not isinstance(submission, SubmissionModel)):
+  if not isinstance(submission, SubmissionModel):
     return GenericReply(
       message = 'Could not locate submission',
       status = HTTPStatusCode.BAD_REQUEST
@@ -84,7 +84,7 @@ def comment_create_api(user: UserModel):
   if (user.privilege != 'Admin') and (user.id not in [
     submission.student_id,
     submission.assignment.classroom.owner_id,
-    *submission.assignment.classroom.educator_ids
+    *submission.assignment.classroom.educator_ids.split('|')
   ]):
     return GenericReply(
       message = 'Unauthorized',
