@@ -5,6 +5,10 @@ Submission Snippet Endpoint
 from src import limiter
 from src.database import SubmissionSnippetModel, UserModel
 from src.service.auth_provider import require_login
+from src.utils.http import HTTPStatusCode
+from src.utils.api import (
+  GenericReply
+)
 
 from flask_limiter import util
 from flask import (
@@ -24,32 +28,4 @@ auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host
 @auth_limit
 @require_login
 def submissionsnippet_get_api(user: UserModel):
-  ...
-
-
-
-
-@app.route(f'{basePath}/create', methods = ['POST'])
-@auth_limit
-@require_login
-def submissionsnippet_create_api(user: UserModel):
-  ...
-
-
-
-
-@app.route(f'{basePath}/edit', methods = ['POST'])
-@auth_limit
-@require_login
-def submissionsnippet_edit_api(user: UserModel):
-  ...
-
-
-
-
-
-@app.route(f'{basePath}/delete', methods = ['POST'])
-@auth_limit
-@require_login
-def submissionsnippet_delete_api(user: UserModel):
   ...
