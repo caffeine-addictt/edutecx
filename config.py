@@ -24,6 +24,7 @@ class ConfigBase:
   # \\\\\\ General ////// #
   # Production ENV
   ENV: Literal['development', 'production'] = 'development'
+  DOMAIN: str = '127.0.0.1:8080'
 
 
   # \\\\\\ Stripe ////// #
@@ -72,6 +73,7 @@ class DevelopmentConfig(ConfigBase):
   """
 
   ENV = 'development'
+  DOMAIN = '127.0.0.1:8080'
 
   SECRET_KEY = 'mysecretkey'
 
