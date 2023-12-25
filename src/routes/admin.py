@@ -131,7 +131,7 @@ def drawGraph(
 
   # Upload
   _dirCheck()
-  filename = model + '_' + re.compile(r'[^a-zA-Z0-9-]').sub('', nameExtra) + '.png'
+  filename = model + '_' + re.compile(r'[^a-zA-Z0-9-]').sub('', nameExtra) + '.svg'
   plt.savefig(os.path.join(GraphFileLocation, filename))
   plt.close()
 
