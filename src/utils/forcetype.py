@@ -1,6 +1,8 @@
 import inspect
 from typing import Any, Optional, Union, Sequence, Mapping, get_args, get_origin
 
+from flask import current_app as app
+
 def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
   """
   Recursive type forcing
@@ -45,6 +47,7 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
   if origin is Union:
     for t in get_args(type_):
       interpretated = recursiveValidation(x, t)
+      app.logger.error(f'1 {interpretated}')
       if interpretated:
         return interpretated
       
@@ -55,6 +58,8 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
         for t in get_args(type_):
           for y in x:
             interpretated = recursiveValidation(y, t)
+            app.logger.debug(f'Elif Sequence: {interpretated}')
+
             if interpretated:
               validatedX = origin([*validatedX, interpretated])
             else:
@@ -69,6 +74,7 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
         for k,v in x.items():
           interpretatedKey = recursiveValidation(k, keyTypes)
           interpretatedValue = recursiveValidation(v, valueTypes)
+          app.logger.debug(f'Elif Origin: Mapping {interpretatedKey, interpretatedValue}')
 
           if (not interpretatedKey) or (not interpretatedValue):
             return None
@@ -89,11 +95,22 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
   else:
     isDefaultValue = not inspect.isclass(type_)
     try:
-      interpretated = (type(type_) if isDefaultValue else type_)(x)
+      app.logger.debug(f'Else: {isDefaultValue, type_, type(type_), x}')
+
+      try:
+        interpretated = (type(type_) if isDefaultValue else type_)(x)
+      except Exception as e:
+        from .api import _APIBase
+        if issubclass(type_, _APIBase):
+          interpretated = type_(**x)
+        else:
+          raise e
+
       if isinstance(interpretated, (type(type_) if isDefaultValue else type_)):
         return interpretated
       elif isDefaultValue:
         return type_
     
-    except Exception:
+    except Exception as e:
+      app.logger.error(e)
       return type_ if isDefaultValue else None
