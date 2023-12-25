@@ -41,3 +41,12 @@ def uploaded_textbooks(user: UserModel, filename: str):
     )
   
   else: raise Unauthorized()
+
+@app.route('/public/graphs/<path:filename>')
+@auth_provider.require_admin
+def uploaded_graphs(user: UserModel, filename: str):
+  return send_from_directory(
+    cdn_provider.GraphFileLocation,
+    filename,
+    as_attachment = True
+  )
