@@ -15,19 +15,19 @@ def customCache(func: Callable[_CacheP, _CacheT]) -> Callable[_CacheP, _CacheT]:
   @wraps(func)
   def wrapper(*args: _CacheP.args, **kwargs: _CacheP.kwargs) -> _CacheT:
     # Generate hash
-    hash = str(''.join([
-      str(i.__hash__())
+    _hash = str(hash(''.join([
+      str(hash(i))
       for i in (list(args) + list(
-        (str(a.__hash__()) + str(b.__hash__()))
+        (str(hash(a)) + str(hash(b)))
         for a,b in kwargs.items()
       ))
-    ]).__hash__())
+    ])))
 
-    if memory[hash]:
-      return memory[hash]
+    if memory.get(_hash):
+      return memory[_hash]
     
     returnValue = func(*args, **kwargs)
-    memory[hash] = returnValue
+    memory[_hash] = returnValue
 
     # Enforce max memory
     keys = tuple(memory.keys())
