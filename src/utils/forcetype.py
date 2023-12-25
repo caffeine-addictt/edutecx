@@ -89,11 +89,19 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
   else:
     isDefaultValue = not inspect.isclass(type_)
     try:
-      interpretated = (type(type_) if isDefaultValue else type_)(x)
+      try:
+        interpretated = (type(type_) if isDefaultValue else type_)(x)
+      except Exception as e:
+        from .api import _APIBase
+        if issubclass(type_, _APIBase):
+          interpretated = type_(**x)
+        else:
+          raise e
+
       if isinstance(interpretated, (type(type_) if isDefaultValue else type_)):
         return interpretated
       elif isDefaultValue:
         return type_
     
-    except Exception:
+    except Exception as e:
       return type_ if isDefaultValue else None

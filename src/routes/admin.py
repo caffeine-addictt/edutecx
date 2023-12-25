@@ -2,25 +2,189 @@
 Managing Admin-Only routes
 """
 
-from src import db
-from src.utils.http import Parser, escape_id
+from src.utils.caching import customCache
+from src.utils.http import Parser
 from src.service.auth_provider import require_admin
+from src.utils.http import HTTPStatusCode
+from src.utils.ext import utc_time
+from sqlalchemy import and_
 from src.database import (
+  UserModel,
   SaleModel,
-  UserModel
+  TextbookModel
 )
 
+import os
+import re
+import numpy
+from datetime import datetime
+import matplotlib.pyplot as plt
+from thread import ParallelProcessing
+from src.service.cdn_provider import _dirCheck, GraphFileLocation
+from typing import Callable, Tuple, TypeVar, Any
+from werkzeug.exceptions import InternalServerError
 from flask import (
-  g,
-  request,
+  abort,
   render_template,
   current_app as app
 )
 
 
-# Routes
+# Config
 basePath: str = '/dashboard'
 
+_TModel = TypeVar('_TModel', UserModel, SaleModel, TextbookModel)
+_TYValue = TypeVar('_TYValue')
+_YFunc = Callable[[_TModel], _TYValue]
+LabelX = int
+LabelY = int
+
+DateRange = Tuple[datetime, datetime] | datetime | None
+
+
+
+
+# Helper functions
+def getDateRange(dateRange: DateRange = None) -> Tuple[datetime, datetime]:
+  if isinstance(dateRange, datetime):
+    return (
+      dateRange,
+      utc_time.skip('1y', dateRange)
+    )
+
+  if (not isinstance(dateRange, tuple)):
+    return (utc_time.unskip('6months'), utc_time.skip('6months'))
+  
+  return dateRange
+
+
+@customCache
+def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> list[_TModel]:
+  range_ = getDateRange(dateRange)
+  return model.query.filter(and_(
+    (range_[0] <= model.created_at),
+    (model.created_at <= range_[1])
+  )).all()
+
+
+def getURI(filename: str) -> str:
+  if domain := app.config.get('DOMAIN'):
+    return domain + '/public/graphs/' + filename
+  raise InternalServerError('Domain not configured')
+
+
+@customCache
+def drawGraph(
+  model: type[_TModel],
+  axisY: _YFunc[_TModel, _TYValue],
+  title: str,
+  nameExtra: str,
+  labelCount: Tuple[LabelX, LabelY] = (6, 10),
+  ylabel: str = 'Count',
+  dateRange: DateRange = None
+) -> str:
+  """
+  Draw the graph to an image
+
+  Parameters
+  ----------
+  `model: Model`, required
+    The model to draw a graph on
+  
+  `axisY: (model) -> Any`, required
+    The function to calculate an individual Y-Axis plot point
+  
+  `nameExtra: str`, required
+    Extra name to not collide with previous generations
+  
+  `labelCount: tuple[Xint, Yint]`, optional (defaults to tuple(6, 10))
+    How many graph labels per axis
+  
+  `ylabel: str`, optional (defaults to 'Count')
+    The Y-Axis title
+  
+  `dateRange: DateRange`, optional (defaults to None)
+    The year to consider, else defaults to the past 12 months
+  
+  Returns
+  -------
+  uri: str
+  """
+  XValue = datetime
+
+  fetched: list[_TModel] = fetchAll(model, dateRange)
+  processed: list[Tuple[datetime, Any]] = []
+
+  try:
+    def _processor(m: _TModel) -> Tuple[XValue, _TYValue]:
+      return (
+        m.created_at,
+        axisY(m)
+      )
+    process = ParallelProcessing(_processor, dataset = fetched, max_threads = 4, daemon = True)
+    process.start()
+    processed = process.get_return_values()
+  
+  except Exception:
+    pass
+
+  if len(processed) < 12:
+    # Populate dummy data
+    first = processed[0][0] if len(processed) >= 1 else None
+    app.logger.error(processed)
+    processed = [
+      (utc_time.unskip(f'{i}months', first), 0)
+      for i in range(13 - len(processed), 1, -1)
+    ] + processed
+    app.logger.error('hi')
+
+
+  # Split format data
+  hashMap = {}
+  for x, y in processed:
+
+    curr: _TYValue | None = hashMap.get(x)
+    if isinstance(y, (int, float)):
+      hashMap[f'{x.month}/{x.year}'] = (curr + y) if isinstance(curr, (int, float)) else y
+  
+  # Sort
+  hashMap = dict(sorted(
+    hashMap.items(),
+    key = lambda a: int(''.join(a[0].split('/')[::-1]))
+  ))
+  
+  # Plotting
+  plt.figure(figsize = (16, 11))
+  plt.plot(tuple(hashMap.keys()), tuple(hashMap.values()))
+
+  # Curl X and Y points
+  _width = len(hashMap)
+  _height = max(hashMap.values())
+
+  app.logger.debug(f'{_width, _height, _width // labelCount[0], _height // labelCount[1]}')
+  plt.xticks(numpy.arange(0, _width + 1, max(1, round(_width / labelCount[0]))))
+  plt.yticks(numpy.arange(0, _height + 1, max(1, round(_height / labelCount[1]))))
+
+  # Label
+  plt.title(title)
+  plt.xlabel('Time')
+  plt.ylabel(ylabel)
+  plt.tick_params('both')
+  plt.autoscale(True, 'both')
+
+
+  # Upload
+  _dirCheck()
+  filename = str(model.id) + '_' + re.compile(r'[^a-zA-Z0-9-]').sub('', nameExtra) + '.svg'
+  plt.savefig(os.path.join(GraphFileLocation, filename), transparent = True)
+  plt.close()
+
+  return getURI(filename)
+
+
+
+
+# Routes
 @app.route(basePath)
 @require_admin
 def dashboard(user: UserModel):
@@ -30,35 +194,58 @@ def dashboard(user: UserModel):
   ))
 
 
+
+
 # Users
-@app.route(f'{basePath}/users')
+@app.route(f'{basePath}/users', methods = ['GET'])
 def dashboard_users():
-
-  return render_template('(admin)/user_list.html', data = Parser(
-
-  ))
-
-@app.route(f'{basePath}/users/<string:id>')
-def dashboard_user(id: str):
-  id = escape_id(id)
+  graphURI = drawGraph(
+    UserModel,
+    lambda _: 1,
+    'Users Accounts Created Over a 12 Month Period',
+    'created',
+    ylabel = 'Accounts Created'
+  )
 
   return render_template('(admin)/user.html', data = Parser(
-    id = id, typeof = type(id)
+    graphURI = graphURI,
+    users = fetchAll(UserModel)
   ))
 
 
-# Store
-@app.route(f'{basePath}/sales')
+
+
+# Revenue
+@app.route(f'{basePath}/sales', methods = ['GET'])
 def dashboard_sales():
+  graphURI = drawGraph(
+    SaleModel,
+    lambda model: model.total_cost,
+    'Revenue Over a 12 Month Period',
+    'revenue',
+    ylabel = 'Total Revenue ($)'
+  )
 
-  return render_template('(admin)/sale_list.html', data = Parser(
-
+  return render_template('(admin)/sale.html', data = Parser(
+    graphURI = graphURI,
+    sales = fetchAll(SaleModel)
   ))
 
-@app.route(f'{basePath}/sales/<string:id>')
-def dashboard_sale(id: str):
-  id = escape_id(id)
 
-  return render_template('(auth)/sale.html', data = Parser(
 
+
+# Textbooks
+@app.route(f'{basePath}/textbooks', methods = ['GET'])
+def dashboard_textbooks():
+  graphURI = drawGraph(
+    TextbookModel,
+    lambda _: 1,
+    'Textbooks Created Over a 12 Month Period',
+    'created',
+    ylabel = 'Textbooks Created'
+  )
+
+  return render_template('(admin)/textbook.html', data = Parser(
+    graphURI = graphURI,
+    textbooks = fetchAll(TextbookModel)
   ))

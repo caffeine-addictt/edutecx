@@ -71,7 +71,7 @@ class _APIParser(_APIBase):
       if (interpreted is not None) or self.get('ignore_none'):
         self.__dict__[variableName] = interpreted
       else:
-        raise BadRequest('%s is not valid' % variableName)
+        raise BadRequest('%s is not valid. Expected %s, Got %s' % (variableName, variableType, variable))
 
 
 

@@ -3,7 +3,7 @@ Extension for managing time
 """
 
 import re
-from typing import Union
+from typing import Union, Optional
 from datetime import datetime
 
 from .math_lib import isInteger, isFloat
@@ -85,7 +85,7 @@ def get() -> datetime:
   """
   return datetime.utcnow()
 
-def skip(unixOrSec: Union[str, int, float]) -> datetime:
+def skip(unixOrSec: Union[str, int, float], fromTime: Optional[datetime] = None) -> datetime:
   """
   Returns the utc time of the skipped amount
 
@@ -94,6 +94,8 @@ def skip(unixOrSec: Union[str, int, float]) -> datetime:
   ----------
   `unixOrSec: str | int | float`, required
     The amount of time to skip
+  
+  `fromTime: datetime`, optional (defaults to None)
 
     
   Returns
@@ -101,4 +103,24 @@ def skip(unixOrSec: Union[str, int, float]) -> datetime:
   `utcthen: datetime`
   """
   unixOrSec = convertToTime(unixOrSec)
-  return datetime.fromtimestamp(datetime.utcnow().timestamp() + unixOrSec)
+  return datetime.fromtimestamp((fromTime or datetime.utcnow()).timestamp() + unixOrSec)
+
+def unskip(unixOrSec: Union[str, int, float], fromTime: Optional[datetime] = None) -> datetime:
+  """
+  Returns the utc time of the unskipped amount
+
+  
+  Parameters
+  ----------
+  `unixOrSec: str | int | float`, required
+    The amount of time to unskip
+  
+  `fromTime: datetime`, optional (defaults to None)
+
+    
+  Returns
+  -------
+  `utcthen: datetime`
+  """
+  unixOrSec = convertToTime(unixOrSec)
+  return datetime.fromtimestamp((fromTime or datetime.utcnow()).timestamp() - unixOrSec)

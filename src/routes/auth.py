@@ -211,11 +211,12 @@ def login():
         'remember_me': form.remember_me.data,
       }
     )
-    body = LoginResponse(response)
     
     if response.status_code != HTTPStatusCode.OK:
-      flash(body.message, 'danger')
+      flash(response.json().get('message'), 'danger')
     else:
+      body = LoginResponse(response)
+
       # Handle Login and cookie
       callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
       successfulLogin = make_response(
