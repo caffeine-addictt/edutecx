@@ -6,7 +6,6 @@ from src import limiter
 from flask_limiter import util
 from src.utils.http import HTTPStatusCode
 from src.database import UserModel
-from sqlalchemy import or_
 
 from src.service.auth_provider import require_login
 from src.utils.api import (
@@ -15,16 +14,9 @@ from src.utils.api import (
   GenericReply
 )
 
-from typing import Optional
 from flask import (
   request,
   current_app as app,
-)
-from flask_jwt_extended import (
-  jwt_required,
-  get_current_user,
-  create_access_token,
-  create_refresh_token,
 )
 
 # Routes
