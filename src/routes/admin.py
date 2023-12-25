@@ -3,7 +3,7 @@ Managing Admin-Only routes
 """
 
 from src.utils.caching import customCache
-from src.utils.http import Parser, escape_id
+from src.utils.http import Parser
 from src.service.auth_provider import require_admin
 from src.utils.http import HTTPStatusCode
 from src.database import (
