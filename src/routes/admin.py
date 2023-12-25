@@ -157,16 +157,8 @@ def dashboard(user: UserModel):
 def dashboard_users():
   # graph = drawGraph(UserModel)
 
-  return render_template('(admin)/user_list.html', data = Parser(
-
-  ))
-
-@app.route(f'{basePath}/users/<string:id>')
-def dashboard_user(id: str):
-  id = escape_id(id)
-
   return render_template('(admin)/user.html', data = Parser(
-    id = id, typeof = type(id)
+
   ))
 
 
@@ -177,15 +169,7 @@ def dashboard_user(id: str):
 def dashboard_sales():
   # graph = drawGraph(SaleModel)
 
-  return render_template('(admin)/sale_list.html', data = Parser(
-
-  ))
-
-@app.route(f'{basePath}/sales/<string:id>')
-def dashboard_sale(id: str):
-  id = escape_id(id)
-
-  return render_template('(auth)/sale.html', data = Parser(
+  return render_template('(admin)/sale.html', data = Parser(
 
   ))
 
@@ -202,4 +186,4 @@ def dashboard_textbooks():
     ylabel = 'Created'
   )
 
-  return render_template('(admin)/textbook_list.html', graphURI = graphFilename)
+  return render_template('(admin)/textbook.html', graphURI = graphFilename)
