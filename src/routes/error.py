@@ -33,7 +33,7 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
 
   # Handle errors for API
   if request.path.startswith('/api/'):
-    app.logger.error(f'API error {request.path}: %s' % error.__repr__())
+    app.logger.error(f'API error {request.path}: %s' % str(error))
 
     return {
       'message': (isHTTPException and error.description) or HTTPStatusCode.getNameFromCode(500),
@@ -41,7 +41,7 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
     }, (isHTTPException and error.code) or HTTPStatusCode.INTERNAL_SERVER_ERROR
   
 
-  app.logger.error(f'Non-API error {request.path}: %s' % error.__repr__())
+  app.logger.error(f'Non-API error {request.path}: %s' % str(error))
   match (isHTTPException and error.code):
     case HTTPStatusCode.NOT_FOUND:
       return render_template('error.html', params = ErrorPageVariables(
