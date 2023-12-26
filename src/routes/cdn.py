@@ -18,8 +18,7 @@ cdn_provider._dirCheck()
 def uploaded_images(filename: str):
   return send_from_directory(
     cdn_provider.TextbookLocation,
-    filename,
-    as_attachment = True
+    filename
   )
 
 @app.route('/public/textbooks/<path:filename>')
@@ -36,8 +35,7 @@ def uploaded_textbooks(user: UserModel, filename: str):
     if book.iuri.endswith(filename):
       return send_from_directory(
       cdn_provider.TextbookLocation,
-      filename,
-      as_attachment = True
+      filename
     )
   
   else: raise Unauthorized()
@@ -47,6 +45,5 @@ def uploaded_textbooks(user: UserModel, filename: str):
 def uploaded_graphs(user: UserModel, filename: str):
   return send_from_directory(
     cdn_provider.GraphFileLocation,
-    filename,
-    as_attachment = True
+    filename
   )
