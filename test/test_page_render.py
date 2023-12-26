@@ -45,7 +45,8 @@ def test_routesExist(app: Flask, client: FlaskClient):
     # Admin routes
     '/dashboard',
     '/dashboard/users',
-    '/dashboard/sales'
+    '/dashboard/revenue',
+    '/dashboard/textbooks'
   ]:
     response = client.get(route)
 
