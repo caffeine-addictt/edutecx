@@ -255,7 +255,8 @@ def dashboard_graph(user: UserModel):
 
 # Users
 @app.route(f'{basePath}/users', methods = ['GET'])
-def dashboard_users():
+@require_admin
+def dashboard_users(user: UserModel):
   graphURI = drawGraph(
     UserModel,
     lambda _: 1,
@@ -274,7 +275,8 @@ def dashboard_users():
 
 # Revenue
 @app.route(f'{basePath}/revenue', methods = ['GET'])
-def dashboard_revenue():
+@require_admin
+def dashboard_revenue(user: UserModel):
   graphURI = drawGraph(
     SaleModel,
     lambda model: model.total_cost,
