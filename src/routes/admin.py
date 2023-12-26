@@ -6,7 +6,9 @@ from src.utils.http import Parser
 from src.utils.caching import customCache
 from src.service.auth_provider import require_admin
 from src.utils.ext import utc_time
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
+from flask_sqlalchemy.query import Query
+from flask_sqlalchemy.pagination import Pagination
 from src.database import (
   UserModel,
   SaleModel,
@@ -16,6 +18,8 @@ from src.database import (
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
   AdminGraphGetRequest, AdminGraphGetReply, _AdminGraphGetData,
+  AdminGetRequest, AdminGetReply,
+  _UserGetData, _SaleGetData, _TextbookGetData,
   GenericReply
 )
 
@@ -27,7 +31,7 @@ import matplotlib.pyplot as plt
 from thread import ParallelProcessing
 from src.service.cdn_provider import _dirCheck, GraphFileLocation
 from typing import Callable, Tuple, TypeVar, Any
-from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import InternalServerError, BadRequest
 from flask import (
   abort,
   request,
@@ -65,12 +69,12 @@ def getDateRange(dateRange: DateRange = None) -> Tuple[datetime, datetime]:
 
 
 @customCache
-def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> list[_TModel]:
+def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> Query:
   range_ = getDateRange(dateRange)
   return model.query.filter(and_(
     (range_[0] <= model.created_at),
     (model.created_at <= range_[1])
-  )).all()
+  ))
 
 
 def getURI(filename: str) -> str:
@@ -118,7 +122,7 @@ def drawGraph(
   """
   XValue = datetime
 
-  fetched: list[_TModel] = fetchAll(model, dateRange)
+  fetched: list[_TModel] = fetchAll(model, dateRange).all()
   processed: list[Tuple[datetime, Any]] = []
 
   try:
@@ -245,6 +249,112 @@ def dashboard_graph(user: UserModel):
     data = _AdminGraphGetData(
       uri = uri
     )
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+# Paginated endpoint
+@app.route(f'{basePath}/get', methods = ['GET'])
+@require_admin
+def dashboard_get(user: UserModel):
+  req = AdminGetRequest(request)
+  model = (req.requestFor == 'User' and UserModel) \
+          or (req.requestFor == 'Sale' and SaleModel) \
+          or (req.requestFor == 'Textbook' and TextbookModel)
+
+  if not model:
+    raise BadRequest('Invalid requestFor')
+  
+  # Handle query
+  dateRange: DateRange = (
+    datetime.fromtimestamp(req.createdLower) if float('inf') != req.createdLower else utc_time.skip('1day'),
+    datetime.fromtimestamp(req.createdUpper) if float('inf') != req.createdUpper else utc_time.skip('1day')
+  )
+  priceRange = (req.priceLower, req.priceUpper)
+
+  if dateRange[0] > dateRange[1]:
+    raise BadRequest('createdLower is larger than createdUpper')
+  
+  if priceRange[0] > priceRange[1]:
+    raise BadRequest('priceLower is larger than priceUpper')
+
+
+  # Build query
+  queryPayload = []
+  query: Query
+
+  match req.requestFor:
+    case 'User':
+      queryPayload.append(or_(
+        UserModel.id.contains(req.query),
+        UserModel.username.contains(req.query)
+      ))
+      query = fetchAll(UserModel, dateRange)
+    
+    case 'Sale':
+      query = fetchAll(SaleModel, dateRange)
+
+    case 'Textbook':
+      queryPayload.append(and_(
+        priceRange[0] <= TextbookModel.price,
+        TextbookModel.price <= priceRange[1]
+      ))
+      queryPayload.append(or_(
+        TextbookModel.id.contains(req.query),
+        TextbookModel.author_id.contains(req.query)
+      ))
+      query = fetchAll(TextbookModel, dateRange)
+  
+  if query and queryPayload:
+    query = query.filter(or_(*queryPayload) if req.criteria == 'or' else and_(*queryPayload))
+
+  
+  # JSONify
+  payload = []
+  for entry in query.paginate(error_out = False):
+    match req.requestFor:
+      case 'User':
+        payload.append(_UserGetData(
+          entry.id,
+          username = entry.username,
+          privilege = entry.privilege,
+          profile_image = entry.profile_image,
+          created_at = entry.created_at.timestamp(),
+          last_login = entry.last_login.timestamp()
+        ))
+        continue
+
+      case 'Sale':
+        payload.append(_SaleGetData(
+          sale_id = entry.id,
+          user_id = entry.user_id,
+          textbook_ids = entry.textbook_ids.split(',')
+        ))
+        continue
+
+      case 'Textbook':
+        payload.append(_TextbookGetData(
+          id = entry.id,
+          author_id = entry.author_id,
+          title = entry.title,
+          description = entry.description,
+          categories = entry.categories.split('|'),
+          price = entry.price,
+          discount = entry.discount,
+          uri = entry.uri,
+          status = entry.status,
+          cover_image = entry.cover_image.uri if entry.cover_image else None,
+          created_at = entry.created_at.timestamp(),
+          updated_at = entry.updated_at.timestamp(),
+        ))
+        continue
+
+
+  return AdminGetReply(
+    message = f'Successfully fetched {req.requestFor}',
+    status = HTTPStatusCode.OK,
+    data = payload
   ).to_dict(), HTTPStatusCode.OK
 
 
