@@ -28,7 +28,12 @@ class _APIBase:
         
   def to_dict(self) -> dict[str, Any]:
     return {
-      i: (v if not isinstance(v, _APIBase) else v.to_dict())
+      i: (
+        (isinstance(v, _APIBase) and v.to_dict())
+        or (isinstance(v, (list, tuple)) and type(v)([ v2 if not isinstance(v2, _APIBase) else v2.to_dict() for v2 in v ]))
+        or (isinstance(v, Mapping) and type(v)({ i2: v2 if not isinstance(v2, _APIBase) else v2.to_dict() for i2, v2 in v.items() }))
+        or v
+      )
       for i,v in self.__dict__.items()
     }
   
