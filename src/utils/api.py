@@ -966,17 +966,17 @@ UserDeleteResponse = GenericResponse
 
 
 
-# Admin POST
+# Admin Graph Get
 @dataclass
-class _AdminGetData(_APIBase):
+class _AdminGraphGetData(_APIBase):
   uri: str
 
-class AdminGetRequest(_APIRequest):
+class AdminGraphGetRequest(_APIRequest):
   graphFor: Literal['User', 'Textbook', 'Revenue']
 
 @dataclass
-class AdminGetReply(_APIReply):
-  data: _AdminGetData
+class AdminGraphGetReply(_APIReply):
+  data: _AdminGraphGetData
 
-class AdminGetResponse(_APIResponse):
-  data: _AdminGetData
+class AdminGraphGetResponse(_APIResponse):
+  data: _AdminGraphGetData

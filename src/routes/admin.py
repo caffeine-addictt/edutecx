@@ -15,7 +15,7 @@ from src.database import (
 
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
-  AdminGetRequest, AdminGetReply, _AdminGetData,
+  AdminGraphGetRequest, AdminGraphGetReply, _AdminGraphGetData,
   GenericReply
 )
 
@@ -203,7 +203,7 @@ def dashboard(user: UserModel):
 @app.route(f'{basePath}/graph', methods = ['POST'])
 @require_admin
 def dashboard_graph(user: UserModel):
-  req = AdminGetRequest(request)
+  req = AdminGraphGetRequest(request)
 
   match req.graphFor:
     case 'User':
@@ -239,10 +239,10 @@ def dashboard_graph(user: UserModel):
         status = HTTPStatusCode.BAD_REQUEST
       ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  return AdminGetReply(
+  return AdminGraphGetReply(
     message = 'Successfully generated graph',
     status = HTTPStatusCode.OK,
-    data = _AdminGetData(
+    data = _AdminGraphGetData(
       uri = uri
     )
   ).to_dict(), HTTPStatusCode.OK
