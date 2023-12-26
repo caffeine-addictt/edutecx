@@ -3,7 +3,7 @@ API Parser
 """
 
 from .forcetype import recursiveValidation
-from typing import Any, Union, Optional, Mapping
+from typing import Any, Union, Literal, Optional, Mapping
 
 from requests import Response as ReqResponse
 from flask import Request, Response as FlaskResponse
@@ -28,7 +28,12 @@ class _APIBase:
         
   def to_dict(self) -> dict[str, Any]:
     return {
-      i: (v if not isinstance(v, _APIBase) else v.to_dict())
+      i: (
+        (isinstance(v, _APIBase) and v.to_dict())
+        or (isinstance(v, (list, tuple)) and type(v)([ v2 if not isinstance(v2, _APIBase) else v2.to_dict() for v2 in v ]))
+        or (isinstance(v, Mapping) and type(v)({ i2: v2 if not isinstance(v2, _APIBase) else v2.to_dict() for i2, v2 in v.items() }))
+        or v
+      )
       for i,v in self.__dict__.items()
     }
   
@@ -58,7 +63,8 @@ class _APIParser(_APIBase):
     ).items():
       
       if isinstance(req, Request):
-        variable = req.json.get(variableName, None) if req.json else req.form.get(variableName, None)
+        variable = req.json.get(variableName, None) if req.is_json and req.json else req.form.get(variableName, None)
+        variable = variable or req.args.get(variableName, None)
       elif isinstance(req, FlaskResponse):
         variable = req.json.get(variableName, None) if req.json else None
       elif isinstance(req, ReqResponse):
@@ -958,3 +964,48 @@ class UserDeleteRequest(_APIRequest):
 
 UserDeleteReply = GenericReply
 UserDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Admin Graph GET
+@dataclass
+class _AdminGraphGetData(_APIBase):
+  uri: str
+
+class AdminGraphGetRequest(_APIRequest):
+  graphFor: Literal['User', 'Textbook', 'Revenue']
+
+@dataclass
+class AdminGraphGetReply(_APIReply):
+  data: _AdminGraphGetData
+
+class AdminGraphGetResponse(_APIResponse):
+  data: _AdminGraphGetData
+
+
+
+
+
+
+
+
+# Admin GET
+class AdminGetRequest(_APIRequest):
+  requestFor: Literal['User', 'Textbook', 'Sale']
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class AdminGetReply(_APIReply):
+  data: list[_UserGetData | _SaleGetData | _TextbookGetData]
+

@@ -45,6 +45,11 @@ def test_forceTyping():
   assert forcetype('hi', typing.Optional[int]) == None
   assert forcetype('hi', typing.Optional[str]) == 'hi'
 
+  # Testing Literal types
+  assert forcetype('hi', typing.Literal['hi', 'bye']) == 'hi'
+  assert forcetype(None, typing.Literal[True]) == None
+  assert forcetype([], typing.Literal['']) == None
+
   # Testing sequence declared types
   assert forcetype('hi', list[str]) == None
   assert forcetype(['hi', Exception()], list[int]) == None

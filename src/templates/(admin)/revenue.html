@@ -4,7 +4,7 @@
 
 <!-- Title -->
 {% block title %}
-  User Dashboard - EduTecX
+  Revenue Dashboard - EduTecX
 {% endblock %}
 
 
@@ -25,7 +25,7 @@
           Authorization: 'Bearer {{ session["access_token"] }}'
         },
         body: JSON.stringify({
-          "graphFor": "User"
+          "graphFor": "Revenue"
         })
       })
 
@@ -42,7 +42,7 @@
       let criteria = searchParams.get('criteria')
       criteria = ['or', 'and'].includes(criteria) ? criteria : 'or'
 
-      searchParams.set('requestFor', 'User')
+      searchParams.set('requestFor', 'Sale')
       searchParams.set('criteria', criteria)
 
       response = await fetch(`/dashboard/get?${searchParams.toString()}`, {

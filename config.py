@@ -24,7 +24,6 @@ class ConfigBase:
   # \\\\\\ General ////// #
   # Production ENV
   ENV: Literal['development', 'production'] = 'development'
-  DOMAIN: str = '127.0.0.1:8080'
 
 
   # \\\\\\ Stripe ////// #
@@ -46,7 +45,7 @@ class ConfigBase:
   # \\\\\\ JWT ////// #
   # Docs https://flask-jwt-extended.readthedocs.io/en/3.0.0_release/options/
   JWT_SECRET_KEY: str = 'jwt-secret'
-  JWT_TOKEN_LOCATION: list[str] = ['headers', 'cookies']
+  JWT_TOKEN_LOCATION: list[str] = ['headers', 'cookies', 'json']
   JWT_ACCESS_TOKEN_EXPIRES: int = 60 * 60 # 1h in seconds
   JWT_REFRESH_TOKEN_EXPIRES: int = 30 * 24 * 60 * 60 #30 days in seconds
   PROPAGATE_EXCEPTIONS: bool = True

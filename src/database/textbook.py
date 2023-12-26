@@ -39,7 +39,7 @@ class TextbookModel(db.Model):
   # Attributes
   title      : Mapped[str] = mapped_column(String, nullable = False)
   description: Mapped[str] = mapped_column(String, nullable = True, default = '')
-  categories : Mapped[str] = mapped_column(String, nullable = False, default = '') # 'category1|gaategory2...'
+  categories : Mapped[str] = mapped_column(String, nullable = False, default = '') # 'category1|category2...'
 
   price      : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
   discount   : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
