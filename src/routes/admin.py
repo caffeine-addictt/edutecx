@@ -368,7 +368,7 @@ def dashboard_users(user: UserModel):
 @app.route(f'{basePath}/revenue', methods = ['GET'])
 @require_admin
 def dashboard_revenue(user: UserModel):
-  return render_template('(admin)/sale.html')
+  return render_template('(admin)/revenue.html')
 
 
 
