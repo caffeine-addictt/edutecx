@@ -2,13 +2,11 @@
 Managing Admin-Only routes
 """
 
-from src.utils.http import Parser
 from src.utils.caching import customCache
 from src.service.auth_provider import require_admin
 from src.utils.ext import utc_time
 from sqlalchemy import and_, or_
 from flask_sqlalchemy.query import Query
-from flask_sqlalchemy.pagination import Pagination
 from src.database import (
   UserModel,
   SaleModel,
@@ -33,7 +31,6 @@ from src.service.cdn_provider import _dirCheck, GraphFileLocation
 from typing import Callable, Tuple, TypeVar, Any
 from werkzeug.exceptions import BadRequest
 from flask import (
-  abort,
   request,
   render_template,
   current_app as app
