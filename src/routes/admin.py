@@ -216,8 +216,8 @@ def dashboard_users():
 
 
 # Revenue
-@app.route(f'{basePath}/sales', methods = ['GET'])
-def dashboard_sales():
+@app.route(f'{basePath}/revenue', methods = ['GET'])
+def dashboard_revenue():
   graphURI = drawGraph(
     SaleModel,
     lambda model: model.total_cost,
