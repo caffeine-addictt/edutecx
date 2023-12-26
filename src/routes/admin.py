@@ -168,8 +168,8 @@ def drawGraph(
   _height = max(hashMap.values())
 
   app.logger.debug(f'{_width, _height, _width // labelCount[0], _height // labelCount[1]}')
-  plt.xticks(numpy.arange(0, _width + 1, max(1, round(_width / labelCount[0]))))
-  plt.yticks(numpy.arange(0, _height + 1, max(1, round(_height / labelCount[1]))))
+  plt.xticks(numpy.arange(0, _width + 1, max(1, round(_width / labelCount[0]))), minor = True)
+  plt.yticks(numpy.arange(0, _height + 1, max(1, round(_height / labelCount[1]))), minor = True)
 
   # Label
   plt.title(title)
