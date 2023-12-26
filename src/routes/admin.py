@@ -257,16 +257,7 @@ def dashboard_graph(user: UserModel):
 @app.route(f'{basePath}/users', methods = ['GET'])
 @require_admin
 def dashboard_users(user: UserModel):
-  graphURI = drawGraph(
-    UserModel,
-    lambda _: 1,
-    'Users Accounts Created Over a 12 Month Period',
-    'created',
-    ylabel = 'Accounts Created'
-  )
-
   return render_template('(admin)/user.html', data = Parser(
-    graphURI = graphURI,
     users = fetchAll(UserModel)
   ))
 
@@ -277,16 +268,7 @@ def dashboard_users(user: UserModel):
 @app.route(f'{basePath}/revenue', methods = ['GET'])
 @require_admin
 def dashboard_revenue(user: UserModel):
-  graphURI = drawGraph(
-    SaleModel,
-    lambda model: model.total_cost,
-    'Revenue Over a 12 Month Period',
-    'revenue',
-    ylabel = 'Total Revenue ($)'
-  )
-
   return render_template('(admin)/sale.html', data = Parser(
-    graphURI = graphURI,
     sales = fetchAll(SaleModel)
   ))
 
@@ -296,15 +278,6 @@ def dashboard_revenue(user: UserModel):
 # Textbooks
 @app.route(f'{basePath}/textbooks', methods = ['GET'])
 def dashboard_textbooks():
-  graphURI = drawGraph(
-    TextbookModel,
-    lambda _: 1,
-    'Textbooks Created Over a 12 Month Period',
-    'created',
-    ylabel = 'Textbooks Created'
-  )
-
   return render_template('(admin)/textbook.html', data = Parser(
-    graphURI = graphURI,
     textbooks = fetchAll(TextbookModel)
   ))
