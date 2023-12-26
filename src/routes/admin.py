@@ -2,16 +2,21 @@
 Managing Admin-Only routes
 """
 
-from src.utils.caching import customCache
 from src.utils.http import Parser
+from src.utils.caching import customCache
 from src.service.auth_provider import require_admin
-from src.utils.http import HTTPStatusCode
 from src.utils.ext import utc_time
 from sqlalchemy import and_
 from src.database import (
   UserModel,
   SaleModel,
   TextbookModel
+)
+
+from src.utils.http import HTTPStatusCode
+from src.utils.api import (
+  AdminGetRequest, AdminGetReply, _AdminGetData,
+  GenericReply
 )
 
 import os
@@ -25,6 +30,7 @@ from typing import Callable, Tuple, TypeVar, Any
 from werkzeug.exceptions import InternalServerError
 from flask import (
   abort,
+  request,
   render_template,
   current_app as app
 )
@@ -69,7 +75,7 @@ def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> list[_TModel]
 
 def getURI(filename: str) -> str:
   if domain := app.config.get('DOMAIN'):
-    return domain + '/public/graphs/' + filename
+    return '/public/graphs/' + filename
   raise InternalServerError('Domain not configured')
 
 
@@ -192,6 +198,57 @@ def dashboard(user: UserModel):
   return render_template('(admin)/index.html', data = Parser(
     user = user
   ))
+
+
+
+
+# Graph generate endpoint
+@app.route(f'{basePath}/graph', methods = ['POST'])
+@require_admin
+def dashboard_graph(user: UserModel):
+  req = AdminGetRequest(request)
+
+  match req.graphFor:
+    case 'User':
+      uri = drawGraph(
+        UserModel,
+        lambda _: 1,
+        'Users Accounts Created Over a 12 Month Period',
+        'created',
+        ylabel = 'Accounts Created'
+      )
+    
+    case 'Revenue':
+      uri = drawGraph(
+        SaleModel,
+        lambda model: model.total_cost,
+        'Revenue Over a 12 Month Period',
+        'revenue',
+        ylabel = 'Total Revenue ($)'
+      )
+    
+    case 'Textbook':
+      uri = drawGraph(
+        TextbookModel,
+        lambda _: 1,
+        'Textbooks Created Over a 12 Month Period',
+        'created',
+        ylabel = 'Textbooks Created'
+      )
+    
+    case _:
+      return GenericReply(
+        message = 'Invalid graphFor',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  return AdminGetReply(
+    message = 'Successfully generated graph',
+    status = HTTPStatusCode.OK,
+    data = _AdminGetData(
+      uri = uri
+    )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 

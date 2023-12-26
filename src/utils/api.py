@@ -3,7 +3,7 @@ API Parser
 """
 
 from .forcetype import recursiveValidation
-from typing import Any, Union, Optional, Mapping
+from typing import Any, Union, Literal, Optional, Mapping
 
 from requests import Response as ReqResponse
 from flask import Request, Response as FlaskResponse
@@ -958,3 +958,25 @@ class UserDeleteRequest(_APIRequest):
 
 UserDeleteReply = GenericReply
 UserDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Admin POST
+@dataclass
+class _AdminGetData(_APIBase):
+  uri: str
+
+class AdminGetRequest(_APIRequest):
+  graphFor: Literal['User', 'Textbook', 'Revenue']
+
+@dataclass
+class AdminGetReply(_APIReply):
+  data: _AdminGetData
+
+class AdminGetResponse(_APIResponse):
+  data: _AdminGetData
