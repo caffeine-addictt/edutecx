@@ -59,6 +59,7 @@ class _APIParser(_APIBase):
       
       if isinstance(req, Request):
         variable = req.json.get(variableName, None) if req.json else req.form.get(variableName, None)
+        variable = variable or req.args.get(variableName, None)
       elif isinstance(req, FlaskResponse):
         variable = req.json.get(variableName, None) if req.json else None
       elif isinstance(req, ReqResponse):
