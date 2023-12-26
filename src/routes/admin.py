@@ -190,7 +190,7 @@ def drawGraph(
 def dashboard(user: UserModel):
   
   return render_template('(admin)/index.html', data = Parser(
-    
+    user = user
   ))
 
 
