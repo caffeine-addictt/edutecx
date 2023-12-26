@@ -58,7 +58,7 @@ class _APIParser(_APIBase):
     ).items():
       
       if isinstance(req, Request):
-        variable = req.json.get(variableName, None) if req.json else req.form.get(variableName, None)
+        variable = req.json.get(variableName, None) if req.is_json and req.json else req.form.get(variableName, None)
         variable = variable or req.args.get(variableName, None)
       elif isinstance(req, FlaskResponse):
         variable = req.json.get(variableName, None) if req.json else None
@@ -967,7 +967,7 @@ UserDeleteResponse = GenericResponse
 
 
 
-# Admin Graph Get
+# Admin Graph GET
 @dataclass
 class _AdminGraphGetData(_APIBase):
   uri: str
@@ -981,3 +981,26 @@ class AdminGraphGetReply(_APIReply):
 
 class AdminGraphGetResponse(_APIResponse):
   data: _AdminGraphGetData
+
+
+
+
+
+
+
+
+# Admin GET
+class AdminGetRequest(_APIRequest):
+  requestFor: Literal['User', 'Textbook', 'Sale']
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class AdminGetReply(_APIReply):
+  data: list[_UserGetData | _SaleGetData | _TextbookGetData]
+
