@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Optional, Union, Sequence, Mapping, get_args, get_origin
+from typing import Any, Optional, Union, Literal, Sequence, Mapping, get_args, get_origin
 
 def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
   """
@@ -42,10 +42,10 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
   # f: MyClass => None
   origin = get_origin(type_)
 
-  if origin is Union:
+  if origin is Union or origin is Literal:
     for t in get_args(type_):
       interpretated = recursiveValidation(x, t)
-      if interpretated:
+      if interpretated and (origin is not Literal or (origin is Literal and (interpretated == t))):
         return interpretated
       
   elif origin:
