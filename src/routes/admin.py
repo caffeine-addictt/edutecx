@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 from thread import ParallelProcessing
 from src.service.cdn_provider import _dirCheck, GraphFileLocation
 from typing import Callable, Tuple, TypeVar, Any
-from werkzeug.exceptions import InternalServerError, BadRequest
+from werkzeug.exceptions import BadRequest
 from flask import (
   abort,
   request,
@@ -78,9 +78,7 @@ def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> Query:
 
 
 def getURI(filename: str) -> str:
-  if domain := app.config.get('DOMAIN'):
-    return '/public/graphs/' + filename
-  raise InternalServerError('Domain not configured')
+  return '/public/graphs/' + filename
 
 
 @customCache
