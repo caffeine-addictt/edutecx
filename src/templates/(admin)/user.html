@@ -15,8 +15,8 @@
   </div>
 
 
-  <!-- Update graph URI -->
   <script>
+    // Update graph URI
     const fetchGraphURI = async () => {
       response = await fetch('/dashboard/graph', {
         method: 'POST',
@@ -34,15 +34,35 @@
 
       $('#graph').attr('src', data.data.uri)
       console.log('Fetched URI: ' + data.data.uri)
-
-      return data.data.uri
     }
 
-    $(document).ready(() => Promise.all([fetchGraphURI()])
+    // Stream fetched
+    const fetchUserData = async () => {
+      let searchParams = ((new URL(location.href)).searchParams)
+      let criteria = searchParams.get('criteria')
+      criteria = ['or', 'and'].includes(criteria) ? criteria : 'or'
+
+      searchParams.set('requestFor', 'User')
+      searchParams.set('criteria', criteria)
+
+      response = await fetch(`/dashboard/get?${searchParams.toString()}`, {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer {{ session["access_token"] }}'
+        }
+      })
+
+      data = await response.json()
+      if (!response.ok) throw new Error(data.message)
+
+      /* TODO: Inject data at runtime */
+      console.log('Fetched Data')
+    }
+
+
+    // Run in parallel
+    $(document).ready(() => Promise.all([ fetchGraphURI(), fetchUserData() ])
       .then(values => console.log(values))
       .catch(err => console.log(err)))
-    
-
-
   </script>
 {% endblock %}
