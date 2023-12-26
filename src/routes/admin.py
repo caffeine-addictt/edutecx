@@ -182,7 +182,7 @@ def drawGraph(
   # Upload
   _dirCheck()
   filename = str(model.id) + '_' + re.compile(r'[^a-zA-Z0-9-]').sub('', nameExtra) + '.svg'
-  plt.savefig(os.path.join(GraphFileLocation, filename), transparent = True)
+  plt.savefig(os.path.join(GraphFileLocation, filename))
   plt.close()
 
   return getURI(filename)
