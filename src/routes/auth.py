@@ -313,7 +313,5 @@ def register():
 
       callbackURI: str = parse.quote(request.args.get('callbackURI', '/login'))
       return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
-  elif request.method == 'POST':
-    flash(f'Failed to create user account: {form.errors}', 'danger')
 
   return render_template('(auth)/register.html', form = form)
