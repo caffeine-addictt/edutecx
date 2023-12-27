@@ -7,7 +7,7 @@ class RegisterForm(FlaskForm):
   """Register Form"""
 
   username    = StringField('Username', validators = [DataRequired(), Length(5, 20)])
-  email       = StringField('Email', validators = [DataRequired(), Length(1, 64), Email('Invalid Email', check_deliverability = True)])
+  email       = StringField('Email', validators = [DataRequired(), Length(1, 64), Email('Invalid Email')])
   password    = PasswordField('Password', validators = [DataRequired(), Length(8, 20), EqualTo('confirm', 'Passwords do not match')])
   confirm     = PasswordField('Confirm Password', validators = [DataRequired(), Length(1, 20)])
   agree       = BooleanField('I agree to the <a href="/">privacy policy</a>', validators = [DataRequired()])
