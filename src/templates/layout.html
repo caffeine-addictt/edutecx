@@ -8,7 +8,7 @@
 
     
 
-    <!-- Default Title -->
+    {# Default Title #}
     <title>
       {% block title %}
         EduTecX
@@ -18,10 +18,10 @@
 
 
 
-    <!-- Globals SCSS -->
+    {# Globals SCSS #}
     <link href = '{{ url_for("static", filename = "global.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
 
-    <!-- Bootstrap CSS v5.2.1 -->
+    {# Bootstrap CSS v5.2.1 #}
     <link
       href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css'
       rel = 'stylesheet'
@@ -29,20 +29,20 @@
       crossorigin = 'anonymous'
     />
 
-    <!-- Page Private SCSS -->
+    {# Page Private SCSS #}
     {% block styles %}
     {% endblock %}
 
 
     
 
-    <!-- SCSS to CSS compiler -->
+    {# SCSS to CSS compiler #}
     <script src='https://cdn.jsdelivr.net/npm/less@4.1.1' ></script>
 
-    <!-- JQuery -->
+    {# JQuery #}
     <script src='https://cdn.jsdelivr.net/npm/jquery@3.6.3/dist/jquery.slim.min.js'></script>
 
-    <!-- Bootstrap CSS -->
+    {# Bootstrap CSS #}
     <script
       src='https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js'
       integrity='sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3'
@@ -54,20 +54,20 @@
       crossorigin='anonymous'
     ></script>
 
-    <!-- Import Scripts -->
+    {# Import Scripts #}
     {% block scripts %}
     {% endblock %}
   </head>
 
 
   <body class='d-flex flex-column min-vh-100 vw-100 mw-100'>
-    <!-- Import Navbar -->
+    {# Import Navbar #}
     {% block navComponent %}
       {% include 'components/navbar.html' %}
     {% endblock %}
 
 
-    <!-- Content Block -->
+    {# Content Block #}
     <div class='d-flex flex-column flex-fill'>
       {% block mainContent %}
         body
@@ -75,13 +75,13 @@
     </div>
 
 
-    <!-- Import Footer -->
+    {# Import Footer #}
     {% block footerComponent %}
       {% include 'components/footer.html' %}
     {% endblock %}
 
 
-    <!-- Import Toasts -->
+    {# Import Toasts #}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% include 'components/toast.html' %}

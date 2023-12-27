@@ -16,6 +16,8 @@ from src.utils.api import (
   GenericReply
 )
 
+import re
+import email_validator
 from typing import Optional
 from flask import (
   request,
@@ -86,6 +88,31 @@ def apiV1Register():
       message = 'Missing email or username',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  # Validate Email
+  try:
+    email_validator.validate_email(req.email, check_deliverability = True)
+  except Exception:
+    return GenericReply(
+      message = 'Email is invalid and/or cannot be reached',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  # Validate Username
+  if not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{5,20}$', req.username):
+    return GenericReply(
+      message = 'Username has to be between 5 to 20 charcters inclusive, start with a letter and only {_-} special characters are allowed',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  # Validate password
+  if not re.fullmatch(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[?!@$%^#&*-]).{8,20}$', req.password):
+    return GenericReply(
+      message = 'Password has to be between 8 to 20 characters inclusive, contain at least 1 upper and lower case letter, \
+                contain at least 1 digit and contain at least 1 {!@$%^#&*-} special character',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
   
   # Check if user exists
   existing: Optional[UserModel] = UserModel.query.filter(or_(

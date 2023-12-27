@@ -46,10 +46,12 @@ from flask_jwt_extended import (
 def user_identity_loader(user: 'UserModel'):
   return user.id
 
+
 @jwt.user_lookup_loader
 def user_lookup_loader(jwtHeader, jwtPayload):
   identity = jwtPayload["sub"]
   return UserModel.query.filter(UserModel.id == identity).first()
+
 
 @jwt.user_lookup_error_loader
 def user_lookup_error_loader(jwtHeader, jwtPayload):
@@ -62,6 +64,7 @@ def user_lookup_error_loader(jwtHeader, jwtPayload):
   unset_refresh_cookies(reloginResponse)
   unset_jwt_cookies(reloginResponse)
   return reloginResponse, HTTPStatusCode.SEE_OTHER
+
 
 @app.after_request
 def refresh_token(response):
@@ -117,6 +120,7 @@ def unauthorized_loader(msg: str):
       code = HTTPStatusCode.SEE_OTHER
     ), HTTPStatusCode.SEE_OTHER
 
+
 @jwt.invalid_token_loader
 def invalid_token_loader(msg: str):
   if request.path.startswith('/api/'):
@@ -130,6 +134,7 @@ def invalid_token_loader(msg: str):
       code = HTTPStatusCode.SEE_OTHER
     ))
     return response, HTTPStatusCode.SEE_OTHER
+
 
 @jwt.expired_token_loader
 def expired_token_loader(jwtHeader, jwtPayload):
@@ -180,7 +185,8 @@ def expired_token_loader(jwtHeader, jwtPayload):
     unset_refresh_cookies(response)
     unset_access_cookies(response)
     return response, HTTPStatusCode.SEE_OTHER
-  
+
+
 @jwt.token_in_blocklist_loader
 def token_in_blocklist_loader(jwtHeader, jwtPayload) -> bool:
   jti = jwtPayload['jti']
@@ -232,11 +238,9 @@ def login():
       flash('Welcome back!', 'success')
 
       return successfulLogin
-    
-  elif request.method == 'POST':
-    flash('Failed to log in', 'danger')
-    
   return render_template('(auth)/login.html', form = form, url = request.host_url)
+
+
 
 
 @app.route('/logout', methods = ['GET', 'POST'])
@@ -285,6 +289,8 @@ def logout():
   return render_template('(auth)/logout.html', form = LogoutForm())
 
 
+
+
 @app.route('/register', methods = ['GET', 'POST'])
 @jwt_required(optional = True)
 def register():
@@ -313,7 +319,5 @@ def register():
 
       callbackURI: str = parse.quote(request.args.get('callbackURI', '/login'))
       return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
-  elif request.method == 'POST':
-    flash(f'Failed to create user account: {form.errors}', 'danger')
 
   return render_template('(auth)/register.html', form = form)

@@ -1,16 +1,15 @@
 <!doctype html>
+{% from 'macros/form.html' import render_submit %}
 {% extends 'layout.html' %}
 
-
-<!-- Styles -->
-{% block styles %}
-  <link href = '{{ url_for("static", filename = "/(auth)/logout/index.scss") }}' rel = 'stylesheet' />
+{# Title #}
+{% block title %}
+  Logout - EduTecX
 {% endblock %}
 
 
-<!-- Body -->
+{# Body #}
 {% block mainContent %}
-  <!-- Everything goes here -->
   <form
     id='logoutForm'
     action=''
@@ -19,12 +18,6 @@
     class='d-flex flex-column gap-2 align-items-center'
   >
     {{ form.hidden_tag() }}
-    <input class = 'btn btn-default btn-submit' type = 'submit' value = 'Log Out'/>
+    {{ render_submit(form.submit) }}
   </form>
-{% endblock %}
-
-
-<!-- Scripts -->
-{% block scripts %}
-  <script src = '{{ url_for("static", filename = "/(auth)/logout/index.js") }} '></script>
 {% endblock %}
