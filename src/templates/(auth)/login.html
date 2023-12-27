@@ -1,5 +1,11 @@
 <!doctype html>
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
 {% extends 'layout.html' %}
+
+{# Title #}
+{% block title %}
+  Login - EduTecX
+{% endblock %}
 
 
 {# Styles #}
@@ -15,23 +21,13 @@
     action=''
     method='POST'
     role='form'
-    class='d-flex flex-column gap-2 align-items-center'
+    class='d-flex flex-column gap-3 align-items-center'
   >
     {{ form.hidden_tag() }}
-
-    <!-- Render Inputs -->
-    {% for field in form %}
-      <div>
-        <div>
-          {{ field.label }} {% if field.flags.required %}*{% endif %}
-        </div>
-        
-        <div>{{ field }}</div>
-      </div>
-    {% endfor %}
-    {{ url }}
-
-    <input class = 'btn btn-default btn-submit' type = 'submit' value = 'Log In'/>
+    {{ render_text_field(form.email) }}
+    {{ render_text_field(form.password) }}
+    {{ render_checkbox_field(form.remember_me) }}
+    {{ render_submit(field.submit) }}
   </form>
 {% endblock %}
 
