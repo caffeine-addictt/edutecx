@@ -2,15 +2,14 @@
 {% extends 'layout.html' %}
 
 
-<!-- Styles -->
+{# Styles #}
 {% block styles %}
   <link href = '{{ url_for("static", filename = "/(auth)/logout/index.scss") }}' rel = 'stylesheet' />
 {% endblock %}
 
 
-<!-- Body -->
+{# Body #}
 {% block mainContent %}
-  <!-- Everything goes here -->
   <form
     id='logoutForm'
     action=''
@@ -24,7 +23,7 @@
 {% endblock %}
 
 
-<!-- Scripts -->
+{# Scripts #}
 {% block scripts %}
   <script src = '{{ url_for("static", filename = "/(auth)/logout/index.js") }} '></script>
 {% endblock %}
