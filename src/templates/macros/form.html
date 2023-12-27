@@ -1,0 +1,48 @@
+{# Macros for all form components #}
+
+{% macro render_label(field) %}
+  <label class="form__label" for="username">
+    <h3 class="fs-5">{{ field.name.title() }}
+      {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}
+    </h3>
+  </label>
+{% endmacro %}
+
+
+{% macro render_errors(field) %}
+  {%- for err in field.errors %}
+    <span class="form__error text-danger">
+      {{ err }}
+    </span>
+  {% endfor %}
+{% endmacro %}
+
+
+
+
+
+
+
+
+{% macro render_text_field(field) %}
+  <div class="form__group d-flex flex-column w-auto">
+    {{ render_label(field) }}
+    {{ field(class_="form__field") }}
+    {{ render_errors(field) }}
+  </div>
+{% endmacro %}
+
+
+{% macro render_checkbox_field(field) %}
+  <div class="form__group d-flex flex-row gap-2 w-auto">
+    {{ field(class_="form__field") }}
+    {{ render_label(field) }}
+  </div>
+{% endmacro %}
+
+
+{% macro render_submit(field) %}
+  <div class="form__group w-auto">
+    {{ field(class="btn btn-default btn-submit") }}
+  </div>
+{% endmacro %}
