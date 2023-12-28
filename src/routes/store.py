@@ -9,7 +9,9 @@ from typing import List, Optional
 from src.utils.http import HTTPStatusCode
 from werkzeug.exceptions import BadRequest
 from src.utils.api import (
-  StoreGetRequest, StoreGetReply, _TextbookGetData
+  StoreGetRequest, StoreGetReply, _TextbookGetData,
+  CartAddRequest, CartAddReply,
+  GenericReply
 )
 
 import re
@@ -123,6 +125,28 @@ def store_get():
 
 
 
+
+
+# Cart POST
+@app.route('/cart/add', methods = ['POST'])
+@auth_provider.require_login
+def add_to_cart(user: UserModel):
+  req = CartAddRequest(request)
+
+  textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
+  if not isinstance(textbook, TextbookModel):
+    return GenericReply(
+      message = 'Unable to locate textbook',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  session['cart'] = session['cart'] or []
+  session['cart'].append(req.textbook_id)
+
+  return CartAddReply(
+    message = 'Successfully added to cart',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
 
 
 @app.route('/cart')
