@@ -54,6 +54,9 @@
       crossorigin='anonymous'
     ></script>
 
+    {# Global Script #}
+    <script src="{{ url_for('static', filename = 'global.js') }}"></script>
+
     {# Import Scripts #}
     {% block scripts %}
     {% endblock %}
