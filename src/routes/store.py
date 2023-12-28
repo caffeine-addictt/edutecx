@@ -4,13 +4,10 @@ Handles store routes
 
 from src.service import auth_provider
 from src.database import UserModel, TextbookModel
-from src.utils.http import HashableDict
-from typing import List, Optional
 from src.utils.http import HTTPStatusCode
 from werkzeug.exceptions import BadRequest
 from src.utils.api import (
-  StoreGetRequest, StoreGetReply, _TextbookGetData,
-  GenericReply
+  StoreGetRequest, StoreGetReply, _TextbookGetData
 )
 
 import re
@@ -23,7 +20,6 @@ from sqlalchemy import and_, or_
 from flask_sqlalchemy.pagination import Pagination
 from flask import (
   flash,
-  session,
   request,
   render_template,
   current_app as app
