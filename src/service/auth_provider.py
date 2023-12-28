@@ -3,7 +3,7 @@ Auth Provider
 """
 
 from functools import wraps
-from typing import Optional, Callable, Any, Literal, Concatenate
+from typing import Optional, Callable, Any, Literal, Concatenate, ParamSpec, TypeVar
 
 from src.database.user import PrivilegeTypes, UserModel
 from src.utils.http import HTTPStatusCode
@@ -15,6 +15,11 @@ from flask_jwt_extended import (
   verify_jwt_in_request
 )
 
+
+
+
+P = ParamSpec('P')
+T = TypeVar('T')
 
 def optional_jwt() -> bool:
   """
@@ -28,7 +33,7 @@ def optional_jwt() -> bool:
     return False
 
 
-def require_admin(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[..., Any]:
+def require_admin(func: Callable[Concatenate[UserModel, P], T]) -> Callable[P, T | tuple[dict[str, Any], int]]:
   """
   Enforces Admin-Only JWT authentication for routes
 
@@ -43,7 +48,7 @@ def require_admin(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[
   >>> def myRoute(user: UserModel): ...
   """
   @wraps(func)
-  def wrapper(*args: Any, **kwargs: Any) -> Any:
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> T | tuple[dict[str, Any], int]:
     verify_jwt_in_request()
     user: UserModel = get_current_user()
 
@@ -64,7 +69,7 @@ def require_admin(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[
 
 
 
-def require_login(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[..., Any]:
+def require_login(func: Callable[Concatenate[UserModel, P], T]) -> Callable[P, T | tuple[dict[str, Any], int]]:
   """
   Decorator for enforcing login-only routes
 
@@ -79,7 +84,7 @@ def require_login(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[
   >>> def myRoute(user: UserModel): ...
   """
   @wraps(func)
-  def wrapper(*args, **kwargs):
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> T | tuple[dict[str, Any], int]:
     verify_jwt_in_request()
     return func(get_current_user(), *args, **kwargs)
   return wrapper
@@ -87,7 +92,7 @@ def require_login(func: Callable[Concatenate[UserModel, ...], Any]) -> Callable[
 
 
 
-def optional_login(func: Callable[Concatenate[UserModel | None, ...], Any]) -> Callable[..., Any]:
+def optional_login(func: Callable[Concatenate[UserModel | None, P], T]) -> Callable[P, T]:
   """
   Decorator for enforcing login-optional routes
 
@@ -102,7 +107,7 @@ def optional_login(func: Callable[Concatenate[UserModel | None, ...], Any]) -> C
   >>> def myRoute(user: UserModel | None): ...
   """
   @wraps(func)
-  def wrapper(*args, **kwargs):
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
     return func(
       optional_jwt() and get_current_user() or None,
       *args,
