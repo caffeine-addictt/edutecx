@@ -250,6 +250,20 @@ CartAddReply = GenericReply
 
 
 
+# Cart DELETE
+class CartDeleteRequest(_APIRequest):
+  """API Request for deleting textbook from cart"""
+  textbook_id: str
+
+CartDeleteReply = GenericReply
+
+
+
+
+
+
+
+
 # Assignment GET
 @dataclass
 class _AssignmentGetData(_APIBase):

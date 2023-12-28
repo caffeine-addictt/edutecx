@@ -11,6 +11,7 @@ from werkzeug.exceptions import BadRequest
 from src.utils.api import (
   StoreGetRequest, StoreGetReply, _TextbookGetData,
   CartAddRequest, CartAddReply,
+  CartDeleteRequest, CartDeleteReply,
   GenericReply
 )
 
@@ -127,7 +128,7 @@ def store_get():
 
 
 
-# Cart POST
+# Cart ADD
 @app.route('/cart/add', methods = ['POST'])
 @auth_provider.require_login
 def add_to_cart(user: UserModel):
@@ -140,11 +141,32 @@ def add_to_cart(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  session['cart'] = session['cart'] or []
-  session['cart'].append(req.textbook_id)
+  session['cart'] = session['cart'] or set()
+  session['cart'].add(req.textbook_id)
 
   return CartAddReply(
     message = 'Successfully added to cart',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+# Cart DELETE
+@app.route('/cart/remove', methods = ['POST'])
+@auth_provider.require_login
+def remove_from_cart(user: UserModel):
+  req = CartDeleteRequest(request)
+
+  session['cart'] = session['cart'] or set()
+  if req.textbook_id not in session['cart']:
+    return GenericReply(
+      message = 'Not in cart',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  session['cart'].remove(req.textbook_id)
+
+  return CartDeleteReply(
+    message = 'Successfully removed from cart',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
 
