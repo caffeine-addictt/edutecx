@@ -6,8 +6,16 @@ from src.service import auth_provider
 from src.database import UserModel, TextbookModel
 from src.utils.http import HashableDict
 from typing import List, Optional
+from src.utils.http import HTTPStatusCode
+from werkzeug.exceptions import BadRequest
+from src.utils.api import (
+  StoreGetRequest, StoreGetReply, _TextbookGetData
+)
 
+import re
 import stripe
+from datetime import datetime
+from src.utils.ext import utc_time
 from src.utils.caching import customCache
 
 from sqlalchemy import and_, or_
@@ -27,29 +35,96 @@ stripe.api_key = app.config.get('STRIPE_API_KEY')
 
 
 
-# Routes
+# Store
 @app.route('/store')
-@auth_provider.optional_login
-def store(user: Optional[UserModel]):
-  # Get the search params
-  page = request.args.get('page', 1, type = int)
-  criteria = request.args.get('criteria', 'or', type = lambda x: (x.lower() == 'and' and 'and') or 'or') # 'and' or 'or'
-  queryString = request.args.get('query', '', type = str)
-  priceLimit = request.args.get('price_limit', float('inf'), type = float)
-  categoryFilter = request.args.get('category', [], type = lambda x: x.lower().split(','))
+def store():
+  return render_template('(misc)/store.html')
 
-  # Filter
-  textbooks: Pagination = filterTextbooks(
-    criteria = criteria,
-    filterExpression = HashableDict(
-      queryString = TextbookModel.title.like(f'%{queryString}%'),
-      priceLimit = (TextbookModel.price < priceLimit),
-      *{i: TextbookModel.categories.like(f'%{category}%') for i, category in enumerate(categoryFilter)}
-    ),
-    page = page
+
+# Store Get
+@app.route('/store/get', methods = ['GET'])
+def store_get():
+  req = StoreGetRequest(request)
+
+  # Handle query
+  # regex to parse only proper categories
+  categories = re.match(re.compile(r'^[a-zA-Z-_,]$'), req.categories)
+  if (not categories) or (categories != req.categories):
+    raise BadRequest('Invalid characters in category filter')
+  categories = str(categories).split(',')
+
+  dateRange: tuple[datetime, datetime] = (
+    datetime.fromtimestamp(req.createdLower) if float('inf') != req.createdLower else utc_time.skip('1day'),
+    datetime.fromtimestamp(req.createdUpper) if float('inf') != req.createdUpper else utc_time.skip('1day')
+  )
+  priceRange = (req.priceLower, req.priceUpper)
+  discountRange = (req.discountLower, req.discountUpper)
+
+  if dateRange[0] > dateRange[1]:
+    raise BadRequest('createdLower is larger than createdUpper')
+  
+  if priceRange[0] > priceRange[1]:
+    raise BadRequest('priceLower is larger than priceUpper')
+  
+  if discountRange[0] > discountRange[1]:
+    raise BadRequest('discountLower is larger than discountUpper')
+  
+
+  # Build query
+  filterResult = filterTextbooks(
+    criteria = req.criteria,
+    filterPayload = [
+      and_(
+        dateRange[0] <= TextbookModel.created_at,
+        TextbookModel.created_at <= dateRange[1]
+      ),
+      and_(
+        priceRange[0] <= TextbookModel.price,
+        TextbookModel.price <= priceRange[1]
+      ),
+      and_(
+        discountRange[0] <= TextbookModel.discount,
+        TextbookModel.discount <= discountRange[1]
+      ),
+      or_(*[
+        TextbookModel.categories.contains(category)
+        for category in categories
+      ]),
+      TextbookModel.title.contains(req.query)
+    ],
+    page = req.page
   )
 
-  return render_template('(misc)/store.html', textbooks = textbooks)
+  # Compile data
+  compiled: list[_TextbookGetData] = [
+    _TextbookGetData(
+      id = textbook.id,
+      uri = textbook.uri,
+      status = textbook.status,
+      author_id = textbook.author_id,
+      title = textbook.title,
+      description = textbook.description,
+      categories = textbook.categories,
+      price = textbook.price,
+      discount = textbook.discount,
+      cover_image = textbook.cover_image,
+      created_at = textbook.created_at.timestamp(),
+      updated_at = textbook.updated_at.timestamp()
+    )
+    for textbook in filterResult
+  ]
+
+  return StoreGetReply(
+    message = 'Successfully fetched textbooks',
+    status = HTTPStatusCode.OK,
+    data = compiled
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+
+
 
 
 @app.route('/cart')
@@ -88,9 +163,9 @@ def checkout(user: UserModel):
 @customCache
 def filterTextbooks(
   criteria: str,
-  filterExpression: HashableDict,
+  filterPayload: list,
   page: int
 ) -> Pagination:
   return TextbookModel.query.filter(
-    and_(*filterExpression.values()) if criteria == 'and' else or_(*filterExpression.values())
+    and_(*filterPayload) if criteria == 'and' else or_(*filterPayload)
   ).paginate(page = page, error_out = False)
