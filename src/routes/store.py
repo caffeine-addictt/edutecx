@@ -23,7 +23,7 @@ from flask import (
   current_app as app
 )
 
-stripe.api_key = app.config.get('STRIPE_API_KEY') # TODO: Add to config.py and .env
+stripe.api_key = app.config.get('STRIPE_API_KEY')
 
 
 @app.route('/store')
