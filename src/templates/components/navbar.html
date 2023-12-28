@@ -5,8 +5,43 @@
 
   
   <!-- Place content in this div, so we dont introduce margin straight into body -->
-  <div class='d-flex flex-row justify-between px-4 pt-4 pb-2 w-[90%] mx-auto h-fit'>
-    navbar
+  <div class='d-flex flex-row justify-between w-[100%] mx-auto h-fit'>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light w-100">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="{{ url_for("static", filename = "assets/icons/logo_black.png") }}" alt="logo" width="50px" height="50px">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Store</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Policy</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" tabindex="-1" aria-disabled="true">Contact Us</a>
+            </li>
+          </ul>
+          <form class="d-flex">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Help</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active text-decoration-underline" href="#" tabindex="-1" aria-disabled="true">Login</a>
+              </li>
+              <li class="nav-item px-3">
+                <button class="btn btn-outline-dark" type="submit">Register</button>
+              </li>
+            </ul>
+          </form>
+        </div>
+      </div>
+    </nav>
   </div>
 
   
