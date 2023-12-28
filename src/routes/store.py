@@ -26,6 +26,9 @@ from flask import (
 stripe.api_key = app.config.get('STRIPE_API_KEY')
 
 
+
+
+# Routes
 @app.route('/store')
 @auth_provider.optional_login
 def store(user: Optional[UserModel]):
@@ -49,10 +52,12 @@ def store(user: Optional[UserModel]):
 
   return render_template('(misc)/store.html', textbooks = textbooks)
 
+
 @app.route('/cart')
 @auth_provider.require_login
 def cart(user: UserModel):
   return render_template('(misc)/cart.html')
+
 
 @app.route('/checkout', methods = ['GET', 'POST'])
 @auth_provider.require_login
