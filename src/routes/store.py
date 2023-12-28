@@ -30,6 +30,10 @@ stripe.api_key = app.config.get('STRIPE_API_KEY')
 
 
 
+
+
+
+
 # Store
 @app.route('/store')
 def store():
@@ -118,14 +122,13 @@ def store_get():
 
 
 
-
-
-
-
-@app.route('/cart')
+# Cart GET
+@app.route('/cart', methods = ['GET'])
 @auth_provider.require_login
 def cart(user: UserModel):
   return render_template('(misc)/cart.html')
+
+
 
 
 @app.route('/checkout', methods = ['GET', 'POST'])
