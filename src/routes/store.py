@@ -7,9 +7,8 @@ from src.database import UserModel, TextbookModel
 from src.utils.http import HashableDict
 from typing import List, Optional
 
-import os
 import stripe
-from functools import cache
+from src.utils.caching import customCache
 
 from sqlalchemy import and_, or_
 from flask_sqlalchemy.pagination import Pagination
@@ -86,7 +85,7 @@ def checkout(user: UserModel):
 
 
 # Functions
-@cache
+@customCache
 def filterTextbooks(
   criteria: str,
   filterExpression: HashableDict,
@@ -95,4 +94,3 @@ def filterTextbooks(
   return TextbookModel.query.filter(
     and_(*filterExpression.values()) if criteria == 'and' else or_(*filterExpression.values())
   ).paginate(page = page, error_out = False)
-  
