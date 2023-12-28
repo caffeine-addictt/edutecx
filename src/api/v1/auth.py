@@ -2,11 +2,13 @@
 RESTful auth api for session persistence with jwt w/ rate limiting
 """
 
-from src import limiter
+from src import mail, limiter
 from flask_limiter import util
+from flask_mail import Message
+
 from src.utils.http import HTTPStatusCode
 from src.utils.passwords import hash_password
-from src.database import UserModel
+from src.database import UserModel, TokenModel
 from sqlalchemy import or_
 
 from src.utils.api import (
@@ -125,18 +127,33 @@ def apiV1Register():
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  UserModel(
+  
+  user = UserModel(
     email = req.email,
     username = req.username,
     password = hash_password(req.password).decode('utf-8'),
     privilege = 'User'
-  ).save()
+  )
+  user.save()
+
+  token = TokenModel(
+    user = user,
+    token_type = 'Verification'
+  )
+  token.save()
+
+
+  # Send verification code
+  mail.send(Message(
+    subject = 'Verify your EduTecX account',
+    recipients = [req.email],
+    body = f"Dear {req.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{token.token}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team"
+  ))
 
   return RegisterReply(
     message = 'Registered successfully',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
-
 
 
 
