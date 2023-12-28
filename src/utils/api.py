@@ -206,6 +206,36 @@ class LoginReply(_APIReply):
 
 
 
+# Store GET
+class StoreGetRequest(_APIRequest):
+  """
+  API Request for store
+  
+  categories to be separated by ','
+  """
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  categories: str
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+  discountLower = 0.0
+  discountUpper = float('inf')
+
+@dataclass
+class StoreGetReply(_APIReply):
+  """API Reply for store"""
+  data: list['_TextbookGetData']
+
+
+
+
+
+
+
+
 # Assignment GET
 @dataclass
 class _AssignmentGetData(_APIBase):
