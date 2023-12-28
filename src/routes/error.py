@@ -10,6 +10,7 @@ from typing import Union
 from dataclasses import dataclass
 from flask import (
   request,
+  redirect,
   render_template,
   current_app as app,
 )
@@ -32,7 +33,7 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
   isHTTPException = isinstance(error, HTTPException)
 
   # Handle errors for API
-  if request.path.startswith('/api/'):
+  if request.path.startswith('/api'):
     app.logger.error(f'API error {request.path}: %s' % str(error))
 
     return {
@@ -44,6 +45,13 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
   app.logger.error(f'Non-API error {request.path}: %s' % str(error))
   match (isHTTPException and error.code):
     case HTTPStatusCode.NOT_FOUND:
+      # Check for URL with extra /
+      if request.path.endswith('/'):
+        return redirect(
+          request.path[:-1],
+          code = HTTPStatusCode.SEE_OTHER
+        ), HTTPStatusCode.SEE_OTHER
+
       return render_template('error.html', params = ErrorPageVariables(
         page_title = '404 Page not found',
         header1 = '404',
