@@ -2,7 +2,7 @@
 
 {% macro render_label(field) %}
   <label class="form__label" for="username">
-    <h3 class="fs-5">{{ field.name.title() }}
+    <h3 class="fs-5">{{ field.name.title()|safe }}
       {% if field.flags.required %}<span class="text-danger">*</span>{% endif %}
     </h3>
   </label>
