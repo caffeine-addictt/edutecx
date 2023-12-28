@@ -21,8 +21,6 @@ from src.utils.caching import customCache
 from sqlalchemy import and_, or_
 from flask_sqlalchemy.pagination import Pagination
 from flask import (
-  g,
-  abort,
   flash,
   session,
   request,
