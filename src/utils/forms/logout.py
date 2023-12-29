@@ -4,4 +4,4 @@ from wtforms import SubmitField
 class LogoutForm(FlaskForm):
   """Logout Form"""
 
-  submit = SubmitField('Log Out')
+  submit = SubmitField(name = 'Log Out')

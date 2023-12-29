@@ -178,6 +178,35 @@ class TokenRefreshResponse(_APIResponse):
 
 
 
+# Notify MAKE
+class NotifyMakeRequest(_APIRequest):
+  """API Request for making a notification"""
+  message: str
+  category: Optional[Literal['info', 'success', 'danger']]
+
+NotifyReply = GenericReply
+NotifyResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Notify GET
+@dataclass
+class NotifyGetReply(_APIReply):
+  """API Reply for getting notifications"""
+  data: list[tuple[str, str]] | list[str]
+
+
+
+
+
+
+
+
 # Login
 @dataclass
 class _LoginData(_APIBase):
@@ -198,6 +227,36 @@ class LoginResponse(_APIResponse):
 class LoginReply(_APIReply):
   """API Reply for login"""
   data: _LoginData
+
+
+
+
+
+
+
+
+# Store GET
+class StoreGetRequest(_APIRequest):
+  """
+  API Request for store
+  
+  categories to be separated by ','
+  """
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  categories: str
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+  discountLower = 0.0
+  discountUpper = float('inf')
+
+@dataclass
+class StoreGetReply(_APIReply):
+  """API Reply for store"""
+  data: list['_TextbookGetData']
 
 
 

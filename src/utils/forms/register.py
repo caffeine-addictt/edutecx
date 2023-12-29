@@ -6,12 +6,12 @@ from wtforms.validators import DataRequired, Email, Length, EqualTo
 class RegisterForm(FlaskForm):
   """Register Form"""
 
-  username    = StringField('Username', validators = [DataRequired(), Length(5, 20)])
-  email       = StringField('Email', validators = [DataRequired(), Length(1, 64), Email('Invalid Email')])
-  password    = PasswordField('Password', validators = [DataRequired(), Length(8, 20), EqualTo('confirm', 'Passwords do not match')])
-  confirm     = PasswordField('Confirm Password', validators = [DataRequired(), Length(1, 20)])
-  agree       = BooleanField('I agree to the <a href="/">privacy policy</a>', validators = [DataRequired()])
-  submit      = SubmitField('Register')
+  username    = StringField(name = 'Username', validators = [DataRequired(), Length(5, 20)])
+  email       = StringField(name = 'Email', validators = [DataRequired(), Length(1, 64), Email('Invalid Email')])
+  password    = PasswordField(name = 'Password', validators = [DataRequired(), Length(8, 20), EqualTo('confirm', 'Passwords do not match')])
+  confirm     = PasswordField(name = 'Confirm Password', validators = [DataRequired(), Length(1, 20)])
+  agree       = BooleanField(name = 'I agree to the <a href="/">privacy policy</a>', validators = [DataRequired()])
+  submit      = SubmitField(name = 'Register')
 
   def validate(self, *args, **kwargs) -> bool:
     field_validation = super().validate(*args, **kwargs)

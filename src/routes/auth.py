@@ -231,8 +231,6 @@ def login():
         HTTPStatusCode.SEE_OTHER
       )
 
-      session['access_token'] = body.data.access_token
-
       set_access_cookies(successfulLogin, body.data.access_token)
       set_refresh_cookies(successfulLogin, body.data.refresh_token)
       flash('Welcome back!', 'success')

@@ -22,7 +22,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer {{ session["access_token"] }}'
+          'X-CSRF-TOKEN': getAccessToken()
         },
         body: JSON.stringify({
           "graphFor": "User"
@@ -48,7 +48,7 @@
       response = await fetch(`/dashboard/get?${searchParams.toString()}`, {
         method: 'GET',
         headers: {
-          Authorization: 'Bearer {{ session["access_token"] }}'
+          'X-CSRF-TOKEN': getAccessToken()
         }
       })
 
