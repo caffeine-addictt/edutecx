@@ -18,7 +18,19 @@
     <a href="/store">Store</a>
 
     <button type="button" class="btn btn-primary" onclick="clearCart(true);"> Clear Cart </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      onclick="
+        const newItem = (Math.random() * 100).toString();
+        addCartItem(newItem);
+        renderToast(`Added ${newItem} to cart`, 'success');
+      "
+    >
+      Add random to cart
+    </button>
   </div>
+
 
   <script>
     $(document).ready(async () => {

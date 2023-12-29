@@ -20,23 +20,26 @@
    * @returns {void}
    */
   const renderToast = (message, category) => {
-    let template = ''
+    let template = '';
     if (category === 'info') {
-      template = `{{ render_info() }}`
+      template = `{{ render_info() }}`;
     }
     else if (category === 'success') {
-      template = `{{ render_success() }}`
+      template = `{{ render_success() }}`;
     }
     else if (category === 'danger') {
-      template = `{{ render_danger() }}`
-    }
+      template = `{{ render_danger() }}`;
+    };
 
 
     /** @type {HTMLElement} */
-    const toast = htmlToElement(formatString(template, { '${message}': message }))
+    const toast = htmlToElement(formatString(template, { '${message}': message }));
 
     // Add to toast container
-    $('#toast-stack-container').append(toast)
+    $('#toast-stack-container').append(toast);
+
+    // Show toast
+    $(toast).toast('show');
 
 
     // Add hidden listener to cleanup on finish
@@ -78,8 +81,8 @@
    */
   const getNotifications = async () => {
     return fetch('/api/v1/notify/get')
-      .then(r => r.json())
-  }
+      .then(r => r.json());
+  };
 
 
   /**
@@ -87,21 +90,20 @@
    * @returns {Promise<void>}
    */
   const renderNotifications = async () => {
-    const notifications = await getNotifications()
-    console.log(notifications)
+    const notifications = await getNotifications();
+    console.log(notifications);
 
     if (notifications.status === 200) {
-      console.log(notifications.data)
+      console.log(notifications.data);
       for (const notification of notifications.data) {
-        const [category, message] = Array.isArray(notification) ? notification : [null, notification]
-        renderToast(message, category)
-      }
-    }
-  }
+        const [category, message] = Array.isArray(notification) ? notification : [null, notification];
+        renderToast(message, category);
+      };
+    };
+  };
 
 
   $(document).ready( async () => {
-    await renderNotifications()
-    $('.toast').toast('show');
+    await renderNotifications();
   });
 </script>
