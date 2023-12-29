@@ -178,6 +178,35 @@ class TokenRefreshResponse(_APIResponse):
 
 
 
+# Notify MAKE
+class NotifyMakeRequest(_APIRequest):
+  """API Request for making a notification"""
+  message: str
+  category: Optional[Literal['info', 'success', 'danger']]
+
+NotifyReply = GenericReply
+NotifyResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Notify GET
+@dataclass
+class NotifyGetReply(_APIReply):
+  """API Reply for getting notifications"""
+  data: list[tuple[str, str]] | list[str]
+
+
+
+
+
+
+
+
 # Login
 @dataclass
 class _LoginData(_APIBase):
