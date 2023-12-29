@@ -85,12 +85,7 @@
 
 
     {# Import Toasts #}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% include 'components/toast.html' %}
-      {% endif %}
-    {% endwith %}
-
+    {% include 'components/toast.html' %}
   </body>
 </html>
 
