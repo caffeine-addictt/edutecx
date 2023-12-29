@@ -13,6 +13,7 @@ from typing import List, Dict, TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
   String,
+  Boolean,
   DateTime,
   ForeignKey
 )
@@ -40,10 +41,12 @@ class SaleModel(db.Model):
   user_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
 
   # Attributes
+  paid: Mapped[bool] = mapped_column(Boolean, nullable = False, default = False)
   user: Mapped['UserModel'] = relationship('UserModel', back_populates = 'transactions')
   textbook_ids: Mapped[str] = mapped_column(String, nullable = False) # str(id:cost,id2:cost,...)
 
   # Logs
+  paid_at   : Mapped[datetime] = mapped_column(DateTime, nullable = True)
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
 
