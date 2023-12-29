@@ -25,7 +25,7 @@ const getCartItems = () => {
 // Document withReload as a boolean with a default value of false
 /**
  * Clear Cart
- * @param {boolean} [withReload=false]
+ * @param [boolean] withReload
  * @returns {void}
  */
 const clearCart = (withReload = false) => {
@@ -40,7 +40,7 @@ const clearCart = (withReload = false) => {
 /**
   * Add item to cart
   * @param {string} itemID
-  * @param {boolean} [withReload=false]
+  * @param [boolean] withReload
   * @returns {void}
   */
 const addCartItem = (itemID, withReload = false) => {
