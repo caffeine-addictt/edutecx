@@ -20,12 +20,11 @@ from sqlalchemy import and_, or_
 from flask_sqlalchemy.pagination import Pagination
 from flask import (
   flash,
+  url_for,
   request,
   render_template,
   current_app as app
 )
-
-stripe.api_key = app.config.get('STRIPE_API_KEY')
 
 
 
@@ -37,7 +36,7 @@ stripe.api_key = app.config.get('STRIPE_API_KEY')
 # Store
 @app.route('/store')
 def store():
-  return render_template('(misc)/store.html')
+  return render_template('(store)/store.html')
 
 
 # Store Get
@@ -126,7 +125,7 @@ def store_get():
 @app.route('/cart', methods = ['GET'])
 @auth_provider.require_login
 def cart(user: UserModel):
-  return render_template('(misc)/cart.html')
+  return render_template('(store)/cart.html')
 
 
 
@@ -144,7 +143,7 @@ def checkout(user: UserModel):
 
         }],
         mode = 'payment',
-        success_url = '',
+        success_url = url_for('store', _external = True) + '?session_id',
         cancel_url = ''
       )
 
@@ -152,7 +151,21 @@ def checkout(user: UserModel):
     except Exception as e:
       flash(str(e))
 
-  return render_template('(misc)/checkout.html')
+  return render_template('(store)/checkout.html')
+
+
+
+
+@app.route('/checkout/success', methods = ['GET'])
+def checkout_success():
+  return render_template('(store)/checkout_success.html')
+
+
+
+
+@app.route('/checkout/cancel', methods = ['GET'])
+def checkout_cancel():
+  return render_template('(store)/checkout_cancel.html')
 
 
 
