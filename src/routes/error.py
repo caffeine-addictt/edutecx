@@ -5,6 +5,7 @@ Handling errors
 from src.utils.http import HTTPStatusCode
 from werkzeug.exceptions import HTTPException
 
+import traceback
 from typing import Union
 
 from dataclasses import dataclass
@@ -35,6 +36,7 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
   # Handle errors for API
   if request.path.startswith('/api'):
     app.logger.error(f'API error {request.path}: %s' % str(error))
+    app.logger.error(traceback.format_exc())
 
     return {
       'message': (isHTTPException and error.description) or HTTPStatusCode.getNameFromCode(500),
@@ -43,6 +45,7 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
   
 
   app.logger.error(f'Non-API error {request.path}: %s' % str(error))
+  app.logger.error(traceback.format_exc())
   match (isHTTPException and error.code):
     case HTTPStatusCode.NOT_FOUND:
       # Check for URL with extra /
