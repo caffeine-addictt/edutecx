@@ -64,10 +64,8 @@ class _APIParser(_APIBase):
       else req
     ).items():
       
+      variable = None
       if isinstance(req, Request):
-        app.logger.error(req.is_json)
-
-        variable = None
         try: variable = req.json.get(variableName, None) if req.is_json and req.json else None
         except Exception: pass
 
@@ -78,11 +76,16 @@ class _APIParser(_APIBase):
         except Exception: pass
         
       elif isinstance(req, FlaskResponse):
-        variable = req.json.get(variableName, None) if req.json else None
+        try: variable = req.json.get(variableName, None) if req.json else None
+        except Exception: pass
+
       elif isinstance(req, ReqResponse):
-        variable = req.json().get(variableName, None) if req.json else None
+        try: variable = req.json().get(variableName, None) if req.json else None
+        except Exception: pass
+
       else:
-        variable = req.get(variableName, None)
+        try: variable = req.get(variableName, None)
+        except Exception: pass
 
       
       interpreted = recursiveValidation(variable, variableType)
