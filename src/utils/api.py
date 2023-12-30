@@ -48,7 +48,7 @@ class _APIParser(_APIBase):
   Auto loads variables from json, dictionary or form
   """
 
-  def __init__(self, req: Request | FlaskResponse | ReqResponse | dict[str, Any]) -> None:
+  def __init__(self, req: Request | FlaskResponse | ReqResponse | dict[str, Any], isResponse: bool = False) -> None:
     """
     Loads values from response object
 
@@ -56,13 +56,13 @@ class _APIParser(_APIBase):
     ------
     BadRequest: code 400
     """
-    from flask import current_app as app
-    app.logger.error(req)
+    annotationMap = self.__annotations__.copy() if isinstance(req, (Request, FlaskResponse, ReqResponse)) else req
+    if isResponse:
+      annotationMap['status'] = int
+      annotationMap['message'] = str
 
-    for variableName, variableType in (
-      self.__annotations__ if isinstance(req, (Request, FlaskResponse, ReqResponse))
-      else req
-    ).items():
+
+    for variableName, variableType in annotationMap.items():
       
       variable = None
       if isinstance(req, Request):
@@ -107,6 +107,16 @@ class _APIResponse(_APIParser):
 
   message: str
   status: int
+
+  def __init__(self, req: Request | FlaskResponse | ReqResponse | dict[str, Any]) -> None:
+    """
+    Loads values from response object
+
+    Raises
+    ------
+    BadRequest: code 400
+    """
+    super().__init__(req, True)
 
 
 class _APIRequest(_APIParser):
