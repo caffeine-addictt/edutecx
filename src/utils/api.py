@@ -56,6 +56,8 @@ class _APIParser(_APIBase):
     ------
     BadRequest: code 400
     """
+    from flask import current_app as app
+    app.logger.error(req)
 
     for variableName, variableType in (
       self.__annotations__ if isinstance(req, (Request, FlaskResponse, ReqResponse))
@@ -63,8 +65,18 @@ class _APIParser(_APIBase):
     ).items():
       
       if isinstance(req, Request):
-        variable = req.json.get(variableName, None) if req.is_json and req.json else req.form.get(variableName, None)
-        variable = variable or req.args.get(variableName, None)
+        app.logger.error(req.is_json)
+
+        variable = None
+        try: variable = req.json.get(variableName, None) if req.is_json and req.json else None
+        except Exception: pass
+
+        try: variable = variable if variable is not None else req.form.get(variableName, None)
+        except Exception: pass
+
+        try: variable = variable if variable is not None else req.args.get(variableName, None)
+        except Exception: pass
+        
       elif isinstance(req, FlaskResponse):
         variable = req.json.get(variableName, None) if req.json else None
       elif isinstance(req, ReqResponse):
@@ -227,6 +239,28 @@ class LoginResponse(_APIResponse):
 class LoginReply(_APIReply):
   """API Reply for login"""
   data: _LoginData
+
+
+
+
+
+
+
+
+# Stripe MAKE
+@dataclass
+class _StripeMakeData(_APIBase):
+  session_id: str
+  public_key: str
+
+class StripeMakeRequest(_APIRequest):
+  """API Request for making a stripe session"""
+  cart: list[str]
+
+@dataclass
+class StripeMakeReply(_APIReply):
+  """API Reply for making a stripe session"""
+  data: _StripeMakeData
 
 
 
