@@ -42,7 +42,7 @@ class SaleModel(db.Model):
 
   # Attributes
   paid: Mapped[bool] = mapped_column(Boolean, nullable = False, default = False)
-  user: Mapped['UserModel'] = relationship('UserModel', back_populates = 'transactions')
+  user: Mapped['UserModel'] = relationship('UserModel')
   textbook_ids: Mapped[str] = mapped_column(String, nullable = False) # str(id:cost,id2:cost,...)
 
   # Logs
