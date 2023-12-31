@@ -103,7 +103,7 @@ def assignment_create_api(user: UserModel):
     return GenericReply(
       message = 'Invalid due date',
       status = HTTPStatusCode.BAD_REQUEST
-    ), HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   due_date = datetime.fromtimestamp(req.due_date) if isinstance(req.due_date, int) else None
 
