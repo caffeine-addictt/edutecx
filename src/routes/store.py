@@ -55,16 +55,12 @@ def store_get():
     datetime.fromtimestamp(req.createdUpper) if float('inf') != req.createdUpper else utc_time.skip('1day')
   )
   priceRange = (req.priceLower, req.priceUpper)
-  discountRange = (req.discountLower, req.discountUpper)
 
   if dateRange[0] > dateRange[1]:
     raise BadRequest('createdLower is larger than createdUpper')
   
   if priceRange[0] > priceRange[1]:
     raise BadRequest('priceLower is larger than priceUpper')
-  
-  if discountRange[0] > discountRange[1]:
-    raise BadRequest('discountLower is larger than discountUpper')
   
 
   # Build query
@@ -78,10 +74,6 @@ def store_get():
       and_(
         priceRange[0] <= TextbookModel.price,
         TextbookModel.price <= priceRange[1]
-      ),
-      and_(
-        discountRange[0] <= TextbookModel.discount,
-        TextbookModel.discount <= discountRange[1]
       ),
       or_(*[
         TextbookModel.categories.contains(category)

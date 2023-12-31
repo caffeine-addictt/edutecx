@@ -2,7 +2,7 @@
 Stripe Endpoint'
 """
 
-from src.database import UserModel, TextbookModel, SaleModel, SaleInfo
+from src.database import UserModel, TextbookModel, SaleModel, SaleInfo, DiscountModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
@@ -36,6 +36,15 @@ def create_stripe_session_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
+  # Validate discount
+  discount = req.discount and DiscountModel.query.filter(DiscountModel.code == req.discount).first()
+  if req.discount and not isinstance(discount, DiscountModel):
+    return GenericReply(
+      message = 'Invalid discount code',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
   # Validate items exist
   found: list[TextbookModel] = TextbookModel.query.filter(TextbookModel.id.in_(req.cart)).all()
   if len(found) != len(req.cart):
@@ -43,13 +52,37 @@ def create_stripe_session_api(user: UserModel):
       message = 'Invalid items in cart',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  # Ensure discount is valid
+  if discount:
+    if discount.textbook and (not discount.textbook.id in found):
+      return GenericReply(
+        message = 'Invalid discount code',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+    if discount.expires_at and (discount.expires_at < datetime.utcnow()):
+      return GenericReply(
+        message = 'Discount expired',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+    
+    if discount.limit and (discount.limit <= discount.used):
+      return GenericReply(
+        message = 'Discount limit reached',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   
   # Create Item
   items: list[str] = []
   saleinfo: list[SaleInfo] = []
   for txtbook in found:
-    cost = round(txtbook.price, 2) # TODO: Discount logic
+    if discount and discount.textbook and discount.textbook.id == txtbook.id:
+      cost = round(txtbook.price * discount.multiplier * 100, 2)
+    else:
+      cost = round(txtbook.price * (discount.multiplier if discount else 1) * 100, 2)
 
     saleinfo.append(SaleInfo(cost, txtbook))
     items.append(stripe.Price.create(
@@ -69,9 +102,12 @@ def create_stripe_session_api(user: UserModel):
 
 
   # Generate SaleModel
-  sale = SaleModel(user, saleinfo)
-  sale.session_id = session['id']
-  sale.save()
+  SaleModel(
+    user = user,
+    saleinfo = saleinfo,
+    session_id = session['id'],
+    discount = discount or None
+  ).save()
 
   return StripeMakeReply(
     message = 'Checkout session created',

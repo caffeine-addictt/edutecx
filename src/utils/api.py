@@ -269,6 +269,7 @@ class _StripeMakeData(_APIBase):
 class StripeMakeRequest(_APIRequest):
   """API Request for making a stripe session"""
   cart: list[str]
+  discount: Optional[str]
 
 @dataclass
 class StripeMakeReply(_APIReply):
@@ -297,8 +298,6 @@ class StoreGetRequest(_APIRequest):
   priceUpper = float('inf')
   createdLower = 0.0
   createdUpper = float('inf')
-  discountLower = 0.0
-  discountUpper = float('inf')
 
 @dataclass
 class StoreGetReply(_APIReply):
