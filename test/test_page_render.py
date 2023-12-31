@@ -24,7 +24,8 @@ def test_routesExist(app: Flask, client: FlaskClient):
     # Purchasing routes
     '/store',
     '/cart',
-    '/checkout',
+    '/checkout-success',
+    '/checkout-cancel',
 
     # Auth routes
     '/login',
