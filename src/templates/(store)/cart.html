@@ -17,22 +17,45 @@
 
     <a href="/store">Store</a>
 
-    <button type="button" class="btn btn-primary" onclick="clearCart(true);"> Clear Cart </button>
-    <button
-      type="button"
-      class="btn btn-primary"
-      onclick="
-        const newItem = (Math.random() * 100).toString();
-        addCartItem(newItem);
-        renderToast(`Added ${newItem} to cart`, 'success');
-      "
-    >
-      Add random to cart
+    <button type="button" class="btn btn-primary" onclick="clearCart(false); renderToast(`Cleared cart`, 'success');"> Clear Cart </button>
+
+
+    {# Checkout to stripe api #}
+    <button type="button" class="btn btn-primary" onclick="proceedToPayment();">
+      Proceed to payment
     </button>
   </div>
 
+  <script src="https://js.stripe.com/v3"></script>
+
+
 
   <script>
+    const proceedToPayment = async () => {
+      renderToast('Preparing our servers...', 'success');
+
+      /** @type {string[]} */
+      const items = getCartItems();
+      const response = await fetch('/api/v1/stripe/create-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getAccessToken()
+        },
+        body: JSON.stringify({ cart: items })
+      }).then(async res => await res.json());
+
+      if (response.status === 200) {
+        renderToast('Redirecting to payment...', 'success');
+        const stripe = Stripe(response.data.public_key);
+        stripe.redirectToCheckout({ sessionId: response.data.session_id });
+      }
+      else renderToast(response.message, 'danger');
+    };
+
+
+
+
     $(document).ready(async () => {
       /** @type {string[]} */
       const items = getCartItems();
@@ -65,8 +88,10 @@
 
       for (const itemID of items) {
         queryPayloads.push(
-          fetch(`/api/v1/textbook/get?textbook_id=${itemID}`)
-            .then(async res => await res.json()));
+          fetch(`/api/v1/textbook/get?textbook_id=${itemID}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          }).then(async res => await res.json()));
       }
 
       /** @type {Array.<{
