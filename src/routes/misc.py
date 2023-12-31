@@ -7,7 +7,6 @@ from src.utils.http import escape_id
 
 from typing import List
 from flask import (
-  g,
   abort,
   flash,
   request,
@@ -39,7 +38,6 @@ def profile(user: UserModel):
 @app.route('/textbooks')
 @auth_provider.require_login
 def textbooks(user: UserModel):
-  user = g.current_user
   textbooks = None # TODO: UserModel helper method
   return render_template('(misc)/textbook_list.html', textbooks = textbooks)
 
