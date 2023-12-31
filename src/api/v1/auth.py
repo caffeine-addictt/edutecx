@@ -132,23 +132,32 @@ def apiV1Register():
     email = req.email,
     username = req.username,
     password = hash_password(req.password).decode('utf-8'),
-    privilege = 'User'
+    privilege = req.privilege
   )
-  user.save()
-
   token = TokenModel(
     user = user,
     token_type = 'Verification'
   )
-  token.save()
 
 
   # Send verification code
-  mail.send(Message(
-    subject = 'Verify your EduTecX account',
-    recipients = [req.email],
-    body = f"Dear {req.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{token.token}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team"
-  ))
+  try:
+    mail.send(Message(
+      subject = 'Verify your EduTecX account',
+      recipients = [req.email],
+      sender = 'edutecx@ngjx.org',
+      body = f"Dear {req.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{token.token}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team"
+    ))
+
+  except Exception as e:
+    app.logger.error(f'Failed to send verification email: {e}')
+    return GenericReply(
+      message = 'Failed to send verification email',
+      status = HTTPStatusCode.INTERNAL_SERVER_ERROR
+    ).to_dict(), HTTPStatusCode.INTERNAL_SERVER_ERROR
+
+  user.save()
+  token.save()
 
   return RegisterReply(
     message = 'Registered successfully',
