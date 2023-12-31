@@ -1,11 +1,12 @@
 import re
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, PasswordField, SubmitField, StringField
+from wtforms import BooleanField, PasswordField, SubmitField, StringField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 class RegisterForm(FlaskForm):
   """Register Form"""
 
+  privilege   = SelectField(name = 'I am a', choices = [(1, 'Student'), (2, 'Educator')])
   username    = StringField(name = 'Username', validators = [DataRequired(), Length(5, 20)])
   email       = StringField(name = 'Email', validators = [DataRequired(), Length(1, 64), Email('Invalid Email')])
   password    = PasswordField(name = 'Password', validators = [DataRequired(), Length(8, 20), EqualTo('confirm', 'Passwords do not match')])
