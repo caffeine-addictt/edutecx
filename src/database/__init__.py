@@ -3,7 +3,7 @@ Load database modules
 """
 
 # Auth
-from .user import UserModel, ClassroomMember, PrivilegeTypes, ClassroomMemberType
+from .user import UserModel, ClassroomMember, PrivilegeTypes, ClassroomMemberType, MembershipType
 from .token import TokenModel, TokenType
 from .jwtblocklist import JWTBlocklistModel
 

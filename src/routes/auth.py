@@ -303,6 +303,7 @@ def register():
       f'{request.url_root}api/v1/register',
       headers = {'Content-Type': 'application/json'},
       json = {
+        'privilege': ['Student', 'Educator'][int(form.privilege.data)],
         'email': form.email.data,
         'username': form.username.data,
         'password': form.password.data

@@ -17,6 +17,7 @@
     class='d-flex flex-column gap-3 align-items-center'
   >
     {{ form.hidden_tag() }}
+    {{ render_checkbox_field(form.privilege) }}
     {{ render_text_field(form.username) }}
     {{ render_text_field(form.email) }}
     {{ render_text_field(form.password) }}

@@ -1,0 +1,6 @@
+{
+  "typeAcquisition": {
+    "include": ["jquery", "stripe"]
+  },
+  "include": ["src/**/*.js", "src/**/*.html"]
+}

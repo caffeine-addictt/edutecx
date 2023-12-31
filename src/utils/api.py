@@ -169,6 +169,7 @@ class RegisterRequest(_APIRequest):
   email: str
   username: str
   password: str
+  privilege: Literal['Student', 'Educator']
 
 RegisterReply = GenericReply
 RegisterResponse = GenericResponse
@@ -413,6 +414,27 @@ AssignmentDeleteResponse = GenericResponse
 
 
 
+# Classroom LIST
+@dataclass
+class _ClassroomListData(_APIBase):
+  id         : str
+  title      : str
+  description: str
+  cover_image: Union[str, None]
+  created_at : float
+
+@dataclass
+class ClassroomListReply(_APIReply):
+  """API Reply for listing classrooms"""
+  data: list[_ClassroomListData]
+
+
+
+
+
+
+
+
 # Classroom GET
 @dataclass
 class _ClassroomGetData(_APIBase):
@@ -504,6 +526,36 @@ class ClassroomDeleteRequest(_APIRequest):
 
 ClassroomDeleteReply = GenericReply
 ClassroomDeleteResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Classroom JOIN
+class ClassroomJoinRequest(_APIRequest):
+  """API Request for classroom joining"""
+  classroom_id: str
+
+ClassroomJoinReply = GenericReply
+ClassroomJoinResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Classroom LEAVE
+class ClassroomLeaveRequest(_APIRequest):
+  """API Request for classroom leaving"""
+  classroom_id: str
+
+ClassroomLeaveReply = GenericReply
+ClassroomLeaveResponse = GenericResponse
 
 
 

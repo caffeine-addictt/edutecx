@@ -107,3 +107,15 @@ const formatString = (str, params) => {
   });
   return result;
 }
+
+
+
+
+/**
+ * Force javascript to create a deep copy of a string
+ * @param {string} str
+ * @returns {string}
+ */
+const deepCopy = (str) => {
+  return (' ' + str).slice(1)
+}
