@@ -24,6 +24,7 @@ from sqlalchemy import (
 if TYPE_CHECKING:
   from .user import UserModel
   from .textbook import TextbookModel
+  from .discount import DiscountModel
 
 
 @dataclass
@@ -38,15 +39,17 @@ class SaleModel(db.Model):
   __tablename__ = 'sale_table'
 
   # Identifiers
-  id: Mapped[str] = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
-  user_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
-  session_id: Mapped[Optional[str]] = mapped_column(String, nullable = True)
-  textbook_ids: Mapped[str] = mapped_column(String, nullable = False) # str(id:cost,id2:cost,...)
+  id          : Mapped[str]           = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
+  textbook_ids: Mapped[str]           = mapped_column(String, nullable = False) # str(id:cost,id2:cost,...)
+  user_id     : Mapped[str]           = mapped_column(ForeignKey('user_table.id'), nullable = False)
+  session_id  : Mapped[Optional[str]] = mapped_column(String, nullable = True)
+  discount_id : Mapped[Optional[str]] = mapped_column(ForeignKey('discount_table.id'), nullable = True)
 
   # Attributes
-  paid: Mapped[bool] = mapped_column(Boolean, nullable = False, default = False)
-  total_cost: Mapped[float] = mapped_column(Float, nullable = False)
-  user: Mapped['UserModel'] = relationship('UserModel')
+  paid         : Mapped[bool]                      = mapped_column(Boolean, nullable = False, default = False)
+  total_cost   : Mapped[float]                     = mapped_column(Float, nullable = False)
+  user         : Mapped['UserModel']               = relationship('UserModel')
+  used_discount: Mapped[Optional['DiscountModel']] = relationship('DiscountModel', back_populates = 'used_by')
 
   # Logs
   paid_at   : Mapped[datetime] = mapped_column(DateTime, nullable = True)
@@ -57,7 +60,8 @@ class SaleModel(db.Model):
     self,
     user: 'UserModel',
     saleinfo: List[SaleInfo],
-    session_id: Optional[str] = None
+    session_id: Optional[str] = None,
+    discount: Optional['DiscountModel'] = None
   ) -> None:
     """
     Sale Model
@@ -73,6 +77,7 @@ class SaleModel(db.Model):
     self.total_cost = 0
     self.session_id = session_id
     self.user_id = user.id
+    self.discount_id = discount and discount.id
 
     ids = []
     for info in saleinfo:
