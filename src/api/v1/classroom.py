@@ -8,6 +8,7 @@ from src.utils.http import HTTPStatusCode
 from src.service.auth_provider import require_login
 from src.utils.ext import utc_time
 from src.utils.api import (
+  ClassroomListReply, _ClassroomListData,
   ClassroomGetRequest, ClassroomGetReply, _ClassroomGetData,
   ClassroomCreateRequest, ClassroomCreateReply, _ClassroomCreateData,
   ClassroomEditRequest, ClassroomEditReply,
@@ -28,6 +29,28 @@ from flask import (
 #Routes
 basePath: str = '/api/v1/classroom'
 auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host, key_func = util.get_remote_address)
+
+
+
+
+@app.route(f'{basePath}/list', methods = ['GET'])
+@auth_limit
+@require_login
+def classroom_list_api(user: UserModel):
+  return ClassroomListReply(
+    message = 'Successfully fetched classrooms',
+    status = HTTPStatusCode.OK,
+    data = [
+      _ClassroomListData(
+        id = classroom.classroom.id,
+        title = classroom.classroom.title,
+        description = classroom.classroom.description,
+        cover_image = classroom.classroom.cover_image.id if classroom.classroom.cover_image else None,
+        created_at = classroom.classroom.created_at.timestamp()
+      )
+      for classroom in user.classrooms
+    ]
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
@@ -213,7 +236,6 @@ def classroom_delete_api(user: UserModel):
 
 
 
-# Classroom JOIN
 @app.route(f'{basePath}/join', methods = ['POST'])
 @auth_limit
 @require_login
@@ -260,7 +282,6 @@ def classroom_join_api(user: UserModel):
 
 
 
-# Classroom LEAVE
 @app.route(f'{basePath}/leave', methods = ['POST'])
 @auth_limit
 @require_login
