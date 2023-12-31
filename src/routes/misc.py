@@ -47,38 +47,22 @@ def textbooks(user: UserModel):
 @app.route('/textbooks/<string:id>')
 @auth_provider.require_login
 def textbooks_id(user: UserModel, id: str):
-  id = escape_id(id)
-  textbook = None # TODO: UserModel helper method
-  return render_template('(misc)/textbook.html', textbook = textbook)
+  return render_template('(misc)/textbook.html')
 
 
 
 
 # Classrooms
-@app.route('/classrooms')
+@app.route('/classrooms', methods = ['GET'])
 @auth_provider.require_login
 def classrooms(user: UserModel):
-  # Check if user is in a classroom
-  isInClassroom = False
-  if not isInClassroom:
-    abort(404)
-
-  classes = None
-
-  return render_template('(misc)/classroom_list.html', classes = classes)
+  return render_template('(misc)/classroom_list.html', user = user)
 
 
 @app.route('/classrooms/<string:id>')
 @auth_provider.require_login
 def classroom(user: UserModel):
-  # Check if user is in a classroom
-  isInClassroom = False
-  if not isInClassroom:
-    abort(404)
-
-  classes = None
-
-  return render_template('(misc)/classroom_list.html', classes = classes)
+  return render_template('(misc)/classroom.html')
 
 
 
