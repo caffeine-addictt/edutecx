@@ -57,7 +57,7 @@ def user_get_api(user: UserModel):
       created_at = foundUser.created_at.timestamp(),
       last_login = foundUser.last_login.timestamp()
     )
-  )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
