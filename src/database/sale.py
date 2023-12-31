@@ -39,6 +39,7 @@ class SaleModel(db.Model):
   # Identifiers
   id: Mapped[str] = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
   user_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
+  session_id: Mapped[str] = mapped_column(String, nullable = False, primary_key = True)
 
   # Attributes
   paid: Mapped[bool] = mapped_column(Boolean, nullable = False, default = False)
@@ -52,6 +53,7 @@ class SaleModel(db.Model):
 
   def __init__(
     self,
+    session_id: str,
     user: 'UserModel',
     textbooks: List['TextbookModel']
   ) -> None:
@@ -64,6 +66,7 @@ class SaleModel(db.Model):
 
     `textbooks: TextbookModel[]`, required
     """
+    self.session_id = session_id
     self.user_id = user.id
     self.textbook_ids = ','.join([
       f'{i.id}:{i.price}' for i in textbooks
