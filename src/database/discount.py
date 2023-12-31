@@ -1,0 +1,66 @@
+"""
+Discount Model
+"""
+
+from src import db
+
+import uuid
+from datetime import datetime
+from typing import Optional, TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import (
+  Float,
+  String,
+  DateTime,
+  ForeignKey,
+)
+
+
+# Import TokenModel at runtime to prevent circular imports
+if TYPE_CHECKING:
+  from .textbook import TextbookModel
+
+
+class DiscountModel(db.Model):
+  """
+  Discount Model
+  """
+
+  __tablename__ = 'discount_table'
+
+  id         : Mapped[str] = mapped_column(String, primary_key = True, unique = True, nullable = False, default = lambda: uuid.uuid4().hex)
+  textbook_id: Mapped[Optional[str]] = mapped_column(ForeignKey('textbook_table.id'), nullable = False)
+
+  code    : Mapped[str]             = mapped_column(String, nullable = False)
+  used    : Mapped[float]           = mapped_column(Float, nullable = False, default = 0.0)
+  textbook: Mapped[Optional['TextbookModel']] = relationship('TextbookModel', back_populates = 'discounts')
+
+  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+
+  def __init__(self, code: str, textbook: Optional['TextbookModel'] = None) -> None:
+    """
+    Discount Model
+
+    Parameters
+    ----------
+    `code: str`, required
+
+    `textbook: TextbookModel`, optional (defaults to None)
+    """
+    self.code = code
+    self.textbook = textbook
+  
+  def __repr__(self) -> str:
+    return f'{self.__class__.__name__}(code={self.code})'
+  
+
+  def save(self) -> None:
+    """Commits the model"""
+    db.session.add(self)
+    db.session.commit()
+  
+  def delete(self, commit = True) -> None:
+    """Deletes the model and its references"""
+    db.session.delete(self)
+    if commit: db.session.commit()
