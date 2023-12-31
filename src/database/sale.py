@@ -8,10 +8,11 @@ import uuid
 from datetime import datetime
 from dataclasses import dataclass
 from functools import cached_property
-from typing import List, Dict, TYPE_CHECKING
+from typing import Optional, List, Dict, TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
+  Float,
   String,
   Boolean,
   DateTime,
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
   from .textbook import TextbookModel
 
 
-@dataclass(init = True)
+@dataclass
 class SaleInfo:
   cost: float
   textbook: 'TextbookModel'
@@ -39,12 +40,13 @@ class SaleModel(db.Model):
   # Identifiers
   id: Mapped[str] = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
   user_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
-  session_id: Mapped[str] = mapped_column(String, nullable = False, primary_key = True)
+  session_id: Mapped[Optional[str]] = mapped_column(String, nullable = True)
+  textbook_ids: Mapped[str] = mapped_column(String, nullable = False) # str(id:cost,id2:cost,...)
 
   # Attributes
   paid: Mapped[bool] = mapped_column(Boolean, nullable = False, default = False)
+  total_cost: Mapped[float] = mapped_column(Float, nullable = False)
   user: Mapped['UserModel'] = relationship('UserModel')
-  textbook_ids: Mapped[str] = mapped_column(String, nullable = False) # str(id:cost,id2:cost,...)
 
   # Logs
   paid_at   : Mapped[datetime] = mapped_column(DateTime, nullable = True)
@@ -53,9 +55,9 @@ class SaleModel(db.Model):
 
   def __init__(
     self,
-    session_id: str,
     user: 'UserModel',
-    textbooks: List['TextbookModel']
+    saleinfo: List[SaleInfo],
+    session_id: Optional[str] = None
   ) -> None:
     """
     Sale Model
@@ -64,22 +66,26 @@ class SaleModel(db.Model):
     ----------
     `user: UserModel`, required
 
-    `textbooks: TextbookModel[]`, required
+    `saleinfo: SaleInfo[]`, required
+
+    `session_id: str`, optional (defaults to None)
     """
+    self.total_cost = 0
     self.session_id = session_id
     self.user_id = user.id
-    self.textbook_ids = ','.join([
-      f'{i.id}:{i.price}' for i in textbooks
-    ])
+
+    ids = []
+    for info in saleinfo:
+      self.total_cost += info.cost
+      ids.append(f'{info.textbook.id}:{info.textbook.price}')
+
+    self.textbook_ids = ','.join(ids)
+
 
   def __repr__(self):
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
 
-
-  @cached_property
-  def total_cost(self) -> float:
-    return sum([ v.cost for _, v in self.textbooks.items() ])
 
   @cached_property
   def textbooks(self) -> Dict[str, SaleInfo]:
@@ -93,6 +99,7 @@ class SaleModel(db.Model):
       txtbook.id: SaleInfo(data[txtbook.id], txtbook)
       for txtbook in queried
     }
+
   
 
   # DB
