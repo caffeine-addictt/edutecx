@@ -31,6 +31,7 @@ if TYPE_CHECKING:
   from .submissionsnippet import SubmissionSnippetModel
 
 
+MembershipType = Literal['Free', 'Paid']
 PrivilegeTypes = Literal['Student', 'Educator', 'Admin']
 ClassroomMemberType = Literal['Student', 'Educator', 'Owner']
 
@@ -58,6 +59,7 @@ class UserModel(db.Model):
 
   # Auth
   privilege     : Mapped[str]  = mapped_column(String, default = False)
+  membership    : Mapped[str]  = mapped_column(String, nullable = False, default = 'Free')
   password_hash : Mapped[str]  = mapped_column(String, nullable = False)
   email_verified: Mapped[bool] = mapped_column(Boolean, nullable = False, default = False)
 
@@ -87,7 +89,9 @@ class UserModel(db.Model):
     email: str,
     username: str,
     password: str,
-    privilege: PrivilegeTypes
+    privilege: PrivilegeTypes,
+    *,
+    membership: MembershipType = 'Free'
   ) -> None:
     """
     User Model
@@ -108,6 +112,7 @@ class UserModel(db.Model):
     self.username  = username
     self.privilege = privilege
     self.password_hash  = password
+    self.membership = membership
 
   def __repr__(self) -> str:
     """To be used with cache indexing"""

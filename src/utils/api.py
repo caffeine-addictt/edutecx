@@ -169,6 +169,7 @@ class RegisterRequest(_APIRequest):
   email: str
   username: str
   password: str
+  privilege: Literal['Student', 'Educator']
 
 RegisterReply = GenericReply
 RegisterResponse = GenericResponse
