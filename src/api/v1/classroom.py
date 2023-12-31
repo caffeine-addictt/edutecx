@@ -12,6 +12,8 @@ from src.utils.api import (
   ClassroomCreateRequest, ClassroomCreateReply, _ClassroomCreateData,
   ClassroomEditRequest, ClassroomEditReply,
   ClassroomDeleteRequest, ClassroomDeleteReply,
+  ClassroomJoinRequest, ClassroomJoinReply,
+  ClassroomLeaveRequest, ClassroomLeaveReply,
   GenericReply
 )
 
@@ -205,5 +207,96 @@ def classroom_delete_api(user: UserModel):
   classroom.delete()
   return ClassroomDeleteReply(
     message = 'Classroom deleted successfully',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+# Classroom JOIN
+@app.route(f'{basePath}/join', methods = ['POST'])
+@auth_limit
+@require_login
+def classroom_join_api(user: UserModel):
+  req = ClassroomJoinRequest(request)
+
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
+  if not isinstance(classroom, ClassroomModel):
+    return GenericReply(
+      message = 'Classroom could not be located',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if not classroom.invite_enabled:
+    return GenericReply(
+      message = 'Classroom invite is disabled',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
+  
+  
+  # Impose limitations
+  memberList = classroom._clean_id_str(classroom.student_ids) + classroom._clean_id_str(classroom.educator_ids) + [ classroom.owner_id ]
+
+  if user.id in memberList:
+    return GenericReply(
+      message = 'You are already a member of this classroom',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
+
+  if (classroom.owner.membership == 'Free') and (len(memberList) > 5):
+    return GenericReply(
+      message = 'The classroom owner has reached the classroom limit',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
+  
+  classroom.add_students(user)
+  classroom.save()
+
+  return ClassroomJoinReply(
+    message = 'Successfully joined classroom',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+# Classroom LEAVE
+@app.route(f'{basePath}/leave', methods = ['POST'])
+@auth_limit
+@require_login
+def classroom_leave_api(user: UserModel):
+  req = ClassroomLeaveRequest(request)
+
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
+  if not isinstance(classroom, ClassroomModel):
+    return GenericReply(
+      message = 'Classroom could not be located',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  
+  if user.id in classroom.student_ids:
+    classroom.remove_students(user)
+    classroom.save()
+  
+  elif user.id in classroom.educator_ids:
+    classroom.remove_educators(user)
+    classroom.save()
+  
+  elif user.id == classroom.owner_id:
+    return GenericReply(
+      message = 'The classroom owner cannot leave',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
+  
+  else:
+    return GenericReply(
+      message = 'You are not a member of this classroom',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
+
+  
+  return ClassroomLeaveReply(
+    message = 'Successfully left classroom',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK

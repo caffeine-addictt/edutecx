@@ -513,6 +513,36 @@ ClassroomDeleteResponse = GenericResponse
 
 
 
+# Classroom JOIN
+class ClassroomJoinRequest(_APIRequest):
+  """API Request for classroom joining"""
+  classroom_id: str
+
+ClassroomJoinReply = GenericReply
+ClassroomJoinResponse = GenericResponse
+
+
+
+
+
+
+
+
+# Classroom LEAVE
+class ClassroomLeaveRequest(_APIRequest):
+  """API Request for classroom leaving"""
+  classroom_id: str
+
+ClassroomLeaveReply = GenericReply
+ClassroomLeaveResponse = GenericResponse
+
+
+
+
+
+
+
+
 # Textbook GET
 @dataclass
 class _TextbookGetData(_APIBase):
