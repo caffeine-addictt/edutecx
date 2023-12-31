@@ -48,7 +48,7 @@ class _APIParser(_APIBase):
   Auto loads variables from json, dictionary or form
   """
 
-  def __init__(self, req: Request | FlaskResponse | ReqResponse | dict[str, Any]) -> None:
+  def __init__(self, req: Request | FlaskResponse | ReqResponse | dict[str, Any], isResponse: bool = False) -> None:
     """
     Loads values from response object
 
@@ -56,21 +56,36 @@ class _APIParser(_APIBase):
     ------
     BadRequest: code 400
     """
+    annotationMap = self.__annotations__.copy() if isinstance(req, (Request, FlaskResponse, ReqResponse)) else req
+    if isResponse:
+      annotationMap['status'] = int
+      annotationMap['message'] = str
 
-    for variableName, variableType in (
-      self.__annotations__ if isinstance(req, (Request, FlaskResponse, ReqResponse))
-      else req
-    ).items():
+
+    for variableName, variableType in annotationMap.items():
       
+      variable = None
       if isinstance(req, Request):
-        variable = req.json.get(variableName, None) if req.is_json and req.json else req.form.get(variableName, None)
-        variable = variable or req.args.get(variableName, None)
+        try: variable = req.json.get(variableName, None) if req.is_json and req.json else None
+        except Exception: pass
+
+        try: variable = variable if variable is not None else req.form.get(variableName, None)
+        except Exception: pass
+
+        try: variable = variable if variable is not None else req.args.get(variableName, None)
+        except Exception: pass
+        
       elif isinstance(req, FlaskResponse):
-        variable = req.json.get(variableName, None) if req.json else None
+        try: variable = req.json.get(variableName, None) if req.json else None
+        except Exception: pass
+
       elif isinstance(req, ReqResponse):
-        variable = req.json().get(variableName, None) if req.json else None
+        try: variable = req.json().get(variableName, None) if req.json else None
+        except Exception: pass
+
       else:
-        variable = req.get(variableName, None)
+        try: variable = req.get(variableName, None)
+        except Exception: pass
 
       
       interpreted = recursiveValidation(variable, variableType)
@@ -92,6 +107,16 @@ class _APIResponse(_APIParser):
 
   message: str
   status: int
+
+  def __init__(self, req: Request | FlaskResponse | ReqResponse | dict[str, Any]) -> None:
+    """
+    Loads values from response object
+
+    Raises
+    ------
+    BadRequest: code 400
+    """
+    super().__init__(req, True)
 
 
 class _APIRequest(_APIParser):
@@ -235,6 +260,29 @@ class LoginReply(_APIReply):
 
 
 
+# Stripe MAKE
+@dataclass
+class _StripeMakeData(_APIBase):
+  session_id: str
+  public_key: str
+
+class StripeMakeRequest(_APIRequest):
+  """API Request for making a stripe session"""
+  cart: list[str]
+  discount: Optional[str]
+
+@dataclass
+class StripeMakeReply(_APIReply):
+  """API Reply for making a stripe session"""
+  data: _StripeMakeData
+
+
+
+
+
+
+
+
 # Store GET
 class StoreGetRequest(_APIRequest):
   """
@@ -250,8 +298,6 @@ class StoreGetRequest(_APIRequest):
   priceUpper = float('inf')
   createdLower = 0.0
   createdUpper = float('inf')
-  discountLower = 0.0
-  discountUpper = float('inf')
 
 @dataclass
 class StoreGetReply(_APIReply):

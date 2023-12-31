@@ -2,7 +2,6 @@
 Initalizes Flask Application
 """
 
-import thread
 from flask import Flask
 from flask_mail import Mail
 from flask_migrate import Migrate
@@ -10,6 +9,8 @@ from flask_limiter import Limiter, util
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 
+import stripe
+import thread
 from logging import config
 from sqlalchemy import MetaData
 from config import get_production_config
@@ -102,6 +103,9 @@ def init_app(testing: bool = False) -> Flask:
 
   # Init JWT
   jwt.init_app(app = app)
+
+  # Init Stripe
+  stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
 
   with app.app_context():
     # Import Database models

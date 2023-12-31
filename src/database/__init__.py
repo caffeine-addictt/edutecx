@@ -15,6 +15,7 @@ from .assignment import AssignmentModel
 
 # Uploads
 from .image import ImageModel
+from .discount import DiscountModel
 from .textbook import TextbookModel
 from .editabletextbook import EditableTextbookModel
 from .submissionsnippet import SubmissionSnippetModel

@@ -15,7 +15,7 @@ const getAccessToken = () => {
 
 /**
   * Get Cart Items
-  * @returns {string[] | null}
+  * @returns {string[]}
   */
 const getCartItems = () => {
   return JSON.parse(localStorage.getItem('cart')) || new Array();

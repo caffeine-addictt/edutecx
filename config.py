@@ -27,7 +27,8 @@ class ConfigBase:
 
 
   # \\\\\\ Stripe ////// #
-  STRIPE_API_KEY: str = 'sk_test_51No3X2JZ5VDTodh10QYO5W45LIMqQwTJ6e2JjCSKp7l0xL13SoxKTTlmezkkKmpfRsfN8KVybXkfOevFeGbkyqBe007gkNlRRc'
+  STRIPE_PUBLIC_KEY: str = os.getenv('STRIPE_PUBLIC_KEY', '')
+  STRIPE_SECRET_KEY: str = os.getenv('STRIPE_SECRET_KEY', '')
 
 
   # \\\\\\ Flask ////// #

@@ -23,6 +23,7 @@ from sqlalchemy import (
 if TYPE_CHECKING:
   from .user import UserModel
   from .image import ImageModel
+  from .discount import DiscountModel
   from .editabletextbook import EditableTextbookModel
 
 
@@ -41,9 +42,9 @@ class TextbookModel(db.Model):
   description: Mapped[str] = mapped_column(String, nullable = True, default = '')
   categories : Mapped[str] = mapped_column(String, nullable = False, default = '') # 'category1|category2...'
 
-  price      : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
-  discount   : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
-  author     : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_textbooks')
+  price      : Mapped[float]                 = mapped_column(Float, nullable = False, default = 0.0)
+  author     : Mapped['UserModel']           = relationship('UserModel', back_populates = 'owned_textbooks')
+  discounts  : Mapped[List['DiscountModel']] = relationship('DiscountModel', back_populates = 'textbook')
 
   uri        : Mapped[str]                    = mapped_column(String, nullable = True)
   iuri       : Mapped[str]                    = mapped_column(String, nullable = True)
@@ -134,8 +135,7 @@ class TextbookModel(db.Model):
     Thread(deleteFile, args = [self.iuri]).start()
 
     if self.cover_image: self.cover_image.delete(commit = False)
-
+    for i in self.discounts: i.delete(commit = False)
 
     db.session.delete(self)
     if commit: db.session.commit()
-    pass

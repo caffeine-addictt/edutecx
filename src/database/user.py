@@ -77,7 +77,8 @@ class UserModel(db.Model):
   owned_textbooks: Mapped[List['TextbookModel']] = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author')
 
   # Transactions
-  transactions: Mapped[List['SaleModel']] = relationship('SaleModel', back_populates = 'user')
+  transactions        : Mapped[List['SaleModel']] = relationship('SaleModel', primaryjoin = 'and_(SaleModel.user_id == UserModel.id, SaleModel.paid == True)', back_populates = 'user')
+  pending_transactions: Mapped[List['SaleModel']] = relationship('SaleModel', primaryjoin = 'and_(SaleModel.user_id == UserModel.id, SaleModel.paid != True)', overlaps = 'transactions', back_populates = 'user')
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)

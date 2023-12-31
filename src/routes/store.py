@@ -25,8 +25,6 @@ from flask import (
   current_app as app
 )
 
-stripe.api_key = app.config.get('STRIPE_API_KEY')
-
 
 
 
@@ -37,7 +35,7 @@ stripe.api_key = app.config.get('STRIPE_API_KEY')
 # Store
 @app.route('/store')
 def store():
-  return render_template('(misc)/store.html')
+  return render_template('(store)/store.html')
 
 
 # Store Get
@@ -57,16 +55,12 @@ def store_get():
     datetime.fromtimestamp(req.createdUpper) if float('inf') != req.createdUpper else utc_time.skip('1day')
   )
   priceRange = (req.priceLower, req.priceUpper)
-  discountRange = (req.discountLower, req.discountUpper)
 
   if dateRange[0] > dateRange[1]:
     raise BadRequest('createdLower is larger than createdUpper')
   
   if priceRange[0] > priceRange[1]:
     raise BadRequest('priceLower is larger than priceUpper')
-  
-  if discountRange[0] > discountRange[1]:
-    raise BadRequest('discountLower is larger than discountUpper')
   
 
   # Build query
@@ -80,10 +74,6 @@ def store_get():
       and_(
         priceRange[0] <= TextbookModel.price,
         TextbookModel.price <= priceRange[1]
-      ),
-      and_(
-        discountRange[0] <= TextbookModel.discount,
-        TextbookModel.discount <= discountRange[1]
       ),
       or_(*[
         TextbookModel.categories.contains(category)
@@ -126,33 +116,21 @@ def store_get():
 @app.route('/cart', methods = ['GET'])
 @auth_provider.require_login
 def cart(user: UserModel):
-  return render_template('(misc)/cart.html')
+  return render_template('(store)/cart.html')
 
 
 
 
-@app.route('/checkout', methods = ['GET', 'POST'])
-@auth_provider.require_login
-def checkout(user: UserModel):
-  form = None
+@app.route('/checkout-success', methods = ['GET'])
+def checkout_success():
+  return render_template('(store)/checkout_success.html')
 
-  if request.method == 'POST' and form:
-    # TODO: STRIPE https://stripe.com/docs/checkout/quickstart?lang=python
-    try:
-      checkout_session = stripe.checkout.Session.create(
-        line_items = [{
 
-        }],
-        mode = 'payment',
-        success_url = '',
-        cancel_url = ''
-      )
 
-      # return redirect() # TODO: Redirect to stripe
-    except Exception as e:
-      flash(str(e))
 
-  return render_template('(misc)/checkout.html')
+@app.route('/checkout-cancel', methods = ['GET'])
+def checkout_cancel():
+  return render_template('(store)/checkout_cancel.html')
 
 
 

@@ -64,7 +64,7 @@ def submission_get_api(user: UserModel):
       created_at = submission.created_at.timestamp(),
       updated_at = submission.updated_at.timestamp()
     )
-  )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 
