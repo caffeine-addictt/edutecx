@@ -31,7 +31,7 @@ if TYPE_CHECKING:
   from .submissionsnippet import SubmissionSnippetModel
 
 
-PrivilegeTypes = Literal['User', 'Admin']
+PrivilegeTypes = Literal['Student', 'Educator', 'Admin']
 ClassroomMemberType = Literal['Student', 'Educator', 'Owner']
 
 class ClassroomMember:
@@ -46,7 +46,6 @@ class ClassroomMember:
     return '%s(%s-%s)' % (self.__class__.__name__, self.user.id, self.classroom.id)
   
 
-# TODO: A way to persist textbook edits per user
 class UserModel(db.Model):
   """User Model"""
 
