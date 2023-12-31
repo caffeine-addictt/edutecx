@@ -20,7 +20,6 @@ from sqlalchemy import and_, or_
 from flask_sqlalchemy.pagination import Pagination
 from flask import (
   flash,
-  url_for,
   request,
   render_template,
   current_app as app
@@ -130,40 +129,14 @@ def cart(user: UserModel):
 
 
 
-@app.route('/checkout', methods = ['GET', 'POST'])
-@auth_provider.require_login
-def checkout(user: UserModel):
-  form = None
-
-  if request.method == 'POST' and form:
-    # TODO: STRIPE https://stripe.com/docs/checkout/quickstart?lang=python
-    try:
-      checkout_session = stripe.checkout.Session.create(
-        line_items = [{
-
-        }],
-        mode = 'payment',
-        success_url = url_for('store', _external = True) + '?session_id',
-        cancel_url = ''
-      )
-
-      # return redirect() # TODO: Redirect to stripe
-    except Exception as e:
-      flash(str(e))
-
-  return render_template('(store)/checkout.html')
-
-
-
-
-@app.route('/checkout/success', methods = ['GET'])
+@app.route('/checkout-success', methods = ['GET'])
 def checkout_success():
   return render_template('(store)/checkout_success.html')
 
 
 
 
-@app.route('/checkout/cancel', methods = ['GET'])
+@app.route('/checkout-cancel', methods = ['GET'])
 def checkout_cancel():
   return render_template('(store)/checkout_cancel.html')
 
