@@ -98,6 +98,20 @@ def classroom_create_api(user: UserModel):
       message = 'Invalid user',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  # Enforce limitations
+  if owner.privilege not in ['Admin', 'Educator']:
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  if (owner.membership == 'Free') and (len(owner.owned_classrooms) >= 3):
+    return GenericReply(
+      message = 'You have reached your classroom limit',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
 
 
   newClassroom: ClassroomModel = ClassroomModel(
