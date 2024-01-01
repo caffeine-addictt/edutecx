@@ -270,7 +270,7 @@ class _StripeMakeData(_APIBase):
 class StripeMakeRequest(_APIRequest):
   """API Request for making a stripe session"""
   cart: list[str]
-  discount: Optional[str]
+  discount = ''
 
 @dataclass
 class StripeMakeReply(_APIReply):
