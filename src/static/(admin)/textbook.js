@@ -42,10 +42,9 @@ const fetchUserData = async () => {
     headers: {
       'X-CSRF-TOKEN': getAccessToken()
     }
-  })
+  }).then(async res => await res.json())
 
-  data = await response.json()
-  if (!response.ok) throw new Error(data.message)
+  if (response.status !== 200) throw new Error(response.message)
 
   /* TODO: Inject data at runtime */
   console.log('Fetched Data')
