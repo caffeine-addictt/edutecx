@@ -6,14 +6,17 @@ print('Importing routes...')
 
 from . import (
   error,
+  cdn,
 
   auth,
-  misc,
-  store,
   admin,
 
-  cdn,
-  legal,
+  misc,
+  store,
+  classroom,
+  assignment,
+  submission,
+  textbook
 )
 
 print('Successfully imported routes')
