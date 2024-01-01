@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+
+
+{# Title #}
+{% block title %}
+  Canceled Order - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+
+  {# Initial Fetching Block #}
+  <div id="cancel_fetching__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-auto h-auto align-content-center mx-auto">
+    Searching for order...
+  </div>
+
+
+  {# No Orders Found #}
+  <div id="cancel_no__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-auto h-auto align-content-center mx-auto hidden">
+    No orders found
+  </div>
+
+
+  {# Canceling Block #}
+  <div id="cancel_canceling__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-auto h-auto align-content-center mx-auto hidden">
+    Canceling...
+  </div>
+
+
+  {# Canceled Block #}
+  <div id="cancel_canceled__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-auto h-auto align-content-center mx-auto hidden">
+    Canceled
+  </div>
+{% endblock %}
+
+
+{# Scripts #}
+{% block scripts %}
+  <script src="{{ url_for('static', filename = '(store)/checkout_cancel.js') }}"></script>
+{% endblock %}
