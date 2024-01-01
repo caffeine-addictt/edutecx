@@ -5,7 +5,7 @@ Setup Flask Environment Variables
 """
 
 import os
-from typing import Literal, Union, Optional, Required
+from typing import Literal, Optional
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -64,7 +64,7 @@ class ConfigBase:
   # \\\\\\ SQL ////// #
   # Docs https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/config/
   SQLALCHEMY_ECHO: Optional[bool] = True
-  SQLALCHEMY_DATABASE_URI: Required[str] = 'sqlite:///testing.sqlite3'
+  SQLALCHEMY_DATABASE_URI: str = 'sqlite:///testing.sqlite3'
 
 
 
