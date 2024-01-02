@@ -106,7 +106,7 @@ def create_stripe_session_api(user: UserModel):
     mode = 'payment',
     payment_method_types = ['card'],
     success_url = url_for('checkout_success', _external = True) + '?session_id={CHECKOUT_SESSION_ID}',
-    cancel_url = url_for('checkout_cancel', _external = True)
+    cancel_url = url_for('checkout_cancel', _external = True) + '?session_id={CHECKOUT_SESSION_ID}',
   )
 
 
@@ -133,6 +133,13 @@ def create_stripe_session_api(user: UserModel):
 @app.route(f'{basePath}/cancel', methods = ['POST'])
 @require_login
 def stripe_cancel_api(user: UserModel):
+
+  if len(user.pending_transactions) == 0:
+    return GenericReply(
+      message = 'No pending transactions',
+      status = HTTPStatusCode.FORBIDDEN
+    ), HTTPStatusCode.FORBIDDEN
+
   for pending in user.pending_transactions:
     try:
       stripe.checkout.Session.expire(pending.session_id)
