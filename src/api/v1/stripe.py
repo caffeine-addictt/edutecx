@@ -182,6 +182,7 @@ def stripe_status_api(user: UserModel):
           paid = transaction.paid,
           total_cost = transaction.total_cost,
           user_id = user.id,
+          transaction_id = transaction.id,
           paid_at = transaction.paid_at.timestamp(),
           created_at = transaction.created_at.timestamp()
         )

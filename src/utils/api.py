@@ -301,12 +301,13 @@ StripeCancelReply = GenericReply
 # Stripe Status
 @dataclass
 class _StripeStatusData(_APIBase):
-  paid         : bool
-  total_cost   : float
-  user_id      : str
-  used_discount: str
-  paid_at      : float
-  created_at   : float
+  paid          : bool
+  total_cost    : float
+  user_id       : str
+  transaction_id: str
+  used_discount : str
+  paid_at       : float
+  created_at    : float
 
 class StripeStatusRequest(_APIRequest):
   """API Request for getting stripe status"""
