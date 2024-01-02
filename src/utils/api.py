@@ -298,6 +298,32 @@ StripeCancelReply = GenericReply
 
 
 
+# Stripe Status
+@dataclass
+class _StripeStatusData(_APIBase):
+  paid         : bool
+  total_cost   : float
+  user_id      : str
+  used_discount: str
+  paid_at      : float
+  created_at   : float
+
+class StripeStatusRequest(_APIRequest):
+  """API Request for getting stripe status"""
+  session_id: str
+
+@dataclass
+class StripeStatusReply(_APIReply):
+  """API Reply for getting stripe status"""
+  data: _StripeStatusData
+
+
+
+
+
+
+
+
 # Store GET
 class StoreGetRequest(_APIRequest):
   """
