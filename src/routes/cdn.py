@@ -32,7 +32,7 @@ def noindex():
 
 
 # Images
-@app.route('/public/images/<path:filename>')
+@app.route('/public/image/<path:filename>', methods = ['GET'])
 def uploaded_images(filename: str):
   return send_from_directory(
     cdn_provider.ImageLocation,
@@ -63,7 +63,7 @@ def editable_textbook_cdn(user: UserModel, filename: str):
 
 
 # Textbooks
-@app.route('/public/textbook/<path:filename>')
+@app.route('/public/textbook/<path:filename>', methods = ['GET'])
 @auth_provider.require_login
 def uploaded_textbooks(user: UserModel, filename: str):
   if user.privilege == 'Admin':
@@ -86,7 +86,7 @@ def uploaded_textbooks(user: UserModel, filename: str):
 
 
 # Admin graphs
-@app.route('/public/graphs/<path:filename>')
+@app.route('/public/graph/<path:filename>', methods = ['GET'])
 @auth_provider.require_admin
 def uploaded_graphs(user: UserModel, filename: str):
   return send_from_directory(
