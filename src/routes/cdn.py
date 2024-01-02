@@ -48,7 +48,7 @@ def uploaded_images(filename: str):
 def uploaded_textbooks(user: UserModel, filename: str):
   if user.privilege == 'Admin':
     return send_from_directory(
-      cdn_provider.TextbookLocation,
+      cdn_provider.EditableTextbookLocation,
       filename,
       as_attachment = True
     )
@@ -56,7 +56,7 @@ def uploaded_textbooks(user: UserModel, filename: str):
   for book in user.textbooks:
     if book.iuri.endswith(filename):
       return send_from_directory(
-      cdn_provider.TextbookLocation,
+      cdn_provider.EditableTextbookLocation,
       filename
     )
   
