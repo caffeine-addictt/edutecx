@@ -284,6 +284,47 @@ class StripeMakeReply(_APIReply):
 
 
 
+# Stripe CANCEL
+class StripeCancelRequest(_APIRequest):
+  """API Request for canceling a stripe session"""
+  session_id: str
+
+StripeCancelReply = GenericReply
+
+
+
+
+
+
+
+
+# Stripe Status
+@dataclass
+class _StripeStatusData(_APIBase):
+  paid          : bool
+  total_cost    : float
+  user_id       : str
+  transaction_id: str
+  used_discount : str
+  paid_at       : float
+  created_at    : float
+
+class StripeStatusRequest(_APIRequest):
+  """API Request for getting stripe status"""
+  session_id: str
+
+@dataclass
+class StripeStatusReply(_APIReply):
+  """API Reply for getting stripe status"""
+  data: _StripeStatusData
+
+
+
+
+
+
+
+
 # Store GET
 class StoreGetRequest(_APIRequest):
   """

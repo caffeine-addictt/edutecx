@@ -7,6 +7,8 @@ from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
   StripeMakeRequest, StripeMakeReply, _StripeMakeData,
+  StripeCancelRequest, StripeCancelReply,
+  StripeStatusRequest, StripeStatusReply, _StripeStatusData,
   GenericReply
 )
 
@@ -21,6 +23,7 @@ from flask import (
 
 
 basePath: str = '/api/v1/stripe'
+
 
 
 
@@ -73,6 +76,15 @@ def create_stripe_session_api(user: UserModel):
         message = 'Discount limit reached',
         status = HTTPStatusCode.BAD_REQUEST
       ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  # Expire existing sessions
+  for pending in user.pending_transactions:
+    try:
+      stripe.checkout.Session.expire(pending.session_id)
+    except Exception as e:
+      app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
+    pending.delete()
 
   
   # Create Item
@@ -97,7 +109,7 @@ def create_stripe_session_api(user: UserModel):
     mode = 'payment',
     payment_method_types = ['card'],
     success_url = url_for('checkout_success', _external = True) + '?session_id={CHECKOUT_SESSION_ID}',
-    cancel_url = url_for('checkout_cancel', _external = True)
+    cancel_url = url_for('checkout_cancel', _external = True) + '?session_id={CHECKOUT_SESSION_ID}',
   )
 
 
@@ -117,6 +129,70 @@ def create_stripe_session_api(user: UserModel):
       public_key = app.config.get('STRIPE_PUBLIC_KEY', '')
     )
   ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/cancel', methods = ['POST'])
+@require_login
+def stripe_cancel_api(user: UserModel):
+  req = StripeCancelRequest(request)
+
+  pending = [ i for i in user.pending_transactions if i.session_id == req.session_id ]
+  if len(pending) == 0:
+    return GenericReply(
+      message = 'Pending transaction not found',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  pending = pending[0]
+
+  try:
+    stripe.checkout.Session.expire(pending.session_id)
+
+  except Exception as e:
+    app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
+    return GenericReply(
+      message = 'Failed to expire session',
+      status = HTTPStatusCode.INTERNAL_SERVER_ERROR
+    ).to_dict(), HTTPStatusCode.INTERNAL_SERVER_ERROR
+
+  pending.delete()
+
+  return StripeCancelReply(
+    message = 'Checkout cancelled',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/status', methods = ['POST'])
+@require_login
+def stripe_status_api(user: UserModel):
+  req = StripeStatusRequest(request)
+
+  transactions = set([ *user.pending_transactions, *user.transactions ])
+  for transaction in transactions:
+    if transaction.session_id == req.session_id:
+      return StripeStatusReply(
+        message = 'Fetched checkout status',
+        status = HTTPStatusCode.OK,
+        data = _StripeStatusData(
+          paid = transaction.paid,
+          total_cost = transaction.total_cost,
+          user_id = user.id,
+          transaction_id = transaction.id,
+          paid_at = transaction.paid_at.timestamp(),
+          created_at = transaction.created_at.timestamp()
+        )
+      ).to_dict(), HTTPStatusCode.OK
+
+
+  return GenericReply(
+    message = 'Transaction not found',
+    status = HTTPStatusCode.BAD_REQUEST
+  ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
 
 
