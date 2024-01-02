@@ -6,7 +6,7 @@ from src.database import UserModel
 from src.service import auth_provider, cdn_provider
 cdn_provider._dirCheck()
 
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import Unauthorized, NotFound
 from flask import (
   request,
   Response,
@@ -71,6 +71,8 @@ def editable_textbook_cdn(user: UserModel, filename: str):
         cdn_provider.EditableTextbookLocation,
         filename
       )
+  
+  raise NotFound()
 
 
 
