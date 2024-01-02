@@ -121,6 +121,25 @@ def create_stripe_session_api(user: UserModel):
 
 
 
+@app.route(f'{basePath}/cancel', methods = ['POST'])
+@require_login
+def stripe_cancel_api(user: UserModel):
+  for pending in user.pending_transactions:
+    try:
+      stripe.checkout.Session.expire(pending.session_id)
+    except Exception as e:
+      app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
+      
+    pending.delete()
+
+  return GenericReply(
+    message = 'Checkout cancelled',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
 @app.route(f'{basePath}/webhook', methods = ['POST'])
 def stripe_webhook_api():
   payload = request.get_data()
