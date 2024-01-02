@@ -33,6 +33,8 @@ def optional_jwt() -> bool:
     return False
 
 
+
+
 def require_admin(func: Callable[Concatenate[UserModel, P], T]) -> Callable[P, T | tuple[dict[str, Any], int]]:
   """
   Enforces Admin-Only JWT authentication for routes
@@ -113,4 +115,42 @@ def optional_login(func: Callable[Concatenate[UserModel | None, P], T]) -> Calla
       *args,
       **kwargs
     )
+  return wrapper
+
+
+
+
+def require_educator(
+  func: Callable[Concatenate[UserModel, P], T]
+) -> Callable[P, T | tuple[dict[str, Any], int]]:
+  """
+  Decorator for enforcing educator-only routes
+
+  Returns
+  -------
+  `decorator: (...) -> ...`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_educator
+  >>> def myRoute(user: UserModel): ...
+  """
+  @wraps(func)
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> T | tuple[dict[str, Any], int]:
+    verify_jwt_in_request()
+    user: UserModel = get_current_user()
+
+    match (user.privilege not in ['Educator', 'Admin']) and request.method:
+      case 'POST':
+        return {
+          'message': 'Unauthorized',
+          'status': HTTPStatusCode.UNAUTHORIZED
+        }, HTTPStatusCode.UNAUTHORIZED
+      
+      case 'GET':
+        raise Unauthorized()
+      
+      case _:
+        return func(user, *args, **kwargs)
   return wrapper
