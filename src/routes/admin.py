@@ -75,7 +75,7 @@ def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> Query:
 
 
 def getURI(filename: str) -> str:
-  return '/public/graphs/' + filename
+  return f'/public/graph/{filename}'
 
 
 @customCache
