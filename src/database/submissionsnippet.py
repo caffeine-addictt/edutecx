@@ -77,6 +77,7 @@ class SubmissionSnippetModel(db.Model):
 
   def _updateURI(self, filePath: str) -> None:
     self.iuri = filePath
+    self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
     self.status = 'Uploaded'
     self.save()
 

@@ -84,6 +84,7 @@ class ImageModel(db.Model):
     """Threaded background upload process"""
     def updateURI(filePath: str):
       self.iuri = filePath
+      self.uri = f'/public/image/{filePath.split("/")[-1]}'
       self.status = 'Uploaded'
       self.save()
 
