@@ -263,19 +263,19 @@ class LoginReply(_APIReply):
 
 # Stripe MAKE
 @dataclass
-class _StripeMakeData(_APIBase):
+class _StripeCheckoutData(_APIBase):
   session_id: str
   public_key: str
 
-class StripeMakeRequest(_APIRequest):
+class StripeCheckoutRequest(_APIRequest):
   """API Request for making a stripe session"""
   cart: list[str]
   discount = ''
 
 @dataclass
-class StripeMakeReply(_APIReply):
+class StripeCheckoutReply(_APIReply):
   """API Reply for making a stripe session"""
-  data: _StripeMakeData
+  data: _StripeCheckoutData
 
 
 

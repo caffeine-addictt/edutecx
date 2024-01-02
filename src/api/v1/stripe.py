@@ -6,7 +6,7 @@ from src.database import UserModel, TextbookModel, SaleModel, SaleInfo, Discount
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
-  StripeMakeRequest, StripeMakeReply, _StripeMakeData,
+  StripeCheckoutRequest, StripeCheckoutReply, _StripeCheckoutData,
   StripeCancelRequest, StripeCancelReply,
   StripeStatusRequest, StripeStatusReply, _StripeStatusData,
   GenericReply
@@ -27,10 +27,10 @@ basePath: str = '/api/v1/stripe'
 
 
 
-@app.route(f'{basePath}/create-session', methods = ['POST'])
+@app.route(f'{basePath}/create-checkout-session', methods = ['POST'])
 @require_login
-def create_stripe_session_api(user: UserModel):
-  req = StripeMakeRequest(request)
+def create_stripe_checkout_session_api(user: UserModel):
+  req = StripeCheckoutRequest(request)
   
   if not req.cart:
     return GenericReply(
@@ -123,10 +123,10 @@ def create_stripe_session_api(user: UserModel):
     discount = discount or None
   ).save()
 
-  return StripeMakeReply(
+  return StripeCheckoutReply(
     message = 'Checkout session created',
     status = HTTPStatusCode.OK,
-    data = _StripeMakeData(
+    data = _StripeCheckoutData(
       session_id = session['id'],
       public_key = app.config.get('STRIPE_PUBLIC_KEY', '')
     )
