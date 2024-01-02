@@ -284,6 +284,20 @@ class StripeMakeReply(_APIReply):
 
 
 
+# Stripe CANCEL
+class StripeCancelRequest(_APIRequest):
+  """API Request for canceling a stripe session"""
+  session_id: str
+
+StripeCancelReply = GenericReply
+
+
+
+
+
+
+
+
 # Store GET
 class StoreGetRequest(_APIRequest):
   """
