@@ -3,17 +3,30 @@ Handles user uploaded content serving
 """
 
 from src.database import UserModel
+from src.service import auth_provider, cdn_provider
+cdn_provider._dirCheck()
 
+from werkzeug.exceptions import Unauthorized
 from flask import (
+  request,
   Response,
   send_from_directory,
   current_app as app
 )
-from werkzeug.exceptions import Unauthorized
 
-from src.service import auth_provider, cdn_provider
-cdn_provider._dirCheck()
 
+
+
+# Helper Function
+def serve(location: str, filename: str) -> Response:
+  """
+  Handles downloading or serving
+  """
+  return send_from_directory(
+    location,
+    filename,
+    as_attachment = bool(request.args.get('download', None)),
+  )
 
 
 
@@ -34,7 +47,7 @@ def noindex():
 # Images
 @app.route('/public/image/<path:filename>', methods = ['GET'])
 def uploaded_images(filename: str):
-  return send_from_directory(
+  return serve(
     cdn_provider.ImageLocation,
     filename
   )
@@ -47,14 +60,14 @@ def uploaded_images(filename: str):
 @auth_provider.require_login
 def editable_textbook_cdn(user: UserModel, filename: str):
   if user.privilege == 'Admin':
-    return send_from_directory(
+    return serve(
       cdn_provider.EditableTextbookLocation,
       filename
     )
   
   for book in user.owned_textbooks:
     if book.iuri.endswith(filename):
-      return send_from_directory(
+      return serve(
         cdn_provider.EditableTextbookLocation,
         filename
       )
@@ -67,15 +80,14 @@ def editable_textbook_cdn(user: UserModel, filename: str):
 @auth_provider.require_login
 def uploaded_textbooks(user: UserModel, filename: str):
   if user.privilege == 'Admin':
-    return send_from_directory(
+    return serve(
       cdn_provider.TextbookLocation,
-      filename,
-      as_attachment = True
+      filename
     )
   
   for book in user.textbooks:
     if book.iuri.endswith(filename):
-      return send_from_directory(
+      return serve(
       cdn_provider.TextbookLocation,
       filename
     )
@@ -89,7 +101,7 @@ def uploaded_textbooks(user: UserModel, filename: str):
 @app.route('/public/graph/<path:filename>', methods = ['GET'])
 @auth_provider.require_admin
 def uploaded_graphs(user: UserModel, filename: str):
-  return send_from_directory(
+  return serve(
     cdn_provider.GraphFileLocation,
     filename
   )
