@@ -73,6 +73,15 @@ def create_stripe_session_api(user: UserModel):
         message = 'Discount limit reached',
         status = HTTPStatusCode.BAD_REQUEST
       ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  # Expire existing sessions
+  for pending in user.pending_transactions:
+    try:
+      stripe.checkout.Session.expire(pending.session_id)
+    except Exception as e:
+      app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
+    pending.delete()
 
   
   # Create Item
@@ -129,7 +138,7 @@ def stripe_cancel_api(user: UserModel):
       stripe.checkout.Session.expire(pending.session_id)
     except Exception as e:
       app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
-      
+
     pending.delete()
 
   return GenericReply(
