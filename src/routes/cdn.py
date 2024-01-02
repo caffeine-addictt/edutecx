@@ -35,7 +35,7 @@ def noindex():
 @app.route('/public/images/<path:filename>')
 def uploaded_images(filename: str):
   return send_from_directory(
-    cdn_provider.TextbookLocation,
+    cdn_provider.ImageLocation,
     filename
   )
 
