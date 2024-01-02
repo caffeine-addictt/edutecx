@@ -1,0 +1,29 @@
+.git
+.gitignore
+
+# Environments
+venv*/
+.env
+
+# README
+*.md
+
+# Dockers
+Dockerfile
+.devcontainer/
+.dockerignore
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Flask stuff:
+# logs/
+# instance/
+# migrations/
+.webassets-cache
+
+# Javascript
+jsconfig.json

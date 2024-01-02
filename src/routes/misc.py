@@ -2,10 +2,10 @@
 Handles misc routing
 """
 
-from src.database import TextbookModel, UserModel
-from src.utils.http import escape_id
+from src.database import UserModel
+from src.service import auth_provider
+from src.utils.forms import ContactForm
 
-from typing import List
 from flask import (
   abort,
   flash,
@@ -14,7 +14,7 @@ from flask import (
   current_app as app
 )
 
-from src.service import auth_provider
+
 
 
 # General routes
@@ -35,65 +35,25 @@ def profile(user: UserModel):
   return render_template('(misc)/profile.html', user = user)
 
 
+@app.route('/privacy-policy')
+def privacy_policy():
+  return render_template('(misc)/privacy_policy.html')
 
 
-# Textbooks
-@app.route('/textbooks')
-@auth_provider.require_login
-def textbooks(user: UserModel):
-  return render_template('(misc)/textbook_list.html')
+@app.route('/terms-of-service')
+def terms_of_service():
+  return render_template('(misc)/terms_of_service.html')
 
 
-@app.route('/textbooks/<string:id>')
-@auth_provider.require_login
-def textbooks_id(user: UserModel, id: str):
-  return render_template('(misc)/textbook.html')
+@app.route('/contact-us')
+@auth_provider.optional_login
+def contact_us(user: UserModel | None):
+  form = ContactForm(request.form)
 
+  if form.email.data == '':
+    form.email.data = (user and user.email) or ''
 
+  if form.validate_on_submit():
+    ...
 
-
-# Classrooms
-@app.route('/classrooms', methods = ['GET'])
-@auth_provider.require_login
-def classrooms(user: UserModel):
-  return render_template('(misc)/classroom_list.html', user = user)
-
-
-@app.route('/classrooms/<string:id>')
-@auth_provider.require_login
-def classroom(user: UserModel):
-  return render_template('(misc)/classroom.html')
-
-
-
-
-# Assignments
-@app.route('/assignments')
-@auth_provider.require_login
-def assignments(user: UserModel):
-  # Get assignments
-  return render_template('(misc)/assignment_list.html')
-
-
-@app.route('/assignments/<string:id>')
-@auth_provider.require_login
-def assignment(user: UserModel, id: str):
-  id = escape_id(id)
-
-  return render_template('(misc)/assignment.html')
-
-
-
-
-# Submissions
-@app.route('/submissions')
-@auth_provider.require_login
-def submissions(user: UserModel):
-  # Get submissions
-  return render_template('(misc)/submission_list.html')
-
-
-@app.route('/submissions/<string:id>')
-@auth_provider.require_login
-def submission(user: UserModel):
-  return render_template('(misc)/submission.html')
+  return render_template('(misc)/contact_us.html', form = form)

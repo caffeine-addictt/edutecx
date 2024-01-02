@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+
+
+{# Title #}
+{% block title %}
+  Assignment - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+  <div id="assignment__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
+    assignment content
+  </div>
+{% endblock %}
+
+
+{# Scripts #}
+{% block scripts %}
+  {# Write injected macros to variables #}
+  {# <script></script> #}
+  <script src="{{ url_for('static', filename = '(assignment)/assignment.js') }}"></script>
+{% endblock %}

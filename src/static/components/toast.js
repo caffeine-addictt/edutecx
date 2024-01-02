@@ -22,7 +22,7 @@ const renderToast = (message, category) => {
 
 
   /** @type {HTMLElement} */
-  const toast = htmlToElement(formatString(template, { '{message}': message }));
+  const toast = htmlToElement(formatString(template, { message: message }));
 
   // Add to toast container
   $('#toast-stack-container').append(toast);
