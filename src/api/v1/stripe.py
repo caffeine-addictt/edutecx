@@ -7,6 +7,7 @@ from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
   StripeMakeRequest, StripeMakeReply, _StripeMakeData,
+  StripeCancelRequest, StripeCancelReply,
   GenericReply
 )
 
@@ -133,20 +134,28 @@ def create_stripe_session_api(user: UserModel):
 @app.route(f'{basePath}/cancel', methods = ['POST'])
 @require_login
 def stripe_cancel_api(user: UserModel):
+  req = StripeCancelRequest(request)
 
-  if len(user.pending_transactions) == 0:
+  pending = [ i for i in user.pending_transactions if i.session_id == req.session_id ]
+  if len(pending) == 0:
     return GenericReply(
-      message = 'No pending transactions',
-      status = HTTPStatusCode.FORBIDDEN
-    ), HTTPStatusCode.FORBIDDEN
+      message = 'Pending transaction not found',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  pending = pending[0]
 
-  for pending in user.pending_transactions:
-    try:
-      stripe.checkout.Session.expire(pending.session_id)
-    except Exception as e:
-      app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
+  try:
+    stripe.checkout.Session.expire(pending.session_id)
 
-    pending.delete()
+  except Exception as e:
+    app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
+    return GenericReply(
+      message = 'Failed to expire session',
+      status = HTTPStatusCode.INTERNAL_SERVER_ERROR
+    ).to_dict(), HTTPStatusCode.INTERNAL_SERVER_ERROR
+
+  pending.delete()
 
   return GenericReply(
     message = 'Checkout cancelled',
