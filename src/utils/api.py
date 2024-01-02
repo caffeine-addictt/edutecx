@@ -305,7 +305,7 @@ class _StripeStatusData(_APIBase):
   total_cost    : float
   user_id       : str
   transaction_id: str
-  used_discount : str
+  used_discount : Optional[str]
   paid_at       : float
   created_at    : float
 

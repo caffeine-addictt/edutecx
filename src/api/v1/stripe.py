@@ -81,10 +81,12 @@ def create_stripe_session_api(user: UserModel):
   # Expire existing sessions
   for pending in user.pending_transactions:
     try:
-      stripe.checkout.Session.expire(pending.session_id)
+      if pending.session_id:
+        stripe.checkout.Session.expire(pending.session_id)
+        pending.delete()
+
     except Exception as e:
       app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
-    pending.delete()
 
   
   # Create Item
@@ -148,7 +150,8 @@ def stripe_cancel_api(user: UserModel):
   pending = pending[0]
 
   try:
-    stripe.checkout.Session.expire(pending.session_id)
+    if pending.session_id:
+      stripe.checkout.Session.expire(pending.session_id)
 
   except Exception as e:
     app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
@@ -183,6 +186,7 @@ def stripe_status_api(user: UserModel):
           total_cost = transaction.total_cost,
           user_id = user.id,
           transaction_id = transaction.id,
+          used_discount = transaction.used_discount.code if transaction.used_discount else None,
           paid_at = transaction.paid_at.timestamp(),
           created_at = transaction.created_at.timestamp()
         )
