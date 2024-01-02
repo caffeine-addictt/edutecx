@@ -119,3 +119,11 @@ const formatString = (str, params) => {
 const deepCopy = (str) => {
   return (' ' + str).slice(1)
 }
+
+
+
+/**
+ * Wait
+ * @param {number} ms
+ */
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
