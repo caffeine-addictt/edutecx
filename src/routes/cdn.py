@@ -42,13 +42,33 @@ def uploaded_images(filename: str):
 
 
 
+# Editable Textbooks
+@app.route('/public/editabletextbook/<path:filename>', methods = ['GET'])
+@auth_provider.require_login
+def editable_textbook_cdn(user: UserModel, filename: str):
+  if user.privilege == 'Admin':
+    return send_from_directory(
+      cdn_provider.EditableTextbookLocation,
+      filename
+    )
+  
+  for book in user.owned_textbooks:
+    if book.iuri.endswith(filename):
+      return send_from_directory(
+        cdn_provider.EditableTextbookLocation,
+        filename
+      )
+
+
+
+
 # Textbooks
-@app.route('/public/textbooks/<path:filename>')
+@app.route('/public/textbook/<path:filename>')
 @auth_provider.require_login
 def uploaded_textbooks(user: UserModel, filename: str):
   if user.privilege == 'Admin':
     return send_from_directory(
-      cdn_provider.EditableTextbookLocation,
+      cdn_provider.TextbookLocation,
       filename,
       as_attachment = True
     )
@@ -56,7 +76,7 @@ def uploaded_textbooks(user: UserModel, filename: str):
   for book in user.textbooks:
     if book.iuri.endswith(filename):
       return send_from_directory(
-      cdn_provider.EditableTextbookLocation,
+      cdn_provider.TextbookLocation,
       filename
     )
   
