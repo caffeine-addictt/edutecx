@@ -122,14 +122,16 @@ def cart(user: UserModel):
 
 
 @app.route('/checkout-success', methods = ['GET'])
-def checkout_success():
+@auth_provider.require_login
+def checkout_success(user: UserModel):
   return render_template('(store)/checkout_success.html')
 
 
 
 
 @app.route('/checkout-cancel', methods = ['GET'])
-def checkout_cancel():
+@auth_provider.require_login
+def checkout_cancel(user: UserModel):
   return render_template('(store)/checkout_cancel.html')
 
 
