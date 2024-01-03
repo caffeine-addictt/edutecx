@@ -8,11 +8,12 @@ from src.service.cdn_provider import uploadTextbook, deleteFile
 import uuid
 from thread import Thread
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING, List
+from typing import Optional, TYPE_CHECKING, List, Literal
 from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
+  Enum,
   Float,
   String,
   DateTime,
@@ -27,7 +28,10 @@ if TYPE_CHECKING:
   from .editabletextbook import EditableTextbookModel
 
 
-# TODO: Textbook PDF upload
+TextbookUploadStatus = Literal['Uploading', 'Uploaded']
+EnumTextbookUploadStatus = Enum('Uploading', 'Uploaded', name = 'TextbookUploadStatus')
+
+
 class TextbookModel(db.Model):
   """Textbook Model"""
 
@@ -46,10 +50,10 @@ class TextbookModel(db.Model):
   author     : Mapped['UserModel']           = relationship('UserModel', back_populates = 'owned_textbooks')
   discounts  : Mapped[List['DiscountModel']] = relationship('DiscountModel', back_populates = 'textbook')
 
-  uri        : Mapped[str]                    = mapped_column(String, nullable = True)
-  iuri       : Mapped[str]                    = mapped_column(String, nullable = True)
-  status     : Mapped[str]                    = mapped_column(String, nullable = False, default = 'Uploading')
-  cover_image: Mapped[Optional['ImageModel']] = relationship('ImageModel', back_populates = 'textbook')
+  uri        : Mapped[str]                           = mapped_column(String, nullable = True)
+  iuri       : Mapped[str]                           = mapped_column(String, nullable = True)
+  status     : Mapped[TextbookUploadStatus]          = mapped_column(EnumTextbookUploadStatus, nullable = False, default = 'Uploading')
+  cover_image: Mapped[Optional['ImageModel']]        = relationship('ImageModel', back_populates = 'textbook')
   derrived   : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'origin')
 
   # Logs
