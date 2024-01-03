@@ -135,6 +135,13 @@ def checkout_cancel():
 
 
 
+@app.route('/pricing', methods = ['GET'])
+def pricing_page():
+  return render_template('(store)/pricing.html')
+
+
+
+
 # Functions
 @customCache
 def filterTextbooks(
