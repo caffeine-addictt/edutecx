@@ -3,9 +3,9 @@ Auth Provider
 """
 
 from functools import wraps
-from typing import Optional, Callable, Any, Literal, Concatenate, ParamSpec, TypeVar
+from typing import Callable, Any, Concatenate, ParamSpec, TypeVar
 
-from src.database.user import PrivilegeTypes, UserModel
+from src.database.user import UserModel
 from src.utils.http import HTTPStatusCode
 from werkzeug.exceptions import Unauthorized
 
