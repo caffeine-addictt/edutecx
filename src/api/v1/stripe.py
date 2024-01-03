@@ -5,6 +5,7 @@ Stripe Endpoint'
 from src import limiter
 from flask_limiter import util
 
+from sqlalchemy import and_
 from src.database import UserModel, TextbookModel, EditableTextbookModel, SaleModel, SaleInfo, DiscountModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
@@ -134,6 +135,19 @@ def create_stripe_checkout_session_api(user: UserModel):
   if len(found) != len(req.cart):
     return GenericReply(
       message = 'Invalid items in cart',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+
+  # Ensure textbook is not already owned
+  foundIDS = [ i.id for i in found ]
+  alreadyowned = EditableTextbookModel.query.filter(and_(
+    EditableTextbookModel.user_id == user.id,
+    EditableTextbookModel.textbook_id.in_(foundIDS)
+  )).all()
+  if len(alreadyowned) > 0:
+    return GenericReply(
+      message = 'One or more textbook(s) already owned',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
