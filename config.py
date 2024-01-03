@@ -24,6 +24,7 @@ class ConfigBase:
   # \\\\\\ General ////// #
   # Production ENV
   ENV: Literal['development', 'production'] = 'development'
+  UNLIMITED_TIER_PRICE: float = 49.99
 
 
   # \\\\\\ Stripe ////// #
