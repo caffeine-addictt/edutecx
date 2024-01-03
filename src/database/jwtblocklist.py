@@ -16,8 +16,8 @@ from sqlalchemy import (
   DateTime,
 )
 
-TokenType = Literal['access', 'refresh']
-EnumTokenType = Enum('access', 'refresh', name = 'TokenType')
+JWTType = Literal['access', 'refresh']
+EnumJWTType = Enum('access', 'refresh', name = 'TokenType')
 
 class JWTBlocklistModel(db.Model):
   """Stores revoked tokens"""
@@ -25,10 +25,10 @@ class JWTBlocklistModel(db.Model):
   __tablename__ = 'jwtblocklist_table'
 
   jti       : Mapped[str]       = mapped_column(String, primary_key = True, unique = True, nullable = False)
-  token_type: Mapped[TokenType] = mapped_column(EnumTokenType, nullable = False)
+  token_type: Mapped[JWTType] = mapped_column(EnumJWTType, nullable = False)
   created_at: Mapped[datetime]  = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
-  def __init__(self, jti: str, token_type: TokenType) -> None:
+  def __init__(self, jti: str, token_type: JWTType) -> None:
     """
     JWT Blocklist Model
 
