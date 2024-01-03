@@ -43,6 +43,7 @@ class EditableTextbookModel(db.Model):
   user     : Mapped['UserModel']                  = relationship('UserModel', back_populates = 'textbooks')
   origin   : Mapped['TextbookModel']              = relationship('TextbookModel', back_populates = 'derrived')
 
+  updated_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
 
@@ -65,6 +66,7 @@ class EditableTextbookModel(db.Model):
     self.iuri = filePath
     self.uri = f'/public/editabletextbook/{filePath.split("/")[-1]}'
     self.status = 'Uploaded'
+    self.updated_at = datetime.utcnow()
     self.save()
 
   def _handle_upload(self, textbook: 'TextbookModel') -> None:
