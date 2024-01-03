@@ -116,7 +116,7 @@ def unauthorized_loader(msg: str):
     }, HTTPStatusCode.UNAUTHORIZED
   else:
     return redirect(
-      f'/login?callbackURI={parse.quote(request.path)}',
+      f'/login?callbackURI={parse.quote_plus(request.path)}',
       code = HTTPStatusCode.SEE_OTHER
     ), HTTPStatusCode.SEE_OTHER
 
@@ -130,7 +130,7 @@ def invalid_token_loader(msg: str):
     }, HTTPStatusCode.UNPROCESSABLE_ENTITY
   else:
     response = make_response(redirect(
-      f'/login?callbackURI={parse.quote(request.path)}',
+      f'/login?callbackURI={parse.quote_plus(request.path)}',
       code = HTTPStatusCode.SEE_OTHER
     ))
     return response, HTTPStatusCode.SEE_OTHER
@@ -179,7 +179,7 @@ def expired_token_loader(jwtHeader, jwtPayload):
       app.logger.error(f'Failed to Auto-Refresh expired access token with refresh token: {e}')
     
     response = make_response(redirect(
-      f'/login?callbackURI={parse.quote(request.path)}',
+      f'/login?callbackURI={parse.quote_plus(request.path)}',
       code = HTTPStatusCode.SEE_OTHER
     ))
     unset_refresh_cookies(response)
@@ -201,7 +201,7 @@ def login():
   # Auto redirect to callbackURI
   if optional_jwt():
     flash(f'Welcome back!', 'success')
-    callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
+    callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/home'))
 
     return redirect(callbackURI, code = HTTPStatusCode.PERMANENT_REDIRECT)
   
@@ -225,7 +225,7 @@ def login():
       body = LoginResponse(response)
 
       # Handle Login and cookie
-      callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
+      callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/home'))
       successfulLogin = make_response(
         redirect(callbackURI, code = HTTPStatusCode.SEE_OTHER),
         HTTPStatusCode.SEE_OTHER
@@ -294,7 +294,7 @@ def logout():
 def register():
   # Redirect to callbackURI or home if logged in
   if get_jwt_identity():
-    callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
+    callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/home'))
     return redirect(callbackURI, code = HTTPStatusCode.SEE_OTHER), HTTPStatusCode.SEE_OTHER
   
   form = RegisterForm(request.form)
@@ -316,7 +316,7 @@ def register():
     else:
       flash(body.message, 'success')
 
-      callbackURI: str = parse.quote(request.args.get('callbackURI', '/login'))
+      callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/login'))
       return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
 
   return render_template('(auth)/register.html', form = form)
