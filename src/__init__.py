@@ -50,12 +50,6 @@ config.dictConfig({
     'console_fmt': {'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'}
   },
   'handlers': {
-    'general': {
-      'class': 'logging.handlers.RotatingFileHandler',
-      'filename': 'logs/general.log',
-      'formatter': 'file_fmt',
-      'level': 'DEBUG'
-    },
     'error': {
       'class': 'logging.handlers.RotatingFileHandler',
       'filename': 'logs/error.log',
@@ -71,7 +65,7 @@ config.dictConfig({
   },
   'root': {
     'level': 'DEBUG',
-    'handlers': ['general', 'error', 'console']
+    'handlers': ['error', 'console']
   }
 })
 

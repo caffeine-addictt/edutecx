@@ -261,21 +261,44 @@ class LoginReply(_APIReply):
 
 
 
-# Stripe MAKE
+# Stripe Subscription MAKE
 @dataclass
-class _StripeMakeData(_APIBase):
+class _StripeSubscriptionData(_APIBase):
   session_id: str
   public_key: str
 
-class StripeMakeRequest(_APIRequest):
+class StripeSubscriptionRequest(_APIRequest):
+  """API Request for making a stripe session"""
+  tier: Literal['Unlimited']
+  discount = ''
+
+@dataclass
+class StripeSubscriptionReply(_APIReply):
+  """API Reply for making a stripe session"""
+  data: _StripeSubscriptionData
+
+
+
+
+
+
+
+
+# Stripe Checkout MAKE
+@dataclass
+class _StripeCheckoutData(_APIBase):
+  session_id: str
+  public_key: str
+
+class StripeCheckoutRequest(_APIRequest):
   """API Request for making a stripe session"""
   cart: list[str]
   discount = ''
 
 @dataclass
-class StripeMakeReply(_APIReply):
+class StripeCheckoutReply(_APIReply):
   """API Reply for making a stripe session"""
-  data: _StripeMakeData
+  data: _StripeCheckoutData
 
 
 
@@ -284,12 +307,26 @@ class StripeMakeReply(_APIReply):
 
 
 
-# Stripe CANCEL
-class StripeCancelRequest(_APIRequest):
+# Stripe Subscription CANCEL
+class StripeSubscriptionCancelRequest(_APIRequest):
   """API Request for canceling a stripe session"""
+  subscription_id: str
+
+StripeSubscriptionCancelReply = GenericReply
+
+
+
+
+
+
+
+
+# Stripe EXPIRE
+class StripeExpireRequest(_APIRequest):
+  """API Request for expiring a stripe session"""
   session_id: str
 
-StripeCancelReply = GenericReply
+StripeExpireReply = GenericReply
 
 
 
@@ -305,7 +342,7 @@ class _StripeStatusData(_APIBase):
   total_cost    : float
   user_id       : str
   transaction_id: str
-  used_discount : str
+  used_discount : Optional[str]
   paid_at       : float
   created_at    : float
 

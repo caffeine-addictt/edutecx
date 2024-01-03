@@ -45,7 +45,9 @@ def handle_errorNotFound(error: Union[Exception, HTTPException]):
   
 
   app.logger.error(f'Non-API error {request.path}: %s' % str(error))
-  app.logger.error(traceback.format_exc())
+  if (isHTTPException and (error.code != HTTPStatusCode.NOT_FOUND)):
+    app.logger.error(traceback.format_exc())
+
   match (isHTTPException and error.code):
     case HTTPStatusCode.NOT_FOUND:
       # Check for URL with extra /
