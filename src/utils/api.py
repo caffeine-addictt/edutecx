@@ -307,12 +307,26 @@ class StripeCheckoutReply(_APIReply):
 
 
 
-# Stripe CANCEL
-class StripeCancelRequest(_APIRequest):
+# Stripe Subscription CANCEL
+class StripeSubscriptionCancelRequest(_APIRequest):
   """API Request for canceling a stripe session"""
+  subscription_id: str
+
+StripeSubscriptionCancelReply = GenericReply
+
+
+
+
+
+
+
+
+# Stripe EXPIRE
+class StripeExpireRequest(_APIRequest):
+  """API Request for expiring a stripe session"""
   session_id: str
 
-StripeCancelReply = GenericReply
+StripeExpireReply = GenericReply
 
 
 
