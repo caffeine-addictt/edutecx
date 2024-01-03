@@ -42,8 +42,11 @@ class SaleModel(db.Model):
   id          : Mapped[str]           = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
   user_id     : Mapped[str]           = mapped_column(ForeignKey('user_table.id'), nullable = False)
   textbook_ids: Mapped[Optional[str]] = mapped_column(String, nullable = True) # str(id:cost,id2:cost,...)
-  session_id  : Mapped[Optional[str]] = mapped_column(String, nullable = True)
   discount_id : Mapped[Optional[str]] = mapped_column(ForeignKey('discount_table.id'), nullable = True)
+
+  # Stripe IDs
+  session_id     : Mapped[Optional[str]] = mapped_column(String, nullable = True)
+  subscription_id: Mapped[Optional[str]] = mapped_column(String, nullable = True)
 
   # Attributes
   type         : Mapped[str]                      = mapped_column(String, nullable = False)
