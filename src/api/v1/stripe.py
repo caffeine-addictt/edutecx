@@ -384,6 +384,18 @@ def stripe_webhook_api():
       sale = SaleModel.query.filter(SaleModel.session_id == session['id']).first()
       if isinstance(sale, SaleModel):
         sale.delete()
+    
+    case 'customer.subscription.deleted':
+      user = UserModel.query.filter(UserModel.subscription_id == event.data.object['subscription']).first()
+      if not isinstance(user, UserModel):
+        return GenericReply(
+          message = 'Unable to locate customer',
+          status = HTTPStatusCode.BAD_REQUEST
+        ).to_dict(), HTTPStatusCode.BAD_REQUEST
+      
+      user.membership = 'Free'
+      user.subscription_status = 'Cancelled'
+      user.save()
       
 
   return GenericReply(
