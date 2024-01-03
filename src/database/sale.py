@@ -12,6 +12,7 @@ from typing import Optional, Literal, List, Dict, TYPE_CHECKING, overload
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
+  Enum,
   Float,
   String,
   Boolean,
@@ -26,6 +27,8 @@ if TYPE_CHECKING:
   from .textbook import TextbookModel
   from .discount import DiscountModel
 
+SaleType = Literal['OneTime', 'Subscription']
+EnumSaleType = Enum('OneTime', 'Subscription', name = 'SaleType')
 
 @dataclass
 class SaleInfo:
@@ -49,7 +52,7 @@ class SaleModel(db.Model):
   subscription_id: Mapped[Optional[str]] = mapped_column(String, nullable = True)
 
   # Attributes
-  type         : Mapped[str]                      = mapped_column(String, nullable = False)
+  type         : Mapped[SaleType]                  = mapped_column(EnumSaleType, nullable = False)
   paid         : Mapped[bool]                      = mapped_column(Boolean, nullable = False, default = False)
   total_cost   : Mapped[float]                     = mapped_column(Float, nullable = False)
   user         : Mapped['UserModel']               = relationship('UserModel')
@@ -115,7 +118,7 @@ class SaleModel(db.Model):
   def __init__(
     self,
     user: 'UserModel',
-    saleType: Literal['Subscription', 'OneTime'],
+    saleType: SaleType,
     saleinfo: Optional[List[SaleInfo]] = None,
     total_cost: Optional[float] = None,
     *,
