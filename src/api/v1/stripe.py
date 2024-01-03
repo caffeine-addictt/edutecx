@@ -37,7 +37,7 @@ basePath: str = '/api/v1/stripe'
 def create_stripe_subscription_session_api(user: UserModel):
   req = StripeSubscriptionRequest(request)
 
-  if user.membership == req.tier:
+  if user.membership != 'Free':
     return GenericReply(
       message = 'Already subscribed',
       status = HTTPStatusCode.BAD_REQUEST
