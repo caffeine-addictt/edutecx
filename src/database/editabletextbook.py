@@ -63,6 +63,7 @@ class EditableTextbookModel(db.Model):
 
   def _updateURI(self, filePath: str) -> None:
     self.iuri = filePath
+    self.uri = f'/public/editabletextbook/{filePath.split("/")[-1]}'
     self.status = 'Uploaded'
     self.save()
 
