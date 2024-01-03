@@ -75,7 +75,6 @@ class DevelopmentConfig(ConfigBase):
   """
 
   ENV = 'development'
-  DOMAIN = '127.0.0.1:8080'
 
   SECRET_KEY = 'mysecretkey'
 
