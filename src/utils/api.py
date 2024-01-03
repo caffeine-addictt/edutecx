@@ -261,7 +261,30 @@ class LoginReply(_APIReply):
 
 
 
-# Stripe MAKE
+# Stripe Subscription MAKE
+@dataclass
+class _StripeSubscriptionData(_APIBase):
+  session_id: str
+  public_key: str
+
+class StripeSubscriptionRequest(_APIRequest):
+  """API Request for making a stripe session"""
+  tier: Literal['Unlimited']
+  discount = ''
+
+@dataclass
+class StripeSubscriptionReply(_APIReply):
+  """API Reply for making a stripe session"""
+  data: _StripeSubscriptionData
+
+
+
+
+
+
+
+
+# Stripe Checkout MAKE
 @dataclass
 class _StripeCheckoutData(_APIBase):
   session_id: str
