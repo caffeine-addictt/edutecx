@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Literal, Optional
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
+  Enum,
   String,
   DateTime,
   ForeignKey
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
   from .user import UserModel
 
 TokenType = Literal['Verification', 'PasswordReset']
-
+EnumTokenType = Enum('Verification', 'PasswordReset', name = 'TokenType')
 
 class TokenModel(db.Model):
   """
@@ -35,8 +36,8 @@ class TokenModel(db.Model):
   id  : Mapped[str]         = mapped_column(ForeignKey('user_table.id'), primary_key = True, nullable = False)
   user: Mapped['UserModel'] = relationship('UserModel', back_populates = 'token')
 
-  token     : Mapped[str] = mapped_column(String, nullable = False, unique = True, default = lambda: uuid.uuid4().hex)
-  token_type: Mapped[str] = mapped_column(String, nullable = False)
+  token     : Mapped[str]       = mapped_column(String, nullable = False, unique = True)
+  token_type: Mapped[TokenType] = mapped_column(EnumTokenType, nullable = False)
 
   expires_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = lambda: utc_time.skip('1day'))
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = lambda: utc_time.get())
@@ -61,9 +62,7 @@ class TokenModel(db.Model):
     self.id = user.id
     self.user = user
     self.token_type = token_type
-    
-    if isinstance(token, str):
-      self.token = token
+    self.token = token or uuid.uuid4().hex
 
   def __repr__(self):
     """To be used with cache indexing"""
