@@ -11,7 +11,8 @@ from src.utils.http import HTTPStatusCode
 from src.utils.api import (
   StripeSubscriptionRequest, StripeSubscriptionReply, _StripeSubscriptionData,
   StripeCheckoutRequest, StripeCheckoutReply, _StripeCheckoutData,
-  StripeCancelRequest, StripeCancelReply,
+  StripeSubscriptionCancelRequest, StripeSubscriptionCancelReply,
+  StripeExpireRequest, StripeExpireReply,
   StripeStatusRequest, StripeStatusReply, _StripeStatusData,
   GenericReply
 )
@@ -216,10 +217,57 @@ def create_stripe_checkout_session_api(user: UserModel):
 
 
 
+@app.route(f'{basePath}/cancel-subscription', methods = ['POST'])
+@require_login
+def cancel_stripe_subscription_api(user: UserModel):
+  req = StripeSubscriptionCancelRequest(request)
+
+
+  # Validate Request
+  if (user.privilege != 'Admin') and (user.subscription_id != req.subscription_id):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+
+
+  # Locate Sale
+  sale = SaleModel.query.filter(SaleModel.subscription_id == req.subscription_id).first()
+  if not isinstance(sale, SaleModel):
+    return GenericReply(
+      message = 'Subscription not found',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+
+  # Cancel the subscription
+  try:
+    stripe.Subscription.modify(req.subscription_id, cancel_at_period_end = True)
+  except Exception as e:
+    app.logger.error(f'{e}')
+    return GenericReply(
+      message = 'Failed to cancel subscription',
+      status = HTTPStatusCode.INTERNAL_SERVER_ERROR
+    ).to_dict(), HTTPStatusCode.INTERNAL_SERVER_ERROR
+
+
+  # Update the user membership type
+  user.subscription_status = 'Cancelled'
+  user.save()
+
+
+  return StripeSubscriptionCancelReply(
+    message = 'Subscription will cancel at the end of period',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
 @app.route(f'{basePath}/expire-session', methods = ['POST'])
 @require_login
 def stripe_expiresession_api(user: UserModel):
-  req = StripeCancelRequest(request)
+  req = StripeExpireRequest(request)
 
   pending = [ i for i in user.pending_transactions if i.session_id == req.session_id ]
   if len(pending) == 0:
@@ -243,7 +291,7 @@ def stripe_expiresession_api(user: UserModel):
 
   pending.delete()
 
-  return StripeCancelReply(
+  return StripeExpireReply(
     message = 'Checkout cancelled',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
@@ -314,6 +362,13 @@ def stripe_webhook_api():
           message = 'Failed to locate sale',
           status = HTTPStatusCode.BAD_REQUEST
         ).to_dict(), HTTPStatusCode.BAD_REQUEST
+      
+      if sale.type == 'Subscription':
+        sale.subscription_id = event.data.object['subscription']
+        sale.user.subscription_id = event.data.object['subscription']
+        sale.user.subscription_status = 'Active'
+        sale.user.membership = 'Unlimited'
+        sale.user.save()
       
       sale.session_id = None
       sale.paid = True
