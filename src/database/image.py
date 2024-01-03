@@ -8,7 +8,7 @@ from src.service.cdn_provider import uploadImage, deleteFile
 import uuid
 from thread import Thread
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, Literal
+from typing import TYPE_CHECKING, Optional, Literal, overload
 from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -51,13 +51,8 @@ class ImageModel(db.Model):
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
 
-  def __init__(
-    self,
-    file: FileStorage,
-    user: Optional['UserModel'] = None,
-    textbook: Optional['TextbookModel'] = None,
-    classroom: Optional['ClassroomModel'] = None
-  ) -> None:
+  @overload
+  def __init__(self, file: FileStorage, *, user: 'UserModel') -> None:
     """
     Image Model
 
@@ -65,12 +60,41 @@ class ImageModel(db.Model):
     ----------
     `file: FileStorage`, required
 
-    `user: UserModel`, optional
-
-    `textbook: TextbookModel`, optional
-
-    `classroom: ClassroomModel`, optional
+    `user: UserModel`, required
     """
+  
+  @overload
+  def __init__(self, file: FileStorage, *, textbook: 'TextbookModel') -> None:
+    """
+    Image Model
+
+    Parameters
+    ----------
+    `file: FileStorage`, required
+
+    `textbook: TextbookModel`, required
+    """
+  
+  @overload
+  def __init__(self, file: FileStorage, *, classroom: 'ClassroomModel') -> None:
+    """
+    Image Model
+
+    Parameters
+    ----------
+    `file: FileStorage`, required
+
+    `classroom: ClassroomModel`, required
+    """
+
+  def __init__(
+    self,
+    file: FileStorage,
+    *,
+    user: Optional['UserModel'] = None,
+    textbook: Optional['TextbookModel'] = None,
+    classroom: Optional['ClassroomModel'] = None
+  ) -> None:
     # Make use of the fact that Boolean is a subclass of INT
     if (bool(user) + bool(textbook)+ bool(classroom)) != 1:
       raise Exception('Only 1 parent reference is allowed')
