@@ -5,7 +5,7 @@ Stripe Endpoint'
 from src import limiter
 from flask_limiter import util
 
-from src.database import UserModel, TextbookModel, SaleModel, SaleInfo, DiscountModel
+from src.database import UserModel, TextbookModel, EditableTextbookModel, SaleModel, SaleInfo, DiscountModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
@@ -130,33 +130,33 @@ def create_stripe_checkout_session_api(user: UserModel):
   
 
   # Validate items exist
-  # found: list[TextbookModel] = TextbookModel.query.filter(TextbookModel.id.in_(req.cart)).all()
-  # if len(found) != len(req.cart):
-  #   return GenericReply(
-  #     message = 'Invalid items in cart',
-  #     status = HTTPStatusCode.BAD_REQUEST
-  #   ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  found: list[TextbookModel] = TextbookModel.query.filter(TextbookModel.id.in_(req.cart)).all()
+  if len(found) != len(req.cart):
+    return GenericReply(
+      message = 'Invalid items in cart',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
-  # # Ensure discount is valid
-  # if discount:
-  #   if discount.textbook and (not discount.textbook.id in found):
-  #     return GenericReply(
-  #       message = 'Invalid discount code',
-  #       status = HTTPStatusCode.BAD_REQUEST
-  #     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  # Ensure discount is valid
+  if discount:
+    if discount.textbook and (not discount.textbook.id in found):
+      return GenericReply(
+        message = 'Invalid discount code',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  #   if discount.expires_at and (discount.expires_at < datetime.utcnow()):
-  #     return GenericReply(
-  #       message = 'Discount expired',
-  #       status = HTTPStatusCode.BAD_REQUEST
-  #     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+    if discount.expires_at and (discount.expires_at < datetime.utcnow()):
+      return GenericReply(
+        message = 'Discount expired',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
     
-  #   if discount.limit and (discount.limit <= discount.used):
-  #     return GenericReply(
-  #       message = 'Discount limit reached',
-  #       status = HTTPStatusCode.BAD_REQUEST
-  #     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+    if discount.limit and (discount.limit <= discount.used):
+      return GenericReply(
+        message = 'Discount limit reached',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
   # Expire existing sessions
@@ -173,17 +173,19 @@ def create_stripe_checkout_session_api(user: UserModel):
   # Create Item
   items: list[str] = []
   saleinfo: list[SaleInfo] = []
-  for txtbook in req.cart:#found:
-    # if discount and discount.textbook and discount.textbook.id == txtbook.id:
-    #   cost = round(txtbook.price * discount.multiplier * 100, 2)
-    # else:
-    #   cost = round(txtbook.price * (discount.multiplier if discount else 1) * 100, 2)
-    cost = int(round(float(txtbook), 2) * 100)
-    # saleinfo.append(SaleInfo(cost, txtbook))
+  for txtbook in found:
+    if discount and discount.textbook and discount.textbook.id == txtbook.id:
+      cost = round(txtbook.price * discount.multiplier * 100, 2)
+    else:
+      cost = round(txtbook.price * (discount.multiplier if discount else 1) * 100, 2)
+    saleinfo.append(SaleInfo(cost, txtbook))
     items.append(stripe.Price.create(
       currency = 'sgd',
       unit_amount = int(cost * 100),
-      product_data = {'name': f'{txtbook.title()}'}
+      product_data = {
+        'name': f'{txtbook.title} by {txtbook.author.username}',
+        'metadata': { 'id': txtbook.id }
+      }
     )['id'])
 
 
@@ -349,11 +351,8 @@ def stripe_webhook_api():
 
   # Handle events
   match event.type:
-    case 'charge.succeeded': # Triggered when checkout succeeds
-      session = stripe.checkout.Session.retrieve(
-        event.data.object['id'],
-        expand = ['line_items']
-      )
+    case 'checkout.session.completed': # Triggered when checkout succeeds
+      session = stripe.checkout.Session.retrieve(event.data.object['id'])
 
       # Query sale model
       sale = SaleModel.query.filter(SaleModel.session_id == session['id']).first()
@@ -363,43 +362,39 @@ def stripe_webhook_api():
           status = HTTPStatusCode.BAD_REQUEST
         ).to_dict(), HTTPStatusCode.BAD_REQUEST
       
+
+      sale.paid = True
+      sale.session_id = None
+      sale.paid_at = datetime.utcnow()
+
       if sale.type == 'Subscription':
+        sale.user.membership = 'Unlimited'
+        sale.user.subscription_status = 'Active'
         sale.user.subscription_id = event.data.object['subscription']
         sale.subscription_id = event.data.object['subscription']
-
-      elif sale.type == 'OneTime':
-        sale.paid = True
-        sale.paid_at = datetime.utcnow()
-
-        # TODO: Handle making textbooks availble to user
-
+        sale.user.save()
 
       sale.save()
 
+      # Handle making textbooks availble to user
+      items = stripe.checkout.Session.list_line_items(event.data.object['id'])
+      if sale.type == 'OneTime':
+        for info in sale.textbooks.values():
+          EditableTextbookModel(
+            user = sale.user,
+            textbook = info.textbook
+          ).save()
 
 
-    case 'invoice.paid': # Triggered when subscription charge succeeds
+
+    case 'invoice.paid': # Handle recurring charge
       # Query most recent sale model
       sale = SaleModel.query.filter(
         SaleModel.subscription_id == event.data.object['subscription']
       ).order_by(SaleModel.created_at.desc()).first()
 
-      if not isinstance(sale, SaleModel):
-        return GenericReply(
-          message = 'Failed to locate subscription',
-          status = HTTPStatusCode.BAD_REQUEST
-        ).to_dict(), HTTPStatusCode.BAD_REQUEST
-      
-      # Handle first payment
-      if not sale.paid:
-        sale.paid = True
-        sale.paid_at = datetime.utcnow()
-        sale.user.subscription_status = 'Active'
-        sale.user.membership = 'Unlimited'
-        sale.user.save()
-        sale.save()
-      
-      else:
+      if isinstance(sale, SaleModel) and sale.paid:
+        # Handle recurring payment
         SaleModel(
           user = sale.user,
           saleType = 'Subscription',
@@ -407,16 +402,6 @@ def stripe_webhook_api():
         ).save()
 
 
-
-    case 'checkout.session.completed':
-      session = stripe.checkout.Session.retrieve(event.data.object['id'])
-
-      # Query sale model
-      sale = SaleModel.query.filter(SaleModel.session_id == session['id']).first()
-      if isinstance(sale, SaleModel):
-        sale.session_id = None
-        sale.save()
-    
 
     case 'checkout.session.expired':
       session = stripe.checkout.Session.retrieve(event.data.object['id'])
@@ -426,6 +411,7 @@ def stripe_webhook_api():
       if isinstance(sale, SaleModel):
         sale.delete()
     
+
 
     case 'customer.subscription.deleted':
       user = UserModel.query.filter(UserModel.subscription_id == event.data.object['subscription']).first()
