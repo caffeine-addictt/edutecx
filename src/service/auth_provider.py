@@ -51,20 +51,25 @@ def verify_jwt(
 
 
 
-RouteResponse = _FResponse | _WResponse | tuple[dict[str, Any], int] | dict[str, Any] | str
+RouteResponse = _FResponse | _WResponse | tuple[dict[str, Any], int] | dict[str, Any] | str | tuple[str, int] | tuple[_FResponse, int] | tuple[_WResponse, int]
 NoParamReturn = Callable[P, RouteResponse]
 FullParamReturn = Callable[P, RouteResponse]
 
 
-# For User required annotation
+# For User-required annotation
 UserRouteEndpoint = Callable[Concatenate[UserModel, P], RouteResponse]
 UserWithParamReturn = Callable[[UserRouteEndpoint[P]], NoParamReturn[P]]
 UserWrappedReturn = NoParamReturn[P] | UserWithParamReturn[P] | FullParamReturn[P]
 
-# For user optional annotation
+# For user-optional annotation
 OptionalRouteEndpoint = Callable[Concatenate[UserModel | None, P], RouteResponse]
 OptionalWithParamReturn = Callable[[OptionalRouteEndpoint[P]], NoParamReturn[P]]
 OptionalWrappedReturn = NoParamReturn[P] | OptionalWithParamReturn[P] | FullParamReturn[P]
+
+# For user-anonymous annotation
+AnonRouteEndpoint = Callable[P, RouteResponse]
+AnonWithParamReturn = Callable[[AnonRouteEndpoint[P]], NoParamReturn[P]]
+AnonWrappedReturn = NoParamReturn[P] | AnonWithParamReturn[P] | FullParamReturn[P]
 
 
 
@@ -363,4 +368,94 @@ def optional_login(
       *args,
       **kwargs
     )
+  return wrapper
+
+
+
+
+
+
+
+
+@overload
+def anonymous_required(__function: AnonRouteEndpoint[P]) -> NoParamReturn[P]:
+  """
+  Decorator for enforcing anonymous-optional routes
+
+  Returns
+  -------
+  `decorator: (...) -> ...`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @anonymous_required
+  >>> def myRoute(): ...
+  """
+
+@overload
+def anonymous_required(
+  *,
+  admin_override: bool = True,
+  loggedin_redirect: str = '/'
+) -> AnonWithParamReturn[P]:
+  """
+  Decorator for enforcing anonymous-only routes
+
+  Parameters
+  ----------
+  `admin_override: bool`, optional (defaults to True)
+    Whether to allow admins to access the route
+
+  `loggedin_redirect: str`, optional (defaults to '/')
+    Redirect endpoint if logged in
+
+  Returns
+  -------
+  `decorator wrapper: (...) -> ( (...) -> ... )`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @anonymous_required()
+  >>> def myRoute(): ...
+  OR
+  >>> @app.route('/')
+  >>> @require_login(verification_redirect = '/custom-endpoint')
+  >>> def myRoute(user: UserModel | None): ...
+  """
+
+@overload
+def anonymous_required(
+  __function: AnonRouteEndpoint[P],
+  *,
+  admin_override: bool = True,
+  loggedin_redirect: str = '/'
+) -> FullParamReturn[P]: ...
+
+def anonymous_required(
+  __function: AnonRouteEndpoint[P] | None = None,
+  *,
+  admin_override: bool = True,
+  loggedin_redirect: str = '/'
+) -> AnonWrappedReturn[P]:
+  if not callable(__function):
+    def early(__function: AnonRouteEndpoint[P]) -> FullParamReturn[P]:
+      return anonymous_required(
+        __function,
+        admin_override = admin_override,
+        loggedin_redirect = loggedin_redirect
+      )
+    return early
+  
+  @wraps(__function)
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
+    user: UserModel | None = get_current_user() if verify_jwt() else None
+    if (user and not admin_override) or (user and admin_override and (user.privilege != 'Admin')):
+      return redirect(
+        loggedin_redirect % parse.quote_plus(request.path),
+        code = HTTPStatusCode.SEE_OTHER
+      )
+
+    return __function(*args, **kwargs)
   return wrapper
