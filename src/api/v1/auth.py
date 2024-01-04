@@ -6,6 +6,7 @@ from src import mail, limiter
 from flask_limiter import util
 from src.service import email_provider
 from src.service import auth_provider
+from src.utils.ext import utc_time
 
 from src.utils.http import HTTPStatusCode
 from src.utils.passwords import hash_password
@@ -180,4 +181,51 @@ def apiV1Refresh(user: UserModel):
     data = _TokenRefreshData(
       access_token = access_token
     )
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/send-verification-email', methods = ['POST'])
+@auth_limit
+@auth_provider.require_login
+def apiV1SendVerificationEmail(user: UserModel):
+  if user.email_verified:
+    return GenericReply(
+      message = 'Email already verified',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if user.token:
+    if utc_time.skip('5minutes', user.token.created_at) < utc_time.get():
+      return GenericReply(
+        message = 'Generating tokens too quickly',
+        status = HTTPStatusCode.TOO_MANY_REQUESTS
+      ).to_dict(), HTTPStatusCode.TOO_MANY_REQUESTS
+    
+    user.token.delete()
+  
+  newToken = TokenModel(user = user, token_type = 'Verification')
+
+  try:
+    email_provider.send_email(
+      user.email,
+      emailType = 'Verification',
+      data = email_provider.VerificationEmailData(
+        username = user.username,
+        cta_link = 'https://edutecx.ngjx.org/verify/' + str(newToken.token),
+      )
+    )
+    newToken.save()
+
+  except Exception as e:
+    app.logger.error(f'Failed to send verification email: {e}')
+    return GenericReply(
+      message = 'Failed to send verification email',
+      status = HTTPStatusCode.INTERNAL_SERVER_ERROR
+    ).to_dict(), HTTPStatusCode.INTERNAL_SERVER_ERROR
+
+  return GenericReply(
+    message = 'Verification email sent',
+    status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
