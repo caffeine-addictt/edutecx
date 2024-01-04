@@ -136,12 +136,10 @@ def drawGraph(
   if len(processed) < 12:
     # Populate dummy data
     first = processed[0][0] if len(processed) >= 1 else None
-    app.logger.error(processed)
     processed = [
       (utc_time.unskip(f'{i}months', first), 0)
       for i in range(13 - len(processed), 1, -1)
     ] + processed
-    app.logger.error('hi')
 
 
   # Split format data
@@ -166,7 +164,6 @@ def drawGraph(
   _width = len(hashMap)
   _height = max(hashMap.values())
 
-  app.logger.debug(f'{_width, _height, _width // labelCount[0], _height // labelCount[1]}')
   plt.xticks(numpy.arange(0, _width + 1, max(1, round(_width / labelCount[0]))), minor = True)
   plt.yticks(numpy.arange(0, _height + 1, max(1, round(_height / labelCount[1]))), minor = True)
 

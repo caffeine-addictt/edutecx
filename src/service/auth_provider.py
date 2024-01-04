@@ -486,7 +486,6 @@ def anonymous_required(
   def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
     from flask import current_app as app
     user: UserModel | None = get_current_user() if verify_jwt() else None
-    app.logger.error(f'{user} {admin_override} {user and admin_override} {user and admin_override and (user.privilege != "Admin")} {verify_jwt()}')
     if (user and not admin_override) or (user and admin_override and (user.privilege != 'Admin')):
       return redirect(
         generateURI(loggedin_redirect, use_path_callback),
