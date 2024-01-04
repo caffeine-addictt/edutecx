@@ -64,7 +64,7 @@ class ConfigBase:
 
   # \\\\\\ SQL ////// #
   # Docs https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/config/
-  SQLALCHEMY_ECHO: Optional[bool] = True
+  SQLALCHEMY_ECHO: Optional[bool] = False
   SQLALCHEMY_DATABASE_URI: str = 'sqlite:///testing.sqlite3'
 
 
