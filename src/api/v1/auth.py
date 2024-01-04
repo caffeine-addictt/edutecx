@@ -2,7 +2,7 @@
 RESTful auth api for session persistence with jwt w/ rate limiting
 """
 
-from src import mail, limiter
+from src import limiter
 from flask_limiter import util
 from src.service import email_provider
 from src.service import auth_provider
@@ -17,6 +17,7 @@ from src.utils.api import (
   TokenRefreshReply, _TokenRefreshData,
   LoginRequest, LoginReply, _LoginData,
   RegisterRequest, RegisterReply,
+  VerifyEmailRequest, VerifyEmailReply,
   GenericReply
 )
 
@@ -227,5 +228,41 @@ def apiV1SendVerificationEmail(user: UserModel):
 
   return GenericReply(
     message = 'Verification email sent',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/verify-email', methods = ['POST'])
+@auth_limit
+@auth_provider.require_login
+def apiV1VerifyEmail(user: UserModel):
+  req = VerifyEmailRequest(request)
+
+  if user.email_verified:
+    return GenericReply(
+      message = 'Email already verified',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if not user.token or (user.token.token_type != 'Verification') or (user.token.token != req.token):
+    return GenericReply(
+      message = 'Invalid token',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if user.token.expires_at < utc_time.get():
+    return GenericReply(
+      message = 'Token expired',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  user.email_verified = True
+  user.token.delete()
+  user.save()
+
+  return GenericReply(
+    message = 'Email verified',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK

@@ -204,6 +204,21 @@ class TokenRefreshResponse(_APIResponse):
 
 
 
+# Verify Email
+class VerifyEmailRequest(_APIRequest):
+  """API Request for verifying email"""
+  token: str
+
+VerifyEmailReply = GenericReply
+VerifyEmailResponse = GenericResponse
+
+
+
+
+
+
+
+
 # Notify MAKE
 class NotifyMakeRequest(_APIRequest):
   """API Request for making a notification"""
