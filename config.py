@@ -55,6 +55,7 @@ class ConfigBase:
 
   # \\\\\\ Mail ////// #
   MAIL_PORT: int = 2525
+  MAIL_DEBUG: bool = False
   MAIL_USE_TLS: bool = True
   MAIL_USE_SSL: bool = False
   MAIL_USERNAME: str = os.getenv('MAIL_USERNAME', '')
