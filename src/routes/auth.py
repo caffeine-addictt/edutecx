@@ -313,3 +313,37 @@ def register():
       return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
 
   return render_template('(auth)/register.html', form = form)
+
+
+
+
+@app.route('/verify', methods = ['GET'])
+@app.route('/verify/<string:token>', methods = ['GET'])
+@require_login(ignore_verification = True)
+def verify(user: UserModel, token: str | None = None):
+  if user.email_verified:
+    flash('Email already verified', 'info')
+    callbackURI = parse.unquote_plus(request.args.get('callbackURI', '/home'))
+    return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+  
+  if token:
+    if not user.token or (user.token.token_type != 'Verification') or (user.token.token != token):
+      flash('Invalid token', 'danger')
+      newCallbackURI = parse.quote_plus(request.args.get('callbackURI', ''))
+      return redirect('/verify?callbackURI=%s' % newCallbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+    
+    if user.token.expires_at < utc_time.get():
+      flash('Token expired', 'danger')
+      newCallbackURI = parse.quote_plus(request.args.get('callbackURI', ''))
+      return redirect('/verify?callbackURI=%s' % newCallbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+    
+    user.email_verified = True
+    user.token.delete()
+    user.save()
+
+    flash('Email verified', 'success')
+
+    callbackURI = parse.unquote_plus(request.args.get('callbackURI', '/home'))
+    return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+
+  return render_template('(auth)/verify.html')
