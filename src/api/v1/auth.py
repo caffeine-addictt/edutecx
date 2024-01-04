@@ -2,9 +2,11 @@
 RESTful auth api for session persistence with jwt w/ rate limiting
 """
 
-from src import mail, limiter
+from src import limiter
 from flask_limiter import util
-from flask_mail import Message
+from src.service import email_provider
+from src.service import auth_provider
+from src.utils.ext import utc_time
 
 from src.utils.http import HTTPStatusCode
 from src.utils.passwords import hash_password
@@ -15,11 +17,11 @@ from src.utils.api import (
   TokenRefreshReply, _TokenRefreshData,
   LoginRequest, LoginReply, _LoginData,
   RegisterRequest, RegisterReply,
+  VerifyEmailRequest, VerifyEmailReply,
   GenericReply
 )
 
 import re
-import email_validator
 from typing import Optional
 from flask import (
   request,
@@ -41,6 +43,7 @@ auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host
 
 @app.route(f'{basePath}/login', methods = ['POST'])
 @auth_limit
+@auth_provider.anonymous_required(admin_override = False)
 def apiv1_Login():
   req = LoginRequest(request)
 
@@ -81,6 +84,7 @@ def apiv1_Login():
 
 @app.route(f'{basePath}/register', methods = ['POST'])
 @auth_limit
+@auth_provider.anonymous_required
 def apiV1Register():
   req = RegisterRequest(request)
 
@@ -92,9 +96,7 @@ def apiV1Register():
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   # Validate Email
-  try:
-    email_validator.validate_email(req.email, check_deliverability = True)
-  except Exception:
+  if not email_provider.dns_check(req.email):
     return GenericReply(
       message = 'Email is invalid and/or cannot be reached',
       status = HTTPStatusCode.BAD_REQUEST
@@ -142,12 +144,14 @@ def apiV1Register():
 
   # Send verification code
   try:
-    mail.send(Message(
-      subject = 'Verify your EduTecX account',
-      recipients = [req.email],
-      sender = 'edutecx@ngjx.org',
-      body = f"Dear {req.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{token.token}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team"
-    ))
+    email_provider.send_email(
+      req.email,
+      emailType = 'Verification',
+      data = email_provider.VerificationEmailData(
+        username = req.username,
+        cta_link = 'https://edutecx.ngjx.org/verify/' + str(token.token),
+      )
+    )
 
   except Exception as e:
     app.logger.error(f'Failed to send verification email: {e}')
@@ -166,6 +170,7 @@ def apiV1Register():
 
 
 
+
 @app.route(f'{basePath}/refresh', methods = ['POST'])
 @limiter.limit('10/hour', key_func = util.get_remote_address)
 @jwt_required(refresh = True)
@@ -179,4 +184,87 @@ def apiV1Refresh():
     data = _TokenRefreshData(
       access_token = access_token
     )
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/send-verification-email', methods = ['POST'])
+@auth_limit
+@auth_provider.require_login(ignore_verification = True)
+def apiV1SendVerificationEmail(user: UserModel):
+  if user.email_verified:
+    return GenericReply(
+      message = 'Email already verified',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if user.token:
+    if utc_time.skip('5minutes', user.token.created_at) >= utc_time.get():
+      return GenericReply(
+        message = 'Generating tokens too quickly',
+        status = HTTPStatusCode.TOO_MANY_REQUESTS
+      ).to_dict(), HTTPStatusCode.TOO_MANY_REQUESTS
+    
+    user.token.delete()
+  
+  newToken = TokenModel(user = user, token_type = 'Verification')
+
+  try:
+    email_provider.send_email(
+      user.email,
+      emailType = 'Verification',
+      data = email_provider.VerificationEmailData(
+        username = user.username,
+        cta_link = 'https://edutecx.ngjx.org/verify/' + str(newToken.token),
+      )
+    )
+    newToken.save()
+
+  except Exception as e:
+    app.logger.error(f'Failed to send verification email: {e}')
+    return GenericReply(
+      message = 'Failed to send verification email',
+      status = HTTPStatusCode.INTERNAL_SERVER_ERROR
+    ).to_dict(), HTTPStatusCode.INTERNAL_SERVER_ERROR
+
+  return GenericReply(
+    message = 'Verification email sent',
+    status = HTTPStatusCode.OK
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/verify-email', methods = ['POST'])
+@auth_limit
+@auth_provider.require_login(ignore_verification = True)
+def apiV1VerifyEmail(user: UserModel):
+  req = VerifyEmailRequest(request)
+
+  if user.email_verified:
+    return GenericReply(
+      message = 'Email already verified',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if not user.token or (user.token.token_type != 'Verification') or (user.token.token != req.token):
+    return GenericReply(
+      message = 'Invalid token',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if user.token.expires_at < utc_time.get():
+    return GenericReply(
+      message = 'Token expired',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  user.email_verified = True
+  user.token.delete()
+  user.save()
+
+  return VerifyEmailReply(
+    message = 'Email verified',
+    status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
