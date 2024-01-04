@@ -2,7 +2,7 @@
 Managing Admin-Only routes
 """
 
-from src.utils.caching import customCache
+from functools import lru_cache
 from src.service.auth_provider import require_admin
 from src.utils.ext import utc_time
 from sqlalchemy import and_, or_
@@ -15,25 +15,27 @@ from src.database import (
 
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
-  AdminGraphGetRequest, AdminGraphGetReply, _AdminGraphGetData,
+  AdminGraphGetRequest,
   AdminGetRequest, AdminGetReply,
   _UserGetData, _SaleGetData, _TextbookGetData,
   GenericReply
 )
 
-import os
-import re
 import numpy
+from io import StringIO
 from datetime import datetime
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
 from thread import ParallelProcessing
-from src.service.cdn_provider import _dirCheck, GraphFileLocation
 from typing import Callable, Tuple, TypeVar, Any
 from werkzeug.exceptions import BadRequest
 from flask import (
   request,
+  Response,
   render_template,
-  current_app as app
+  current_app as app,
+  stream_template_string
 )
 
 
@@ -65,7 +67,7 @@ def getDateRange(dateRange: DateRange = None) -> Tuple[datetime, datetime]:
   return dateRange
 
 
-@customCache
+@lru_cache
 def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> Query:
   range_ = getDateRange(dateRange)
   return model.query.filter(and_(
@@ -74,20 +76,15 @@ def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> Query:
   ))
 
 
-def getURI(filename: str) -> str:
-  return f'/public/graph/{filename}'
-
-
-@customCache
+# @lru_cache
 def drawGraph(
   model: type[_TModel],
   axisY: _YFunc[_TModel, _TYValue],
   title: str,
-  nameExtra: str,
   labelCount: Tuple[LabelX, LabelY] = (6, 10),
   ylabel: str = 'Count',
   dateRange: DateRange = None
-) -> str:
+) -> StringIO:
   """
   Draw the graph to an image
 
@@ -99,8 +96,7 @@ def drawGraph(
   `axisY: (model) -> Any`, required
     The function to calculate an individual Y-Axis plot point
   
-  `nameExtra: str`, required
-    Extra name to not collide with previous generations
+  `title: str`, required
   
   `labelCount: tuple[Xint, Yint]`, optional (defaults to tuple(6, 10))
     How many graph labels per axis
@@ -113,7 +109,7 @@ def drawGraph(
   
   Returns
   -------
-  uri: str
+  svg: StringIO
   """
   XValue = datetime
 
@@ -145,16 +141,10 @@ def drawGraph(
   # Split format data
   hashMap = {}
   for x, y in processed:
-
     curr: _TYValue | None = hashMap.get(x)
     if isinstance(y, (int, float)):
-      hashMap[f'{x.month}/{x.year}'] = (curr + y) if isinstance(curr, (int, float)) else y
-  
-  # Sort
-  hashMap = dict(sorted(
-    hashMap.items(),
-    key = lambda a: int(''.join(a[0].split('/')[::-1]))
-  ))
+      # f'{x.month}/{x.year}'
+      hashMap[x] = (curr + y) if isinstance(curr, (int, float)) else y
   
   # Plotting
   plt.figure(figsize = (16, 11))
@@ -167,6 +157,9 @@ def drawGraph(
   plt.xticks(numpy.arange(0, _width + 1, max(1, round(_width / labelCount[0]))), minor = True)
   plt.yticks(numpy.arange(0, _height + 1, max(1, round(_height / labelCount[1]))), minor = True)
 
+  # Format X-Axis dates
+  plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+
   # Label
   plt.title(title)
   plt.xlabel('Time')
@@ -174,14 +167,12 @@ def drawGraph(
   plt.tick_params('both')
   plt.autoscale(True, 'both')
 
-
-  # Upload
-  _dirCheck()
-  filename = model.__name__ + '_' + re.compile(r'[^a-zA-Z0-9-]').sub('', nameExtra) + '.svg'
-  plt.savefig(os.path.join(GraphFileLocation, filename))
+  # Write to stream
+  f = StringIO()
+  plt.savefig(f, format = 'svg')
   plt.close()
 
-  return getURI(filename)
+  return f
 
 
 
@@ -198,34 +189,32 @@ def dashboard(user: UserModel):
 # Graph generate endpoint
 @app.route(f'{basePath}/graph', methods = ['POST'])
 @require_admin
+@lru_cache
 def dashboard_graph(user: UserModel):
   req = AdminGraphGetRequest(request)
 
   match req.graphFor:
     case 'User':
-      uri = drawGraph(
+      svg = drawGraph(
         UserModel,
         lambda _: 1,
         'Users Accounts Created Over a 12 Month Period',
-        'created',
         ylabel = 'Accounts Created'
       )
     
     case 'Revenue':
-      uri = drawGraph(
+      svg = drawGraph(
         SaleModel,
         lambda model: model.total_cost,
         'Revenue Over a 12 Month Period',
-        'revenue',
         ylabel = 'Total Revenue ($)'
       )
     
     case 'Textbook':
-      uri = drawGraph(
+      svg = drawGraph(
         TextbookModel,
         lambda _: 1,
         'Textbooks Created Over a 12 Month Period',
-        'created',
         ylabel = 'Textbooks Created'
       )
     
@@ -234,14 +223,12 @@ def dashboard_graph(user: UserModel):
         message = 'Invalid graphFor',
         status = HTTPStatusCode.BAD_REQUEST
       ).to_dict(), HTTPStatusCode.BAD_REQUEST
-  
-  return AdminGraphGetReply(
-    message = 'Successfully generated graph',
+
+  return Response(
+    stream_template_string(svg.getvalue()),
     status = HTTPStatusCode.OK,
-    data = _AdminGraphGetData(
-      uri = uri
-    )
-  ).to_dict(), HTTPStatusCode.OK
+    mimetype = 'image/svg+xml'
+  )
 
 
 
