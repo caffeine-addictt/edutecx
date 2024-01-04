@@ -58,7 +58,7 @@ config.dictConfig({
       'class': 'logging.StreamHandler',
       'formatter': 'console_fmt',
       'stream': 'ext://sys.stdout',
-      'level': 'DEBUG',
+      'level': 'INFO',
     }
   },
   'root': {
