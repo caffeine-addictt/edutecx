@@ -226,7 +226,7 @@ def require_login(__function: UserRouteEndpoint[P]) -> NoParamReturn[P]:
 def require_login(
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
-  ignore_verification: bool = True,
+  ignore_verification: bool = False,
   fresh_access_token: bool = False,
   refresh_token_only: bool = False
 ) -> UserWithParamReturn[P]:
@@ -294,13 +294,13 @@ def require_login(
     verify_jwt_in_request(fresh = fresh_access_token, refresh = refresh_token_only)
     user: UserModel = get_current_user()
 
-    if not user.email_verified:
+    if not user.email_verified and not ignore_verification:
       return redirect(
         verification_redirect % parse.quote_plus(request.path),
         code = HTTPStatusCode.SEE_OTHER
       )
 
-    return __function(get_current_user(), *args, **kwargs)
+    return __function(user, *args, **kwargs)
   return wrapper
 
 
