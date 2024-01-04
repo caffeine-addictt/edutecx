@@ -92,7 +92,7 @@ def require_login(func: Callable[Concatenate[UserModel, P], T]) -> Callable[P, T
 
 
 
-def optional_login(func: Callable[Concatenate[UserModel | None, P], T]) -> Callable[P, T]:
+def optional_login(func: Callable[Concatenate[UserModel | None, P], T]) -> Callable[P, T | tuple[dict[str, Any], int]]:
   """
   Decorator for enforcing login-optional routes
 
