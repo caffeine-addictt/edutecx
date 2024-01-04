@@ -28,6 +28,7 @@ from flask import (
   current_app as app,
 )
 from flask_jwt_extended import (
+  jwt_required,
   get_current_user,
   create_access_token,
   create_refresh_token,
@@ -169,10 +170,11 @@ def apiV1Register():
 
 
 
+
 @app.route(f'{basePath}/refresh', methods = ['POST'])
 @limiter.limit('10/hour', key_func = util.get_remote_address)
-@auth_provider.require_login(refresh_token_only = True)
-def apiV1Refresh(user: UserModel):
+@jwt_required(refresh = True)
+def apiV1Refresh():
   identity = get_current_user()
   access_token = create_access_token(identity = identity, fresh = False)
 
@@ -189,7 +191,7 @@ def apiV1Refresh(user: UserModel):
 
 @app.route(f'{basePath}/send-verification-email', methods = ['POST'])
 @auth_limit
-@auth_provider.require_login
+@auth_provider.require_login(ignore_verification = True)
 def apiV1SendVerificationEmail(user: UserModel):
   if user.email_verified:
     return GenericReply(
@@ -198,7 +200,7 @@ def apiV1SendVerificationEmail(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   if user.token:
-    if utc_time.skip('5minutes', user.token.created_at) < utc_time.get():
+    if utc_time.skip('5minutes', user.token.created_at) >= utc_time.get():
       return GenericReply(
         message = 'Generating tokens too quickly',
         status = HTTPStatusCode.TOO_MANY_REQUESTS
@@ -236,7 +238,7 @@ def apiV1SendVerificationEmail(user: UserModel):
 
 @app.route(f'{basePath}/verify-email', methods = ['POST'])
 @auth_limit
-@auth_provider.require_login
+@auth_provider.require_login(ignore_verification = True)
 def apiV1VerifyEmail(user: UserModel):
   req = VerifyEmailRequest(request)
 
@@ -262,7 +264,7 @@ def apiV1VerifyEmail(user: UserModel):
   user.token.delete()
   user.save()
 
-  return GenericReply(
+  return VerifyEmailReply(
     message = 'Email verified',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
