@@ -48,6 +48,34 @@ def verify_jwt(
   except Exception:
     return False
 
+def generateURI(defaultURI: str, usePathCallback: bool) -> str:
+  """
+  Handles logic for interpreting callbackURI
+
+  Parameters
+  ----------
+  `defaultURI: str`, required
+    The default uri
+
+  `usePathCallback: bool`, required
+    Whether or not to use path callback
+  """
+  if usePathCallback:
+    redirect_to = request.args.get('callbackURI', defaultURI)
+  else:
+    redirect_to = defaultURI
+
+  if (defaultURI == redirect_to) and ('%s' in redirect_to):
+    redirect_to = redirect_to % parse.quote_plus(request.path)
+  else:
+    redirect_to = parse.unquote_plus(redirect_to)
+    if (a := redirect_to.split('?')) and (len(a) > 1) and ('callbackURI=%s' not in a[1]):
+      redirect_to = a[0] + '?' + '&'.join([
+        i for i in (a[1].split('&') + [ f'callbackURI={parse.quote_plus(request.path)}' ])
+      ])
+  
+  return redirect_to
+
 
 
 
@@ -397,7 +425,8 @@ def anonymous_required(__function: AnonRouteEndpoint[P]) -> NoParamReturn[P]:
 def anonymous_required(
   *,
   admin_override: bool = True,
-  loggedin_redirect: str = '/'
+  loggedin_redirect: str = '/',
+  use_path_callback: bool = True
 ) -> AnonWithParamReturn[P]:
   """
   Decorator for enforcing anonymous-only routes
@@ -409,6 +438,9 @@ def anonymous_required(
 
   `loggedin_redirect: str`, optional (defaults to '/')
     Redirect endpoint if logged in
+  
+  `use_path_callback: bool`, optional (defaults to True)
+    Whether to use the current path callbackURI as a default
 
   Returns
   -------
@@ -430,14 +462,16 @@ def anonymous_required(
   __function: AnonRouteEndpoint[P],
   *,
   admin_override: bool = True,
-  loggedin_redirect: str = '/'
+  loggedin_redirect: str = '/',
+  use_path_callback: bool = True
 ) -> FullParamReturn[P]: ...
 
 def anonymous_required(
   __function: AnonRouteEndpoint[P] | None = None,
   *,
   admin_override: bool = True,
-  loggedin_redirect: str = '/'
+  loggedin_redirect: str = '/',
+  use_path_callback: bool = True
 ) -> AnonWrappedReturn[P]:
   if not callable(__function):
     def early(__function: AnonRouteEndpoint[P]) -> FullParamReturn[P]:
@@ -450,10 +484,12 @@ def anonymous_required(
   
   @wraps(__function)
   def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
+    from flask import current_app as app
     user: UserModel | None = get_current_user() if verify_jwt() else None
+    app.logger.error(f'{user} {admin_override} {user and admin_override} {user and admin_override and (user.privilege != "Admin")} {verify_jwt()}')
     if (user and not admin_override) or (user and admin_override and (user.privilege != 'Admin')):
       return redirect(
-        loggedin_redirect % parse.quote_plus(request.path),
+        generateURI(loggedin_redirect, use_path_callback),
         code = HTTPStatusCode.SEE_OTHER
       )
 

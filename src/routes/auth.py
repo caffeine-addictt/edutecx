@@ -11,7 +11,7 @@ from src.utils.ext import utc_time
 from src.utils.http import HTTPStatusCode
 from src.utils.api import TokenRefreshResponse, LoginResponse
 from src.utils.forms import LoginForm, LogoutForm, RegisterForm
-from src.service.auth_provider import optional_jwt
+from src.service.auth_provider import optional_login, require_login, anonymous_required
 from src.utils.api import (
   GenericResponse
 )
@@ -20,7 +20,6 @@ import requests
 from urllib import parse
 from flask import (
   flash,
-  session,
   request,
   redirect,
   make_response,
@@ -29,8 +28,6 @@ from flask import (
 )
 from flask_jwt_extended import (
   decode_token,
-  jwt_required,
-  get_jwt_identity,
 
   unset_jwt_cookies,
   unset_access_cookies,
@@ -197,18 +194,17 @@ def token_in_blocklist_loader(jwtHeader, jwtPayload) -> bool:
 
 # Routing
 @app.route('/login', methods = ['Get', 'POST'])
-def login():
+@optional_login
+def login(user: UserModel | None):
   # Auto redirect to callbackURI
-  if optional_jwt():
+  if user:
     flash(f'Welcome back!', 'success')
     callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/home'))
 
     return redirect(callbackURI, code = HTTPStatusCode.PERMANENT_REDIRECT)
   
   form = LoginForm(request.form)
-  validatedForm = form.validate_on_submit()
-
-  if request.method == 'POST' and validatedForm:
+  if request.method == 'POST' and form.validate_on_submit():
     response = requests.post(
       f'{request.url_root}api/v1/login',
       headers = {'Content-Type': 'application/json'},
@@ -221,6 +217,7 @@ def login():
     
     if response.status_code != HTTPStatusCode.OK:
       flash(response.json().get('message'), 'danger')
+
     else:
       body = LoginResponse(response)
 
@@ -236,13 +233,14 @@ def login():
       flash('Welcome back!', 'success')
 
       return successfulLogin
-  return render_template('(auth)/login.html', form = form, url = request.host_url)
+  return render_template('(auth)/login.html', form = form)
 
 
 
 
 @app.route('/logout', methods = ['GET', 'POST'])
-def logout():
+@require_login
+def logout(user: UserModel):
   successfulLogout = make_response(
     redirect('/', code = HTTPStatusCode.SEE_OTHER),
     HTTPStatusCode.SEE_OTHER
@@ -290,13 +288,8 @@ def logout():
 
 
 @app.route('/register', methods = ['GET', 'POST'])
-@jwt_required(optional = True)
+@anonymous_required(use_path_callback = True, admin_override = False)
 def register():
-  # Redirect to callbackURI or home if logged in
-  if get_jwt_identity():
-    callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/home'))
-    return redirect(callbackURI, code = HTTPStatusCode.SEE_OTHER), HTTPStatusCode.SEE_OTHER
-  
   form = RegisterForm(request.form)
   if request.method == 'POST' and form.validate_on_submit():
     response = requests.post(
