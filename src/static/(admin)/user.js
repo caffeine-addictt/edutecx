@@ -1,10 +1,15 @@
 
 /**
- * Fetch and set graph URI
+ * Fetch and draw graph
  * @returns {Promise<void>}
  */
 const fetchGraphURI = async () => {
-  response = await fetch('/dashboard/graph', {
+  renderToast('Drawing Graph...', 'info');
+
+  /**
+   * @type {Response}
+   */
+  const response = await fetch('/dashboard/graph', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -13,12 +18,14 @@ const fetchGraphURI = async () => {
     body: JSON.stringify({
       "graphFor": "User"
     })
-  }).then(async res => await res.json())
+  })
 
-  if (response.status !== 200) throw new Error(response.message)
+  if (!response.ok) return renderToast('Failed to fetch Graph', 'danger');
+  const svg = await response.text();
 
-  $('#graph').attr('src', response.data.uri)
-  console.log('Fetched URI: ' + response.data.uri)
+  $('#svg-render').empty();
+  $('#svg-render').append(htmlToElement(svg));
+  console.log('Fetched SVG')
 }
 
 
