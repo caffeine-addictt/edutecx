@@ -2,14 +2,16 @@
 Auth Provider
 """
 
+from urllib import parse
 from functools import wraps
-from typing import Callable, Any, Concatenate, ParamSpec, TypeVar
+from typing import Callable, Any, Concatenate, ParamSpec, TypeVar, overload
 
 from src.database.user import UserModel
 from src.utils.http import HTTPStatusCode
 from werkzeug.exceptions import Unauthorized
 
-from flask import request
+from werkzeug.wrappers import Response as _WResponse
+from flask import request, redirect, Response as _FResponse
 from flask_jwt_extended import (
   get_current_user,
   verify_jwt_in_request
@@ -33,7 +35,32 @@ def optional_jwt() -> bool:
     return False
 
 
-def require_admin(func: Callable[Concatenate[UserModel, P], T]) -> Callable[P, T | tuple[dict[str, Any], int]]:
+
+
+RouteResponse = _FResponse | _WResponse | tuple[dict[str, Any], int] | dict[str, Any] | str
+NoParamReturn = Callable[P, RouteResponse]
+FullParamReturn = Callable[P, RouteResponse]
+
+
+# For User required annotation
+UserRouteEndpoint = Callable[Concatenate[UserModel, P], RouteResponse]
+UserWithParamReturn = Callable[[UserRouteEndpoint[P]], NoParamReturn[P]]
+UserWrappedReturn = NoParamReturn[P] | UserWithParamReturn[P] | FullParamReturn[P]
+
+# For user optional annotation
+OptionalRouteEndpoint = Callable[Concatenate[UserModel | None, P], RouteResponse]
+OptionalWithParamReturn = Callable[[OptionalRouteEndpoint[P]], NoParamReturn[P]]
+OptionalWrappedReturn = NoParamReturn[P] | OptionalWithParamReturn[P] | FullParamReturn[P]
+
+
+
+
+
+
+
+
+@overload
+def require_admin(__function: UserRouteEndpoint[P]) -> NoParamReturn[P]:
   """
   Enforces Admin-Only JWT authentication for routes
 
@@ -47,29 +74,81 @@ def require_admin(func: Callable[Concatenate[UserModel, P], T]) -> Callable[P, T
   >>> @require_admin
   >>> def myRoute(user: UserModel): ...
   """
-  @wraps(func)
-  def wrapper(*args: P.args, **kwargs: P.kwargs) -> T | tuple[dict[str, Any], int]:
+
+@overload
+def require_admin(
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s'
+) -> UserWithParamReturn[P]:
+  """
+  Enforces Admin-Only JWT authentication for routes
+
+  Parameters
+  ----------
+  `verification_redirect: str`, optional (defaults to '/verify?callbackURI=%s')
+    Email verification endpoint
+
+  Returns
+  -------
+  `decorator wrapper: (...) -> ( (...) -> ... )`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_admin()
+  >>> def myRoute(user: UserModel): ...
+  OR
+  >>> @app.route('/')
+  >>> @require_admin(verification_redirect = '/custom-endpoint')
+  >>> def myRoute(user: UserModel): ...
+  """
+
+@overload
+def require_admin(
+  __function: UserRouteEndpoint[P],
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s'
+) -> FullParamReturn[P]: ...
+
+def require_admin(
+  __function: UserRouteEndpoint[P] | None = None,
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s'
+) -> UserWrappedReturn[P]:
+  if not callable(__function):
+    def early(__function: UserRouteEndpoint[P]) -> FullParamReturn[P]:
+      return require_admin(
+        __function,
+        verification_redirect = verification_redirect
+      )
+    return early
+  
+  @wraps(__function)
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
     verify_jwt_in_request()
     user: UserModel = get_current_user()
 
-    match (user.privilege != 'Admin') and request.method:
-      case 'POST':
-        return {
-          'message': 'Unauthorized',
-          'status': HTTPStatusCode.UNAUTHORIZED
-        }, HTTPStatusCode.UNAUTHORIZED
-      
-      case 'GET':
-        raise Unauthorized()
-      
-      case _:
-        return func(user, *args, **kwargs)
+    if not user.email_verified:
+      return redirect(
+        verification_redirect % parse.quote_plus(request.path),
+        code = HTTPStatusCode.SEE_OTHER
+      )
+
+    if user.privilege != 'Admin':
+      raise Unauthorized()
+
+    return __function(user, *args, **kwargs)
   return wrapper
 
 
 
 
-def require_login(func: Callable[Concatenate[UserModel, P], T]) -> Callable[P, T | tuple[dict[str, Any], int]]:
+
+
+
+
+@overload
+def require_login(__function: UserRouteEndpoint[P]) -> NoParamReturn[P]:
   """
   Decorator for enforcing login-only routes
 
@@ -83,16 +162,85 @@ def require_login(func: Callable[Concatenate[UserModel, P], T]) -> Callable[P, T
   >>> @require_login
   >>> def myRoute(user: UserModel): ...
   """
-  @wraps(func)
-  def wrapper(*args: P.args, **kwargs: P.kwargs) -> T | tuple[dict[str, Any], int]:
+
+@overload
+def require_login(
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  ignore_verification: bool = True
+) -> UserWithParamReturn[P]:
+  """
+  Decorator for enforcing login-only routes
+
+  Parameters
+  ----------
+  `verification_redirect: str`, optional (defaults to '/verify?callbackURI=%s')
+    Email verification endpoint
+  
+  `ignore_verification: bool`, optional (defaults to False)
+    Whether to ignore unverified emails and allow access
+
+  Returns
+  -------
+  `decorator wrapper: (...) -> ( (...) -> ... )`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_login()
+  >>> def myRoute(user: UserModel): ...
+  OR
+  >>> @app.route('/')
+  >>> @require_login(verification_redirect = '/custom-endpoint')
+  >>> def myRoute(user: UserModel): ...
+  """
+
+@overload
+def require_login(
+  __function: UserRouteEndpoint[P],
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  ignore_verification: bool = False
+) -> FullParamReturn[P]: ...
+
+def require_login(
+  __function: UserRouteEndpoint[P] | None = None,
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  ignore_verification: bool = False
+) -> UserWrappedReturn[P]:
+  if not callable(__function):
+    def early(__function: UserRouteEndpoint[P]) -> FullParamReturn[P]:
+      return require_login(
+        __function,
+        verification_redirect = verification_redirect,
+        ignore_verification = ignore_verification
+      )
+    return early
+  
+  @wraps(__function)
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
     verify_jwt_in_request()
-    return func(get_current_user(), *args, **kwargs)
+    user: UserModel = get_current_user()
+
+    if not user.email_verified:
+      return redirect(
+        verification_redirect % parse.quote_plus(request.path),
+        code = HTTPStatusCode.SEE_OTHER
+      )
+
+    return __function(get_current_user(), *args, **kwargs)
   return wrapper
 
 
 
 
-def optional_login(func: Callable[Concatenate[UserModel | None, P], T]) -> Callable[P, T | tuple[dict[str, Any], int]]:
+
+
+
+
+@overload
+def optional_login(__function: OptionalRouteEndpoint[P]) -> NoParamReturn[P]:
   """
   Decorator for enforcing login-optional routes
 
@@ -106,10 +254,74 @@ def optional_login(func: Callable[Concatenate[UserModel | None, P], T]) -> Calla
   >>> @optional_login
   >>> def myRoute(user: UserModel | None): ...
   """
-  @wraps(func)
-  def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-    return func(
-      optional_jwt() and get_current_user() or None,
+
+@overload
+def optional_login(
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  ignore_verification: bool = True
+) -> OptionalWithParamReturn[P]:
+  """
+  Decorator for enforcing login-only routes
+
+  Parameters
+  ----------
+  `verification_redirect: str`, optional (defaults to '/verify?callbackURI=%s')
+    Email verification endpoint
+  
+  `ignore_verification: bool`, optional (defaults to True)
+    Whether to ignore unverified emails and allow access
+
+  Returns
+  -------
+  `decorator wrapper: (...) -> ( (...) -> ... )`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_login()
+  >>> def myRoute(user: UserModel): ...
+  OR
+  >>> @app.route('/')
+  >>> @require_login(verification_redirect = '/custom-endpoint')
+  >>> def myRoute(user: UserModel | None): ...
+  """
+
+@overload
+def optional_login(
+  __function: OptionalRouteEndpoint[P],
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  ignore_verification: bool = True
+) -> FullParamReturn[P]: ...
+
+def optional_login(
+  __function: OptionalRouteEndpoint[P] | None = None,
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  ignore_verification: bool = True
+) -> OptionalWrappedReturn[P]:
+  if not callable(__function):
+    def early(__function: OptionalRouteEndpoint[P]) -> FullParamReturn[P]:
+      return optional_login(
+        __function,
+        verification_redirect = verification_redirect,
+        ignore_verification = ignore_verification
+      )
+    return early
+  
+  @wraps(__function)
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
+    user: UserModel | None = get_current_user() if optional_jwt() else None
+
+    if user and not ignore_verification and not user.email_verified:
+      return redirect(
+        verification_redirect % parse.quote_plus(request.path),
+        code = HTTPStatusCode.SEE_OTHER
+      )
+
+    return __function(
+      user,
       *args,
       **kwargs
     )
