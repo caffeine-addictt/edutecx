@@ -23,12 +23,26 @@ from flask_jwt_extended import (
 P = ParamSpec('P')
 T = TypeVar('T')
 
-def optional_jwt() -> bool:
+def verify_jwt(
+  optional: bool = False,
+  fresh: bool = False,
+  refresh: bool = False,
+  locations: Any = None,
+  verify_type: bool = True,
+  skip_revocation_check: bool = False
+) -> bool:
   """
   Checks for and verifies JWT in cookies/header
   """
   try:
-    if verify_jwt_in_request():
+    if verify_jwt_in_request(
+      optional = optional,
+      fresh = fresh,
+      refresh = refresh,
+      locations = locations,
+      verify_type = verify_type,
+      skip_revocation_check = skip_revocation_check
+    ):
       return True
     return False
   except Exception:
@@ -78,7 +92,9 @@ def require_admin(__function: UserRouteEndpoint[P]) -> NoParamReturn[P]:
 @overload
 def require_admin(
   *,
-  verification_redirect: str = '/verify?callbackURI=%s'
+  verification_redirect: str = '/verify?callbackURI=%s',
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
 ) -> UserWithParamReturn[P]:
   """
   Enforces Admin-Only JWT authentication for routes
@@ -87,6 +103,12 @@ def require_admin(
   ----------
   `verification_redirect: str`, optional (defaults to '/verify?callbackURI=%s')
     Email verification endpoint
+  
+  `fresh_access_token: bool`, optional (defaults to False)
+    Require access token to be new, else redirects to login
+  
+  `refresh_token_only: bool`, optional (defaults to False)
+    Only allow refresh tokens to access routes, else redirects to unauthorized
 
   Returns
   -------
@@ -107,13 +129,17 @@ def require_admin(
 def require_admin(
   __function: UserRouteEndpoint[P],
   *,
-  verification_redirect: str = '/verify?callbackURI=%s'
+  verification_redirect: str = '/verify?callbackURI=%s',
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
 ) -> FullParamReturn[P]: ...
 
 def require_admin(
   __function: UserRouteEndpoint[P] | None = None,
   *,
-  verification_redirect: str = '/verify?callbackURI=%s'
+  verification_redirect: str = '/verify?callbackURI=%s',
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
 ) -> UserWrappedReturn[P]:
   if not callable(__function):
     def early(__function: UserRouteEndpoint[P]) -> FullParamReturn[P]:
@@ -125,7 +151,7 @@ def require_admin(
   
   @wraps(__function)
   def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
-    verify_jwt_in_request()
+    verify_jwt_in_request(fresh = fresh_access_token, refresh = refresh_token_only)
     user: UserModel = get_current_user()
 
     if not user.email_verified:
@@ -167,7 +193,9 @@ def require_login(__function: UserRouteEndpoint[P]) -> NoParamReturn[P]:
 def require_login(
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
-  ignore_verification: bool = True
+  ignore_verification: bool = True,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
 ) -> UserWithParamReturn[P]:
   """
   Decorator for enforcing login-only routes
@@ -179,6 +207,12 @@ def require_login(
   
   `ignore_verification: bool`, optional (defaults to False)
     Whether to ignore unverified emails and allow access
+  
+  `fresh_access_token: bool`, optional (defaults to False)
+    Require access token to be new, else redirects to login
+  
+  `refresh_token_only: bool`, optional (defaults to False)
+    Only allow refresh tokens to access routes, else redirects to unauthorized
 
   Returns
   -------
@@ -200,14 +234,18 @@ def require_login(
   __function: UserRouteEndpoint[P],
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
-  ignore_verification: bool = False
+  ignore_verification: bool = False,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
 ) -> FullParamReturn[P]: ...
 
 def require_login(
   __function: UserRouteEndpoint[P] | None = None,
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
-  ignore_verification: bool = False
+  ignore_verification: bool = False,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
 ) -> UserWrappedReturn[P]:
   if not callable(__function):
     def early(__function: UserRouteEndpoint[P]) -> FullParamReturn[P]:
@@ -220,7 +258,7 @@ def require_login(
   
   @wraps(__function)
   def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
-    verify_jwt_in_request()
+    verify_jwt_in_request(fresh = fresh_access_token, refresh = refresh_token_only)
     user: UserModel = get_current_user()
 
     if not user.email_verified:
@@ -312,7 +350,7 @@ def optional_login(
   
   @wraps(__function)
   def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
-    user: UserModel | None = get_current_user() if optional_jwt() else None
+    user: UserModel | None = get_current_user() if verify_jwt() else None
 
     if user and not ignore_verification and not user.email_verified:
       return redirect(
