@@ -9,6 +9,10 @@
  * @returns {void}
  */
 const renderToast = (message, category) => {
+  if (!inArray(category, ['info', 'success', 'danger'])) {
+    throw new Error(`${category} is an invalid category`);
+  };
+
   let template = '';
   if (category === 'info') {
     template = deepCopy(infoTemplate);

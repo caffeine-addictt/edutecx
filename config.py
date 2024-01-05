@@ -24,6 +24,7 @@ class ConfigBase:
   # \\\\\\ General ////// #
   # Production ENV
   ENV: Literal['development', 'production'] = 'development'
+  UNLIMITED_TIER_PRICE: float = 49.99
 
 
   # \\\\\\ Stripe ////// #
@@ -53,17 +54,18 @@ class ConfigBase:
 
 
   # \\\\\\ Mail ////// #
-  MAIL_PORT: int = 587
+  MAIL_PORT: int = 2525
+  MAIL_DEBUG: bool = False
   MAIL_USE_TLS: bool = True
   MAIL_USE_SSL: bool = False
   MAIL_USERNAME: str = os.getenv('MAIL_USERNAME', '')
   MAIL_PASSWORD: str = os.getenv('MAIL_PASSWORD', '')
-  MAIL_SERVER: Literal['localhost', 'smtp.google.com', 'live.smtp.mailtrap.io'] = 'live.smtp.mailtrap.io'
+  MAIL_SERVER: Literal['localhost', 'smtp.google.com', 'live.smtp.mailtrap.io', 'sandbox.smtp.mailtrap.io'] = 'sandbox.smtp.mailtrap.io'
 
 
   # \\\\\\ SQL ////// #
   # Docs https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/config/
-  SQLALCHEMY_ECHO: Optional[bool] = True
+  SQLALCHEMY_ECHO: Optional[bool] = False
   SQLALCHEMY_DATABASE_URI: str = 'sqlite:///testing.sqlite3'
 
 
@@ -75,7 +77,6 @@ class DevelopmentConfig(ConfigBase):
   """
 
   ENV = 'development'
-  DOMAIN = '127.0.0.1:8080'
 
   SECRET_KEY = 'mysecretkey'
 

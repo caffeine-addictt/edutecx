@@ -8,12 +8,6 @@
 {% endblock %}
 
 
-{# Styles #}
-{% block styles %}
-  <link href='{{ url_for("static", filename = "/(auth)/login/index.scss") }}' rel='stylesheet/less' />
-{% endblock %}
-
-
 {# Body #}
 {% block mainContent %}
   <form
@@ -29,10 +23,4 @@
     {{ render_checkbox_field(form.remember_me) }}
     {{ render_submit(form.submit) }}
   </form>
-{% endblock %}
-
-
-{# Scripts #}
-{% block scripts %}
-  <script src='{{ url_for("static", filename = "/(auth)/login/index.js") }} '></script>
 {% endblock %}

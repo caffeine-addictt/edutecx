@@ -127,3 +127,16 @@ const deepCopy = (str) => {
  * @param {number} ms
  */
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+
+
+
+/**
+ * In Array
+ * @param {T} item
+ * @param {Array.<T>} array
+ * @template T
+ */
+const inArray = (item, array) => {
+  return (array.indexOf(item) > -1);
+};

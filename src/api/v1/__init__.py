@@ -15,6 +15,5 @@ from . import (
   sale,
   submission,
   submissionsnippet,
-  textbook,
-  token
+  textbook
 )

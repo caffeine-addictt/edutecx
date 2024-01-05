@@ -11,7 +11,7 @@ from src.utils.ext import utc_time
 from src.utils.http import HTTPStatusCode
 from src.utils.api import TokenRefreshResponse, LoginResponse
 from src.utils.forms import LoginForm, LogoutForm, RegisterForm
-from src.service.auth_provider import optional_jwt
+from src.service.auth_provider import optional_login, require_login, anonymous_required
 from src.utils.api import (
   GenericResponse
 )
@@ -20,7 +20,6 @@ import requests
 from urllib import parse
 from flask import (
   flash,
-  session,
   request,
   redirect,
   make_response,
@@ -29,8 +28,6 @@ from flask import (
 )
 from flask_jwt_extended import (
   decode_token,
-  jwt_required,
-  get_jwt_identity,
 
   unset_jwt_cookies,
   unset_access_cookies,
@@ -116,7 +113,7 @@ def unauthorized_loader(msg: str):
     }, HTTPStatusCode.UNAUTHORIZED
   else:
     return redirect(
-      f'/login?callbackURI={parse.quote(request.path)}',
+      f'/login?callbackURI={parse.quote_plus(request.path)}',
       code = HTTPStatusCode.SEE_OTHER
     ), HTTPStatusCode.SEE_OTHER
 
@@ -130,7 +127,7 @@ def invalid_token_loader(msg: str):
     }, HTTPStatusCode.UNPROCESSABLE_ENTITY
   else:
     response = make_response(redirect(
-      f'/login?callbackURI={parse.quote(request.path)}',
+      f'/login?callbackURI={parse.quote_plus(request.path)}',
       code = HTTPStatusCode.SEE_OTHER
     ))
     return response, HTTPStatusCode.SEE_OTHER
@@ -179,7 +176,7 @@ def expired_token_loader(jwtHeader, jwtPayload):
       app.logger.error(f'Failed to Auto-Refresh expired access token with refresh token: {e}')
     
     response = make_response(redirect(
-      f'/login?callbackURI={parse.quote(request.path)}',
+      f'/login?callbackURI={parse.quote_plus(request.path)}',
       code = HTTPStatusCode.SEE_OTHER
     ))
     unset_refresh_cookies(response)
@@ -197,18 +194,17 @@ def token_in_blocklist_loader(jwtHeader, jwtPayload) -> bool:
 
 # Routing
 @app.route('/login', methods = ['Get', 'POST'])
-def login():
+@optional_login
+def login(user: UserModel | None):
   # Auto redirect to callbackURI
-  if optional_jwt():
+  if user:
     flash(f'Welcome back!', 'success')
-    callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
+    callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/home'))
 
     return redirect(callbackURI, code = HTTPStatusCode.PERMANENT_REDIRECT)
   
   form = LoginForm(request.form)
-  validatedForm = form.validate_on_submit()
-
-  if request.method == 'POST' and validatedForm:
+  if request.method == 'POST' and form.validate_on_submit():
     response = requests.post(
       f'{request.url_root}api/v1/login',
       headers = {'Content-Type': 'application/json'},
@@ -221,11 +217,12 @@ def login():
     
     if response.status_code != HTTPStatusCode.OK:
       flash(response.json().get('message'), 'danger')
+
     else:
       body = LoginResponse(response)
 
       # Handle Login and cookie
-      callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
+      callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/home'))
       successfulLogin = make_response(
         redirect(callbackURI, code = HTTPStatusCode.SEE_OTHER),
         HTTPStatusCode.SEE_OTHER
@@ -236,13 +233,14 @@ def login():
       flash('Welcome back!', 'success')
 
       return successfulLogin
-  return render_template('(auth)/login.html', form = form, url = request.host_url)
+  return render_template('(auth)/login.html', form = form)
 
 
 
 
 @app.route('/logout', methods = ['GET', 'POST'])
-def logout():
+@require_login
+def logout(user: UserModel):
   successfulLogout = make_response(
     redirect('/', code = HTTPStatusCode.SEE_OTHER),
     HTTPStatusCode.SEE_OTHER
@@ -290,13 +288,8 @@ def logout():
 
 
 @app.route('/register', methods = ['GET', 'POST'])
-@jwt_required(optional = True)
+@anonymous_required(use_path_callback = True, admin_override = False)
 def register():
-  # Redirect to callbackURI or home if logged in
-  if get_jwt_identity():
-    callbackURI: str = parse.quote(request.args.get('callbackURI', '/home'))
-    return redirect(callbackURI, code = HTTPStatusCode.SEE_OTHER), HTTPStatusCode.SEE_OTHER
-  
   form = RegisterForm(request.form)
   if request.method == 'POST' and form.validate_on_submit():
     response = requests.post(
@@ -316,7 +309,41 @@ def register():
     else:
       flash(body.message, 'success')
 
-      callbackURI: str = parse.quote(request.args.get('callbackURI', '/login'))
+      callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/login'))
       return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
 
   return render_template('(auth)/register.html', form = form)
+
+
+
+
+@app.route('/verify', methods = ['GET'])
+@app.route('/verify/<string:token>', methods = ['GET'])
+@require_login(ignore_verification = True)
+def verify(user: UserModel, token: str | None = None):
+  if user.email_verified:
+    flash('Email already verified', 'info')
+    callbackURI = parse.unquote_plus(request.args.get('callbackURI', '/home'))
+    return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+  
+  if token:
+    if not user.token or (user.token.token_type != 'Verification') or (user.token.token != token):
+      flash('Invalid token', 'danger')
+      newCallbackURI = parse.quote_plus(request.args.get('callbackURI', ''))
+      return redirect('/verify?callbackURI=%s' % newCallbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+    
+    if user.token.expires_at < utc_time.get():
+      flash('Token expired', 'danger')
+      newCallbackURI = parse.quote_plus(request.args.get('callbackURI', ''))
+      return redirect('/verify?callbackURI=%s' % newCallbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+    
+    user.email_verified = True
+    user.token.delete()
+    user.save()
+
+    flash('Email verified', 'success')
+
+    callbackURI = parse.unquote_plus(request.args.get('callbackURI', '/home'))
+    return redirect(callbackURI, code = HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+
+  return render_template('(auth)/verify.html')

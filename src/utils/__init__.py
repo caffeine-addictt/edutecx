@@ -6,7 +6,6 @@ from . import (
   http,
   ext,
   api,
-  caching,
   forcetype,
   passwords,
 )
