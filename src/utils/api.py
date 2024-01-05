@@ -826,6 +826,7 @@ class _EditableTextbookGetData(_APIBase):
   uri                : str
   status             : str
   created_at         : float
+  updated_at         : float
 
 class EditableTextbookGetRequest(_APIRequest):
   """API Request for fetching editable textbook"""
