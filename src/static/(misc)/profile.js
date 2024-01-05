@@ -1,73 +1,49 @@
 
-
-/**
- * Textbook fetch controller to stop fetch request
- * @type {AbortController | null}
- */
-let textbookFetchController;
+/** @type {{[key: string]: string;}} */
+let defaultValues = {};
 
 
 
 
-/**
- * Render textbook page based on `tpage` searchparams
- * @returns {Promise<void>}
- */
-const renderTextbookPage = async () => {
-  // Disable forward/previous button
+const handleChange = e => {
+  for (const key in defaultValues) {
+    if ((defaultValues[key] || '') !== $(`[id='${key}']`).val()) {
 
-  textbookFetchController?.abort();
-  $('#textbook__container').empty();
+      // Animate "Cancel Changes" button to visible
+      $('#cancelChanges').removeClass('opacity-0');
+      $('#cancelChanges').addClass('opacity-100');
 
-  // Render dummy
+      // Ungrey save button
+      $('#submit').attr('disabled', false);
 
-  let searchParams = ((new URL(location.href)).searchParams);
-  let tpage = searchParams.get('tpage');
-  tpage = tpage ? tpage : 1;
-  searchParams.set('tpage', tpage);
+      console.log('Changes detected');
+      return;
+    };
+  };
 
-  textbookFetchController = new AbortController();
+  // Animate "Cancel Changes" button to not visible
+  $('#cancelChanges').removeClass('opacity-100');
+  $('#cancelChanges').addClass('opacity-0');
 
-  /**
-   * @type {{
-   *   status : 200;
-   *   message: string;
-   *   data: Array.<{
-   *     user_id            : string;
-   *     textbook_id        : string;
-   *     editabletextbook_id: string;
-   *     uri                : string;
-   *     status             : 'Uploading' | 'Uploaded';
-   *     created_at         : number;
-   *     updated_at         : number;
-   *   }>;
-   * } | {
-   *   status : 500;
-   *   message: string;
-   * }}
-   */
-  const response = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
-    method: 'GET',
-    signal: textbookFetchController.signal
-  }).then(async res => await res.json());
+  // Grey save button
+  $('#submit').attr('disabled', true);
 
-  if (response.status !== 200) {
-    renderToast(response.message, 'danger');
-  }
-  else {
-    response.data.forEach((item) => {
-      $('#textbook__container').append(htmlToElement(`${item.uri}`));
-    })
-  }
-
-  // Undisable forward/previous button
-}
+  console.log('No changes');
+};
 
 
 
-// Initial Render
+
+// Hooks
 $(() => {
-  renderTextbookPage();
+  defaultValues = {
+    'Username'            : $('#Username').val() || '',
+    'Email'               : $('#Email').val() || '',
+    'Change Password'     : $('#Change Password').val() || '',
+    'Confirm New Password': $('#Confirm New Password').val() || ''
+  }
 
-})
-
+  for (const key in defaultValues) {
+    $(`[id='${key}']`).on('change', handleChange);
+  };
+});
