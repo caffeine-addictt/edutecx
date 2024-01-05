@@ -11,10 +11,10 @@ from src.utils.api import (
 )
 
 import re
-import stripe
 from datetime import datetime
+from functools import lru_cache
 from src.utils.ext import utc_time
-from src.utils.caching import customCache
+from src.utils.http import HashableDict
 
 from sqlalchemy import and_, or_
 from flask_sqlalchemy.pagination import Pagination
@@ -66,21 +66,21 @@ def store_get():
   # Build query
   filterResult = filterTextbooks(
     criteria = req.criteria,
-    filterPayload = [
-      and_(
+    filterPayload = HashableDict(
+      one = and_(
         dateRange[0] <= TextbookModel.created_at,
         TextbookModel.created_at <= dateRange[1]
       ),
-      and_(
+      two = and_(
         priceRange[0] <= TextbookModel.price,
         TextbookModel.price <= priceRange[1]
       ),
-      or_(*[
+      three = or_(*[
         TextbookModel.categories.contains(category)
         for category in categories
       ]),
-      TextbookModel.title.contains(req.query)
-    ],
+      four = TextbookModel.title.contains(req.query)
+    ),
     page = req.page
   )
 
@@ -145,10 +145,10 @@ def pricing_page():
 
 
 # Functions
-@customCache
+@lru_cache
 def filterTextbooks(
   criteria: str,
-  filterPayload: list,
+  filterPayload: HashableDict,
   page: int
 ) -> Pagination:
   return TextbookModel.query.filter(

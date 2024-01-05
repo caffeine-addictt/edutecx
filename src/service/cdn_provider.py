@@ -17,7 +17,6 @@ from werkzeug.datastructures import FileStorage
 # Setup
 UploadBaseLocation = os.path.join(os.getcwd(), 'src', 'uploads')
 
-GraphFileLocation = os.path.join(UploadBaseLocation, 'tmp')
 CopyrightNoticeLocation = os.path.join(UploadBaseLocation, 'copyright.pdf')
 SubmittedSnippetLocation = os.path.join(UploadBaseLocation, 'textbook_snippets')
 EditableTextbookLocation = os.path.join(UploadBaseLocation, 'textbook_forks')
@@ -52,9 +51,6 @@ def _dirCheck():
 
   if not os.path.isdir(ImageLocation):
     os.mkdir(ImageLocation)
-  
-  if not os.path.isdir(GraphFileLocation):
-    os.mkdir(GraphFileLocation)
 
 
 
