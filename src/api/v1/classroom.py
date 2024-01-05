@@ -109,57 +109,53 @@ def classroom_get_api(user: UserModel):
 @auth_limit
 @require_login
 def classroom_create_api(user: UserModel):
-  try:
-    req = ClassroomCreateRequest(request)
+  req = ClassroomCreateRequest(request)
 
 
-    if (user.id != req.owner_id) and (user.privilege != 'Admin'):
-      return GenericReply(
-        message = 'Unauthorized',
-        status = HTTPStatusCode.UNAUTHORIZED,
-      ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  if req.owner_id and (user.id != req.owner_id) and (user.privilege != 'Admin'):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED,
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
 
 
-    owner = user if user.id == req.owner_id else UserModel.query.filter(UserModel.id == req.owner_id).first()
-    if not isinstance(owner, UserModel):
-      return GenericReply(
-        message = 'Invalid user',
-        status = HTTPStatusCode.BAD_REQUEST
-      ).to_dict(), HTTPStatusCode.BAD_REQUEST
-    
-
-    # Enforce limitations
-    if owner.privilege not in ['Admin', 'Educator']:
-      return GenericReply(
-        message = 'Unauthorized',
-        status = HTTPStatusCode.UNAUTHORIZED
-      ).to_dict(), HTTPStatusCode.UNAUTHORIZED
-    
-    if (owner.membership == 'Free') and (len(owner.owned_classrooms) >= 3):
-      return GenericReply(
-        message = 'You have reached your classroom limit',
-        status = HTTPStatusCode.FORBIDDEN
-      ).to_dict(), HTTPStatusCode.FORBIDDEN
-
-
-    newClassroom: ClassroomModel = ClassroomModel(
-      owner = owner,
-      title = req.title,
-      description = req.description
-    )
-    newClassroom.save()
-
-
-    return ClassroomCreateReply(
-      message = 'Classroom created successfully',
-      status = HTTPStatusCode.OK,
-      data = _ClassroomCreateData(
-        classroom_id = newClassroom.id
-      )
-    ).to_dict(), HTTPStatusCode.OK
+  owner = user if (not req.owner_id) or (user.id == req.owner_id) else UserModel.query.filter(UserModel.id == req.owner_id).first()
+  if not isinstance(owner, UserModel):
+    return GenericReply(
+      message = 'Invalid user',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  except Exception as e:
-    app.logger.critical(f'{e}')
+
+  # Enforce limitations
+  if owner.privilege not in ['Admin', 'Educator']:
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  if (owner.membership == 'Free') and (len(owner.owned_classrooms) >= 3):
+    return GenericReply(
+      message = 'You have reached your classroom limit',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
+
+
+  newClassroom: ClassroomModel = ClassroomModel(
+    owner = owner,
+    title = req.title,
+    description = req.description
+  )
+  newClassroom.save()
+
+
+  return ClassroomCreateReply(
+    message = 'Classroom created successfully',
+    status = HTTPStatusCode.OK,
+    data = _ClassroomCreateData(
+      classroom_id = newClassroom.id
+    )
+  ).to_dict(), HTTPStatusCode.OK
 
 
 

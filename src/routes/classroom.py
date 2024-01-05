@@ -9,7 +9,7 @@ from src.utils.http import HTTPStatusCode
 from src.utils.http import escape_id
 from src.utils.forms import ClassroomCreateForm
 
-from src.utils.api import ClassroomCreateResponse
+from src.utils.api import ClassroomCreateResponse, GenericResponse
 
 import requests
 
@@ -42,30 +42,4 @@ def classroom(user: UserModel, id: str):
 @auth_provider.require_educator
 def classroom_new(user: UserModel):
   form = ClassroomCreateForm(request.form)
-  app.logger.info(f'{request.url_root}api/v1/classroom/create')
-  app.logger.info(request.cookies.get('access_token_cookie', ''))
-
-  if request.method == 'POST' and form.validate_on_submit():
-    response = ClassroomCreateResponse(requests.post(
-      f'{request.url_root}api/v1/classroom/create',
-      headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + request.cookies.get('access_token_cookie', '')
-      },
-      json = {
-        'owner_id': user.id,
-        'title': form.title.data,
-        'description': form.description.data
-      }
-    ))
-    
-    if response.status != HTTPStatusCode.OK:
-      flash(response.message, "danger")
-    else:
-      flash(response.message, "success")
-      return make_response(redirect(
-        f'/classrooms/{response.data.classroom_id}', 
-        code = HTTPStatusCode.SEE_OTHER
-      ), HTTPStatusCode.SEE_OTHER)
-
   return render_template('(classroom)/classroom_new.html', form = form)

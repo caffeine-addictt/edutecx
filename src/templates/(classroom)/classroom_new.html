@@ -13,13 +13,9 @@
 {% block mainContent %}
   <form
     id='classroomForm'
-    action=''
-    method='POST'
     role='form'
     class='d-flex flex-column gap-3 align-items-center'
   >
-  
-    {{ form.hidden_tag() }}
     {{ render_text_field(form.title) }}
     {{ render_text_field(form.description) }}
     {{ render_checkbox_field(form.inviteEnabled) }}
@@ -27,4 +23,23 @@
     {{ render_submit(form.submit) }}
   
   </form>
+
+  <script>
+    $('#classroomForm').on('submit', async e => {
+      e.preventDefault();
+      const response = await fetch('/api/v1/classroom/create', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': getAccessToken()
+        },
+        body: new FormData(e.target)
+      }).then(async res => await res.json());
+
+      if (response.status !== 200) renderToast(response.message, 'danger');
+      else {
+        renderToast(response.message, 'success');
+        setTimeout(() => window.location.href = '/classrooms', 500);
+      };
+    });
+  </script>
 {% endblock %}
