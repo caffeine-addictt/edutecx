@@ -59,7 +59,8 @@ class ClassroomModel(db.Model):
     self,
     owner: 'UserModel',
     title: str,
-    description: str
+    description: str,
+    invite_enabled: bool = True
   ) -> None:
     """
     Classroom Model
@@ -74,10 +75,14 @@ class ClassroomModel(db.Model):
 
     `description: str`, required
       The description of the classroom
+
+    `invite_enabled: bool`, optional (Default to True)
+      Enable invite
     """
     self.owner_id = owner.id
     self.title = title
     self.description = description
+    self.invite_enabled = invite_enabled
 
   def __repr__(self):
     """To be used with cache indexing"""
