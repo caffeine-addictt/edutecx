@@ -18,11 +18,13 @@
     role='form'
     class='d-flex flex-column gap-3 align-items-center'
   >
+  
     {{ form.hidden_tag() }}
-    {{ render_text_field(form.name) }}
+    {{ render_text_field(form.title) }}
     {{ render_text_field(form.description) }}
     {{ render_checkbox_field(form.inviteEnabled) }}
     {{ render_checkbox_field(form.agreeToTOS) }}
     {{ render_submit(form.submit) }}
+  
   </form>
 {% endblock %}
