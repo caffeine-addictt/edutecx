@@ -38,15 +38,20 @@ def classroom(user: UserModel, id: str):
   return render_template('(classroom)/classroom.html')
 
 
-@app.route('/classrooms/new')
+@app.route('/classrooms/new', methods = ['GET', 'POST'])
 @auth_provider.require_educator
 def classroom_new(user: UserModel):
   form = ClassroomCreateForm(request.form)
+  app.logger.info(f'{request.url_root}api/v1/classroom/create')
+  app.logger.info(request.cookies.get('access_token_cookie', ''))
 
   if request.method == 'POST' and form.validate_on_submit():
     response = ClassroomCreateResponse(requests.post(
-      f'{request.url_root}api/v1/classroom',
-      headers = {'Content-Type': 'application/json'},
+      f'{request.url_root}api/v1/classroom/create',
+      headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + request.cookies.get('access_token_cookie', '')
+      },
       json = {
         'owner_id': user.id,
         'title': form.title.data,
