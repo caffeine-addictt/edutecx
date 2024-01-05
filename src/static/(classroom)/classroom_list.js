@@ -10,6 +10,8 @@ const renderClassrooms = async () => {
    *   message: string;
    *   data: Array.<{
    *     id: string;
+   *     owner_id: string;
+   *     owner_username: string;
    *     title: string;
    *     description: string;
    *     cover_image: string | null;
@@ -17,12 +19,35 @@ const renderClassrooms = async () => {
    *   }>
    * }}
    */
-  const classroomList = await fetch('/api/v1/classroom/list', {
-    method: 'GET',
-    headers: { 'X-CSRF-TOKEN': getAccessToken() }
-  }).then(res => res.json());
-  console.log(classroomList)
-
+  // const classroomList = await fetch('/api/v1/classroom/list', {
+  //   method: 'GET',
+  //   headers: { 'X-CSRF-TOKEN': getAccessToken() }
+  // }).then(res => res.json());
+  // console.log(classroomList)
+  const classroomList = {
+    status: 200,
+    message: "hello",
+    data: [
+      {
+        id: "123",
+        owner_id: "456",
+        owner_username: "teacher1",
+        title: "math",
+        description: "blabla",
+        cover_image: null,
+        created_at: 12345
+      },
+      {
+        id: "987",
+        owner_id: "768",
+        owner_username: "teacher2",
+        title: "physics",
+        description: "blablabla",
+        cover_image: null,
+        created_at: 12345
+      }
+    ]
+  }
   if (classroomList.status !== 200) return renderToast(classroomList.message, 'danger');
 
   const container = $('#classroom__container');
@@ -36,7 +61,7 @@ const renderClassrooms = async () => {
   else {
     template = deepCopy(tile);
     classroomList.data.forEach(classroomData => {
-      container.append(htmlToElement(formatString(template, { title: classroomData.title, teacher: classroomData.owner_id })));
+      container.append(htmlToElement(formatString(template, { title: classroomData.title, teacher: classroomData.owner_username })));
     });
   };
 };
