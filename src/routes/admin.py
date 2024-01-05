@@ -167,6 +167,9 @@ def drawGraph(
   plt.tick_params('both')
   plt.autoscale(True, 'both')
 
+  # Set Y-Axis Limit
+  plt.ylim([0, _height + 1])
+
   # Write to stream
   f = StringIO()
   plt.savefig(f, format = 'svg')
