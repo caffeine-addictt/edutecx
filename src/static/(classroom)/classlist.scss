@@ -1,0 +1,36 @@
+
+#maincontainer {
+  margin: 3vh 7vw;
+  background-color: #f2f2f2;
+}
+#myclassroomstitle {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; 
+  h1 {
+    font-size: 1.3rem;
+    white-space: nowrap;
+  }
+}
+#createcontainer {
+  display: flex;
+  justify-content: flex-end;
+}
+#createanchor {
+  width: 35%;
+}
+.custom-btn {
+  height: auto;
+  width: 100%;
+  margin: 20px 10px;
+  background-color: none;
+  color: #003366;
+  border: 2px solid #003366;
+  line-height: 20px; 
+  
+  &:hover {
+    border: 2px solid #003366 !important;
+    color: #faf9f5 !important;
+    background-color: #003366 !important; 
+  }
+}
