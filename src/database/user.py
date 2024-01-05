@@ -284,19 +284,19 @@ class UserModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
-    if self.token: self.token.delete(commit = False)
-    if self.profile_image: self.profile_image.delete(commit = False)
+    if self.token: self.token.delete()
+    if self.profile_image: self.profile_image.delete()
 
-    for i in self.comments: i.delete(commit = False)
-    for i in self.submissions: i.delete(commit = False)
+    for i in self.comments: i.delete()
+    for i in self.submissions: i.delete()
 
-    for i in self.textbooks: i.delete(commit = False)
-    for i in self.transactions: i.delete(commit = False)
-    for i in self.owned_textbooks: i.delete(commit = False)
-    for i in self.owned_classrooms: i.delete(commit = False)
-    self.exit_class(*[ i.classroom for i in self.classrooms], commits = False)
+    for i in self.textbooks: i.delete()
+    for i in self.transactions: i.delete()
+    for i in self.owned_textbooks: i.delete()
+    for i in self.owned_classrooms: i.delete()
+    self.exit_class(*[ i.classroom for i in self.classrooms])
 
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()

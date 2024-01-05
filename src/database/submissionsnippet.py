@@ -103,10 +103,10 @@ class SubmissionSnippetModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
     Thread(target = deleteFile, args = [self.iuri]).start()
     
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()
 

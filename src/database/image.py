@@ -133,10 +133,10 @@ class ImageModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes model and its references"""
     deleteJob = Thread(target = deleteFile, args = [self.iuri])
     deleteJob.start()
 
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()
