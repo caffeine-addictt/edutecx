@@ -77,7 +77,7 @@ def user_delete_api(user: UserModel):
   foundUser = user if user.id == req.user_id else UserModel.query.filter(UserModel.id == req.user_id).first()
   if not isinstance(foundUser, UserModel):
     return GenericReply(
-      message = 'Unable to lcoate user',
+      message = 'Unable to locate user',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
