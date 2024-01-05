@@ -144,7 +144,8 @@ def classroom_create_api(user: UserModel):
   newClassroom: ClassroomModel = ClassroomModel(
     owner = owner,
     title = req.title,
-    description = req.description
+    description = req.description,
+    invite_enabled = req.invite_enabled == 'y'
   )
   newClassroom.save()
 

@@ -40,6 +40,7 @@ def classroom(user: UserModel, id: str):
 
 @app.route('/classrooms/new', methods = ['GET', 'POST'])
 @auth_provider.require_educator(unauthorized_redirect = '/pricing')
+@auth_provider.require_educator()
 def classroom_new(user: UserModel):
   form = ClassroomCreateForm(request.form)
   return render_template('(classroom)/classroom_new.html', form = form)
