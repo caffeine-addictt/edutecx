@@ -239,8 +239,7 @@ def login(user: UserModel | None):
 
 
 @app.route('/logout', methods = ['GET', 'POST'])
-@require_login
-def logout(user: UserModel):
+def logout():
   successfulLogout = make_response(
     redirect('/', code = HTTPStatusCode.SEE_OTHER),
     HTTPStatusCode.SEE_OTHER
