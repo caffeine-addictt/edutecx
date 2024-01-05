@@ -71,7 +71,7 @@ def editabletextbook_get_api(user: UserModel):
 def editabletextbook_create_api(user: UserModel):
   req = EditableTextbookCreateRequest(request)
 
-  if (user.privilege != 'Admin') and (req.textbook_id not in ''.join(i.textbook_ids for i in user.transactions if i.paid)):
+  if (user.privilege != 'Admin') and (req.textbook_id not in ''.join(i.textbook_ids for i in user.transactions if i.paid and i.textbook_ids)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
