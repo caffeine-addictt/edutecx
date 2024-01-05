@@ -178,7 +178,9 @@ def require_admin(
     def early(__function: UserRouteEndpoint[P]) -> FullParamReturn[P]:
       return require_admin(
         __function,
-        verification_redirect = verification_redirect
+        verification_redirect = verification_redirect,
+        fresh_access_token = fresh_access_token,
+        refresh_token_only = refresh_token_only
       )
     return early
   
@@ -285,7 +287,9 @@ def require_login(
       return require_login(
         __function,
         verification_redirect = verification_redirect,
-        ignore_verification = ignore_verification
+        ignore_verification = ignore_verification,
+        fresh_access_token = fresh_access_token,
+        refresh_token_only = refresh_token_only
       )
     return early
   
@@ -330,6 +334,7 @@ def require_educator(__function: UserRouteEndpoint[P]) -> NoParamReturn[P]:
 def require_educator(
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
   ignore_verification: bool = False,
   fresh_access_token: bool = False,
   refresh_token_only: bool = False
@@ -341,6 +346,9 @@ def require_educator(
   ----------
   `verification_redirect: str`, optional (defaults to '/verify?callbackURI=%s')
     Email verification endpoint
+  
+  `unauthorized_redirect: str`, optional (defaults to None)
+    Endpoint to redirect to if user is not educator, raises 401 UNAUTHORIZED by default
   
   `ignore_verification: bool`, optional (defaults to False)
     Whether to ignore unverified emails and allow access
@@ -371,6 +379,7 @@ def require_educator(
   __function: UserRouteEndpoint[P],
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
   ignore_verification: bool = False,
   fresh_access_token: bool = False,
   refresh_token_only: bool = False
@@ -380,6 +389,7 @@ def require_educator(
   __function: UserRouteEndpoint[P] | None = None,
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
   ignore_verification: bool = False,
   fresh_access_token: bool = False,
   refresh_token_only: bool = False
@@ -389,7 +399,10 @@ def require_educator(
       return require_educator(
         __function,
         verification_redirect = verification_redirect,
-        ignore_verification = ignore_verification
+        unauthorized_redirect = unauthorized_redirect,
+        ignore_verification = ignore_verification,
+        fresh_access_token = fresh_access_token,
+        refresh_token_only = refresh_token_only
       )
     return early
   
@@ -405,6 +418,11 @@ def require_educator(
       )
     
     if user.privilege not in ['Educator', 'Admin']:
+      if unauthorized_redirect:
+        return redirect(
+          unauthorized_redirect,
+          code = HTTPStatusCode.SEE_OTHER
+        )
       raise Unauthorized()
 
     return __function(user, *args, **kwargs)
@@ -585,7 +603,8 @@ def anonymous_required(
       return anonymous_required(
         __function,
         admin_override = admin_override,
-        loggedin_redirect = loggedin_redirect
+        loggedin_redirect = loggedin_redirect,
+        use_path_callback = use_path_callback
       )
     return early
   
