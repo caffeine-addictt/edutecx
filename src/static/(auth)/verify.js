@@ -46,6 +46,8 @@ const sendResendRequest = async e => {
       iterations++;
     };
   }, 1000);
+
+  times++;
 }
 
 
