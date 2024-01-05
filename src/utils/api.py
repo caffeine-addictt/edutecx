@@ -574,7 +574,7 @@ class _ClassroomCreateData(_APIBase):
 
 class ClassroomCreateRequest(_APIRequest):
   """API Request for classroom creation"""
-  owner_id: str
+  owner_id = ''
   title: str
   description: str
 
