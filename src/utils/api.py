@@ -510,11 +510,13 @@ AssignmentDeleteResponse = GenericResponse
 # Classroom LIST
 @dataclass
 class _ClassroomListData(_APIBase):
-  id         : str
-  title      : str
-  description: str
-  cover_image: Union[str, None]
-  created_at : float
+  id            : str
+  owner_id      : str
+  owner_username: str
+  title         : str
+  description   : str
+  cover_image   : Union[str, None]
+  created_at    : float
 
 @dataclass
 class ClassroomListReply(_APIReply):
