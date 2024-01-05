@@ -848,7 +848,7 @@ class EditableTextbookGetResponse(_APIResponse):
 
 
 
-# Textbook LIST
+# EditableTextbook LIST
 class EditableTextbookListRequest(_APIRequest):
   """API Request for textbook listing"""
   user_id: str
@@ -860,6 +860,27 @@ class EditableTextbookListReply(_APIReply):
   data: list[_EditableTextbookGetData]
 
 class EditableTextbookListResponse(_APIResponse):
+  """API Response for listing textbooks"""
+  data: list[_EditableTextbookGetData]
+
+
+
+
+
+
+
+
+# EditableTextbook ALL
+class EditableTextbookAllRequest(_APIRequest):
+  """API Request for textbook listing"""
+  user_id: str
+
+@dataclass
+class EditableTextbookAllReply(_APIReply):
+  """API Reply for listing textbooks"""
+  data: list[_EditableTextbookGetData]
+
+class EditableTextbookAllResponse(_APIResponse):
   """API Response for listing textbooks"""
   data: list[_EditableTextbookGetData]
 
