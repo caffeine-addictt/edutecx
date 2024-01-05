@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
 
 
 {# Title #}
@@ -10,21 +11,23 @@
 
 {# Body #}
 {% block mainContent %}
-  <div id="profile__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-    profile content
-  </div>
+  <h1>Profile</h1>
 
-  {# Show Top 4 #}
-  <div id="textbook__container" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-75 h-25"></div>
+  <form id="profileForm" class="d-flex flex-column gap-3 w-25 h-50">
+    {{ form.hidden_tag() }}
+    {{ render_text_field(form.username) }}
+    {{ render_text_field(form.email) }}
+    {{ render_text_field(form.password) }}
+    {{ render_text_field(form.confirm) }}
 
-  {# Show Top 4 #}
-  <div id="classroom__container" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-75 h-25"></div>
+    {{ render_submit(form.submit) }}
+    <button type="button" class="btn btn-secondary fade opacity-0" id="cancelChanges"> Cancel Changes </button>
+    <button type="button" class="btn btn-danger" id="deleteAccount"> Delete Account </button>
+  </form>
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
   <script src="{{ url_for('static', filename = '(misc)/profile.js') }}"></script>
 {% endblock %}
