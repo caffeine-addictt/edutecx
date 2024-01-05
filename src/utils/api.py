@@ -204,6 +204,21 @@ class TokenRefreshResponse(_APIResponse):
 
 
 
+# Verify Email
+class VerifyEmailRequest(_APIRequest):
+  """API Request for verifying email"""
+  token: str
+
+VerifyEmailReply = GenericReply
+VerifyEmailResponse = GenericResponse
+
+
+
+
+
+
+
+
 # Notify MAKE
 class NotifyMakeRequest(_APIRequest):
   """API Request for making a notification"""
@@ -261,21 +276,44 @@ class LoginReply(_APIReply):
 
 
 
-# Stripe MAKE
+# Stripe Subscription MAKE
 @dataclass
-class _StripeMakeData(_APIBase):
+class _StripeSubscriptionData(_APIBase):
   session_id: str
   public_key: str
 
-class StripeMakeRequest(_APIRequest):
+class StripeSubscriptionRequest(_APIRequest):
+  """API Request for making a stripe session"""
+  tier: Literal['Unlimited']
+  discount = ''
+
+@dataclass
+class StripeSubscriptionReply(_APIReply):
+  """API Reply for making a stripe session"""
+  data: _StripeSubscriptionData
+
+
+
+
+
+
+
+
+# Stripe Checkout MAKE
+@dataclass
+class _StripeCheckoutData(_APIBase):
+  session_id: str
+  public_key: str
+
+class StripeCheckoutRequest(_APIRequest):
   """API Request for making a stripe session"""
   cart: list[str]
   discount = ''
 
 @dataclass
-class StripeMakeReply(_APIReply):
+class StripeCheckoutReply(_APIReply):
   """API Reply for making a stripe session"""
-  data: _StripeMakeData
+  data: _StripeCheckoutData
 
 
 
@@ -284,12 +322,26 @@ class StripeMakeReply(_APIReply):
 
 
 
-# Stripe CANCEL
-class StripeCancelRequest(_APIRequest):
+# Stripe Subscription CANCEL
+class StripeSubscriptionCancelRequest(_APIRequest):
   """API Request for canceling a stripe session"""
+  subscription_id: str
+
+StripeSubscriptionCancelReply = GenericReply
+
+
+
+
+
+
+
+
+# Stripe EXPIRE
+class StripeExpireRequest(_APIRequest):
+  """API Request for expiring a stripe session"""
   session_id: str
 
-StripeCancelReply = GenericReply
+StripeExpireReply = GenericReply
 
 
 
@@ -305,7 +357,7 @@ class _StripeStatusData(_APIBase):
   total_cost    : float
   user_id       : str
   transaction_id: str
-  used_discount : str
+  used_discount : Optional[str]
   paid_at       : float
   created_at    : float
 
@@ -1054,77 +1106,6 @@ class SubmissionSnippetGetResponse(_APIResponse):
 
 
 
-# Token GET
-@dataclass
-class _TokenGetData(_APIBase):
-  token     : str
-  token_type: str
-  expires_at: float
-  created_at: float
-
-class TokenGetRequest(_APIRequest):
-  """API Request for fetching token"""
-  token: str
-
-@dataclass
-class TokenGetReply(_APIReply):
-  """API Reply for fetching token"""
-  data: _TokenGetData
-
-class TokenGetResponse(_APIResponse):
-  """API Response for fetching token"""
-  data: _TokenGetData
-
-
-
-
-
-
-
-
-# Token CREATE
-@dataclass
-class _TokenCreateData(_APIBase):
-  token   : str
-  token_id: str
-
-class TokenCreateRequest(_APIRequest):
-  """API Request for creating token"""
-  token_type: str
-  user_id: str
-
-@dataclass
-class TokenCreateReply(_APIReply):
-  """API Reply for creating token"""
-  data: _TokenCreateData
-
-class TokenCreateResponse(_APIResponse):
-  """API Response for creating token"""
-  data: _TokenCreateData
-
-
-
-
-
-
-
-
-# Token DELETE
-class TokenDeleteRequest(_APIRequest):
-  """API Request for deleting token"""
-  token_id: Optional[str]
-  token   : Optional[str]
-
-TokenDeleteReply = GenericReply
-TokenDeleteResponse = GenericResponse
-
-
-
-
-
-
-
-
 # User GET
 @dataclass
 class _UserGetData(_APIBase):
@@ -1171,19 +1152,8 @@ UserDeleteResponse = GenericResponse
 
 
 # Admin Graph GET
-@dataclass
-class _AdminGraphGetData(_APIBase):
-  uri: str
-
 class AdminGraphGetRequest(_APIRequest):
   graphFor: Literal['User', 'Textbook', 'Revenue']
-
-@dataclass
-class AdminGraphGetReply(_APIReply):
-  data: _AdminGraphGetData
-
-class AdminGraphGetResponse(_APIResponse):
-  data: _AdminGraphGetData
 
 
 
@@ -1206,4 +1176,3 @@ class AdminGetRequest(_APIRequest):
 @dataclass
 class AdminGetReply(_APIReply):
   data: list[_UserGetData | _SaleGetData | _TextbookGetData]
-

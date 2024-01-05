@@ -7,25 +7,28 @@ from src.utils.ext import utc_time
 
 from datetime import datetime, timedelta
 from typing import Union, Literal
-from flask import current_app as app
 
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import (
   or_,
+  Enum,
   String,
   DateTime,
 )
+
+JWTType = Literal['access', 'refresh']
+EnumJWTType = Enum('access', 'refresh', name = 'TokenType')
 
 class JWTBlocklistModel(db.Model):
   """Stores revoked tokens"""
 
   __tablename__ = 'jwtblocklist_table'
 
-  jti: Mapped[str] = mapped_column(String, primary_key = True, unique = True, nullable = False)
-  token_type: Mapped[str] = mapped_column(String, nullable = False)
-  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+  jti       : Mapped[str]       = mapped_column(String, primary_key = True, unique = True, nullable = False)
+  token_type: Mapped[JWTType] = mapped_column(EnumJWTType, nullable = False)
+  created_at: Mapped[datetime]  = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
-  def __init__(self, jti: str, token_type: Literal['access', 'refresh']) -> None:
+  def __init__(self, jti: str, token_type: JWTType) -> None:
     """
     JWT Blocklist Model
 

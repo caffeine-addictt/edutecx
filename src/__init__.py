@@ -4,7 +4,6 @@ Initalizes Flask Application
 
 from flask import Flask
 from flask_mail import Mail
-from flask_migrate import Migrate
 from flask_limiter import Limiter, util
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
@@ -33,7 +32,6 @@ thread.Settings.set_graceful_exit(False)
 db = SQLAlchemy(metadata = metadata)
 mail = Mail()
 jwt = JWTManager()
-migrate = Migrate()
 limiter = Limiter(
   key_func = util.get_remote_address,
   default_limits = ['5 per second'],
@@ -50,12 +48,6 @@ config.dictConfig({
     'console_fmt': {'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'}
   },
   'handlers': {
-    'general': {
-      'class': 'logging.handlers.RotatingFileHandler',
-      'filename': 'logs/general.log',
-      'formatter': 'file_fmt',
-      'level': 'DEBUG'
-    },
     'error': {
       'class': 'logging.handlers.RotatingFileHandler',
       'filename': 'logs/error.log',
@@ -66,12 +58,12 @@ config.dictConfig({
       'class': 'logging.StreamHandler',
       'formatter': 'console_fmt',
       'stream': 'ext://sys.stdout',
-      'level': 'DEBUG',
+      'level': 'INFO',
     }
   },
   'root': {
     'level': 'DEBUG',
-    'handlers': ['general', 'error', 'console']
+    'handlers': ['error', 'console']
   }
 })
 
@@ -116,6 +108,5 @@ def init_app(testing: bool = False) -> Flask:
     from . import routes
 
     db.create_all()
-    migrate.init_app(app = app, db = db)
 
     return app

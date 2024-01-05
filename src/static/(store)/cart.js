@@ -22,7 +22,7 @@ const proceedToPayment = async () => {
    *    message: string;
    *  }}
    */
-  const response = await fetch('/api/v1/stripe/create-session', {
+  const response = await fetch('/api/v1/stripe/create-checkout-session', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

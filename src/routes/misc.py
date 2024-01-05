@@ -57,3 +57,8 @@ def contact_us(user: UserModel | None):
     ...
 
   return render_template('(misc)/contact_us.html', form = form)
+
+
+@app.route('/up')
+def up():
+  return { 'status': 200 }, 200
