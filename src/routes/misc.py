@@ -35,7 +35,7 @@ def profile(user: UserModel):
   form = ProfileEditForm()
   form.email.data = user.email
   form.username.data = user.username
-  return render_template('(misc)/profile.html', form = form)
+  return render_template('(misc)/profile.html', form = form, user_id = user.id)
 
 
 @app.route('/privacy-policy')
