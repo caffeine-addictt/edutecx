@@ -5,10 +5,19 @@ Handles classroom routes
 from src.database import UserModel, ClassroomModel
 from src.service import auth_provider
 
+from src.utils.http import HTTPStatusCode
 from src.utils.http import escape_id
 from src.utils.forms import ClassroomCreateForm
+
+from src.utils.api import ClassroomCreateResponse
+
+import requests
+
 from flask import (
+  flash,
   request,
+  redirect,
+  make_response,
   render_template,
   current_app as app
 )
@@ -35,7 +44,23 @@ def classroom_new(user: UserModel):
   form = ClassroomCreateForm(request.form)
 
   if request.method == 'POST' and form.validate_on_submit():
-    # TODO: Hit v1/create
-    ...
+    response = ClassroomCreateResponse(requests.post(
+      f'{request.url_root}api/v1/classroom',
+      headers = {'Content-Type': 'application/json'},
+      json = {
+        'owner_id': user.id,
+        'title': form.title.data,
+        'description': form.description.data
+      }
+    ))
+    
+    if response.status != HTTPStatusCode.OK:
+      flash(response.message, "danger")
+    else:
+      flash(response.message, "success")
+      return make_response(redirect(
+        f'/classrooms/{response.data.classroom_id}', 
+        code = HTTPStatusCode.SEE_OTHER
+      ), HTTPStatusCode.SEE_OTHER)
 
   return render_template('(classroom)/classroom_new.html', form = form)
