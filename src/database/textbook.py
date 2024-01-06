@@ -135,12 +135,12 @@ class TextbookModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
     Thread(deleteFile, args = [self.iuri]).start()
 
-    if self.cover_image: self.cover_image.delete(commit = False)
-    for i in self.discounts: i.delete(commit = False)
+    if self.cover_image: self.cover_image.delete()
+    for i in self.discounts: i.delete()
 
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()

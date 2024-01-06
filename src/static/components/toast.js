@@ -2,6 +2,56 @@
 // let successTemplate = '';
 // let dangerTemplate = '';
 
+
+/**
+ * Fetch Toast Queue
+  * @returns {['info' | 'success' | 'danger' | null | string, string][]}
+  */
+const getToastQueue = () => {
+  return JSON.parse(localStorage.getItem('toastQueue')) || new Array();
+};
+
+
+/**
+ * Clear Toast Queue
+ * @returns {void}
+ */
+const clearToastQueue = () => {
+  localStorage.removeItem('toastQueue');
+};
+
+
+/**
+  * Add item to toast queue
+  * @param {['info' | 'success' | 'danger' | null | string, string]} toastData
+  * @returns {void}
+  */
+const addToToastQueue = (toastData) => {
+  let queue = getToastQueue();
+  queue.push(toastData);
+  localStorage.setItem('toastQueue', JSON.stringify(queue));
+};
+
+
+/**
+ * Remove first toast found in queue
+ * @param {['info' | 'success' | 'danger' | null | string, string]} toastData
+ * @returns {void}
+ */
+const removeFromToastQueue = (toastData) => {
+  let queue = getToastQueue();
+  queue.some((toastItem, index) => {
+    if (arrayIsEqual(toastItem, toastData)) {
+      queue.splice(index, 1);
+      localStorage.setItem('toastQueue', JSON.stringify(queue));
+      return true;
+    };
+  });
+};
+
+
+
+
 /**
  * Render a toast
  * @param {string} message - The message to display
@@ -28,6 +78,25 @@ const renderToast = (message, category) => {
   /** @type {HTMLElement} */
   const toast = htmlToElement(formatString(template, { message: message }));
 
+
+  // Add to toast queue (in case of reload)
+  addToToastQueue([category, message]);
+
+
+  // Time logic
+  let interval;
+  const start = new Date();
+
+  interval = setInterval(() => {
+    if ($(toast)) {
+      $(toast).find('#time-counter').text( Math.round(((new Date()).getTime() - start.getTime()) / 1000) + 's Ago');
+    }
+    else {
+      clearInterval(interval);
+    }
+  }, 1000);
+
+
   // Add to toast container
   $('#toast-stack-container').append(toast);
 
@@ -40,6 +109,9 @@ const renderToast = (message, category) => {
     for (const e of mutations) {
       if (e.target.classList.contains('hide')) {
         toast.remove();
+
+        // Remove from queue
+        removeFromToastQueue([category, message]);
       };
     };
   });
@@ -59,21 +131,29 @@ const renderToast = (message, category) => {
  * Fetch notifications
  * [category, message] or message
  *
- * @returns {Promise<{
- *   message: string
- *   status: 200
- *   data: Array.<
- *     string | Array.<'info' | 'success' | 'danger', string>>
- *   >
- * | {
- *     status: 404
- *     message: string
- *   }
- * >}
+ * @returns {Promise<Array.<string | Array.<'info' | 'success' | 'danger', string>>>}
  */
 const getNotifications = async () => {
-  return fetch('/api/v1/notify/get')
-    .then(r => r.json());
+
+  /**
+   * Fetched notifications
+   * @type {{
+   *   status: 200;
+   *   message: string;
+   *   data: Array.<string | ['info' | 'success' | 'danger', string]>;
+   * } | null}
+   */
+  const data = await fetch('/api/v1/notify/get')
+    .then(r => {
+      if (r.ok) {
+        return r.json();
+      };
+    });
+
+  const httpNotif = (!data || (data.status !== 200)) ? [['danger', 'Failed to fetch notifications']] : data.data;
+  console.log(getToastQueue());
+
+  return new Array(...httpNotif, ...getToastQueue());
 };
 
 
@@ -87,12 +167,9 @@ const renderNotifications = async () => {
   const notifications = await getNotifications();
   console.log(notifications);
 
-  if (notifications.status === 200) {
-    console.log(notifications.data);
-    for (const notification of notifications.data) {
-      const [category, message] = Array.isArray(notification) ? notification : [null, notification];
-      renderToast(message, category);
-    };
+  for (const notification of notifications) {
+    const [category, message] = Array.isArray(notification) ? notification : [null, notification];
+    renderToast(message, category);
   };
 };
 

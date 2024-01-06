@@ -13,6 +13,7 @@ from . import (
   editabletextbook,
   image,
   sale,
+  user,
   submission,
   submissionsnippet,
   textbook

@@ -68,10 +68,10 @@ class SubmissionModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
-    for i in self.comments: i.delete(commit = False)
-    self.snippet.delete(commit = False)
+    for i in self.comments: i.delete()
+    self.snippet.delete()
     
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()

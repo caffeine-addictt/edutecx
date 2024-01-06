@@ -4,7 +4,7 @@ Handles misc routing
 
 from src.database import UserModel
 from src.service import auth_provider
-from src.utils.forms import ContactForm
+from src.utils.forms import ContactForm, ProfileEditForm
 
 from flask import (
   abort,
@@ -32,7 +32,15 @@ def home(user: UserModel):
 @app.route('/profile')
 @auth_provider.require_login
 def profile(user: UserModel):
-  return render_template('(misc)/profile.html', user = user)
+  form = ProfileEditForm()
+  form.email.data = user.email
+  form.username.data = user.username
+  return render_template(
+    '(misc)/profile.html',
+    form = form,
+    user_id = str(user.id),
+    profile_uri = user.profile_image.uri if user.profile_image else ''
+  )
 
 
 @app.route('/privacy-policy')

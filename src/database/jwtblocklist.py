@@ -54,21 +54,20 @@ class JWTBlocklistModel(db.Model):
     Commits self to the database\n
     Also invokes cleanup on expired tokens
     """
-    self.__class__.clear_expired(commit = False)
+    self.__class__.clear_expired()
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()
 
   @classmethod
   def clear_expired(
     cls,
     access_live_time: Union[str, int, float] = '1week',
-    refresh_live_time: Union[str, int, float] = '1week1',
-    commit: bool = True
+    refresh_live_time: Union[str, int, float] = '1week1'
   ) -> None:
     now = utc_time.get()
     access_lowest_limit = now - timedelta(seconds = utc_time.convertToTime(access_live_time))
@@ -78,4 +77,3 @@ class JWTBlocklistModel(db.Model):
       (cls.token_type.like('access') and cls.created_at.timestamp() <= access_lowest_limit.timestamp()),
       (cls.token_type.like('refresh') and cls.created_at.timestamp() <= refresh_lowest_limit.timestamp())
     )).delete()
-    if commit: db.session.commit()
