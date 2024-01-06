@@ -50,11 +50,11 @@ class TextbookModel(db.Model):
   author     : Mapped['UserModel']           = relationship('UserModel', back_populates = 'owned_textbooks')
   discounts  : Mapped[List['DiscountModel']] = relationship('DiscountModel', back_populates = 'textbook')
 
-  uri        : Mapped[str]                           = mapped_column(String, nullable = True)
-  iuri       : Mapped[str]                           = mapped_column(String, nullable = True)
-  status     : Mapped[TextbookUploadStatus]          = mapped_column(EnumTextbookUploadStatus, nullable = False, default = 'Uploading')
-  cover_image: Mapped[Optional['ImageModel']]        = relationship('ImageModel', back_populates = 'textbook')
-  derrived   : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'origin')
+  uri          : Mapped[str]                           = mapped_column(String, nullable = True)
+  iuri         : Mapped[str]                           = mapped_column(String, nullable = True)
+  upload_status: Mapped[TextbookUploadStatus]          = mapped_column(EnumTextbookUploadStatus, nullable = False, default = 'Uploading')
+  cover_image  : Mapped[Optional['ImageModel']]        = relationship('ImageModel', back_populates = 'textbook')
+  derrived     : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'origin')
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
@@ -113,20 +113,14 @@ class TextbookModel(db.Model):
 
   def _upload_handler(self, file: FileStorage) -> None:
     """Threaded background upload process"""
-    def updateURI(filePath: str):
-      self.iuri = filePath
-      self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
-      self.status = 'Uploaded'
-      self.save()
-
+    self.upload_status = 'Uploading'
     filename = f'{self.id}-{self.author_id or ""}'
-
-    uploadJob = Thread(uploadTextbook, kwargs = {
-      'file': file,
-      'filename': filename
-    })
-    uploadJob.add_hook(updateURI)
-    uploadJob.start()
+    
+    filePath = uploadTextbook(file, filename)
+    self.iuri = filePath
+    self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
+    self.upload_status = 'Uploaded'
+    self.save()
   
   
   # DB

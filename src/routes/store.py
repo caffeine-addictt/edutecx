@@ -89,7 +89,7 @@ def store_get():
     _TextbookGetData(
       id = textbook.id,
       uri = textbook.uri,
-      status = textbook.status,
+      status = textbook.upload_status,
       author_id = textbook.author_id,
       title = textbook.title,
       description = textbook.description,
