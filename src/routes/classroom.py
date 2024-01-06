@@ -38,12 +38,32 @@ def classroom(user: UserModel, id: str):
   classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
 
   if not isinstance(classroom, ClassroomModel):
-    return render_template('(classroom)/classroom_not_found.html')
+    return render_template('(classroom)/classroom_error.html')
+  
+  if classroom.is_member(user) and (user.privilege != 'Admin'):
+    return render_template('(classroom)/classroom_error.html', message = 'You are not a member of this classroom!')
 
   return render_template('(classroom)/classroom.html', classroom = classroom)
 
 
-@app.route('/classrooms/new', methods = ['GET', 'POST'])
+@app.route('/classrooms/edit/<string:id>', methods = ['GET'])
+@auth_provider.require_educator(unauthorized_redirect = '/pricing')
+def classroom_edit(user: UserModel, id: str):
+  id = escape_id(id)
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
+  app.logger.error(f'{classroom}')
+
+  if not isinstance(classroom, ClassroomModel):
+    return render_template('(classroom)/classroom_error.html')
+  
+  if classroom.is_educator(user) and (user.privilege != 'Admin'):
+    return render_template('(classroom)/classroom_error.html', message = 'You are not authorized to edit this classroom')
+
+  form = None
+  return render_template('(classroom)/classroom_edit.html', form = form)
+
+
+@app.route('/classrooms/new', methods = ['GET'])
 @auth_provider.require_educator(unauthorized_redirect = '/pricing')
 def classroom_new(user: UserModel):
   form = ClassroomCreateForm(request.form)
