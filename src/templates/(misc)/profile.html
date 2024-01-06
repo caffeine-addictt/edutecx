@@ -13,21 +13,104 @@
 {% block mainContent %}
   <h1>Profile</h1>
 
-  <form id="profileForm" class="d-flex flex-column gap-3 w-25 h-50">
-    {{ form.hidden_tag() }}
-    {{ render_text_field(form.username) }}
-    {{ render_text_field(form.email) }}
-    {{ render_text_field(form.password) }}
-    {{ render_text_field(form.confirm) }}
+  <form id="profileForm" action="" class="d-flex flex-column gap-3 w-25 h-50">
+
+    <div class="d-flex flex-row gap-3 mx-auto align-items-center w-100 h-100">
+      {# Left #}
+      <div class="d-flex flex-column gap-3 w-25 h-50">
+        {{ render_text_field(form.username) }}
+        {{ render_text_field(form.email) }}
+        {{ render_text_field(form.password) }}
+        {{ render_text_field(form.confirm) }}
+      </div>
+
+      {# Right #}
+      <div id="profile__container" class="d-flex align-items-center gap-3 mw-100 mh-100">
+        <label class="form__label">
+          <input
+            type="file"
+            id="profile__input"
+            name="profile__input"
+            accept="image/png, image/jpeg"
+            class="d-none"
+            hidden
+          />
+          <div class="d-flex w-100 h-100 position-relative">
+            <!-- Text overlaay on picture upload -->
+            <span
+              id="overlay-text"
+              class="w-100 h-auto order-first align-self-center position-absolute text-center text-secondary"
+            >
+              Upload Profile Picture
+            </span>
+            <img id="profile__image" src="{{ profile_uri }}" width="200" height="200" />
+          </div>
+        </label>
+      </div>
+    </div>
+
 
     {{ render_submit(form.submit) }}
-    <button type="button" class="btn btn-secondary fade opacity-0" id="cancelChanges"> Cancel Changes </button>
-    <button type="button" class="btn btn-danger" id="deleteAccount"> Delete Account </button>
+    <button type="button" class="btn btn-secondary fade opacity-0" id="cancel-changes-button"> Cancel Changes </button>
+    <button type="button" class="btn btn-danger" id="delete-account-button"> Delete Account </button>
   </form>
+
+
+
+
+  {# Update Account Details Modal #}
+  <div class="modal fade" id="update-account-modal" tabindex="-1" aria-labelledby="updateAccountModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Update your account</h5>
+          <button type="button" class="close" aria-label="Close" id="close-update-account-modal-small">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to update your account?</p>
+          <p class="text-secondary">Updating your email will require you to verify your new email.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close-update-account-modal-big">Close</button>
+          <button type="button" class="btn btn-primary" id="confirmed-update-account">Update My Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+
+  {# Delete Account Modal #}
+  <div class="modal fade" id="delete-account-modal" tabindex="-1" aria-labelledby="deleteAccountModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Delete your account</h5>
+          <button type="button" class="close" aria-label="Close" id="close-delete-account-modal-small">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>This action is <span class="text-danger">IRREVERSIBLE!</span></p>
+          <p>Are you sure you want to delete your account?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close-delete-account-modal-big">Close</button>
+          <button type="button" class="btn btn-danger" id="confirmed-delete-account">Delete My Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
+  <script>
+    var user_id = `{{ user_id }}`
+  </script>
   <script src="{{ url_for('static', filename = '(misc)/profile.js') }}"></script>
 {% endblock %}
