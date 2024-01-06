@@ -16,7 +16,7 @@ from .assignment import AssignmentModel
 # Uploads
 from .image import ImageModel, ImageUploadStatus, EnumImageUploadStatus
 from .discount import DiscountModel
-from .textbook import TextbookModel, TextbookUploadStatus, EnumTextbookUploadStatus
+from .textbook import TextbookModel, TextbookStatus, EnumTextbookStatus, TextbookUploadStatus, EnumTextbookUploadStatus
 from .editabletextbook import EditableTextbookModel, EditableTextbookUploadStatus, EnumEditableTextbookUploadStatus
 from .submissionsnippet import SubmissionSnippetModel, SnippetUploadStatus, EnumSnippetUploadStatus
 

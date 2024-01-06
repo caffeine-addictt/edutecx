@@ -28,6 +28,9 @@ if TYPE_CHECKING:
   from .editabletextbook import EditableTextbookModel
 
 
+TextbookStatus = Literal['Available', 'Unavailable', 'DMCA']
+EnumTextbookStatus = Enum('Available', 'Unavailable', 'DMCA', name = 'TextbookStatus')
+
 TextbookUploadStatus = Literal['Uploading', 'Uploaded']
 EnumTextbookUploadStatus = Enum('Uploading', 'Uploaded', name = 'TextbookUploadStatus')
 
@@ -52,6 +55,7 @@ class TextbookModel(db.Model):
 
   uri          : Mapped[str]                           = mapped_column(String, nullable = True)
   iuri         : Mapped[str]                           = mapped_column(String, nullable = True)
+  status       : Mapped[TextbookStatus]                = mapped_column(EnumTextbookStatus, nullable = False, default = 'Available')
   upload_status: Mapped[TextbookUploadStatus]          = mapped_column(EnumTextbookUploadStatus, nullable = False, default = 'Uploading')
   cover_image  : Mapped[Optional['ImageModel']]        = relationship('ImageModel', back_populates = 'textbook')
   derrived     : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'origin')
@@ -115,7 +119,7 @@ class TextbookModel(db.Model):
     """Threaded background upload process"""
     self.upload_status = 'Uploading'
     filename = f'{self.id}-{self.author_id or ""}'
-    
+
     filePath = uploadTextbook(file, filename)
     self.iuri = filePath
     self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
