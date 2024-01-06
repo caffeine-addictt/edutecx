@@ -119,7 +119,6 @@ def user_edit_api(user: UserModel):
     if foundUser.profile_image:
       foundUser.profile_image.delete()
     ImageModel(profileImg, user = user).save()
-    app.logger.error(f'User {user.id} changed profile image')
     changed = True
   
   if req.password:
