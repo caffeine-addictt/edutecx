@@ -140,3 +140,23 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const inArray = (item, array) => {
   return (array.indexOf(item) > -1);
 };
+
+
+
+
+/**
+ * Compare if both arrays are equal
+ * @param {Array.<T>} a
+ * @param {Array.<U>} b
+ * @template T
+ * @template U
+ */
+const arrayIsEqual = (a, b) => {
+  if (a.length !== b.length) return false;
+  
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  };
+  return true;
+}
+

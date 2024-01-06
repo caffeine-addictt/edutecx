@@ -98,7 +98,8 @@ class ImageModel(db.Model):
     # Make use of the fact that Boolean is a subclass of INT
     if (bool(user) + bool(textbook)+ bool(classroom)) != 1:
       raise Exception('Only 1 parent reference is allowed')
-
+    
+    self.id = uuid.uuid4().hex
     self.user_id = user and user.id
     self.textbook_id = textbook and textbook.id
     self.classroom_id = classroom and classroom.id
@@ -111,20 +112,15 @@ class ImageModel(db.Model):
 
   def _upload_handler(self, file: FileStorage) -> None:
     """Threaded background upload process"""
-    def updateURI(filePath: str):
-      self.iuri = filePath
-      self.uri = f'/public/image/{filePath.split("/")[-1]}'
-      self.status = 'Uploaded'
-      self.save()
+    filePath = uploadImage(
+      file,
+      f'{self.id}-{self.user_id or ""}{self.textbook_id or ""}{self.classroom_id or ""}'
+    )
 
-    filename = f'{self.id}-{self.user_id or ""}{self.textbook_id or ""}{self.classroom_id or ""}'
-
-    uploadJob = Thread(uploadImage, kwargs = {
-      'file': file,
-      'filename': filename
-    })
-    uploadJob.add_hook(updateURI)
-    uploadJob.start()
+    self.iuri = filePath
+    self.uri = f'/public/image/{filePath.split("/")[-1]}'
+    self.status = 'Uploaded'
+    self.save()
 
 
   # DB
@@ -133,10 +129,10 @@ class ImageModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes model and its references"""
     deleteJob = Thread(target = deleteFile, args = [self.iuri])
     deleteJob.start()
 
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()

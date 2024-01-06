@@ -50,6 +50,6 @@ def sale_get_api(user: UserModel):
     data = _SaleGetData(
       sale_id = sale.id,
       user_id =  user.id,
-      textbook_ids = [ i.split(':')[0] for i in sale.textbook_ids.split(',') ]
+      textbook_ids = [ i.split(':')[0] for i in sale.textbook_ids.split(',') ] if sale.textbook_ids else []
     )
   ).to_dict(), HTTPStatusCode.OK

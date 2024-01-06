@@ -306,10 +306,10 @@ class ClassroomModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and cleans up references"""
-    if self.cover_image: self.cover_image.delete(commit = False)
-    for i in self.assignments: i.delete(commit = False)
+    if self.cover_image: self.cover_image.delete()
+    for i in self.assignments: i.delete()
 
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()
