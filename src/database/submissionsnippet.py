@@ -80,22 +80,14 @@ class SubmissionSnippetModel(db.Model):
     return '%s(%s)' % (self.__class__.__name__, self.id)
   
 
-  def _updateURI(self, filePath: str) -> None:
+  def _handle_upload(self, editabletextbook: 'EditableTextbookModel', pages: int | tuple[int, int]) -> None:
+    filename = f'{self.id}-{self.student_id or ""}{self.submission_id}'
+    filePath = clonePage(editabletextbook.iuri, filename, pages)
+
     self.iuri = filePath
     self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
     self.status = 'Uploaded'
     self.save()
-
-  def _handle_upload(self, editabletextbook: 'EditableTextbookModel', pages: int | tuple[int, int]) -> None:
-    filename = f'{self.id}-{self.student_id or ""}{self.submission_id}'
-
-    uploadJob = Thread(clonePage, kwargs = {
-      'fileLocation': editabletextbook.iuri,
-      'newfilename': filename,
-      'pages': pages
-    })
-    uploadJob.add_hook(self._updateURI)
-    uploadJob.start()
 
   
   def save(self) -> None:
