@@ -30,7 +30,7 @@ $(() => {
     if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
     else {
       renderToast(response.message, 'success');
-      setTimeout(() => window.location.href = `/classrooms/${response.data.classroom_id}`, 500);
+      window.location.href = `/classrooms/${response.data.classroom_id}`;
     };
   });
 });
