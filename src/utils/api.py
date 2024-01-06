@@ -56,7 +56,11 @@ class _APIParser(_APIBase):
     ------
     BadRequest: code 400
     """
-    annotationMap = self.__annotations__.copy() if isinstance(req, (Request, FlaskResponse, ReqResponse)) else req
+    if isinstance(req, (Request, FlaskResponse, ReqResponse)):
+      try: annotationMap = self.__annotations__.copy()
+      except Exception: annotationMap = dict()
+    else: annotationMap = req
+
     if isResponse:
       annotationMap['status'] = int
       annotationMap['message'] = str
@@ -1172,6 +1176,25 @@ class UserGetReply(_APIReply):
 class UserGetResponse(_APIResponse):
   """API Response for fetching user"""
   data: _UserGetData
+
+
+
+
+
+
+
+
+# User Edit
+class UserEditRequest(_APIRequest):
+  """API Request for editing user"""
+  user_id   = ''
+  email     = ''
+  username  = ''
+  password  = ''
+  privilege = ''
+
+UserEditReply = GenericReply
+UserEditResponse = GenericResponse
 
 
 
