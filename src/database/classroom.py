@@ -127,6 +127,57 @@ class ClassroomModel(db.Model):
     return usr.query.filter(ClassroomModel.textbook_ids.contains(tm.id)).all()
   
 
+  def is_student(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is a student in the classroom
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return user.id in self._clean_id_str(self.student_ids)
+  
+  def is_educator(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is an educator in the classroom
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return user.id in self._clean_id_str(self.educator_ids)
+  
+  def is_owner(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is the classroom owner
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return user.id == self.owner_id
+  
+  def is_member(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is a member of the classroom
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return self.is_student(user) or self.is_educator(user) or self.is_owner(user)
+  
+  def is_privileged(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is privileged in the classroom
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return self.is_owner(user) or self.is_educator(user)
+  
+
   # Editing
   def add_students(self, *students: 'UserModel') -> None:
     """

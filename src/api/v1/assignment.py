@@ -170,7 +170,7 @@ def assignment_edit_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (user.id not in [assignment.classroom.owner_id, *assignment.classroom.educator_ids]):
+  if (user.privilege != 'Admin') and not assignment.classroom.is_privileged(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -206,7 +206,7 @@ def assignment_delete_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if user.id not in set(assignment.classroom.owner_id, *assignment.classroom.educator_ids.split('|')):
+  if not assignment.classroom.is_privileged(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED

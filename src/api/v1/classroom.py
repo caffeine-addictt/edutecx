@@ -18,7 +18,6 @@ from src.utils.api import (
   GenericReply
 )
 
-from sqlalchemy import and_, or_
 from flask_limiter import util
 from flask import (
   request,
@@ -71,11 +70,7 @@ def classroom_get_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
-  if (user.privilege != 'Admin') and (user.id not in [
-    classroom.owner_id,
-    *classroom.educator_ids.split('|'),
-    *classroom.student_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and classroom.is_member(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -188,7 +183,7 @@ def classroom_edit_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (classroom.owner_id != user.id):
+  if (user.privilege != 'Admin') and classroom.is_owner(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.BAD_REQUEST
@@ -223,7 +218,7 @@ def classroom_delete_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (classroom.owner_id != user.id):
+  if (user.privilege != 'Admin') and classroom.is_owner(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.BAD_REQUEST
@@ -299,15 +294,15 @@ def classroom_leave_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   
-  if user.id in classroom.student_ids:
+  if classroom.is_student(user):
     classroom.remove_students(user)
     classroom.save()
   
-  elif user.id in classroom.educator_ids:
+  elif classroom.is_educator(user):
     classroom.remove_educators(user)
     classroom.save()
   
-  elif user.id == classroom.owner_id:
+  elif classroom.is_owner(user):
     return GenericReply(
       message = 'The classroom owner cannot leave',
       status = HTTPStatusCode.FORBIDDEN
