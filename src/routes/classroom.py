@@ -35,7 +35,12 @@ def classrooms(user: UserModel):
 @auth_provider.require_login
 def classroom(user: UserModel, id: str):
   id = escape_id(id)
-  return render_template('(classroom)/classroom.html')
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
+
+  if not isinstance(classroom, ClassroomModel):
+    return render_template('(classroom)/classroom_not_found.html')
+
+  return render_template('(classroom)/classroom.html', classroom = classroom)
 
 
 @app.route('/classrooms/new', methods = ['GET', 'POST'])
