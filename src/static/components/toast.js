@@ -28,6 +28,21 @@ const renderToast = (message, category) => {
   /** @type {HTMLElement} */
   const toast = htmlToElement(formatString(template, { message: message }));
 
+  
+  // Time logic
+  let interval;
+  const start = new Date();
+
+  interval = setInterval(() => {
+    if ($(toast)) {
+      $(toast).find('#time-counter').text( Math.round(((new Date()).getTime() - start.getTime()) / 1000) + 's Ago');
+    }
+    else {
+      clearInterval(interval);
+    }
+  }, 1000);
+
+
   // Add to toast container
   $('#toast-stack-container').append(toast);
 
@@ -59,21 +74,30 @@ const renderToast = (message, category) => {
  * Fetch notifications
  * [category, message] or message
  *
- * @returns {Promise<{
- *   message: string
- *   status: 200
- *   data: Array.<
- *     string | Array.<'info' | 'success' | 'danger', string>>
- *   >
- * | {
- *     status: 404
- *     message: string
- *   }
- * >}
+ * @returns {Promise<Array.<string | Array.<'info' | 'success' | 'danger', string>>>}
  */
 const getNotifications = async () => {
-  return fetch('/api/v1/notify/get')
-    .then(r => r.json());
+
+  /**
+   * Fetched notifications
+   * @type {{
+   *   status: 200;
+   *   message: string;
+   *   data: Array.<string | ['info' | 'success' | 'danger', string]>;
+   * } | null}
+   */
+  const data = await fetch('/api/v1/notify/get')
+    .then(r => {
+      if (r.ok) {
+        return r.json();
+      };
+    });
+
+  if (!data || (data.status !== 200)) return [
+    ['danger', 'Failed to fetch notifications']
+  ];
+
+  return data.data
 };
 
 
@@ -87,12 +111,9 @@ const renderNotifications = async () => {
   const notifications = await getNotifications();
   console.log(notifications);
 
-  if (notifications.status === 200) {
-    console.log(notifications.data);
-    for (const notification of notifications.data) {
-      const [category, message] = Array.isArray(notification) ? notification : [null, notification];
-      renderToast(message, category);
-    };
+  for (const notification of notifications) {
+    const [category, message] = Array.isArray(notification) ? notification : [null, notification];
+    renderToast(message, category);
   };
 };
 
