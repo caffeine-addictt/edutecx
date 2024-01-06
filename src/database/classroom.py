@@ -35,9 +35,9 @@ class ClassroomModel(db.Model):
 
   # Stored as str(user1.id|user2.id|...)
   owner_id    : Mapped[str] = mapped_column(String, ForeignKey('user_table.id'), nullable = False)
-  educator_ids: Mapped[str] = mapped_column(String, nullable = True, default = None)
-  student_ids : Mapped[str] = mapped_column(String, nullable = True, default = None)
-  textbook_ids: Mapped[str] = mapped_column(String, nullable = True, default = None)
+  educator_ids: Mapped[str] = mapped_column(String, nullable = False, default = '')
+  student_ids : Mapped[str] = mapped_column(String, nullable = False, default = '')
+  textbook_ids: Mapped[str] = mapped_column(String, nullable = False, default = '')
 
   # Attributes
   owner      : Mapped['UserModel']             = relationship('UserModel', back_populates = 'owned_classrooms')
