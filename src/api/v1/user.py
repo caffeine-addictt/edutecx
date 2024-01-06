@@ -5,7 +5,7 @@ User Endpoint
 from src import limiter
 from flask_limiter import util
 from src.utils.http import HTTPStatusCode
-from src.database import UserModel, ImageModel, PrivilegeType
+from src.database import UserModel, ImageModel
 
 from src.utils.passwords import hash_password
 from src.service.email_provider import dns_check
