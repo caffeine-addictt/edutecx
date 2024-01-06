@@ -39,7 +39,7 @@ const renderClassrooms = async () => {
   else {
     template = deepCopy(tile);
     classroomList.data.forEach(classroomData => {
-      container.append(htmlToElement(formatString(template, { title: classroomData.title, teacher: classroomData.owner_username })));
+      container.append(htmlToElement(formatString(template, { title: classroomData.title, teacher: classroomData.owner_username, id: classroomData.id })));
     });
   };
 };

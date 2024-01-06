@@ -1,11 +1,15 @@
 {# Macros for classroom tiles #}
 
 {% macro  render_tile() %}
-<div class="card mb-3">
-  <div class="card-body">
-    <h5 class="card-title">{title}</h5>
-    <p class="card-text">{teacher}</p>
+<a href="/classrooms/{id}" class="classtile">
+  <div class="card mb-3">
+    <div class="card-body">
+      <div style="height: 15vh; width: 30%; border: 1px solid black" ><img alt="class picture"/></div>
+      <h5 class="card-title">{title}</h5>
+      <p class="card-text">{teacher}</p>
+    </div>
   </div>
-</div>
+</a>
+
 {% endmacro %}
 
