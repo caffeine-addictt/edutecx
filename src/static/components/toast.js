@@ -2,6 +2,56 @@
 // let successTemplate = '';
 // let dangerTemplate = '';
 
+
+/**
+ * Fetch Toast Queue
+  * @returns {['info' | 'success' | 'danger' | null | string, string][]}
+  */
+const getToastQueue = () => {
+  return JSON.parse(localStorage.getItem('toastQueue')) || new Array();
+};
+
+
+/**
+ * Clear Toast Queue
+ * @returns {void}
+ */
+const clearToastQueue = () => {
+  localStorage.removeItem('toastQueue');
+};
+
+
+/**
+  * Add item to toast queue
+  * @param {['info' | 'success' | 'danger' | null | string, string]} toastData
+  * @returns {void}
+  */
+const addToToastQueue = (toastData) => {
+  let queue = getToastQueue();
+  queue.push(toastData);
+  localStorage.setItem('toastQueue', JSON.stringify(queue));
+};
+
+
+/**
+ * Remove first toast found in queue
+ * @param {['info' | 'success' | 'danger' | null | string, string]} toastData
+ * @returns {void}
+ */
+const removeFromToastQueue = (toastData) => {
+  let queue = getToastQueue();
+  queue.some((toastItem, index) => {
+    if (arrayIsEqual(toastItem, toastData)) {
+      queue.splice(index, 1);
+      localStorage.setItem('toastQueue', JSON.stringify(queue));
+      return true;
+    };
+  });
+};
+
+
+
+
 /**
  * Render a toast
  * @param {string} message - The message to display
@@ -28,7 +78,11 @@ const renderToast = (message, category) => {
   /** @type {HTMLElement} */
   const toast = htmlToElement(formatString(template, { message: message }));
 
-  
+
+  // Add to toast queue (in case of reload)
+  addToToastQueue([category, message]);
+
+
   // Time logic
   let interval;
   const start = new Date();
@@ -55,6 +109,9 @@ const renderToast = (message, category) => {
     for (const e of mutations) {
       if (e.target.classList.contains('hide')) {
         toast.remove();
+
+        // Remove from queue
+        removeFromToastQueue([category, message]);
       };
     };
   });
@@ -93,11 +150,10 @@ const getNotifications = async () => {
       };
     });
 
-  if (!data || (data.status !== 200)) return [
-    ['danger', 'Failed to fetch notifications']
-  ];
+  const httpNotif = (!data || (data.status !== 200)) ? [['danger', 'Failed to fetch notifications']] : data.data;
+  console.log(getToastQueue());
 
-  return data.data
+  return new Array(...httpNotif, ...getToastQueue());
 };
 
 
