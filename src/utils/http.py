@@ -161,5 +161,4 @@ def escape_id(id: str) -> str:
   Returns
   `Escaped ID: str`
   """
-  regex = re.compile(r'[a-z0-9]')
-  return regex.sub('', id)
+  return re.sub(r'[^a-z0-9]', '', id)
