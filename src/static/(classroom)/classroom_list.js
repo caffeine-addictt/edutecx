@@ -72,6 +72,8 @@ const fetchClassrooms = async () => {
  */
 const renderClassrooms = async () => {
   const container = $('#classroom__container');
+  container.empty();
+
   if (classroomList.length === 0) {
     container.append(htmlToElement(
       `<p class="text-secondary fs-5 mb-0">
@@ -94,8 +96,15 @@ const renderClassrooms = async () => {
 
 
 
+
 // On DOM Render
 $(async () => {
   classroomList = await fetchClassrooms();
   renderClassrooms();
 });
+
+
+// Hooks
+$(() => {
+  // TODO: Handle query and filtering
+})
