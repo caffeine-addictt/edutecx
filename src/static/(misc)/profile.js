@@ -114,7 +114,13 @@ $(() => {
     if (response.status === 200) {
       renderToast(response.message, 'success');
       document.location.reload();
-    } else {
+    }
+    else if (response.status === 401) {
+      // Handle edge case where access token expires
+      renderToast('Your session has expired. Please log in again.', 'danger');
+      document.location.href = `/login?callbackURI=${encodeURIComponent(document.location.href)}`;
+    }
+    else {
       renderToast(response.message, 'danger');
     };
 
