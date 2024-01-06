@@ -68,13 +68,22 @@ const fetchClassrooms = async () => {
 
 /**
  * Render Classrooms
+ * @param {Array.<{
+ *   id: string;
+ *   owner_id: string;
+ *   owner_username: string;
+ *   title: string;
+ *   description: string;
+ *   cover_image: string | null;
+ *   created_at: number
+ * }>?} filteredList
  * @returns {Promise<void>}
  */
-const renderClassrooms = async () => {
+const renderClassrooms = async (filteredList) => {
   const container = $('#classroom__container');
   container.empty();
 
-  if (classroomList.length === 0) {
+  if ((filteredList || classroomList).length === 0) {
     container.append(htmlToElement(
       `<p class="text-secondary fs-5 mb-0">
         You are not in any classrooms. 
@@ -84,7 +93,7 @@ const renderClassrooms = async () => {
   }
   else {
     template = deepCopy(tile);
-    classroomList.forEach(classroomData => {
+    (filteredList || classroomList).forEach(classroomData => {
       container.append(htmlToElement(formatString(template, {
         title: classroomData.title,
         teacher: classroomData.owner_username,
@@ -93,6 +102,18 @@ const renderClassrooms = async () => {
     });
   };
 };
+
+
+
+
+/**
+ * Handle Filtering
+ * @returns {void}
+ */
+const handleFiltering = () => {
+  // TODO: Generate NEW array from `classroomList`
+  // TODO: Call renderClassrooms( newFilteredClassrooms );
+}
 
 
 
