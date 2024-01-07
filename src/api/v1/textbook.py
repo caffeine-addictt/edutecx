@@ -8,6 +8,7 @@ from src.database import TextbookModel, UserModel, ImageModel
 from src.service.auth_provider import require_login
 from src.utils.ext import utc_time
 from src.utils.api import (
+  TextbookListRequest, TextbookListReply,
   TextbookGetRequest, TextbookGetReply, _TextbookGetData,
   TextbookCreateRequest, TextbookCreateReply, _TextbookCreateData,
   TextbookEditRequest, TextbookEditReply,
@@ -15,6 +16,9 @@ from src.utils.api import (
   GenericReply
 )
 
+from datetime import datetime
+from functools import lru_cache
+from sqlalchemy import or_, and_
 from werkzeug.datastructures import FileStorage
 from flask_limiter import util
 from flask import (
@@ -26,6 +30,77 @@ from flask import (
 # Routes
 basePath: str = '/api/v1/textbook'
 auth_limit = limiter.shared_limit('100 per hour', scope = lambda _: request.host, key_func = util.get_remote_address)
+
+DateRange = tuple[datetime, datetime] | datetime | None
+
+
+
+
+@app.route(f'{basePath}/list', methods = ['GET'])
+@auth_limit
+@require_login
+@lru_cache
+def textbooks_list_api(user: UserModel):
+  req = TextbookListRequest(request)
+
+  # Handle query
+  dateRange: DateRange = (
+    datetime.fromtimestamp(req.createdLower) if float('inf') != req.createdLower else utc_time.skip('1day'),
+    datetime.fromtimestamp(req.createdUpper) if float('inf') != req.createdUpper else utc_time.skip('1day')
+  )
+  priceRange = (req.priceLower, req.priceUpper)
+
+  if dateRange[0] > dateRange[1]:
+    return GenericReply(
+      message = 'createdLower is larger than createdUpper',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if priceRange[0] > priceRange[1]:
+    return GenericReply(
+      message = 'priceLower is larger than priceUpper',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if req.query == 'None':
+    req.query = ''
+  
+
+  # Build query
+  query = [
+    and_(
+      dateRange[0] <= TextbookModel.created_at,
+      TextbookModel.created_at <= dateRange[1]
+    ),
+    or_(
+      TextbookModel.id.contains(req.query),
+      TextbookModel.title.contains(req.query),
+      TextbookModel.author_id.contains(req.query)
+    )
+  ]
+  
+  filtered = UserModel.query.filter(
+    and_(*query) if req.criteria == 'and' else or_(*query)
+  ).paginate(page = req.page, error_out = False)
+
+  return TextbookListReply(
+    message = 'Successfully fetched textbook list',
+    status = HTTPStatusCode.OK,
+    data = [_TextbookGetData(
+      id = i.id,
+      author_id = i.author_id,
+      title = i.title,
+      description = i.description,
+      categories = i.categories.split('|'),
+      price = i.price,
+      discount = i.discount,
+      uri = i.uri,
+      status = i.status,
+      cover_image = i.cover_image.uri if i.cover_image else None,
+      created_at = i.created_at.timestamp(),
+      updated_at = i.updated_at.timestamp(),
+    ) for i in filtered]
+  ).to_dict(), HTTPStatusCode.OK
 
 
 

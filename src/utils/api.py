@@ -668,6 +668,29 @@ ClassroomLeaveResponse = GenericResponse
 
 
 
+# Textbook LIST
+class TextbookListRequest(_APIRequest):
+  """API Request for textbook listing"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class TextbookListReply(_APIReply):
+  """API Reply for listing textbooks"""
+  data: list['_TextbookGetData']
+
+
+
+
+
+
+
+
 # Textbook GET
 @dataclass
 class _TextbookGetData(_APIBase):
