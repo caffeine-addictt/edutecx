@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+
+
+{# Title #}
+{% block title %}
+  Classroom Not Found - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+  <div id="classroom_not_found__container">
+    <h1>{{ message or 'Classroom Not Found!' }}</h1>
+    <a href="/classrooms">Back</a>
+
+    <p>Was this not expected? <a href="/contact-us">Let us know!</a></p>
+  </div>
+{% endblock %}

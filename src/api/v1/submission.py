@@ -41,11 +41,9 @@ def submission_get_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (user.id not in [
-    submission.student_id,
-    submission.assignment.classroom.owner_id,
-    *submission.assignment.classroom.educator_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and \
+      (user.id != submission.student_id) and \
+      (not submission.assignment.classroom.is_privileged(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED

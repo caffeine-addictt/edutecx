@@ -5,7 +5,7 @@ User Endpoint
 from src import limiter
 from flask_limiter import util
 from src.utils.http import HTTPStatusCode
-from src.database import UserModel, ImageModel, PrivilegeType
+from src.database import UserModel, ImageModel
 
 from src.utils.ext import utc_time
 from src.utils.passwords import hash_password

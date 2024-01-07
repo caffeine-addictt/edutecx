@@ -345,6 +345,123 @@ def require_login(
 
 
 @overload
+def require_educator(__function: UserRouteEndpoint[P]) -> NoParamReturn[P]:
+  """
+  Decorator for enforcing educator-only routes
+
+  Returns
+  -------
+  `decorator: (...) -> ...`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_educator
+  >>> def myRoute(user: UserModel): ...
+  """
+
+@overload
+def require_educator(
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
+  ignore_verification: bool = False,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
+) -> UserWithParamReturn[P]:
+  """
+  Decorator for enforcing educator-only routes
+
+  Parameters
+  ----------
+  `verification_redirect: str`, optional (defaults to '/verify?callbackURI=%s')
+    Email verification endpoint
+  
+  `unauthorized_redirect: str`, optional (defaults to None)
+    Endpoint to redirect to if user is not educator, raises 401 UNAUTHORIZED by default
+  
+  `ignore_verification: bool`, optional (defaults to False)
+    Whether to ignore unverified emails and allow access
+  
+  `fresh_access_token: bool`, optional (defaults to False)
+    Require access token to be new, else redirects to login
+  
+  `refresh_token_only: bool`, optional (defaults to False)
+    Only allow refresh tokens to access routes, else redirects to unauthorized
+
+  Returns
+  -------
+  `decorator wrapper: (...) -> ( (...) -> ... )`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_educator()
+  >>> def myRoute(user: UserModel): ...
+  OR
+  >>> @app.route('/')
+  >>> @require_educator(verification_redirect = '/custom-endpoint')
+  >>> def myRoute(user: UserModel): ...
+  """
+
+@overload
+def require_educator(
+  __function: UserRouteEndpoint[P],
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
+  ignore_verification: bool = False,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
+) -> FullParamReturn[P]: ...
+
+def require_educator(
+  __function: UserRouteEndpoint[P] | None = None,
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
+  ignore_verification: bool = False,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
+) -> UserWrappedReturn[P]:
+  if not callable(__function):
+    def early(__function: UserRouteEndpoint[P]) -> FullParamReturn[P]:
+      return require_educator(
+        __function,
+        verification_redirect = verification_redirect,
+        unauthorized_redirect = unauthorized_redirect,
+        ignore_verification = ignore_verification,
+        fresh_access_token = fresh_access_token,
+        refresh_token_only = refresh_token_only
+      )
+    return early
+  
+  @wraps(__function)
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
+    verify_jwt_in_request(fresh = fresh_access_token, refresh = refresh_token_only)
+    user: UserModel = get_current_user()
+
+    # Check for locked account
+    if user.status == 'Locked':
+      return handleLockedRedirect()
+
+    if not user.email_verified and not ignore_verification:
+      return redirect(
+        verification_redirect % parse.quote_plus(request.path),
+        code = HTTPStatusCode.SEE_OTHER
+      ), HTTPStatusCode.SEE_OTHER
+
+    return __function(user, *args, **kwargs)
+  return wrapper
+
+
+
+
+
+
+
+
+@overload
 def optional_login(__function: OptionalRouteEndpoint[P]) -> NoParamReturn[P]:
   """
   Decorator for enforcing login-optional routes

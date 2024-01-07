@@ -18,7 +18,6 @@ from src.utils.api import (
   GenericReply
 )
 
-from sqlalchemy import and_, or_
 from flask_limiter import util
 from flask import (
   request,
@@ -43,6 +42,8 @@ def classroom_list_api(user: UserModel):
     data = [
       _ClassroomListData(
         id = classroom.classroom.id,
+        owner_id = classroom.classroom.owner_id,
+        owner_username = classroom.classroom.owner.username,
         title = classroom.classroom.title,
         description = classroom.classroom.description,
         cover_image = classroom.classroom.cover_image.id if classroom.classroom.cover_image else None,
@@ -69,11 +70,7 @@ def classroom_get_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
-  if (user.privilege != 'Admin') and (user.id not in [
-    classroom.owner_id,
-    *classroom.educator_ids.split('|'),
-    *classroom.student_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and classroom.is_member(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -110,14 +107,14 @@ def classroom_create_api(user: UserModel):
   req = ClassroomCreateRequest(request)
 
 
-  if (user.id != req.owner_id) and (user.privilege != 'Admin'):
+  if req.owner_id and (user.id != req.owner_id) and (user.privilege != 'Admin'):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED,
     ).to_dict(), HTTPStatusCode.UNAUTHORIZED
 
 
-  owner = user if user.id == req.owner_id else UserModel.query.filter(UserModel.id == req.owner_id).first()
+  owner = user if (not req.owner_id) or (user.id == req.owner_id) else UserModel.query.filter(UserModel.id == req.owner_id).first()
   if not isinstance(owner, UserModel):
     return GenericReply(
       message = 'Invalid user',
@@ -142,7 +139,8 @@ def classroom_create_api(user: UserModel):
   newClassroom: ClassroomModel = ClassroomModel(
     owner = owner,
     title = req.title,
-    description = req.description
+    description = req.description,
+    invite_enabled = req.invite_enabled == 'y'
   )
   newClassroom.save()
 
@@ -185,7 +183,7 @@ def classroom_edit_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (classroom.owner_id != user.id):
+  if (user.privilege != 'Admin') and classroom.is_owner(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.BAD_REQUEST
@@ -220,7 +218,7 @@ def classroom_delete_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (classroom.owner_id != user.id):
+  if (user.privilege != 'Admin') and classroom.is_owner(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.BAD_REQUEST
@@ -296,15 +294,15 @@ def classroom_leave_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   
-  if user.id in classroom.student_ids:
+  if classroom.is_student(user):
     classroom.remove_students(user)
     classroom.save()
   
-  elif user.id in classroom.educator_ids:
+  elif classroom.is_educator(user):
     classroom.remove_educators(user)
     classroom.save()
   
-  elif user.id == classroom.owner_id:
+  elif classroom.is_owner(user):
     return GenericReply(
       message = 'The classroom owner cannot leave',
       status = HTTPStatusCode.FORBIDDEN

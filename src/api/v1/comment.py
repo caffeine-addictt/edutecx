@@ -40,11 +40,9 @@ def comment_get_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
-  if (user.privilege != 'Admin') and (user.id not in [
-    comment.author_id,
-    comment.submission.assignment.classroom.owner_id,
-    *comment.submission.assignment.classroom.educator_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and \
+      (user.id != comment.author_id) and \
+      (not comment.submission.assignment.classroom.is_privileged(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -81,11 +79,9 @@ def comment_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (user.id not in [
-    submission.student_id,
-    submission.assignment.classroom.owner_id,
-    *submission.assignment.classroom.educator_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and \
+      (user.id != submission.student_id) and \
+      (not submission.assignment.classroom.is_privileged(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED

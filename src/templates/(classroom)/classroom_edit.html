@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+
+
+{# Title #}
+{% block title %}
+  Edit Classroom - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+  <form
+    id='classroomForm'
+    role='form'
+    class='d-flex flex-column gap-3 align-items-center'
+  >
+    
+    {# Behviour can be copied from (misc)/profile.js #}
+  
+  </form>
+{% endblock %}
+
+
+{# Scripts #}
+{% block scripts %}
+  {# Write injected macros to variables #}
+  <script src="{{ url_for('static', filename = '(classroom)/classroom_edit.js') }}"></script>
+{% endblock %}

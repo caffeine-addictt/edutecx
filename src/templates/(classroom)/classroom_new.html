@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
+
+
+{# Title #}
+{% block title %}
+  Create Classroom - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+  <form
+    id='classroomForm'
+    role='form'
+    class='d-flex flex-column gap-3 align-items-center'
+  >
+    {{ render_text_field(form.title) }}
+    {{ render_text_field(form.description) }}
+    {{ render_checkbox_field(form.inviteEnabled) }}
+    {{ render_checkbox_field(form.agreeToTOS) }}
+    {{ render_submit(form.submit) }}
+  
+  </form>
+
+  <script src="{{ url_for('static', filename = '(classroom)/classroom_new.js') }}"></script>
+{% endblock %}
