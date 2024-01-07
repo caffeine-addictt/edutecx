@@ -88,7 +88,78 @@ const fetchGraphURI = async (initialRender = false) => {
  * @returns {void}
  */
 const renderTextbook = (textbook) => {
-  
+  const newEntry = htmlToElement(formatString(deepCopy(textbookTemplate), {
+    'textbook_id'      : textbook.id,
+    'textbook_author'   : textbook.author_id,
+    'textbook_title'    : textbook.title,
+    'textbook_price'    : textbook.price,
+    'textbook_discount' : textbook.discount,
+    'textbook_status'   : textbook.status
+  }));
+
+  // Add hooks
+  $(newEntry).find('#textbook__manage_button').on('click', () => {
+    const title = $('#update-textbook-title');
+    const categories = $('#update-textbook-categories');
+    const price = $('#update-textbook-price');
+    const discount = $('#update-textbook-discount');
+    const status = $('#update-textbook-status');
+
+    // Change modal values
+    $('#modal-long-title').text(`Manage ${textbook.title}`);
+    title.val(textbook.title);
+    categories.val(textbook.categories);
+    price.val(textbook.price);
+    discount.val(textbook.discount);
+    status.val(textbook.status);
+
+    // Add hooks
+    const submitButton = $('#update-textbook-modal').find('#confirmed-update-textbook')
+    submitButton.on('click', async () => {
+      submitButton.attr('disabled', true);
+      submitButton.text('Updating...');
+
+      const response = await fetch('/api/v1/textbook/edit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getAccessToken()
+        },
+        body: JSON.stringify({
+          textbook_id: textbook.id,
+          title      : textbook.title !== $('#update-textbook-title').val() ? $('#update-textbook-title').val() : null,
+          categories : textbook.categories !== $('#update-textbook-categories').val() ? $('#update-textbook-categories').val() : null,
+          price      : textbook.price !== parseFloat($('#update-textbook-price').val()) ? parseFloat($('#update-textbook-price').val()) : null,
+          discount   : textbook.discount !== parseFloat($('#update-textbook-discount').val()) ? parseFloat($('#update-textbook-discount').val()) : null,
+        })
+      }).then(res => {
+        if (res.ok) {
+          return res.json();
+        };
+      });
+
+
+      if (!response || response.status !== 200) {
+        renderToast(response ? response.message : 'Failed to update textbook', 'danger');
+      }
+      else {
+        if (response.message) renderToast(response.message, 'success');
+        fetchTextbookData(true);
+      };
+
+      submitButton.text('Update Textbook');
+      $('#update-textbook-modal').modal('hide');
+      submitButton.off('click');
+      submitButton.attr('disabled', false);
+    });
+
+
+    // Show modal
+    $('#update-textbook-modal').modal('show');
+  });
+
+
+  $('#textbook__container').append(newEntry);
 }
 
 
@@ -131,30 +202,40 @@ const fetchTextbookData = async (initialRender = false) => {
    *     created_at: number;
    *     updated_at: number;
    *   }>;
-   * } | {
-   *   status: 500;
-   *   message: string;
-   * }}
+   * } | void}
    */
   const response = await fetch(`/dashboard/get?${searchParams.toString()}`, {
     method: 'GET',
     headers: {
       'X-CSRF-TOKEN': getAccessToken()
     }
-  }).then(async res => await res.json())
+  }).then(res => {
+    if (res.ok) {
+      return res.json();
+    };
+  });
 
-  if (response.status !== 200) {
-    console.log(response.message);
+  if (!response || response.status !== 200) {
+    if (response) console.log(response.message);
     renderToast('Failed to fetch textbooks!', 'danger');
   }
-  else if (!response.data || response.data.length === 0) {
-    // Render no textbooks
+  else if (!response?.data || response.data.length === 0) {
+    $('#user__container').empty();
+    $('#user__container').append('<p class="text-center">No textbooks found</p>');
   }
   else {
     $('#textbook__container').empty();
+    $('#update-textbook-category').empty();
+
+    let renderedCategories = [];
     response.data.forEach(textbook => {
-      // Render macros for textbooks
-      $('#textbook__container').append(`${textbook.title}`);
+      for (const category of textbook.categories) {
+        if (!renderedCategories.includes(category)) {
+          $('#update-textbook-category').append(`<option value="${category}">${category}</option>`);
+          renderedCategories.push(category);
+        };
+      };
+      renderTextbook(textbook)
     });
   };
   
@@ -178,15 +259,15 @@ const fetchTextbookData = async (initialRender = false) => {
 
 
 // Run in parallel
-$(() => Promise.all([ fetchGraphURI(), fetchTextbookData() ])
+$(() => Promise.all([ fetchGraphURI(true), fetchTextbookData(true) ])
   .then(values => console.log(values))
   .catch(err => console.log(err)));
 
 
 $(() => {
   // Hooks
-  $('#graph__button').on('click', async e => await fetchGraphURI(true));
-  $('#textbook__button').on('click',  async e => await fetchTextbookData(true));
+  $('#graph__button').on('click', async e => await fetchGraphURI());
+  $('#textbook__button').on('click',  async e => await fetchTextbookData());
 
   // Modal hooks
   $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-big').on('click', () => {

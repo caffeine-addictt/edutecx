@@ -1,5 +1,6 @@
 <!doctype html>
 {% extends 'layout.html' %}
+{% from 'macros/admin.html' import render_textbook_entry %}
 
 
 {# Title #}
@@ -34,12 +35,56 @@
 
   </div>
 
+
+
+
+  {# Modal #}
+  <div class="modal fade" id="update-textbook-modal" tabindex="-1" aria-labelledby="updateTextbookModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-long-title">Manage textbook title</h5>
+          <button type="button" class="close" aria-label="Close" id="close-update-textbook-modal-small">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">
+            This action is <span class="text-danger">IRREVERSIBLE!</span>
+            <p class="text-secondary">Setting status to <span class="text-danger">'Unavailable'</span> or <span class="text-danger">'DMCA'</span> will make it unpurchasable.</p>
+          </p>
+
+          <form id="update-textbook-form" class="mt-4">
+            <input type="text" id="update-textbook-title" class="form-control mb-2" placeholder="Enter new title"/>
+            <input type="text" id="update-textbook-description" class="form-control mb-2" placeholder="Enter new description"/>
+            <input type="text" id="update-textbook-price" class="form-control mb-2" placeholder="Enter new price"/>
+            <input type="text" id="update-textbook-discount" class="form-control mb-2" placeholder="Enter new discount"/>
+
+            <select id="update-textbook-status" class="form-select mb-2">
+              <option value="Available">Available</option>
+              <option value="Unavailable">Unavailable</option>
+              <option value="DMCA">DMCA</option>
+            </select>
+
+            <select id="update-textbook-category" class="form-select mb-2" multiple>
+              <option value="Computer Science">Computer Science</option>
+            </select>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close-update-textbook-modal-big">Close</button>
+          <button type="button" class="btn btn-primary" id="confirmed-update-textbook">Update Textbook</button>
+        </div>
+      </div>
+    </div>
+
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  <script>
+    var textbookTemplate = `{{ render_textbook_entry() }}`;
+  </script>
   <script src="{{ url_for('static', filename = '(admin)/textbook.js') }}"></script>
 {% endblock %}
