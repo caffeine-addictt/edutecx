@@ -362,5 +362,6 @@ def dashboard_revenue(user: UserModel):
 
 # Textbooks
 @app.route(f'{basePath}/textbooks', methods = ['GET'])
-def dashboard_textbooks():
+@require_admin
+def dashboard_textbooks(user: UserModel):
   return render_template('(admin)/textbook.html')

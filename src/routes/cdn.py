@@ -46,7 +46,8 @@ def noindex():
 
 # Images
 @app.route('/public/image/<path:filename>', methods = ['GET'])
-def uploaded_images(filename: str):
+@auth_provider.optional_login
+def uploaded_images(user: UserModel | None, filename: str):
   return serve(
     cdn_provider.ImageLocation,
     filename
