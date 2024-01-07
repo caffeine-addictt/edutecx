@@ -1,4 +1,6 @@
 
+// let textbookTemplate = '';
+
 /**
  * Track how many times graph is drawn to apply weighted cooldown
  * @type {number}
@@ -10,12 +12,13 @@ let times = 0;
 
 /**
  * Fetch and draw graph
+ * @param {boolean} initialRender - Whether this is the initial render
  * @returns {Promise<void>}
  */
-const fetchGraphURI = async () => {
+const fetchGraphURI = async (initialRender = false) => {
   $('#graph__button').attr('disabled', true);
   $('#graph__button').text('Drawing...');
-  renderToast('Drawing Graph...', 'info');
+  if (!initialRender) renderToast('Drawing Graph...', 'info');
 
   $('#svg-render').empty();
 
@@ -61,19 +64,20 @@ const fetchGraphURI = async () => {
   }, 1000);
 
   times++;
-}
+};
 
 
 
 
 /**
  * Stream filtered query
+ * @param {boolean} initialRender - Whether this is the initial render
  * @returns {Promise<void>}
  */
-const fetchTextbookData = async () => {
+const fetchTextbookData = async (initialRender = false) => {
   $('#textbook__button').attr('disabled', true);
   $('#textbook__button').text('Fetching...');
-  renderToast('Fetching textbooks...', 'info');
+  if (!initialRender) renderToast('Fetching textbooks...', 'info');
 
   $('#textbook__container').empty();
 
@@ -143,7 +147,7 @@ const fetchTextbookData = async () => {
       iterations++;
     };
   }, 1000);
-}
+};
 
 
 
@@ -156,6 +160,16 @@ $(() => Promise.all([ fetchGraphURI(), fetchTextbookData() ])
 
 $(() => {
   // Hooks
-  $('#graph__button').on('click', async e => await fetchGraphURI());
-  $('#textbook__button').on('click',  async e => await fetchTextbookData());
+  $('#graph__button').on('click', async e => await fetchGraphURI(true));
+  $('#textbook__button').on('click',  async e => await fetchTextbookData(true));
+
+  // Modal hooks
+  $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-big').on('click', () => {
+    $('#update-tetxbook-modal').find('#confirm-update-tetxbook').off('click');
+    $('#update-tetxbook-modal').modal('hide');
+  });
+  $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-small').on('click', () => {
+    $('#update-tetxbook-modal').find('#confirm-update-tetxbook').off('click');
+    $('#update-tetxbook-modal').modal('hide');
+  });
 });

@@ -12,12 +12,13 @@ let times = 0;
 
 /**
  * Fetch and draw graph
+ * @param {boolean} initialRender - Whether this is the initial render
  * @returns {Promise<void>}
  */
-const fetchGraphURI = async () => {
+const fetchGraphURI = async (initialRender = false) => {
   $('#graph__button').attr('disabled', true);
   $('#graph__button').text('Drawing...');
-  renderToast('Drawing Graph...', 'info');
+  if (!initialRender) renderToast('Drawing Graph...', 'info');
 
   $('#svg-render').empty();
 
@@ -137,7 +138,7 @@ const renderUser = (user) => {
           renderToast(response ? response.message : 'Failed to update user', 'danger');
         }
         else {
-          renderToast(response.message, 'success');
+          if (response.message) renderToast(response.message, 'success');
           fetchUserData();
         };
 
@@ -161,12 +162,13 @@ const renderUser = (user) => {
 
 /**
  * Stream filtered query
+ * @param {boolean} initialRender - Whether this is the initial render
  * @returns {Promise<void>}
  */
-const fetchUserData = async () => {
+const fetchUserData = async (initialRender = false) => {
   $('#user__button').attr('disabled', true);
   $('#user__button').text('Fetching...');
-  renderToast('Fetching users...', 'info');
+  if (!initialRender) renderToast('Fetching users...', 'info');
 
   $('#user__container').empty();
 
@@ -208,7 +210,8 @@ const fetchUserData = async () => {
     renderToast('Failed to fetch users!', 'danger');
   }
   else if (!response.data || response.data.length === 0) {
-    // Render no users
+    $('#user__container').empty();
+    $('#user__container').append('<p class="text-center">No users found</p>');
   }
   else {
     $('#user__container').empty();
@@ -242,8 +245,8 @@ $(() => Promise.all([ fetchGraphURI(), fetchUserData() ])
 
 $(() => {
   // Hooks
-  $('#graph__button').on('click', async e => await fetchGraphURI());
-  $('#user__button').on('click',  async e => await fetchUserData());
+  $('#graph__button').on('click', async e => await fetchGraphURI(true));
+  $('#user__button').on('click',  async e => await fetchUserData(true));
 
   // Modal hooks
   $('#update-user-modal').find('#close-update-user-modal-big').on('click', () => {
