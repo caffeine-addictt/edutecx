@@ -80,7 +80,8 @@ const fetchGraphURI = async (initialRender = false) => {
  *   profile_image: string | null;
  *   created_at   : number;
  *   last_login   : number;
- * }}
+ * }} user - The user to render
+ * @returns {void}
  */
 const renderUser = (user) => {
   const newEntry = htmlToElement(formatString(deepCopy(userTemplate), {
