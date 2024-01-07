@@ -89,7 +89,7 @@ const fetchGraphURI = async (initialRender = false) => {
  */
 const renderTextbook = (textbook) => {
   const newEntry = htmlToElement(formatString(deepCopy(textbookTemplate), {
-    'textbook_id'      : textbook.id,
+    'textbook_id'       : textbook.id,
     'textbook_author'   : textbook.author_id,
     'textbook_title'    : textbook.title,
     'textbook_price'    : textbook.price,
@@ -204,16 +204,36 @@ const fetchTextbookData = async (initialRender = false) => {
    *   }>;
    * } | void}
    */
-  const response = await fetch(`/dashboard/get?${searchParams.toString()}`, {
-    method: 'GET',
-    headers: {
-      'X-CSRF-TOKEN': getAccessToken()
-    }
-  }).then(res => {
-    if (res.ok) {
-      return res.json();
-    };
-  });
+  // const response = await fetch(`/dashboard/get?${searchParams.toString()}`, {
+  //   method: 'GET',
+  //   headers: {
+  //     'X-CSRF-TOKEN': getAccessToken()
+  //   }
+  // }).then(res => {
+  //   if (res.ok) {
+  //     return res.json();
+  //   };
+  // });
+  const response = {
+    status : 200,
+    message: 'Success',
+    data: [
+      {
+        id: '1',
+        author_id: '1',
+        title: 'Title',
+        description: 'Description',
+        categories: ['Category 1', 'Category 2'],
+        price: 9.99,
+        discount: 0,
+        uri: 'uri',
+        status: 'Uploaded',
+        cover_image: null,
+        created_at: 0,
+        updated_at: 0
+      },
+    ]
+  }
 
   if (!response || response.status !== 200) {
     if (response) console.log(response.message);

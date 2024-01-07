@@ -18,7 +18,7 @@
 
 {% macro render_textbook_entry() %}
   <div id="textbook__container" class="d-flex flex-row w-100 h-auto align-content-between">
-    <a id="textbook__link" href="/textbook/{textbook_id}"><p id="textbook__id" class="w-25 h-auto">{textbook_id}</p></a>
+    <a id="textbook__id" href="/textbook/{textbook_id}" class="w-25 h-auto">{textbook_id}</a>
     <p id="textbook__author" class="w-25 h-auto">{textbook_author}</p>
     <p id="textbook__title" class="w-25 h-auto">{textbook_title}</p>
     <p id="textbook__price" class="w-25 h-auto">{textbook_price}</p>
