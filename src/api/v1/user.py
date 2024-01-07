@@ -214,6 +214,7 @@ def user_edit_api(user: UserModel):
   
   if req.email and (req.email != 'None') and (req.email != foundUser.email):
     foundUser.email = req.email
+    foundUser.email_verified = False
     changed = True
   
   # Handle no changes
