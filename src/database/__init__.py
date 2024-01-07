@@ -3,7 +3,12 @@ Load database modules
 """
 
 # Auth
-from .user import UserModel, ClassroomMember, PrivilegeType, ClassroomMemberType, MembershipType, SubscriptionStatus, EnumMembershipType, EnumPrivilegeType, EnumSubscriptionStatus
+from .user import UserModel, ClassroomMember, ClassroomMemberType, \
+                  SubscriptionStatus, EnumSubscriptionStatus, \
+                  MembershipType, EnumMembershipType, \
+                  PrivilegeType, EnumPrivilegeType, \
+                  UserStatus, EnumUserStatus
+
 from .token import TokenModel, TokenType, EnumTokenType
 from .jwtblocklist import JWTBlocklistModel, JWTType, EnumJWTType
 
