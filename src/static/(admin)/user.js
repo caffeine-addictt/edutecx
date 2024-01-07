@@ -140,7 +140,7 @@ const renderUser = (user) => {
         }
         else {
           if (response.message) renderToast(response.message, 'success');
-          fetchUserData();
+          fetchUserData(true);
         };
 
         submitButton.text('Update Account');
@@ -184,7 +184,7 @@ const fetchUserData = async (initialRender = false) => {
    * @type {{
    *   status : 200;
    *   message: string;
-   *   data: Array.<{
+   *   data?: Array.<{
    *     user_id      : string;
    *     email        : string;
    *     status       : 'Active' | 'Locked';
@@ -194,23 +194,24 @@ const fetchUserData = async (initialRender = false) => {
    *     created_at   : number;
    *     last_login   : number;
    *   }>;
-   * } | {
-   *   status: 500;
-   *   message: string;
-   * }}
+   * } | void}
    */
   const response = await fetch(`/api/v1/user/list?${searchParams.toString()}`, {
     method: 'GET',
     headers: {
       'X-CSRF-TOKEN': getAccessToken()
     }
-  }).then(async res => await res.json())
+  }).then(res => {
+    if (res.ok) {
+      return res.json();
+    };
+  });
 
-  if (response.status !== 200) {
-    console.log(response.message);
+  if (!response || response.status !== 200) {
+    if (response) console.log(response.message);
     renderToast('Failed to fetch users!', 'danger');
   }
-  else if (!response.data || response.data.length === 0) {
+  else if (!response?.data || response.data.length === 0) {
     $('#user__container').empty();
     $('#user__container').append('<p class="text-center">No users found</p>');
   }
@@ -239,15 +240,15 @@ const fetchUserData = async (initialRender = false) => {
 
 
 // Run in parallel
-$(() => Promise.all([ fetchGraphURI(), fetchUserData() ])
+$(() => Promise.all([ fetchGraphURI(true), fetchUserData(true) ])
   .then(values => console.log(values))
   .catch(err => console.log(err)));
 
 
 $(() => {
   // Hooks
-  $('#graph__button').on('click', async e => await fetchGraphURI(true));
-  $('#user__button').on('click',  async e => await fetchUserData(true));
+  $('#graph__button').on('click', async e => await fetchGraphURI());
+  $('#user__button').on('click',  async e => await fetchUserData());
 
   // Modal hooks
   $('#update-user-modal').find('#close-update-user-modal-big').on('click', () => {
