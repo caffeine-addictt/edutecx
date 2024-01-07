@@ -57,8 +57,11 @@ class _APIParser(_APIBase):
     BadRequest: code 400
     """
     if isinstance(req, (Request, FlaskResponse, ReqResponse)):
-      try: annotationMap = self.__annotations__.copy()
-      except Exception: annotationMap = dict()
+      annotationMap = None
+      try:
+        annotationMap = { i:v for i,v in self.__dict__.items() if not i.startswith('__') }
+        annotationMap.update(self.__annotations__.copy())
+      except Exception: annotationMap = annotationMap or dict()
     else: annotationMap = req
 
     if isResponse:
@@ -92,6 +95,10 @@ class _APIParser(_APIBase):
         except Exception: pass
 
       
+      if variableType == '':
+        self.__dict__[variableName] = recursiveValidation(variable, str) or ''
+        continue
+
       interpreted = recursiveValidation(variable, variableType)
       if (interpreted is not None) or self.get('ignore_none'):
         self.__dict__[variableName] = interpreted
@@ -1180,9 +1187,10 @@ class UserListReply(_APIReply):
 @dataclass
 class _UserGetData(_APIBase):
   user_id      : str
+  email        : str
+  status       : str
   username     : str
   privilege    : str
-  status       : str
   profile_image: Optional[str]
   created_at   : float
   last_login   : float
@@ -1210,11 +1218,12 @@ class UserGetResponse(_APIResponse):
 # User Edit
 class UserEditRequest(_APIRequest):
   """API Request for editing user"""
-  user_id   = ''
-  email     = ''
-  username  = ''
-  password  = ''
-  privilege = ''
+  user_id  : str = ''
+  email    : str = ''
+  status   : str = ''
+  username : str = ''
+  password : str = ''
+  privilege: str = ''
 
 UserEditReply = GenericReply
 UserEditResponse = GenericResponse
