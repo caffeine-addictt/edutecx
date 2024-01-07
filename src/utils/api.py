@@ -1154,12 +1154,35 @@ class SubmissionSnippetGetResponse(_APIResponse):
 
 
 
+# User LIST
+class UserListRequest(_APIRequest):
+  """API Request for fetching user list"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class UserListReply(_APIReply):
+  """API Reply for fetching user list"""
+  data: list['_UserGetData']
+
+
+
+
+
+
+
+
+
 # User GET
 @dataclass
 class _UserGetData(_APIBase):
   user_id      : str
   username     : str
   privilege    : str
+  status       : str
   profile_image: Optional[str]
   created_at   : float
   last_login   : float
