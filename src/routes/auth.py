@@ -10,7 +10,7 @@ from src.database import UserModel, JWTBlocklistModel
 from src.utils.ext import utc_time
 from src.utils.http import HTTPStatusCode
 from src.utils.api import TokenRefreshResponse, LoginResponse
-from src.utils.forms import LoginForm, LogoutForm, RegisterForm
+from src.utils.forms import LoginForm, RegisterForm
 from src.service.auth_provider import optional_login, require_login, anonymous_required
 from src.utils.api import (
   GenericResponse
@@ -140,6 +140,7 @@ def expired_token_loader(jwtHeader, jwtPayload):
       'message': 'Token has expired',
       'status': HTTPStatusCode.UNAUTHORIZED
     }, HTTPStatusCode.UNAUTHORIZED
+  
   else:
     try:
       # Refresh the token if refresh token is valid and they previously logged in with "remember me" checked
@@ -194,8 +195,13 @@ def token_in_blocklist_loader(jwtHeader, jwtPayload) -> bool:
 
 # Routing
 @app.route('/login', methods = ['Get', 'POST'])
-@optional_login
+@optional_login(ignore_locked = True)
 def login(user: UserModel | None):
+
+  # Check for locked account
+  if user and user.status == 'Locked':
+    return redirect('/logout', code = HTTPStatusCode.SEE_OTHER), HTTPStatusCode.SEE_OTHER
+
   # Auto redirect to callbackURI
   if user:
     flash(f'Welcome back!', 'success')
@@ -239,50 +245,42 @@ def login(user: UserModel | None):
 
 
 @app.route('/logout', methods = ['GET', 'POST'])
-@require_login
+@require_login(ignore_locked = True)
 def logout(user: UserModel):
   successfulLogout = make_response(
     redirect('/', code = HTTPStatusCode.SEE_OTHER),
     HTTPStatusCode.SEE_OTHER
   )
 
-  # Not logged in
-  if (
-    not request.cookies.get('access_token_cookie')
-    and not request.cookies.get('refresh_token_cookie')
-  ):
-    return successfulLogout, HTTPStatusCode.SEE_OTHER
-  
-  # Logged in
-  if request.method == 'POST':
-    try:
-      accesss_token = request.cookies.get('access_token_cookie')
-      refresh_token = request.cookies.get('refresh_token_cookie')
+  try:
+    accesss_token = request.cookies.get('access_token_cookie')
+    refresh_token = request.cookies.get('refresh_token_cookie')
 
-      if not accesss_token or not refresh_token:
-        raise Exception('No cookies')
-      
-      decoded_access = decode_token(accesss_token)
-      decoded_refresh = decode_token(refresh_token)
+    if not accesss_token or not refresh_token:
+      raise Exception('No cookies')
 
-      if decoded_access.get('jti'): db.session.add(JWTBlocklistModel(str(decoded_access.get('jti')), 'access'))
-      if decoded_refresh.get('jti'): db.session.add(JWTBlocklistModel(str(decoded_refresh.get('jti')), 'refresh'))
-      db.session.commit()
+    decoded_access = decode_token(accesss_token)
+    decoded_refresh = decode_token(refresh_token)
 
+    if decoded_access.get('jti'): db.session.add(JWTBlocklistModel(str(decoded_access.get('jti')), 'access'))
+    if decoded_refresh.get('jti'): db.session.add(JWTBlocklistModel(str(decoded_refresh.get('jti')), 'refresh'))
+    db.session.commit()
+
+    if user.status == 'Active':
       flash('Successfully logged out', 'info')
+    else:
+      flash('Your account has been locked, contact us at edutecx@ngjx.org for more information', 'danger')
 
-    except Exception as e:
-      app.logger.exception(f'Failed to logout: {e}')
-    
-    finally:
-      unset_refresh_cookies(successfulLogout)
-      unset_access_cookies(successfulLogout)
-      unset_jwt_cookies(successfulLogout)
+  except Exception as e:
+    app.logger.exception(f'Failed to logout: {e}')
 
-      app.logger.warning('Unset cookies on logout')
-      return successfulLogout, HTTPStatusCode.SEE_OTHER
-    
-  return render_template('(auth)/logout.html', form = LogoutForm())
+  finally:
+    unset_refresh_cookies(successfulLogout)
+    unset_access_cookies(successfulLogout)
+    unset_jwt_cookies(successfulLogout)
+
+    app.logger.warning('Unset cookies on logout')
+    return successfulLogout, HTTPStatusCode.SEE_OTHER
 
 
 

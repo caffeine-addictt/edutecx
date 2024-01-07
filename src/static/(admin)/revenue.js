@@ -1,4 +1,6 @@
 
+// let saleTemplate = '';
+
 /**
  * Track how many times graph is drawn to apply weighted cooldown
  * @type {number}
@@ -10,12 +12,13 @@ let times = 0;
 
 /**
  * Fetch and draw graph
+ * @param {boolean} initialRender - Whether this is the initial render
  * @returns {Promise<void>}
  */
-const fetchGraphURI = async () => {
+const fetchGraphURI = async (initialRender = false) => {
   $('#graph__button').attr('disabled', true);
   $('#graph__button').text('Drawing...');
-  renderToast('Drawing Graph...', 'info');
+  if (!initialRender) renderToast('Drawing Graph...', 'info');
 
   $('#svg-render').empty();
 
@@ -61,19 +64,20 @@ const fetchGraphURI = async () => {
   }, 1000);
 
   times++;
-}
+};
 
 
 
 
 /**
  * Stream filtered query
+ * @param {boolean} initialRender - Whether this is the initial render
  * @returns {Promise<void>}
  */
-const fetchSaleData = async () => {
+const fetchSaleData = async (initialRender = false) => {
   $('#sale__button').attr('disabled', true);
   $('#sale__button').text('Fetching...');
-  renderToast('Fetching sales...', 'info');
+  if (!initialRender) renderToast('Fetching sales...', 'info');
 
   $('#sale__container').empty();
 
@@ -89,32 +93,58 @@ const fetchSaleData = async () => {
    *   status : 200;
    *   message: string;
    *   data: Array.<{
-   * 
+   *     type        : 'OneTime' | 'Subscription';
+   *     sale_id     : string;
+   *     user_id     : string;
+   *     discount_id : string | null;
+   *     textbook_ids: string[];
+   *     paid        : number;
+   *     paid_at     : number;
+   *     total_cost  : number;
    *   }>;
-   * } | {
-   *   status: 500;
-   *   message: string;
-   * }}
+   * } | void}
    */
-  const response = await fetch(`/dashboard/get?${searchParams.toString()}`, {
+  const response = await fetch(`/api/v1/sale/list?${searchParams.toString()}`, {
     method: 'GET',
     headers: {
       'X-CSRF-TOKEN': getAccessToken()
     }
-  }).then(async res => await res.json())
+  }).then(res => {
+    if (res.ok) {
+      return res.json();
+    };
+  });
 
-  if (response.status !== 200) {
+  if (!response || response.status !== 200) {
     console.log(response.message);
     renderToast('Failed to fetch sales!', 'danger');
   }
-  else if (!response.data || response.data.length === 0) {
-    // Render no sales
+  else if (!response?.data || response.data.length === 0) {
+    $('#sale__container').empty();
+    $('#sale__container').append('<p class="text-center">No sales found</p>');
   }
   else {
     $('#sale__container').empty();
+    
     response.data.forEach(sale => {
-      // Render macros for sales
-      $('#sale__container').append(`${sale.title}`);
+      const newSaleEntry = htmlToElement(formatString(deepCopy(saleTemplate), {
+        'sale_id'     : sale.sale_id,
+        'user_id'     : sale.user_id,
+        'discount_id' : sale.discount_id,
+        'paid'        : sale.paid,
+        'paid_date'   : (new Date(sale.paid_at)).toDateString(),
+        'total_cost'  : sale.total_cost
+      }))
+
+      const textbookIds = $(newSaleEntry).find('#sale__textbookids')
+      sale.textbook_ids.forEach(textbookId => {
+        textbookIds.append(htmlToElement(formatString(
+          '<a href="/textbook/{textbook_id}" target="_blank" class="textbook__link">{textbook_id}</a>',
+          { 'textbook_id' : textbookId }
+        )))
+      })
+
+      $('#sale__container').append(newSaleEntry);
     });
   };
   
@@ -132,13 +162,13 @@ const fetchSaleData = async () => {
       iterations++;
     };
   }, 1000);
-}
+};
 
 
 
 
 // Run in parallel
-$(() => Promise.all([ fetchGraphURI(), fetchSaleData() ])
+$(() => Promise.all([ fetchGraphURI(true), fetchSaleData(true) ])
   .then(values => console.log(values))
   .catch(err => console.log(err)));
 

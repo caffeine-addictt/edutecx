@@ -46,7 +46,8 @@ def noindex():
 
 # Images
 @app.route('/public/image/<path:filename>', methods = ['GET'])
-def uploaded_images(filename: str):
+@auth_provider.optional_login
+def uploaded_images(user: UserModel | None, filename: str):
   return serve(
     cdn_provider.ImageLocation,
     filename
@@ -95,15 +96,3 @@ def uploaded_textbooks(user: UserModel, filename: str):
     )
   
   else: raise Unauthorized()
-
-
-
-
-# Admin graphs
-@app.route('/public/graph/<path:filename>', methods = ['GET'])
-@auth_provider.require_admin
-def uploaded_graphs(user: UserModel, filename: str):
-  return serve(
-    cdn_provider.GraphFileLocation,
-    filename
-  )

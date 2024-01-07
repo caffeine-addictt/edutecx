@@ -32,6 +32,9 @@ if TYPE_CHECKING:
   from .submissionsnippet import SubmissionSnippetModel
 
 
+UserStatus = Literal['Active', 'Locked']
+EnumUserStatus = Enum('Active', 'Locked', name = 'UserStatus')
+
 PrivilegeType = Literal['Student', 'Educator', 'Admin']
 EnumPrivilegeType = Enum('Student', 'Educator', 'Admin', name = 'PrivilegeType')
 
@@ -66,6 +69,7 @@ class UserModel(db.Model):
   username: Mapped[str] = mapped_column(String, unique = True, nullable = False)
 
   # Auth
+  status        : Mapped[UserStatus]     = mapped_column(EnumUserStatus, nullable = False, default = 'Active')
   privilege     : Mapped[PrivilegeType]  = mapped_column(EnumPrivilegeType, nullable = False)
   membership    : Mapped[MembershipType] = mapped_column(EnumMembershipType, nullable = False, default = 'Free')
   password_hash : Mapped[str]            = mapped_column(String, nullable = False)

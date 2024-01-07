@@ -1,5 +1,6 @@
 <!doctype html>
 {% extends 'layout.html' %}
+{% from 'macros/admin.html' import render_sale_entry %}
 
 
 {# Title #}
@@ -39,7 +40,8 @@
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  <script>
+    var saleTemplate = `{{ render_sale_entry() }}`
+  </script>
   <script src="{{ url_for('static', filename = '(admin)/revenue.js') }}"></script>
 {% endblock %}
