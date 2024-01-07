@@ -95,15 +95,3 @@ def uploaded_textbooks(user: UserModel, filename: str):
     )
   
   else: raise Unauthorized()
-
-
-
-
-# Admin graphs
-@app.route('/public/graph/<path:filename>', methods = ['GET'])
-@auth_provider.require_admin
-def uploaded_graphs(user: UserModel, filename: str):
-  return serve(
-    cdn_provider.GraphFileLocation,
-    filename
-  )
