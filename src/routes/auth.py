@@ -244,6 +244,47 @@ def login(user: UserModel | None):
 
 
 
+@app.route('/logout', methods = ['GET', 'POST'])
+@require_login(ignore_locked = True)
+def logout(user: UserModel):
+  successfulLogout = make_response(
+    redirect('/', code = HTTPStatusCode.SEE_OTHER),
+    HTTPStatusCode.SEE_OTHER
+  )
+
+  try:
+    accesss_token = request.cookies.get('access_token_cookie')
+    refresh_token = request.cookies.get('refresh_token_cookie')
+
+    if not accesss_token or not refresh_token:
+      raise Exception('No cookies')
+
+    decoded_access = decode_token(accesss_token)
+    decoded_refresh = decode_token(refresh_token)
+
+    if decoded_access.get('jti'): db.session.add(JWTBlocklistModel(str(decoded_access.get('jti')), 'access'))
+    if decoded_refresh.get('jti'): db.session.add(JWTBlocklistModel(str(decoded_refresh.get('jti')), 'refresh'))
+    db.session.commit()
+
+    if user.status == 'Active':
+      flash('Successfully logged out', 'info')
+    else:
+      flash('Your account has been locked, contact us at edutecx@ngjx.org for more information', 'danger')
+
+  except Exception as e:
+    app.logger.exception(f'Failed to logout: {e}')
+
+  finally:
+    unset_refresh_cookies(successfulLogout)
+    unset_access_cookies(successfulLogout)
+    unset_jwt_cookies(successfulLogout)
+
+    app.logger.warning('Unset cookies on logout')
+    return successfulLogout, HTTPStatusCode.SEE_OTHER
+
+
+
+
 @app.route('/register', methods = ['GET', 'POST'])
 @anonymous_required(use_path_callback = True, admin_override = False)
 def register():
