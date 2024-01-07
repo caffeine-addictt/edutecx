@@ -96,9 +96,9 @@ $(() => {
     // Generate formData
     const formattedData = new FormData();
     formattedData.append('user_id', `${user_id}`);
-    if (defaultValues['Username'] !== ($('#Username').val() || '')) formattedData.append('username', defaultValues['Username']);
-    if (defaultValues['Email'] !== ($('#Email').val() || '')) formattedData.append('email', defaultValues['Email']);
-    if (defaultValues['Change Password'] !== ($('#Change Password').val() || '')) formattedData.append('password', defaultValues['Change Password']);
+    if (defaultValues['Username'] !== ($('#Username').val() || '')) formattedData.append('username', $('#Username').val());
+    if (defaultValues['Email'] !== ($('#Email').val() || '')) formattedData.append('email', $('#Email').val());
+    if (defaultValues['Change Password'] !== ($('#Change Password').val() || '')) formattedData.append('password', $('#Change Password').val());
     if (defaultValues['profile__image'] !== ($('#profile__image').attr('src') || '')) formattedData.append('upload', $('#profile__input')[0].files[0]);
 
     /**
