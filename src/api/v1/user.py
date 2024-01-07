@@ -56,6 +56,9 @@ def user_list_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
+  if req.query == 'None':
+    req.query = ''
+  
 
   # Build query
   query = [
