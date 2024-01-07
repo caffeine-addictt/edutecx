@@ -19,7 +19,8 @@ from flask import (
 
 # General routes
 @app.route('/')
-def index():
+@auth_provider.optional_login
+def index(user: UserModel | None):
   return render_template('(misc)/root.html')
 
 
@@ -44,12 +45,14 @@ def profile(user: UserModel):
 
 
 @app.route('/privacy-policy')
-def privacy_policy():
+@auth_provider.optional_login
+def privacy_policy(user: UserModel | None):
   return render_template('(misc)/privacy_policy.html')
 
 
 @app.route('/terms-of-service')
-def terms_of_service():
+@auth_provider.optional_login
+def terms_of_service(user: UserModel | None):
   return render_template('(misc)/terms_of_service.html')
 
 
@@ -68,5 +71,6 @@ def contact_us(user: UserModel | None):
 
 
 @app.route('/up')
-def up():
+@auth_provider.optional_login
+def up(user: UserModel | None):
   return { 'status': 200 }, 200

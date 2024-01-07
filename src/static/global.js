@@ -103,7 +103,7 @@ const htmlToElement = (html, trim = true) => {
 const formatString = (str, params) => {
   let result = str;
   Object.keys(params).forEach((key) => {
-    result = result.replace(`{${key}}`, params[key]);
+    result = result.replace(new RegExp(`{${key}}`, 'g'), params[key]);
   });
   return result;
 }

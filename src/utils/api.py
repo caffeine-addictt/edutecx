@@ -57,8 +57,11 @@ class _APIParser(_APIBase):
     BadRequest: code 400
     """
     if isinstance(req, (Request, FlaskResponse, ReqResponse)):
-      try: annotationMap = self.__annotations__.copy()
-      except Exception: annotationMap = dict()
+      annotationMap = None
+      try:
+        annotationMap = { i:v for i,v in self.__dict__.items() if not i.startswith('__') }
+        annotationMap.update(self.__annotations__.copy())
+      except Exception: annotationMap = annotationMap or dict()
     else: annotationMap = req
 
     if isResponse:
@@ -92,6 +95,10 @@ class _APIParser(_APIBase):
         except Exception: pass
 
       
+      if variableType == '':
+        self.__dict__[variableName] = recursiveValidation(variable, str) or ''
+        continue
+
       interpreted = recursiveValidation(variable, variableType)
       if (interpreted is not None) or self.get('ignore_none'):
         self.__dict__[variableName] = interpreted
@@ -664,6 +671,29 @@ ClassroomLeaveResponse = GenericResponse
 
 
 
+# Textbook LIST
+class TextbookListRequest(_APIRequest):
+  """API Request for textbook listing"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class TextbookListReply(_APIReply):
+  """API Reply for listing textbooks"""
+  data: list['_TextbookGetData']
+
+
+
+
+
+
+
+
 # Textbook GET
 @dataclass
 class _TextbookGetData(_APIBase):
@@ -708,7 +738,6 @@ class _TextbookCreateData(_APIBase):
 class TextbookCreateRequest(_APIRequest):
   """API Request for textbook creation"""
   author_id  : str
-  files      : _Files
   title      : str
   description: str
   price      : float
@@ -735,7 +764,6 @@ class TextbookEditRequest(_APIRequest):
   """API Request for textbook editing"""
   ignore_none = True
   textbook_id: str
-  files      : _Files
   title      : Optional[str]
   description: Optional[str]
   categories : Optional[list[str]]
@@ -1025,12 +1053,40 @@ ImageDeleteResponse = GenericResponse
 
 
 
+# Sale LIST
+class SaleListRequest(_APIRequest):
+  """API Request for sale listing"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class SaleListReply(_APIReply):
+  """API Reply for listing sales"""
+  data: list['_SaleGetData']
+
+
+
+
+
+
+
+
 # Sale GET
 @dataclass
 class _SaleGetData(_APIBase):
-  sale_id: str
-  user_id: str
+  type        : Literal['OneTime', 'Subscription']
+  sale_id     : str
+  user_id     : str
+  discount_id : Optional[str]
   textbook_ids: list[str]
+  paid        : bool
+  paid_at     : Optional[float]
+  total_cost  : float
 
 class SaleGetRequest(_APIRequest):
   """API Request for sale fetching"""
@@ -1157,10 +1213,34 @@ class SubmissionSnippetGetResponse(_APIResponse):
 
 
 
+# User LIST
+class UserListRequest(_APIRequest):
+  """API Request for fetching user list"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class UserListReply(_APIReply):
+  """API Reply for fetching user list"""
+  data: list['_UserGetData']
+
+
+
+
+
+
+
+
+
 # User GET
 @dataclass
 class _UserGetData(_APIBase):
   user_id      : str
+  email        : str
+  status       : str
   username     : str
   privilege    : str
   profile_image: Optional[str]
@@ -1190,11 +1270,12 @@ class UserGetResponse(_APIResponse):
 # User Edit
 class UserEditRequest(_APIRequest):
   """API Request for editing user"""
-  user_id   = ''
-  email     = ''
-  username  = ''
-  password  = ''
-  privilege = ''
+  user_id  : str = ''
+  email    : str = ''
+  status   : str = ''
+  username : str = ''
+  password : str = ''
+  privilege: str = ''
 
 UserEditReply = GenericReply
 UserEditResponse = GenericResponse

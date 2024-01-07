@@ -1,5 +1,6 @@
 <!doctype html>
 {% extends 'layout.html' %}
+{% from 'macros/admin.html' import render_user_entry %}
 
 
 {# Title #}
@@ -34,12 +35,56 @@
 
   </div>
 
+
+
+
+  {# Modal #}
+  <div class="modal fade" id="update-user-modal" tabindex="-1" aria-labelledby="updateUserModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-long-title">Manage username</h5>
+          <button type="button" class="close" aria-label="Close" id="close-update-user-modal-small">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">
+            This action is <span class="text-danger">IRREVERSIBLE!</span>
+            <p class="text-secondary">Updating the email will require the user to reverify.</p>
+          </p>
+
+          <form id="update-user-form" class="mt-4">
+            <input type="text" id="update-user-username" class="form-control mb-2" placeholder="Enter new username"/>
+            <input type="text" id="update-user-email" class="form-control mb-2" placeholder="Enter new email"/>
+
+            <select id="update-user-privileges" class="form-select mb-2">
+              <option value="Student">Student</option>
+              <option value="Educator">Educator</option>
+            </select>
+
+            <select id="update-user-status" class="form-select mb-2">
+              <option value="Active">Active</option>
+              <option value="Locked">Locked</option>
+            </select>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close-update-user-modal-big">Close</button>
+          <button type="button" class="btn btn-primary" id="confirmed-update-user">Update Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
   {# Write injected macros to variables #}
-  {# <script></script> #}
+  <script>
+    var userTemplate = `{{ render_user_entry() }}`;
+  </script>
   <script src="{{ url_for('static', filename = '(admin)/user.js') }}"></script>
 {% endblock %}

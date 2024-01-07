@@ -76,6 +76,18 @@ def generateURI(defaultURI: str, usePathCallback: bool) -> str:
   
   return redirect_to
 
+def handleLockedRedirect() -> 'RouteResponse':
+  if request.path.startswith('/api') or request.method == 'POST':
+    return {
+      'message': 'Your account has been locked, contact us at edutecx@ngjx.org for more information',
+      'status': HTTPStatusCode.UNAUTHORIZED
+    }, HTTPStatusCode.UNAUTHORIZED
+  
+  return redirect(
+    f'/logout?callbackURI={parse.quote_plus(request.path)}',
+    code = HTTPStatusCode.SEE_OTHER
+  ), HTTPStatusCode.SEE_OTHER
+
 
 
 
@@ -189,11 +201,18 @@ def require_admin(
     verify_jwt_in_request(fresh = fresh_access_token, refresh = refresh_token_only)
     user: UserModel = get_current_user()
 
+    # Check for locked account
+    if user.status == 'Locked':
+      return redirect(
+        '/logout?callbackURI=%s' % parse.quote_plus(request.path),
+        code = HTTPStatusCode.SEE_OTHER
+      ), HTTPStatusCode.SEE_OTHER
+
     if not user.email_verified:
       return redirect(
         verification_redirect % parse.quote_plus(request.path),
         code = HTTPStatusCode.SEE_OTHER
-      )
+      ), HTTPStatusCode.SEE_OTHER
 
     if user.privilege != 'Admin':
       raise Unauthorized()
@@ -230,7 +249,8 @@ def require_login(
   verification_redirect: str = '/verify?callbackURI=%s',
   ignore_verification: bool = False,
   fresh_access_token: bool = False,
-  refresh_token_only: bool = False
+  refresh_token_only: bool = False,
+  ignore_locked: bool = False
 ) -> UserWithParamReturn[P]:
   """
   Decorator for enforcing login-only routes
@@ -248,6 +268,9 @@ def require_login(
   
   `refresh_token_only: bool`, optional (defaults to False)
     Only allow refresh tokens to access routes, else redirects to unauthorized
+  
+  `ignore_locked: bool`, optional (defaults to False)
+    Whether to ignore locked accounts, redirects to login which will force logout by default
 
   Returns
   -------
@@ -271,7 +294,8 @@ def require_login(
   verification_redirect: str = '/verify?callbackURI=%s',
   ignore_verification: bool = False,
   fresh_access_token: bool = False,
-  refresh_token_only: bool = False
+  refresh_token_only: bool = False,
+  ignore_locked: bool = False
 ) -> FullParamReturn[P]: ...
 
 def require_login(
@@ -280,13 +304,132 @@ def require_login(
   verification_redirect: str = '/verify?callbackURI=%s',
   ignore_verification: bool = False,
   fresh_access_token: bool = False,
-  refresh_token_only: bool = False
+  refresh_token_only: bool = False,
+  ignore_locked: bool = False
 ) -> UserWrappedReturn[P]:
   if not callable(__function):
     def early(__function: UserRouteEndpoint[P]) -> FullParamReturn[P]:
       return require_login(
         __function,
         verification_redirect = verification_redirect,
+        ignore_verification = ignore_verification,
+        fresh_access_token = fresh_access_token,
+        refresh_token_only = refresh_token_only,
+        ignore_locked = ignore_locked
+      )
+    return early
+  
+  @wraps(__function)
+  def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
+    verify_jwt_in_request(fresh = fresh_access_token, refresh = refresh_token_only)
+    user: UserModel = get_current_user()
+
+    # Check for locked account
+    if user.status == 'Locked' and not ignore_locked:
+      return handleLockedRedirect()
+
+    if not user.email_verified and not ignore_verification:
+      return redirect(
+        verification_redirect % parse.quote_plus(request.path),
+        code = HTTPStatusCode.SEE_OTHER
+      ), HTTPStatusCode.SEE_OTHER
+
+    return __function(user, *args, **kwargs)
+  return wrapper
+
+
+
+
+
+
+
+
+@overload
+def require_educator(__function: UserRouteEndpoint[P]) -> NoParamReturn[P]:
+  """
+  Decorator for enforcing educator-only routes
+
+  Returns
+  -------
+  `decorator: (...) -> ...`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_educator
+  >>> def myRoute(user: UserModel): ...
+  """
+
+@overload
+def require_educator(
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
+  ignore_verification: bool = False,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
+) -> UserWithParamReturn[P]:
+  """
+  Decorator for enforcing educator-only routes
+
+  Parameters
+  ----------
+  `verification_redirect: str`, optional (defaults to '/verify?callbackURI=%s')
+    Email verification endpoint
+  
+  `unauthorized_redirect: str`, optional (defaults to None)
+    Endpoint to redirect to if user is not educator, raises 401 UNAUTHORIZED by default
+  
+  `ignore_verification: bool`, optional (defaults to False)
+    Whether to ignore unverified emails and allow access
+  
+  `fresh_access_token: bool`, optional (defaults to False)
+    Require access token to be new, else redirects to login
+  
+  `refresh_token_only: bool`, optional (defaults to False)
+    Only allow refresh tokens to access routes, else redirects to unauthorized
+
+  Returns
+  -------
+  `decorator wrapper: (...) -> ( (...) -> ... )`
+
+  Use Case
+  --------
+  >>> @app.route('/')
+  >>> @require_educator()
+  >>> def myRoute(user: UserModel): ...
+  OR
+  >>> @app.route('/')
+  >>> @require_educator(verification_redirect = '/custom-endpoint')
+  >>> def myRoute(user: UserModel): ...
+  """
+
+@overload
+def require_educator(
+  __function: UserRouteEndpoint[P],
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
+  ignore_verification: bool = False,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
+) -> FullParamReturn[P]: ...
+
+def require_educator(
+  __function: UserRouteEndpoint[P] | None = None,
+  *,
+  verification_redirect: str = '/verify?callbackURI=%s',
+  unauthorized_redirect: str | None = None,
+  ignore_verification: bool = False,
+  fresh_access_token: bool = False,
+  refresh_token_only: bool = False
+) -> UserWrappedReturn[P]:
+  if not callable(__function):
+    def early(__function: UserRouteEndpoint[P]) -> FullParamReturn[P]:
+      return require_educator(
+        __function,
+        verification_redirect = verification_redirect,
+        unauthorized_redirect = unauthorized_redirect,
         ignore_verification = ignore_verification,
         fresh_access_token = fresh_access_token,
         refresh_token_only = refresh_token_only
@@ -298,11 +441,15 @@ def require_login(
     verify_jwt_in_request(fresh = fresh_access_token, refresh = refresh_token_only)
     user: UserModel = get_current_user()
 
+    # Check for locked account
+    if user.status == 'Locked' and not ignore_locked:
+      return handleLockedRedirect()
+
     if not user.email_verified and not ignore_verification:
       return redirect(
         verification_redirect % parse.quote_plus(request.path),
         code = HTTPStatusCode.SEE_OTHER
-      )
+      ), HTTPStatusCode.SEE_OTHER
 
     return __function(user, *args, **kwargs)
   return wrapper
@@ -455,7 +602,8 @@ def optional_login(__function: OptionalRouteEndpoint[P]) -> NoParamReturn[P]:
 def optional_login(
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
-  ignore_verification: bool = True
+  ignore_verification: bool = True,
+  ignore_locked: bool = False
 ) -> OptionalWithParamReturn[P]:
   """
   Decorator for enforcing login-only routes
@@ -467,6 +615,9 @@ def optional_login(
   
   `ignore_verification: bool`, optional (defaults to True)
     Whether to ignore unverified emails and allow access
+  
+  `ignore_locked: bool`, optional (defaults to False)
+    Whether to ignore locked accounts, redirects to login which will force logout by default
 
   Returns
   -------
@@ -488,21 +639,24 @@ def optional_login(
   __function: OptionalRouteEndpoint[P],
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
-  ignore_verification: bool = True
+  ignore_verification: bool = True,
+  ignore_locked: bool = False
 ) -> FullParamReturn[P]: ...
 
 def optional_login(
   __function: OptionalRouteEndpoint[P] | None = None,
   *,
   verification_redirect: str = '/verify?callbackURI=%s',
-  ignore_verification: bool = True
+  ignore_verification: bool = True,
+  ignore_locked: bool = False
 ) -> OptionalWrappedReturn[P]:
   if not callable(__function):
     def early(__function: OptionalRouteEndpoint[P]) -> FullParamReturn[P]:
       return optional_login(
         __function,
         verification_redirect = verification_redirect,
-        ignore_verification = ignore_verification
+        ignore_verification = ignore_verification,
+        ignore_locked = ignore_locked
       )
     return early
   
@@ -510,11 +664,15 @@ def optional_login(
   def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
     user: UserModel | None = get_current_user() if verify_jwt() else None
 
+    # Check for locked account
+    if user and not ignore_locked and user.status == 'Locked':
+      return handleLockedRedirect()
+
     if user and not ignore_verification and not user.email_verified:
       return redirect(
         verification_redirect % parse.quote_plus(request.path),
         code = HTTPStatusCode.SEE_OTHER
-      )
+      ), HTTPStatusCode.SEE_OTHER
 
     return __function(
       user,
@@ -610,13 +768,17 @@ def anonymous_required(
   
   @wraps(__function)
   def wrapper(*args: P.args, **kwargs: P.kwargs) -> RouteResponse:
-    from flask import current_app as app
     user: UserModel | None = get_current_user() if verify_jwt() else None
+
+    # Check for locked account
+    if user and user.status == 'Locked':
+      return handleLockedRedirect()
+
     if (user and not admin_override) or (user and admin_override and (user.privilege != 'Admin')):
       return redirect(
         generateURI(loggedin_redirect, use_path_callback),
         code = HTTPStatusCode.SEE_OTHER
-      )
+      ), HTTPStatusCode.SEE_OTHER
 
     return __function(*args, **kwargs)
   return wrapper
