@@ -154,10 +154,17 @@ def textbook_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
+  uplaod = request.files.get('upload')
+  if not uplaod:
+    return GenericReply(
+      message = 'Missing upload',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
 
   newTextbook = TextbookModel(
     author = author,
-    file = req.files['upload'],
+    file = uplaod,
     title = req.title,
     description = req.description,
     price = req.price,
@@ -165,7 +172,7 @@ def textbook_create_api(user: UserModel):
   )
   newTextbook.save()
 
-  if cover_img := req.files.get('cover_img'):
+  if cover_img := request.files.get('cover_img'):
     ImageModel(
       file = cover_img,
       textbook = newTextbook
@@ -189,15 +196,15 @@ def textbook_create_api(user: UserModel):
 def textbooks_edit_api(user: UserModel):
   req = TextbookEditRequest(request)
 
-  toChange = {key: req.get(key, None) for key in [
+  toChange = {key: '' if i == 'None' else i for key in [
     'title',
     'description',
     'categories',
     'price',
     'discount'
-  ] if ((req.get(key, None) is not None) or (not req.ignore_none))}
+  ] if ((i := req.get(key, None)) and ((i not in [None, 'None'])) or (not req.ignore_none))}
 
-  if (i := req.files.get('cover_img')) or (not req.ignore_none):
+  if (i := request.files.get('cover_img')) or (not req.ignore_none):
     toChange['cover_img'] = i
 
   if not any(toChange.values()):
