@@ -1,0 +1,14 @@
+{# Admin Macros #}
+
+
+{# User Entry Template #}
+{% macro render_user_entry() %}
+  <div id="user__container" class="d-flex flex-row w-100 h-auto align-content-between">
+    <p id="user__id" class="w-25 h-auto">{user_id}</p>
+    <p id="user__email" class="w-25 h-auto">{user_email}</p>
+    <p id="user__type" class="w-25 h-auto">{user_type}</p>
+    <p id="user__status" class="w-25 h-auto">{user_status}</p>
+
+    <button id="user__manage_button" type="button" class="btn btn-primary"> Manage </button>
+  </div>
+{% endmacro %}
