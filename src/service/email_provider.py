@@ -7,13 +7,12 @@ import email_validator
 
 from src import mail
 from flask_mail import Message
-from src.utils.http import Parser
 from src.utils.api import _APIBase
 from flask import render_template
 from dataclasses import dataclass
 
 from functools import wraps
-from typing import Literal, Union, TypedDict, TypeVar, ParamSpec, Callable, Concatenate, overload
+from typing import Literal, TypeVar, ParamSpec, Callable, Concatenate
 
 
 EmailSender: str = 'edutecx@ngjx.org'
