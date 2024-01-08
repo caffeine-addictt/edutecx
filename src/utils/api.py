@@ -13,6 +13,8 @@ from werkzeug.datastructures import FileStorage
 from abc import abstractmethod
 from dataclasses import dataclass
 
+Boolean = Literal['y', 'n', True, False]
+
 
 
 
@@ -269,7 +271,7 @@ class LoginRequest(_APIRequest):
   """API Request for login"""
   email: str
   password: str
-  remember_me: bool
+  remember_me: Boolean | None
 
 class LoginResponse(_APIResponse):
   """API Response for login"""
