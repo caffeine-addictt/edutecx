@@ -991,7 +991,6 @@ class _ImageGetData(_APIBase):
 
 class ImageGetRequest(_APIRequest):
   """API Request for image fetching"""
-  files: _Files
   image_id: str
 
 @dataclass
@@ -1018,10 +1017,9 @@ class _ImageCreateData(_APIBase):
 
 class ImageCreateRequest(_APIRequest):
   """API Request for image creation"""
-  files       : _Files
-  user_id     : Optional[str]
-  textbook_id : Optional[str]
-  classroom_id: Optional[str]
+  user_id     : str | None
+  textbook_id : str | None
+  classroom_id: str | None
 
 @dataclass
 class ImageCreateReply(_APIReply):

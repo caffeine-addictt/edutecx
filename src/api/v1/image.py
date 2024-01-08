@@ -44,13 +44,7 @@ def image_get_api(user: UserModel):
   
 
   # Validate
-  if (
-    image.classroom and (user.privilege != 'Admin') and (user.id not in [
-      image.classroom.owner_id,
-      *image.classroom.student_ids.split('|'),
-      *image.classroom.educator_ids.split('|')
-    ])
-  ):
+  if image.classroom and (user.privilege != 'Admin') and (not image.classroom.is_member(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -82,7 +76,7 @@ def image_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(),  HTTPStatusCode.BAD_REQUEST
   
-  upload = req.files.get('upload')
+  upload = request.files.get('upload')
   if not upload:
     return GenericReply(
       message = 'No file supplied',
@@ -154,12 +148,12 @@ def image_delete_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
-  if (
-    (image.user and (user.privilege != 'Admin') and (user.id != image.user.id))
+  if (user.privilege != 'Admin') and (
+    (image.user and (user.id != image.user.id))
     or
-    (image.classroom and (user.privilege != 'Admin') and (user.id != image.classroom.owner_id))
+    (image.classroom and (user.id != image.classroom.owner_id))
     or
-    (image.textbook and (user.privilege != 'Admin') and (user.id != image.textbook.author_id))
+    (image.textbook and (user.id != image.textbook.author_id))
   ):
     return GenericReply(
       message = 'Unauthorized',
