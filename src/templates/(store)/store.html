@@ -1,5 +1,6 @@
 <!doctype html>
 {% extends 'layout.html' %}
+{% from 'macros/store.html' import render_textbookListing %}
 
 
 {# Title #}
@@ -25,6 +26,17 @@
       Add random to cart
     </button>
 
+    <div id="listingContainer">
+      
+    </div>
     <a href="/cart">Cart</a>
   </div>
+{% endblock %}
+
+
+{% block Scripts %}
+  <script>
+    var template = `{{ render_textbookListing() }}`
+  </script>
+  <script src="{{ url_for('static', filename = '(store)/store.js') }}"></script>
 {% endblock %}
