@@ -25,3 +25,9 @@ def textbooks(user: UserModel):
 def textbooks_id(user: UserModel, id: str):
   id = escape_id(id)
   return render_template('(textbook)/textbook.html')
+
+
+@app.route('/textbooks/new', methods = ['GET'])
+@auth_provider.require_educator(unauthorized_redirect = '/pricing')
+def textbook_new(user: UserModel):
+  return render_template('(textbook)/textbook_new.html', user = user )
