@@ -147,6 +147,12 @@ def editabletextbook_all_api(user: UserModel):
 def editabletextbook_create_api(user: UserModel):
   req = EditableTextbookCreateRequest(request)
 
+  if req.textbook_id == 'None':
+    return GenericReply(
+      message = 'No textbook supplied',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
   if (user.privilege != 'Admin') and (req.textbook_id not in ''.join(i.textbook_ids for i in user.transactions if i.paid and i.textbook_ids)):
     return GenericReply(
       message = 'Unauthorized',
@@ -180,7 +186,7 @@ def editabletextbook_create_api(user: UserModel):
 @require_login
 def editabletextbook_edit_api(user: UserModel):
   req = EditableTextbookEditRequest(request)
-  upload = req.files.get('upload')
+  upload = request.files.get('upload')
 
   if not upload:
     return GenericReply(

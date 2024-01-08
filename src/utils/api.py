@@ -957,7 +957,6 @@ class EditableTextbookCreateResponse(_APIResponse):
 class EditableTextbookEditRequest(_APIRequest):
   """API Request for editing editable textbook"""
   editabletextbook_id: str
-  files: _Files
 
 EditableTextbookEditReply = GenericReply
 EditableTextbookEditResponse = GenericResponse
