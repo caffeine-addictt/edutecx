@@ -35,7 +35,10 @@ def classrooms(user: UserModel):
 @auth_provider.require_login
 def classroom(user: UserModel, id: str):
   id = escape_id(id)
-  return render_template('(classroom)/classroom.html')
+
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first_or_404()
+
+  return render_template('(classroom)/classroom.html', classroom = classroom)
 
 
 @app.route('/classrooms/new', methods = ['GET', 'POST'])
@@ -43,3 +46,9 @@ def classroom(user: UserModel, id: str):
 def classroom_new(user: UserModel):
   form = ClassroomCreateForm(request.form)
   return render_template('(classroom)/classroom_new.html', form = form)
+
+@app.route('/classrooms/edit/', methods = ['GET', 'POST'])
+@auth_provider.require_educator(unauthorized_redirect = '/pricing')
+def classroom_edit(user: UserModel):
+  form = ClassroomCreateForm(request.form)
+  return render_template('(classroom)/classroom_edit.html', form = form)
