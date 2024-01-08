@@ -3,11 +3,11 @@ Initalizes Flask Application
 """
 
 from flask import Flask
-from flask_mail import Mail
 from flask_limiter import Limiter, util
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 
+import resend
 import stripe
 import thread
 from logging import config
@@ -30,7 +30,6 @@ metadata = MetaData(naming_convention = convention)
 thread.Settings.set_graceful_exit(False)
 
 db = SQLAlchemy(metadata = metadata)
-mail = Mail()
 jwt = JWTManager()
 limiter = Limiter(
   key_func = util.get_remote_address,
@@ -90,8 +89,8 @@ def init_app(testing: bool = False) -> Flask:
   # Init Limiting
   limiter.init_app(app = app)
 
-  # Init Mail
-  mail.init_app(app = app)
+  # Init Email
+  resend.api_key = app.config.get('RESEND_API_KEY')
 
   # Init JWT
   jwt.init_app(app = app)
