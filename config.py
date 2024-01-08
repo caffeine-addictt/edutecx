@@ -54,13 +54,7 @@ class ConfigBase:
 
 
   # \\\\\\ Mail ////// #
-  MAIL_PORT: int = 2525
-  MAIL_DEBUG: bool = False
-  MAIL_USE_TLS: bool = True
-  MAIL_USE_SSL: bool = False
-  MAIL_USERNAME: str = os.getenv('MAIL_USERNAME', '')
-  MAIL_PASSWORD: str = os.getenv('MAIL_PASSWORD', '')
-  MAIL_SERVER: Literal['localhost', 'smtp.google.com', 'live.smtp.mailtrap.io', 'sandbox.smtp.mailtrap.io'] = 'sandbox.smtp.mailtrap.io'
+  RESEND_API_KEY: str = os.getenv('RESEND_API_KEY', '')
 
 
   # \\\\\\ SQL ////// #
