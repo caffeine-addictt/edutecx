@@ -72,6 +72,12 @@ def comment_get_api(user: UserModel):
 def comment_create_api(user: UserModel):
   req = CommentCreateRequest(request)
 
+  if (req.text == 'None'):
+    return GenericReply(
+      message = 'Invalid text',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
   submission = SubmissionModel.query.filter(SubmissionModel.id == req.submission_id).first()
   if not isinstance(submission, SubmissionModel):
     return GenericReply(

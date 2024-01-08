@@ -45,8 +45,8 @@ def create_stripe_subscription_session_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   # Validate discount
-  discount = req.discount and DiscountModel.query.filter(DiscountModel.code == req.discount).first()
-  if req.discount and not isinstance(discount, DiscountModel):
+  discount = (req.discount != 'None') and DiscountModel.query.filter(DiscountModel.code == req.discount).first()
+  if (req.discount != 'None') and not isinstance(discount, DiscountModel):
     return GenericReply(
       message = 'Invalid discount code',
       status = HTTPStatusCode.BAD_REQUEST
@@ -122,8 +122,8 @@ def create_stripe_checkout_session_api(user: UserModel):
   
 
   # Validate discount
-  discount = req.discount and DiscountModel.query.filter(DiscountModel.code == req.discount).first()
-  if req.discount and not isinstance(discount, DiscountModel):
+  discount = (req.discount != 'None') and DiscountModel.query.filter(DiscountModel.code == req.discount).first()
+  if (req.discount != 'None') and not isinstance(discount, DiscountModel):
     return GenericReply(
       message = 'Invalid discount code',
       status = HTTPStatusCode.BAD_REQUEST
@@ -238,6 +238,11 @@ def create_stripe_checkout_session_api(user: UserModel):
 def cancel_stripe_subscription_api(user: UserModel):
   req = StripeSubscriptionCancelRequest(request)
 
+  if req.subscription_id == 'None':
+    return GenericReply(
+      message = 'Invalid subscription id',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   # Validate Request
   if (user.privilege != 'Admin') and (user.subscription_id != req.subscription_id):
@@ -285,6 +290,12 @@ def cancel_stripe_subscription_api(user: UserModel):
 def stripe_expiresession_api(user: UserModel):
   req = StripeExpireRequest(request)
 
+  if req.session_id == 'None':
+    return GenericReply(
+      message = 'Invalid session id',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
   pending = [ i for i in user.pending_transactions if i.session_id == req.session_id ]
   if len(pending) == 0:
     return GenericReply(
@@ -319,6 +330,12 @@ def stripe_expiresession_api(user: UserModel):
 @require_login
 def stripe_status_api(user: UserModel):
   req = StripeStatusRequest(request)
+
+  if req.session_id == 'None':
+    return GenericReply(
+      message = 'Invalid session id',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   transactions = set([ *user.pending_transactions, *user.transactions ])
   for transaction in transactions:

@@ -32,7 +32,7 @@ def notify_new(user: UserModel | None):
   req.category = req.category or 'info'
 
   req.message = str(escape(req.message))
-  if not req.message:
+  if req.message == 'None':
     return GenericReply(
       message = 'Message cannot be empty',
       status = HTTPStatusCode.BAD_REQUEST

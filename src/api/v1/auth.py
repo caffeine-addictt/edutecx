@@ -49,7 +49,7 @@ def apiv1_Login():
   req = LoginRequest(request)
 
   # Ensure email and password exist
-  if not req.email or not req.password:
+  if (req.email == 'None') or (req.password == 'None'):
     return GenericReply(
       message = 'Missing email or password',
       status = HTTPStatusCode.BAD_REQUEST
@@ -73,7 +73,7 @@ def apiv1_Login():
   # Create tokens
   add_claims = {
     'aud': request.host,
-    'remember_me': bool(req.remember_me),
+    'remember_me': req.remember_me in ['y', True],
   }
   refresh_token = create_refresh_token(identity = user, additional_claims = add_claims)
   access_token = create_access_token(identity = user, fresh = True)
@@ -97,9 +97,9 @@ def apiV1Register():
   req = RegisterRequest(request)
 
   # Ensure email and password exist
-  if not req.email or not req.username or not req.password:
+  if (req.email == 'None') or (req.username == 'None') or (req.password == 'None'):
     return GenericReply(
-      message = 'Missing email or username',
+      message = 'Missing email, username or password',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
