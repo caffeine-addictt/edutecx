@@ -590,7 +590,7 @@ class ClassroomCreateRequest(_APIRequest):
   owner_id = ''
   title: str
   description: str
-  invite_enabled: Literal['y', 'n'] = 'y'
+  invite_enabled: Boolean | None
 
 @dataclass
 class ClassroomCreateReply(_APIReply):
