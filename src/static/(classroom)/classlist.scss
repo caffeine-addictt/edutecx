@@ -7,22 +7,6 @@ a {
   }
 }
 
-// class selectors
-.custom-btn {
-  height: auto;
-  width: 100%;
-  margin: 20px 10px;
-  background-color: none;
-  color: #003366;
-  border: 2px solid #003366;
-  line-height: 20px; 
-  
-  &:hover {
-    border: 2px solid #003366 !important;
-    color: #faf9f5 !important;
-    background-color: #003366 !important; 
-  }
-}
 .classtile {
   width: 45%;
   &:hover {
