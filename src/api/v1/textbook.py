@@ -147,6 +147,18 @@ def textbooks_get_api(user: UserModel):
 def textbook_create_api(user: UserModel):
   req = TextbookCreateRequest(request)
 
+  if req.title == 'None':
+    return GenericReply(
+      message = 'Missing title',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  if req.description == 'None':
+    return GenericReply(
+      message = 'Missing description',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
   author = user if user.id == req.author_id else UserModel.query.filter(UserModel.id == req.author_id).first()
   if not isinstance(author, UserModel):
     return GenericReply(

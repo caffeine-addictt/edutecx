@@ -743,7 +743,7 @@ class TextbookCreateRequest(_APIRequest):
   title      : str
   description: str
   price      : float
-  discount   : float
+  discount   = 0.0
 
 @dataclass
 class TextbookCreateReply(_APIReply):
@@ -766,8 +766,8 @@ class TextbookEditRequest(_APIRequest):
   """API Request for textbook editing"""
   ignore_none = True
   textbook_id: str
-  title      : Optional[str]
-  description: Optional[str]
+  title      : str | None
+  description: str | None
   categories : Optional[list[str]]
   price      : Optional[float]
   discount   : Optional[float]
