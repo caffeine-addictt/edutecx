@@ -144,12 +144,12 @@ def assignment_create_api(user: UserModel):
 @require_login
 def assignment_edit_api(user: UserModel):
   req = AssignmentEditRequest(request)
-  toChange = {key: req.get(key, None) for key in [
+  toChange = {key: '' if i == 'None' else i for key in [
     'title',
     'description',
     'due_date',
     'requirement'
-  ] if ((req.get(key, None) is not None) or (not req.ignore_none))}
+  ] if ((i := req.get(key, None)) and ((i not in [None, 'None'])) or (not req.ignore_none))}
 
   if not any(toChange.values()):
     return GenericReply(
