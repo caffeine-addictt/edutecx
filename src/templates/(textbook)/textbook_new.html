@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
+
+
+{# Title #}
+{% block title %}
+  Create Textbook - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+
+  <form
+    id='textbookForm'
+    role='form'
+    class='d-flex flex-column gap-3 align-items-center'
+  >
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Author of Textbook
+        <input type="text" id="textbookAuthor" class="form-control">
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Upload the Textbook
+        <input type="text" id="textbookUpload" class="form-control">
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Title of Textbook
+        <input type="text" id="textbookTitle" class="form-control">
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Description of Textbook
+        <textarea class="form-control" id="textbookDescription" rows="5" maxlength="200"></textarea>
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Price of Textbook
+        <input type="number" id="textbookPrice" class="form-control" min="1">
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Discount Value for Textbook
+        <input type="number" id="textbookPrice" class="form-control" min="0" max="3">
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary" id="submit">Submit</button>
+  </form>
+{% endblock %}
+
+
+{% block Scripts %}
+  <script>
+    var user_id = `{{ user.id }}`
+  </script>
+  <script src="{{ url_for('static', filename = '(textbook)/textbook_new.js') }}"></script>
+{% endblock %}
