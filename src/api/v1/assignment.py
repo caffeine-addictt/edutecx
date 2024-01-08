@@ -46,12 +46,7 @@ def assignment_get_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (
-    user.id not in [
-      assignment.classroom.owner_id,
-      *assignment.classroom.educator_ids.split('|'),
-      *assignment.classroom.student_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and (not assignment.classroom.is_member(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
