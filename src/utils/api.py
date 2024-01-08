@@ -13,6 +13,8 @@ from werkzeug.datastructures import FileStorage
 from abc import abstractmethod
 from dataclasses import dataclass
 
+Boolean = Literal['y', 'n', True, False]
+
 
 
 
@@ -269,7 +271,7 @@ class LoginRequest(_APIRequest):
   """API Request for login"""
   email: str
   password: str
-  remember_me: bool
+  remember_me: Boolean | None
 
 class LoginResponse(_APIResponse):
   """API Response for login"""
@@ -588,7 +590,7 @@ class ClassroomCreateRequest(_APIRequest):
   owner_id = ''
   title: str
   description: str
-  invite_enabled: Literal['y', 'n'] = 'y'
+  invite_enabled: Boolean | None
 
 @dataclass
 class ClassroomCreateReply(_APIReply):
@@ -741,7 +743,7 @@ class TextbookCreateRequest(_APIRequest):
   title      : str
   description: str
   price      : float
-  discount   : float
+  discount   = 0.0
 
 @dataclass
 class TextbookCreateReply(_APIReply):
@@ -764,8 +766,8 @@ class TextbookEditRequest(_APIRequest):
   """API Request for textbook editing"""
   ignore_none = True
   textbook_id: str
-  title      : Optional[str]
-  description: Optional[str]
+  title      : str | None
+  description: str | None
   categories : Optional[list[str]]
   price      : Optional[float]
   discount   : Optional[float]
@@ -955,7 +957,6 @@ class EditableTextbookCreateResponse(_APIResponse):
 class EditableTextbookEditRequest(_APIRequest):
   """API Request for editing editable textbook"""
   editabletextbook_id: str
-  files: _Files
 
 EditableTextbookEditReply = GenericReply
 EditableTextbookEditResponse = GenericResponse
@@ -990,7 +991,6 @@ class _ImageGetData(_APIBase):
 
 class ImageGetRequest(_APIRequest):
   """API Request for image fetching"""
-  files: _Files
   image_id: str
 
 @dataclass
@@ -1017,10 +1017,9 @@ class _ImageCreateData(_APIBase):
 
 class ImageCreateRequest(_APIRequest):
   """API Request for image creation"""
-  files       : _Files
-  user_id     : Optional[str]
-  textbook_id : Optional[str]
-  classroom_id: Optional[str]
+  user_id     : str | None
+  textbook_id : str | None
+  classroom_id: str | None
 
 @dataclass
 class ImageCreateReply(_APIReply):
@@ -1147,8 +1146,6 @@ class _SubmissionCreateData(_APIBase):
 
 class SubmissionCreateRequest(_APIRequest):
   """API Request for creating submission"""
-  files              : _Files
-  student_id         : str
   assignment_id      : str
   editabletextbook_id: str
 
