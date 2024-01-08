@@ -1,0 +1,14 @@
+{# Macros for store pages #}
+
+{# /store #}
+{% macro  render_textbookListing() %}
+  <a href="/store/{id}" class="storeList">
+    <div class="card mb-3">
+      <div class="card-body">
+        <div style="height: 15vh; width: 30%; border: 1px solid black" ><img alt="class picture"/></div>
+        <h5 class="card-title">{title}</h5>
+        <p class="card-text">{author}</p>
+      </div>
+    </div>
+  </a>
+{% endmacro %}
