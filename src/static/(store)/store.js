@@ -12,7 +12,7 @@
  *   status: 'Available' | 'Unavailable' | 'DMCA';
  *   cover_image: string | null;
  *   created_at: number;
- *   update_at: number;
+ *   updated_at: number;
  * }>}
  */
 let textbookList = [];
@@ -33,26 +33,29 @@ let textbookList = [];
  *   status: 'Available' | 'Unavailable' | 'DMCA';
  *   cover_image: string | null;
  *   created_at: number;
- *   update_at: number;
+ *   updated_at: number;
  * }>>}
  */
 const fetchTextbooks = async () => {
 
   /**
    * @type {{
-   *   id: string;
-   *   author_id: string;
-   *   description: string;
-   *   categories: string[];
-   *   price: number;
-   *   discount: number;
-   *   uri: string;
-   *   status: 'Available' | 'Unavailable' | 'DMCA';
-   *   cover_image: string | null;
-   *   created_at: number;
-   *   update_at: number;
-   *  }>
-   * } | null}
+   *   status: number;
+   *   message: string;
+   *   data?: Array.<{
+   *     id: string;
+   *     author_id: string;
+   *     description: string;
+   *     categories: string[];
+   *     price: number;
+   *     discount: number;
+   *     uri: string;
+   *     status: 'Available' | 'Unavailable' | 'DMCA';
+   *     cover_image: string | null;
+   *     created_at: number;
+   *     updated_at: number;
+   *   }>
+   * } | void}
    */
   // const data = await fetch('/api/v1/textbook/list', {
   //   method: 'GET',
@@ -65,21 +68,35 @@ const fetchTextbooks = async () => {
   const data = {
     message: "Good",
     status: 200,
-    data:[{
-
-      id: '12345',
-      author_id: '7889',
-      description: 'Great',
-      categories: ['nice', 'good', 'great'],
-      price: 79.10,
-      discount: 0.5,
-      uri: 'dgfsdf324',
-      status: 'Available' | 'Unavailable' | 'DMCA',
-      cover_image: null,
-      created_at: 100,
-      update_at: 1
-    }
-  ]};
+    data:[
+      {
+        id: '12345',
+        author_id: '7889',
+        description: 'Great',
+        categories: ['nice', 'good', 'great'],
+        price: 79.10,
+        discount: 0.5,
+        uri: '/store/12345',
+        status: 'Available',
+        cover_image: null,
+        created_at: 100,
+        updated_at: 1
+      },
+      {
+        id: '21dws',
+        author_id: '23423',
+        description: 'awdwadadad',
+        categories: ['science', 'math'],
+        price: 49.99,
+        discount: 1,
+        uri: '/store/21dws',
+        status: 'Available',
+        cover_image: null,
+        created_at: 100,
+        updated_at: 1
+      }
+    ]
+  };
   
   if (!data || data.status !== 200) {
     renderToast('Failed to fetch textbooks', 'danger');
