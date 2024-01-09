@@ -43,7 +43,7 @@ def store(user: UserModel | None):
 
 
 # Store focus view
-@app.route('/store/<string:id>')
+@app.route('/store/<string:textbook_id>')
 @auth_provider.optional_login
 def store_focused(user: UserModel | None, textbook_id: str):
   textbook_id = escape_id(textbook_id)
