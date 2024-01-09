@@ -2,10 +2,11 @@
 
 {# /store #}
 {% macro  render_textbookListing() %}
-  <a href="/store/{id}" class="storeList">
-    <div class="card mb-3">
-      <div class="card-body">
-        <div style="height: 15vh; width: 30%; border: 1px solid black" ><img alt="class picture"/></div>
+  <a href="/store/{id}" class="storeList w-25 d-flex flex-column">
+    <div class="card mb-3 w-100 h-auto">
+      <div class="card-body w-100">
+        <div class="d-flex w-75 h-100 align-self-center mb-5"><img alt="class picture" class="w-100 h-100 align-self-center"/></div>
+        
         <h5 class="card-title">{title}</h5>
         <p class="card-text">{author}</p>
       </div>

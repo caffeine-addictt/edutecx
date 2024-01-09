@@ -11,12 +11,12 @@
 
 {# Body #}
 {% block mainContent %}
-  <div id="store__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
+  <div id="store__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-100 h-100">
     store content
 
     <button
       type="button"
-      class="btn btn-primary"
+      class="btn btn-primary align-self-center w-25"
       onclick="
         const newItem = (Math.random() * 100).toString();
         addCartItem(newItem);
@@ -26,7 +26,7 @@
       Add random to cart
     </button>
 
-    <div id="listingContainer">
+    <div id="listingContainer" class="d-flex flex-wrap gap-4 w-75 align-self-center">
       
     </div>
     <a href="/cart">Cart</a>
