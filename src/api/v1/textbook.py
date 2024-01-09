@@ -79,7 +79,7 @@ def textbooks_list_api(user: UserModel):
     )
   ]
   
-  filtered = UserModel.query.filter(
+  filtered = TextbookModel.query.filter(
     and_(*query) if req.criteria == 'and' else or_(*query)
   ).paginate(page = req.page, error_out = False)
 
