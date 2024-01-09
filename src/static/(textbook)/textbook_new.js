@@ -1,13 +1,7 @@
 
 // Hooks
 $(() => {
-  $('#assignmentRequirements').on('input', e => {
-    e.target.value = e.target.value.replace(/([^0-9:]+)/gi, '') 
-  })
-
-
-
-  $('#assignmentForm').on('submit', async e => {
+  $('#textbookForm').on('submit', async e => {
     e.preventDefault();
 
     const data = Object.fromEntries((new FormData(e.target)).entries());
