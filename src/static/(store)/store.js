@@ -116,7 +116,8 @@ const renderTextbooks = async (filteredList = false) => {
     (filteredList || textbookList).forEach(textbookData => {
       container.append(htmlToElement(formatString(deepCopy(template), {
         title: textbookData.title,
-        id: textbookData.id
+        id: textbookData.id,
+        // author: textbookData.author
       })));
     });
   };
