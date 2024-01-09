@@ -73,9 +73,7 @@ const removeFromToastQueue = (toastData) => {
   let queue = getToastQueue();
   queue.some((toastItem, index) => {
     if (arrayIsEqual(toastItem, toastData)) {
-      console.log(queue);
       queue.splice(index, 1);
-      console.log(queue);
       localStorage.setItem('toastQueue', JSON.stringify(queue));
       return true;
     };
@@ -122,8 +120,6 @@ const renderToast = (message, category, displayTime, initialRender = false) => {
   if (!initialRender || (initialRender && !inArray(savedPayload, getToastQueue()))) {
     addToToastQueue(savedPayload);
   };
-
-  console.log(message, category, displayTime, liveTime)
 
 
   /** @type {HTMLElement} */
