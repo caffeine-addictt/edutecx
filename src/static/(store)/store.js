@@ -62,48 +62,14 @@ const fetchTextbooks = async () => {
    *   }>
    * } | void}
    */
-  // const data = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
-  //   method: 'GET',
-  //   headers: { 'X-CSRF-TOKEN': getAccessToken() }
-  // }).then(res => {
-  //   if (res.ok) {
-  //     return res.json();
-  //   };
-  // });
-  const data = {
-    message: "Good",
-    status: 200,
-    data:[
-      {
-        id: '12345',
-        author_id: '7889',
-        title: 'aaaa',
-        description: 'Great',
-        categories: ['nice', 'good', 'great'],
-        price: 79.10,
-        discount: 0.5,
-        uri: '/store/12345',
-        status: 'Available',
-        cover_image: null,
-        created_at: 100,
-        updated_at: 1
-      },
-      {
-        id: '21dws',
-        author_id: '23423',
-        title: 'aaaa',
-        description: 'awdwadadad',
-        categories: ['science', 'math'],
-        price: 49.99,
-        discount: 1,
-        uri: '/store/21dws',
-        status: 'Available',
-        cover_image: null,
-        created_at: 100,
-        updated_at: 1
-      }
-    ]
-  };
+  const data = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
+    method: 'GET',
+    headers: { 'X-CSRF-TOKEN': getAccessToken() }
+  }).then(res => {
+    if (res.ok) {
+      return res.json();
+    };
+  });
   
   if (!data || data.status !== 200) {
     renderToast('Failed to fetch textbooks', 'danger');
