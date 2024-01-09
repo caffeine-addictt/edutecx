@@ -38,7 +38,7 @@ DateRange = tuple[datetime, datetime] | datetime | None
 
 @app.route(f'{basePath}/list', methods = ['GET'])
 @auth_limit
-@lru_cache
+# @lru_cache
 def textbooks_list_api():
   req = TextbookListRequest(request)
 
@@ -81,6 +81,8 @@ def textbooks_list_api():
   filtered = TextbookModel.query.filter(
     and_(*query) if req.criteria == 'and' else or_(*query)
   ).paginate(page = req.page, error_out = False)
+  app.logger.error(f'{set(filtered)}')
+  app.logger.error(f'{filtered}')
 
   return TextbookListReply(
     message = 'Successfully fetched textbook list',
