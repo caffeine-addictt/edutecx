@@ -4,6 +4,7 @@
  * @type {Array.<{
  *   id: string;
  *   author_id: string;
+ *   title: string;
  *   description: string;
  *   categories: string[];
  *   price: number;
@@ -25,6 +26,7 @@ let textbookList = [];
  * @type {Promise<Array.<{
  *   id: string;
  *   author_id: string;
+ *   title: string;
  *   description: string;
  *   categories: string[];
  *   price: number;
@@ -45,6 +47,7 @@ const fetchTextbooks = async () => {
    *   data?: Array.<{
    *     id: string;
    *     author_id: string;
+   *     title: string;
    *     description: string;
    *     categories: string[];
    *     price: number;
@@ -72,6 +75,7 @@ const fetchTextbooks = async () => {
       {
         id: '12345',
         author_id: '7889',
+        title: 'aaaa',
         description: 'Great',
         categories: ['nice', 'good', 'great'],
         price: 79.10,
@@ -85,6 +89,7 @@ const fetchTextbooks = async () => {
       {
         id: '21dws',
         author_id: '23423',
+        title: 'aaaa',
         description: 'awdwadadad',
         categories: ['science', 'math'],
         price: 49.99,
@@ -115,6 +120,7 @@ const fetchTextbooks = async () => {
  * @param {Array.<{
  *   id: string;
  *   author_id: string;
+ *   title: string;
  *   description: string;
  *   categories: string[];
  *   price: number;
@@ -127,7 +133,7 @@ const fetchTextbooks = async () => {
  * }>?} filteredList
  * @returns {Promise<void>}
  */
-const renderTextbooks = async (filteredList) => {
+const renderTextbooks = async (filteredList = false) => {
   const container = $('#listingContainer');
   container.empty();
 
@@ -139,10 +145,10 @@ const renderTextbooks = async (filteredList) => {
     ));
   }
   else {
+    console.log(filteredList || textbookList);
     (filteredList || textbookList).forEach(textbookData => {
       container.append(htmlToElement(formatString(deepCopy(template), {
         title: textbookData.title,
-        author: textbookData.owner_username,
         id: textbookData.id
       })));
     });
