@@ -4,13 +4,13 @@ $(() => {
   $('#textbookForm').on('submit', async e => {
     e.preventDefault();
 
-    const data = Object.fromEntries((new FormData(e.target)).entries());
+    const data = new FormData(e.target);
     console.log(data);
 
     /**
      * @type {{status: 200; message: string; data: { assignment_id: string }}?}
      */
-    const response = await fetch('/api/v1/assignment/create', {
+    const response = await fetch('/api/v1/textbook/create', {
       method: 'POST',
       headers: { 'X-CSRF-Token': getAccessToken() },
       body: data
