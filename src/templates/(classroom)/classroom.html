@@ -7,18 +7,43 @@
   Classroom - EduTecX
 {% endblock %}
 
+{# Styles #}
+{% block styles %}
+  <link href='{{ url_for("static", filename = "/(classroom)/classroom.scss") }}' rel='stylesheet/less' />
+{% endblock %}
 
 {# Body #}
 {% block mainContent %}
-  <div id="classroom__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-    classroom content
+  <div>
+    <div id="class_info" class="container mt-2">
+      <div class="row">
+        <div class="col-4">
+          
+        </div>
+        <div class="col-4">
+          <h1>{{ classroom.title }}</h1>
+          <p>{{ classroom.description }}</p>
+          <p></p>
+        </div>
+        <div class="col-4">
+          <a href="/classrooms/edit/">
+            <button class="btn custom-btn-2 .align-middle" id="editbutton">Edit</button>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
+  <!-- <div id="classroom__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
+    classroom content
+  </div> -->
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  {# injected macros to variables #}
+  <script>
+    
+  </script> 
   <script src="{{ url_for('static', filename = '(classroom)/classroom.js') }}"></script>
 {% endblock %}
