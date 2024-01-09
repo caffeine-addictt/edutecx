@@ -41,11 +41,9 @@ def submission_get_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (user.id not in [
-    submission.student_id,
-    submission.assignment.classroom.owner_id,
-    *submission.assignment.classroom.educator_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and \
+      (user.id != submission.student_id) and \
+      (not submission.assignment.classroom.is_privileged(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -75,14 +73,6 @@ def submission_get_api(user: UserModel):
 def submission_create_api(user: UserModel):
   req = SubmissionCreateRequest(request)
 
-  upload = req.files.get('upload')
-  if not upload:
-    return GenericReply(
-      message = 'No upload supplied',
-      status = HTTPStatusCode.BAD_REQUEST
-    ).to_dict(), HTTPStatusCode.BAD_REQUEST
-  
-
   editabletextbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == req.editabletextbook_id).first()
   if not isinstance(editabletextbook, EditableTextbookModel):
     return GenericReply(
@@ -98,11 +88,7 @@ def submission_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if user.id not in [
-    assignment.classroom.owner_id,
-    *assignment.classroom.student_ids.split('|'),
-    *assignment.classroom.educator_ids.split('|')
-  ]:
+  if assignment.classroom.is_member(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -174,10 +160,7 @@ def submission_delete_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
  
-  if (user.privilege != 'Admin') and (user.id not in [
-    submission.assignment.classroom.owner_id,
-    *submission.assignment.classroom.educator_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and (not submission.assignment.classroom.is_privileged(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED

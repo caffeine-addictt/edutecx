@@ -8,12 +8,14 @@ from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
   EditableTextbookGetRequest, EditableTextbookGetReply, _EditableTextbookGetData,
+  EditableTextbookListRequest, EditableTextbookListReply,
   EditableTextbookCreateRequest, EditableTextbookCreateReply, _EditableTextbookCreateData,
   EditableTextbookEditRequest, EditableTextbookEditReply,
   EditableTextbookDeleteRequest, EditableTextbookDeleteReply,
   GenericReply
 )
 
+from functools import lru_cache
 from flask_limiter import util
 from flask import (
   request,
@@ -58,8 +60,82 @@ def editabletextbook_get_api(user: UserModel):
       textbook_id = etextbook.textbook_id,
       uri = etextbook.uri,
       status = etextbook.status,
-      created_at = etextbook.created_at.timestamp()
+      created_at = etextbook.created_at.timestamp(),
+      updated_at = etextbook.updated_at.timestamp()
     )
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/list', methods = ['GET'])
+@auth_limit
+@require_login
+@lru_cache
+def editabletextbook_list_api(user: UserModel):
+  req = EditableTextbookListRequest(request)
+
+  if (user.privilege != 'Admin') and (user.id != req.user_id):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  targetUser = user or UserModel.query.filter(UserModel.id == req.user_id).first()
+  if not isinstance(targetUser, UserModel):
+    return GenericReply(
+      message = 'Unable to locate user',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  return EditableTextbookListReply(
+    message = 'Successfully fetched editable textbook list',
+    status = HTTPStatusCode.OK,
+    data = [_EditableTextbookGetData(
+      editabletextbook_id = i.id,
+      user_id = targetUser.id,
+      textbook_id = i.textbook_id,
+      uri = i.uri,
+      status = i.status,
+      created_at = i.created_at.timestamp(),
+      updated_at = i.updated_at.timestamp()
+    ) for i in targetUser.textbooks[(req.page-1)*4 : (req.page-1)*4+4]]
+  ).to_dict(), HTTPStatusCode.OK
+
+
+
+
+@app.route(f'{basePath}/all', methods = ['GET'])
+@auth_limit
+@require_login
+def editabletextbook_all_api(user: UserModel):
+  req = EditableTextbookListRequest(request)
+
+  if (user.privilege != 'Admin') and (user.id != req.user_id):
+    return GenericReply(
+      message = 'Unauthorized',
+      status = HTTPStatusCode.UNAUTHORIZED
+    ).to_dict(), HTTPStatusCode.UNAUTHORIZED
+  
+  targetUser = user or UserModel.query.filter(UserModel.id == req.user_id).first()
+  if not isinstance(targetUser, UserModel):
+    return GenericReply(
+      message = 'Unable to locate user',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  return EditableTextbookListReply(
+    message = 'Successfully fetched editable textbook list',
+    status = HTTPStatusCode.OK,
+    data = [_EditableTextbookGetData(
+      editabletextbook_id = i.id,
+      user_id = i.user_id,
+      textbook_id = i.textbook_id,
+      uri = i.uri,
+      status = i.status,
+      created_at = i.created_at.timestamp(),
+      updated_at = i.updated_at.timestamp()
+    ) for i in targetUser.textbooks]
   ).to_dict(), HTTPStatusCode.OK
 
 
@@ -71,7 +147,13 @@ def editabletextbook_get_api(user: UserModel):
 def editabletextbook_create_api(user: UserModel):
   req = EditableTextbookCreateRequest(request)
 
-  if (user.privilege != 'Admin') and (req.textbook_id not in ''.join(i.textbook_ids for i in user.transactions if i.paid)):
+  if req.textbook_id == 'None':
+    return GenericReply(
+      message = 'No textbook supplied',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if (user.privilege != 'Admin') and (req.textbook_id not in ''.join(i.textbook_ids for i in user.transactions if i.paid and i.textbook_ids)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -104,7 +186,7 @@ def editabletextbook_create_api(user: UserModel):
 @require_login
 def editabletextbook_edit_api(user: UserModel):
   req = EditableTextbookEditRequest(request)
-  upload = req.files.get('upload')
+  upload = request.files.get('upload')
 
   if not upload:
     return GenericReply(

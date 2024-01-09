@@ -40,11 +40,9 @@ def comment_get_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
 
-  if (user.privilege != 'Admin') and (user.id not in [
-    comment.author_id,
-    comment.submission.assignment.classroom.owner_id,
-    *comment.submission.assignment.classroom.educator_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and \
+      (user.id != comment.author_id) and \
+      (not comment.submission.assignment.classroom.is_privileged(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -74,6 +72,12 @@ def comment_get_api(user: UserModel):
 def comment_create_api(user: UserModel):
   req = CommentCreateRequest(request)
 
+  if (req.text == 'None'):
+    return GenericReply(
+      message = 'Invalid text',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
   submission = SubmissionModel.query.filter(SubmissionModel.id == req.submission_id).first()
   if not isinstance(submission, SubmissionModel):
     return GenericReply(
@@ -81,11 +85,9 @@ def comment_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (user.id not in [
-    submission.student_id,
-    submission.assignment.classroom.owner_id,
-    *submission.assignment.classroom.educator_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and \
+      (user.id != submission.student_id) and \
+      (not submission.assignment.classroom.is_privileged(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED

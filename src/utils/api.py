@@ -13,6 +13,8 @@ from werkzeug.datastructures import FileStorage
 from abc import abstractmethod
 from dataclasses import dataclass
 
+Boolean = Literal['y', 'n', True, False]
+
 
 
 
@@ -56,7 +58,14 @@ class _APIParser(_APIBase):
     ------
     BadRequest: code 400
     """
-    annotationMap = self.__annotations__.copy() if isinstance(req, (Request, FlaskResponse, ReqResponse)) else req
+    if isinstance(req, (Request, FlaskResponse, ReqResponse)):
+      annotationMap = None
+      try:
+        annotationMap = { i:v for i,v in self.__dict__.items() if not i.startswith('__') }
+        annotationMap.update(self.__annotations__.copy())
+      except Exception: annotationMap = annotationMap or dict()
+    else: annotationMap = req
+
     if isResponse:
       annotationMap['status'] = int
       annotationMap['message'] = str
@@ -88,6 +97,10 @@ class _APIParser(_APIBase):
         except Exception: pass
 
       
+      if variableType == '':
+        self.__dict__[variableName] = recursiveValidation(variable, str) or ''
+        continue
+
       interpreted = recursiveValidation(variable, variableType)
       if (interpreted is not None) or self.get('ignore_none'):
         self.__dict__[variableName] = interpreted
@@ -258,7 +271,7 @@ class LoginRequest(_APIRequest):
   """API Request for login"""
   email: str
   password: str
-  remember_me: bool
+  remember_me: Boolean | None
 
 class LoginResponse(_APIResponse):
   """API Response for login"""
@@ -577,7 +590,7 @@ class ClassroomCreateRequest(_APIRequest):
   owner_id = ''
   title: str
   description: str
-  invite_enabled: Literal['y', 'n'] = 'y'
+  invite_enabled: Boolean | None
 
 @dataclass
 class ClassroomCreateReply(_APIReply):
@@ -660,6 +673,29 @@ ClassroomLeaveResponse = GenericResponse
 
 
 
+# Textbook LIST
+class TextbookListRequest(_APIRequest):
+  """API Request for textbook listing"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class TextbookListReply(_APIReply):
+  """API Reply for listing textbooks"""
+  data: list['_TextbookGetData']
+
+
+
+
+
+
+
+
 # Textbook GET
 @dataclass
 class _TextbookGetData(_APIBase):
@@ -704,11 +740,10 @@ class _TextbookCreateData(_APIBase):
 class TextbookCreateRequest(_APIRequest):
   """API Request for textbook creation"""
   author_id  : str
-  files      : _Files
   title      : str
   description: str
   price      : float
-  discount   : float
+  discount   = 0.0
 
 @dataclass
 class TextbookCreateReply(_APIReply):
@@ -731,9 +766,8 @@ class TextbookEditRequest(_APIRequest):
   """API Request for textbook editing"""
   ignore_none = True
   textbook_id: str
-  files      : _Files
-  title      : Optional[str]
-  description: Optional[str]
+  title      : str | None
+  description: str | None
   categories : Optional[list[str]]
   price      : Optional[float]
   discount   : Optional[float]
@@ -829,6 +863,7 @@ class _EditableTextbookGetData(_APIBase):
   uri                : str
   status             : str
   created_at         : float
+  updated_at         : float
 
 class EditableTextbookGetRequest(_APIRequest):
   """API Request for fetching editable textbook"""
@@ -842,6 +877,49 @@ class EditableTextbookGetReply(_APIReply):
 class EditableTextbookGetResponse(_APIResponse):
   """API Response for fetching editable textbook"""
   data: _EditableTextbookGetData
+
+
+
+
+
+
+
+
+# EditableTextbook LIST
+class EditableTextbookListRequest(_APIRequest):
+  """API Request for textbook listing"""
+  user_id: str
+  page = 1
+
+@dataclass
+class EditableTextbookListReply(_APIReply):
+  """API Reply for listing textbooks"""
+  data: list[_EditableTextbookGetData]
+
+class EditableTextbookListResponse(_APIResponse):
+  """API Response for listing textbooks"""
+  data: list[_EditableTextbookGetData]
+
+
+
+
+
+
+
+
+# EditableTextbook ALL
+class EditableTextbookAllRequest(_APIRequest):
+  """API Request for textbook listing"""
+  user_id: str
+
+@dataclass
+class EditableTextbookAllReply(_APIReply):
+  """API Reply for listing textbooks"""
+  data: list[_EditableTextbookGetData]
+
+class EditableTextbookAllResponse(_APIResponse):
+  """API Response for listing textbooks"""
+  data: list[_EditableTextbookGetData]
 
 
 
@@ -879,7 +957,6 @@ class EditableTextbookCreateResponse(_APIResponse):
 class EditableTextbookEditRequest(_APIRequest):
   """API Request for editing editable textbook"""
   editabletextbook_id: str
-  files: _Files
 
 EditableTextbookEditReply = GenericReply
 EditableTextbookEditResponse = GenericResponse
@@ -914,7 +991,6 @@ class _ImageGetData(_APIBase):
 
 class ImageGetRequest(_APIRequest):
   """API Request for image fetching"""
-  files: _Files
   image_id: str
 
 @dataclass
@@ -941,10 +1017,9 @@ class _ImageCreateData(_APIBase):
 
 class ImageCreateRequest(_APIRequest):
   """API Request for image creation"""
-  files       : _Files
-  user_id     : Optional[str]
-  textbook_id : Optional[str]
-  classroom_id: Optional[str]
+  user_id     : str | None
+  textbook_id : str | None
+  classroom_id: str | None
 
 @dataclass
 class ImageCreateReply(_APIReply):
@@ -977,12 +1052,40 @@ ImageDeleteResponse = GenericResponse
 
 
 
+# Sale LIST
+class SaleListRequest(_APIRequest):
+  """API Request for sale listing"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  priceLower = 0.0
+  priceUpper = float('inf')
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class SaleListReply(_APIReply):
+  """API Reply for listing sales"""
+  data: list['_SaleGetData']
+
+
+
+
+
+
+
+
 # Sale GET
 @dataclass
 class _SaleGetData(_APIBase):
-  sale_id: str
-  user_id: str
+  type        : Literal['OneTime', 'Subscription']
+  sale_id     : str
+  user_id     : str
+  discount_id : Optional[str]
   textbook_ids: list[str]
+  paid        : bool
+  paid_at     : Optional[float]
+  total_cost  : float
 
 class SaleGetRequest(_APIRequest):
   """API Request for sale fetching"""
@@ -1043,8 +1146,6 @@ class _SubmissionCreateData(_APIBase):
 
 class SubmissionCreateRequest(_APIRequest):
   """API Request for creating submission"""
-  files              : _Files
-  student_id         : str
   assignment_id      : str
   editabletextbook_id: str
 
@@ -1109,10 +1210,34 @@ class SubmissionSnippetGetResponse(_APIResponse):
 
 
 
+# User LIST
+class UserListRequest(_APIRequest):
+  """API Request for fetching user list"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class UserListReply(_APIReply):
+  """API Reply for fetching user list"""
+  data: list['_UserGetData']
+
+
+
+
+
+
+
+
+
 # User GET
 @dataclass
 class _UserGetData(_APIBase):
   user_id      : str
+  email        : str
+  status       : str
   username     : str
   privilege    : str
   profile_image: Optional[str]
@@ -1131,6 +1256,26 @@ class UserGetReply(_APIReply):
 class UserGetResponse(_APIResponse):
   """API Response for fetching user"""
   data: _UserGetData
+
+
+
+
+
+
+
+
+# User Edit
+class UserEditRequest(_APIRequest):
+  """API Request for editing user"""
+  user_id  : str = ''
+  email    : str = ''
+  status   : str = ''
+  username : str = ''
+  password : str = ''
+  privilege: str = ''
+
+UserEditReply = GenericReply
+UserEditResponse = GenericResponse
 
 
 

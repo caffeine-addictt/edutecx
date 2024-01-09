@@ -2,7 +2,7 @@
 RESTful auth api for session persistence with jwt w/ rate limiting
 """
 
-from src import limiter
+from src import db, limiter
 from flask_limiter import util
 from src.service import email_provider
 from src.service import auth_provider
@@ -10,7 +10,7 @@ from src.utils.ext import utc_time
 
 from src.utils.http import HTTPStatusCode
 from src.utils.passwords import hash_password
-from src.database import UserModel, TokenModel
+from src.database import UserModel, TokenModel, JWTBlocklistModel
 from sqlalchemy import or_
 
 from src.utils.api import (
@@ -28,6 +28,7 @@ from flask import (
   current_app as app,
 )
 from flask_jwt_extended import (
+  decode_token,
   jwt_required,
   get_current_user,
   create_access_token,
@@ -48,7 +49,7 @@ def apiv1_Login():
   req = LoginRequest(request)
 
   # Ensure email and password exist
-  if not req.email or not req.password:
+  if (req.email == 'None') or (req.password == 'None'):
     return GenericReply(
       message = 'Missing email or password',
       status = HTTPStatusCode.BAD_REQUEST
@@ -61,11 +62,18 @@ def apiv1_Login():
       message = 'Invalid email or password',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  # Check for locked account
+  if user.status == 'Locked':
+    return GenericReply(
+      message = 'Your account has been locked, contact us at edutecx@ngjx.org for more information',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
 
   # Create tokens
   add_claims = {
     'aud': request.host,
-    'remember_me': bool(req.remember_me),
+    'remember_me': req.remember_me in ['y', True],
   }
   refresh_token = create_refresh_token(identity = user, additional_claims = add_claims)
   access_token = create_access_token(identity = user, fresh = True)
@@ -89,9 +97,9 @@ def apiV1Register():
   req = RegisterRequest(request)
 
   # Ensure email and password exist
-  if not req.email or not req.username or not req.password:
+  if (req.email == 'None') or (req.username == 'None') or (req.password == 'None'):
     return GenericReply(
-      message = 'Missing email or username',
+      message = 'Missing email, username or password',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
@@ -199,6 +207,13 @@ def apiV1SendVerificationEmail(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
+  # Check for locked account
+  if user.status == 'Locked':
+    return GenericReply(
+      message = 'Your account has been locked, contact us at edutecx@ngjx.org for more information',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
+  
   if user.token:
     if utc_time.skip('5minutes', user.token.created_at) >= utc_time.get():
       return GenericReply(
@@ -241,6 +256,13 @@ def apiV1SendVerificationEmail(user: UserModel):
 @auth_provider.require_login(ignore_verification = True)
 def apiV1VerifyEmail(user: UserModel):
   req = VerifyEmailRequest(request)
+
+  # Check for locked account
+  if user.status == 'Locked':
+    return GenericReply(
+      message = 'Your account has been locked, contact us at edutecx@ngjx.org for more information',
+      status = HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
 
   if user.email_verified:
     return GenericReply(

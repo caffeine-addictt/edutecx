@@ -62,34 +62,26 @@ class EditableTextbookModel(db.Model):
 
     self._handle_upload(textbook)
 
-  def _updateURI(self, filePath: str) -> None:
+
+  def _handle_upload(self, textbook: 'TextbookModel') -> None:
+    filename = f'{self.id}-{self.user_id or ""}{self.textbook_id}'
+    filePath = cloneTextbook(textbook.iuri, filename)
+
     self.iuri = filePath
     self.uri = f'/public/editabletextbook/{filePath.split("/")[-1]}'
     self.status = 'Uploaded'
     self.updated_at = datetime.utcnow()
     self.save()
 
-  def _handle_upload(self, textbook: 'TextbookModel') -> None:
-    filename = f'{self.id}-{self.user_id or ""}{self.textbook_id}'
-
-    uploadJob = Thread(cloneTextbook, kwargs = {
-      'fileLocation': textbook.iuri,
-      'newfilename': filename
-    })
-    uploadJob.add_hook(self._updateURI)
-    uploadJob.start()
-
 
   def update(self, file: FileStorage) -> None:
     """Update the file content"""
     self.status = 'Uploading'
+    updateEditableTextbook(self.iuri, file)
 
-    job = Thread(updateEditableTextbook, kwargs = {
-      'fileLocation': self.iuri,
-      'file': file
-    })
-    job.add_hook(lambda x: self._updateURI(self.iuri))
-    job.start()
+    self.status = 'Uploaded'
+    self.updated_at = datetime.utcnow()
+    self.save()
 
   
   def save(self) -> None:
@@ -97,9 +89,9 @@ class EditableTextbookModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
     Thread(deleteFile, args = [self.iuri]).start()
     
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()

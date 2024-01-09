@@ -46,12 +46,7 @@ def assignment_get_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (
-    user.id not in [
-      assignment.classroom.owner_id,
-      *assignment.classroom.educator_ids.split('|'),
-      *assignment.classroom.student_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and (not assignment.classroom.is_member(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -149,12 +144,12 @@ def assignment_create_api(user: UserModel):
 @require_login
 def assignment_edit_api(user: UserModel):
   req = AssignmentEditRequest(request)
-  toChange = {key: req.get(key, None) for key in [
+  toChange = {key: '' if i == 'None' else i for key in [
     'title',
     'description',
     'due_date',
     'requirement'
-  ] if ((req.get(key, None) is not None) or (not req.ignore_none))}
+  ] if ((i := req.get(key, None)) and ((i not in [None, 'None'])) or (not req.ignore_none))}
 
   if not any(toChange.values()):
     return GenericReply(
@@ -170,7 +165,7 @@ def assignment_edit_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (user.id not in [assignment.classroom.owner_id, *assignment.classroom.educator_ids]):
+  if (user.privilege != 'Admin') and not assignment.classroom.is_privileged(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -206,7 +201,7 @@ def assignment_delete_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if user.id not in set(assignment.classroom.owner_id, *assignment.classroom.educator_ids.split('|')):
+  if not assignment.classroom.is_privileged(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED

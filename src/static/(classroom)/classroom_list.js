@@ -1,9 +1,35 @@
 
 /**
- * Render Classrooms
- * @returns {Promise<void>}
+ * Classrooms List
+ * @type {Array.<{
+*     id: string;
+*     owner_id: string;
+*     owner_username: string;
+*     title: string;
+*     description: string;
+*     cover_image: string | null;
+*     created_at: number
+ * }>}
  */
-const renderClassrooms = async () => {
+let classroomList = [];
+
+
+
+
+/**
+ * Fetch Classrooms
+ * @type {Promise<Array.<{
+ *   id: string;
+ *   owner_id: string;
+ *   owner_username: string;
+ *   title: string;
+ *   description: string;
+ *   cover_image: string | null;
+ *   created_at: number
+ * }>>}
+ */
+const fetchClassrooms = async () => {
+
   /**
    * @type {{
    *   status: number;
@@ -17,18 +43,47 @@ const renderClassrooms = async () => {
    *     cover_image: string | null;
    *     created_at: number
    *   }>
-   * }}
+   * } | null}
    */
-  const classroomList = await fetch('/api/v1/classroom/list', {
+  const data = await fetch('/api/v1/classroom/list', {
     method: 'GET',
     headers: { 'X-CSRF-TOKEN': getAccessToken() }
-  }).then(res => res.json());
-  console.log(classroomList)
+  }).then(res => {
+    if (res.ok) {
+      return res.json();
+    };
+  });
 
-  if (classroomList.status !== 200) return renderToast(classroomList.message, 'danger');
+  if (!data || data.status !== 200) {
+    renderToast('Failed to fetch classrooms', 'danger');
+    if (data) console.log(data.message);
+    return data?.data || new Array();
+  };
 
+  return data.data
+}
+
+
+
+
+/**
+ * Render Classrooms
+ * @param {Array.<{
+ *   id: string;
+ *   owner_id: string;
+ *   owner_username: string;
+ *   title: string;
+ *   description: string;
+ *   cover_image: string | null;
+ *   created_at: number
+ * }>?} filteredList
+ * @returns {Promise<void>}
+ */
+const renderClassrooms = async (filteredList) => {
   const container = $('#classroom__container');
-  if (classroomList.data.length === 0) {
+  container.empty();
+
+  if ((filteredList || classroomList).length === 0) {
     container.append(htmlToElement(
       `<p class="text-secondary fs-5 mb-0">
         You are not in any classrooms. 
@@ -38,15 +93,39 @@ const renderClassrooms = async () => {
   }
   else {
     template = deepCopy(tile);
-    classroomList.data.forEach(classroomData => {
-      container.append(htmlToElement(formatString(template, { title: classroomData.title, teacher: classroomData.owner_username, id: classroomData.id })));
+    (filteredList || classroomList).forEach(classroomData => {
+      container.append(htmlToElement(formatString(template, {
+        title: classroomData.title,
+        teacher: classroomData.owner_username,
+        id: classroomData.id
+      })));
     });
   };
 };
 
 
 
+
+/**
+ * Handle Filtering
+ * @returns {void}
+ */
+const handleFiltering = () => {
+  // TODO: Generate NEW array from `classroomList`
+  // TODO: Call renderClassrooms( newFilteredClassrooms );
+}
+
+
+
+
 // On DOM Render
-$(() => {
+$(async () => {
+  classroomList = await fetchClassrooms();
   renderClassrooms();
 });
+
+
+// Hooks
+$(() => {
+  // TODO: Handle query and filtering
+})

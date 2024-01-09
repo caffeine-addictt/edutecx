@@ -23,8 +23,8 @@ EditableTextbookLocation = os.path.join(UploadBaseLocation, 'textbook_forks')
 TextbookLocation = os.path.join(UploadBaseLocation, 'textbooks')
 ImageLocation = os.path.join(UploadBaseLocation, 'images')
 
-TextbookFileEXT = ['.pdf']
-ImageFileEXT = ['.png', '.jpg', 'jpeg', '.webp']
+TextbookFileEXT = ['pdf']
+ImageFileEXT = ['png', 'jpg', 'jpeg']
 
 class BadFileEXT(Exception):
   """Raised when file extension is not supported"""
@@ -69,7 +69,7 @@ def _get_unique_filename(dir: str, filename: str, extension: str) -> str:
   regex = re.compile(r'[^a-zA-Z0-9-]')
   filename = regex.sub('', filename)
   while True:
-    filename = regex.sub('', filename) + extension
+    filename = f'{regex.sub("", filename)}.{extension}'
 
     if os.path.exists(os.path.join(dir, filename)):
       filename = uuid.uuid4().hex
@@ -90,7 +90,7 @@ def _upload(
   if fileType == 'Image':
     ext = file.filename.split('.')[-1]
     if ext not in ImageFileEXT:
-      raise BadFileEXT()
+      raise BadFileEXT(f'{ext} is not supported')
     
     filename = _get_unique_filename(
       ImageLocation,

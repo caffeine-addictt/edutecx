@@ -3,17 +3,15 @@ Email Provider
 """
 
 import re
+import resend
 import email_validator
 
-from src import mail
-from flask_mail import Message
-from src.utils.http import Parser
 from src.utils.api import _APIBase
 from flask import render_template
 from dataclasses import dataclass
 
 from functools import wraps
-from typing import Literal, Union, TypedDict, TypeVar, ParamSpec, Callable, Concatenate, overload
+from typing import Literal, TypeVar, ParamSpec, Callable, Concatenate
 
 
 EmailSender: str = 'edutecx@ngjx.org'
@@ -71,13 +69,13 @@ def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') 
   try:
     match emailType:
       case 'Verification':
-        mail.send(Message(
-          subject = 'Email Verification',
-          recipients = [email],
-          sender = EmailSender,
-          body = f'Dear {data.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{data.cta_link}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team',
-          html = render_template('email/verification.html', **data.to_dict())
-        ))
+        resend.Emails.send({
+          'from': 'EduTecX <contact@edutecx.ngjx.org>',
+          'to': [email],
+          'subject': 'Email Verification',
+          'text': f'Dear {data.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{data.cta_link}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team',
+          'html': render_template('email/verification.html', **data.to_dict()),
+        })
     return True
   except Exception:
     return False

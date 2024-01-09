@@ -38,12 +38,8 @@ def submissionsnippet_get_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (
-    user.id not in [
-      submissionSnippet.submission.assignment.classroom.owner_id,
-      *submissionSnippet.submission.assignment.classroom.educator_ids.split('|'),
-      *submissionSnippet.submission.assignment.classroom.student_ids.split('|')
-  ]):
+  if (user.privilege != 'Admin') and \
+      (not submissionSnippet.submission.assignment.classroom.is_member(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED

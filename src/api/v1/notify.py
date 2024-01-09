@@ -3,7 +3,9 @@ Notification Endpoint
 """
 
 from markupsafe import escape
+from src.database import UserModel
 from src.utils.http import HTTPStatusCode
+from src.service.auth_provider import optional_login
 from src.utils.api import (
   NotifyMakeRequest, NotifyReply,
   NotifyGetReply,
@@ -24,12 +26,13 @@ basePath: str = '/api/v1/notify'
 
 
 @app.route(f'{basePath}/make', methods = ['POST'])
-def notify_new():
+@optional_login
+def notify_new(user: UserModel | None):
   req = NotifyMakeRequest(request)
   req.category = req.category or 'info'
 
   req.message = str(escape(req.message))
-  if not req.message:
+  if req.message == 'None':
     return GenericReply(
       message = 'Message cannot be empty',
       status = HTTPStatusCode.BAD_REQUEST
@@ -45,7 +48,8 @@ def notify_new():
 
 
 @app.route(f'{basePath}/get', methods = ['GET'])
-def notify_get():
+@optional_login
+def notify_get(user: UserModel | None):
   return NotifyGetReply(
     message = 'Successfully fetched notifications',
     status = HTTPStatusCode.OK,

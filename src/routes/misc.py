@@ -4,7 +4,7 @@ Handles misc routing
 
 from src.database import UserModel
 from src.service import auth_provider
-from src.utils.forms import ContactForm
+from src.utils.forms import ContactForm, ProfileEditForm
 
 from flask import (
   abort,
@@ -19,7 +19,8 @@ from flask import (
 
 # General routes
 @app.route('/')
-def index():
+@auth_provider.optional_login
+def index(user: UserModel | None):
   return render_template('(misc)/root.html')
 
 
@@ -32,16 +33,26 @@ def home(user: UserModel):
 @app.route('/profile')
 @auth_provider.require_login
 def profile(user: UserModel):
-  return render_template('(misc)/profile.html', user = user)
+  form = ProfileEditForm()
+  form.email.data = user.email
+  form.username.data = user.username
+  return render_template(
+    '(misc)/profile.html',
+    form = form,
+    user_id = str(user.id),
+    profile_uri = user.profile_image.uri if user.profile_image else ''
+  )
 
 
 @app.route('/privacy-policy')
-def privacy_policy():
+@auth_provider.optional_login
+def privacy_policy(user: UserModel | None):
   return render_template('(misc)/privacy_policy.html')
 
 
 @app.route('/terms-of-service')
-def terms_of_service():
+@auth_provider.optional_login
+def terms_of_service(user: UserModel | None):
   return render_template('(misc)/terms_of_service.html')
 
 
@@ -60,5 +71,6 @@ def contact_us(user: UserModel | None):
 
 
 @app.route('/up')
-def up():
+@auth_provider.optional_login
+def up(user: UserModel | None):
   return { 'status': 200 }, 200

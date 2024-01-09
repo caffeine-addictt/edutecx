@@ -29,7 +29,6 @@ def test_routesExist(app: Flask, client: FlaskClient):
 
     # Auth routes
     '/login',
-    '/logout',
     '/register',
 
     # user routes

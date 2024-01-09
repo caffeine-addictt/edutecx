@@ -3,7 +3,12 @@ Load database modules
 """
 
 # Auth
-from .user import UserModel, ClassroomMember, PrivilegeType, ClassroomMemberType, MembershipType, SubscriptionStatus, EnumMembershipType, EnumPrivilegeType, EnumSubscriptionStatus
+from .user import UserModel, ClassroomMember, ClassroomMemberType, \
+                  SubscriptionStatus, EnumSubscriptionStatus, \
+                  MembershipType, EnumMembershipType, \
+                  PrivilegeType, EnumPrivilegeType, \
+                  UserStatus, EnumUserStatus
+
 from .token import TokenModel, TokenType, EnumTokenType
 from .jwtblocklist import JWTBlocklistModel, JWTType, EnumJWTType
 
@@ -16,7 +21,7 @@ from .assignment import AssignmentModel
 # Uploads
 from .image import ImageModel, ImageUploadStatus, EnumImageUploadStatus
 from .discount import DiscountModel
-from .textbook import TextbookModel, TextbookUploadStatus, EnumTextbookUploadStatus
+from .textbook import TextbookModel, TextbookStatus, EnumTextbookStatus, TextbookUploadStatus, EnumTextbookUploadStatus
 from .editabletextbook import EditableTextbookModel, EditableTextbookUploadStatus, EnumEditableTextbookUploadStatus
 from .submissionsnippet import SubmissionSnippetModel, SnippetUploadStatus, EnumSnippetUploadStatus
 

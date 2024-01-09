@@ -34,13 +34,15 @@ from flask import (
 
 # Store
 @app.route('/store')
-def store():
+@auth_provider.optional_login
+def store(user: UserModel | None):
   return render_template('(store)/store.html')
 
 
 # Store Get
 @app.route('/store/get', methods = ['GET'])
-def store_get():
+@auth_provider.optional_login
+def store_get(user: UserModel | None):
   req = StoreGetRequest(request)
 
   # Handle query
@@ -89,7 +91,7 @@ def store_get():
     _TextbookGetData(
       id = textbook.id,
       uri = textbook.uri,
-      status = textbook.status,
+      status = textbook.upload_status,
       author_id = textbook.author_id,
       title = textbook.title,
       description = textbook.description,
@@ -138,7 +140,8 @@ def checkout_cancel(user: UserModel):
 
 
 @app.route('/pricing', methods = ['GET'])
-def pricing_page():
+@auth_provider.optional_login
+def pricing_page(user: UserModel | None):
   return render_template('(store)/pricing.html')
 
 

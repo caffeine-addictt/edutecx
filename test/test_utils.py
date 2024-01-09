@@ -65,3 +65,24 @@ def test_forceTyping():
   # Testing default values
   assert forcetype(None, 9) == 9
   assert forcetype(Exception(), 4) == 4
+
+
+  # Use Cases (None -> str conversion)
+  assert forcetype(None, None | str) == None
+  assert forcetype(None, str | None) == None
+  assert forcetype(None, typing.Union[None, str]) == 'None'
+  assert forcetype(None, typing.Union[str, None]) == 'None'
+  assert forcetype(None, typing.Optional[str]) == 'None'
+  assert forcetype(None, '') == 'None'
+
+  
+  # Use Cases (Booleans)
+  assert forcetype(None, typing.Literal['y', 'n', True, False] | None) == None
+  assert forcetype(None, typing.Literal['y', 'n', True, False]) == None
+  assert forcetype(False, typing.Literal['y', 'n', True, False]) == None
+  assert forcetype(True, typing.Literal['y', 'n', True, False]) == True
+
+  assert forcetype(None, '') == 'None'
+
+  assert forcetype(None, 0.0) == 0.0
+  assert forcetype(None, typing.Optional[list[int]]) == None

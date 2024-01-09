@@ -32,6 +32,9 @@ if TYPE_CHECKING:
   from .submissionsnippet import SubmissionSnippetModel
 
 
+UserStatus = Literal['Active', 'Locked']
+EnumUserStatus = Enum('Active', 'Locked', name = 'UserStatus')
+
 PrivilegeType = Literal['Student', 'Educator', 'Admin']
 EnumPrivilegeType = Enum('Student', 'Educator', 'Admin', name = 'PrivilegeType')
 
@@ -66,6 +69,7 @@ class UserModel(db.Model):
   username: Mapped[str] = mapped_column(String, unique = True, nullable = False)
 
   # Auth
+  status        : Mapped[UserStatus]     = mapped_column(EnumUserStatus, nullable = False, default = 'Active')
   privilege     : Mapped[PrivilegeType]  = mapped_column(EnumPrivilegeType, nullable = False)
   membership    : Mapped[MembershipType] = mapped_column(EnumMembershipType, nullable = False, default = 'Free')
   password_hash : Mapped[str]            = mapped_column(String, nullable = False)
@@ -284,19 +288,19 @@ class UserModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
-    if self.token: self.token.delete(commit = False)
-    if self.profile_image: self.profile_image.delete(commit = False)
+    if self.token: self.token.delete()
+    if self.profile_image: self.profile_image.delete()
 
-    for i in self.comments: i.delete(commit = False)
-    for i in self.submissions: i.delete(commit = False)
+    for i in self.comments: i.delete()
+    for i in self.submissions: i.delete()
 
-    for i in self.textbooks: i.delete(commit = False)
-    for i in self.transactions: i.delete(commit = False)
-    for i in self.owned_textbooks: i.delete(commit = False)
-    for i in self.owned_classrooms: i.delete(commit = False)
-    self.exit_class(*[ i.classroom for i in self.classrooms], commits = False)
+    for i in self.textbooks: i.delete()
+    for i in self.transactions: i.delete()
+    for i in self.owned_textbooks: i.delete()
+    for i in self.owned_classrooms: i.delete()
+    self.exit_class(*[ i.classroom for i in self.classrooms])
 
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()
