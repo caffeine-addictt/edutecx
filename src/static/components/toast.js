@@ -27,6 +27,7 @@
  */
 
 
+const maxToasts = 3; // Maximum number of toasts to show at any one time
 const minDisplayTime = 2000; // 2 seconds
 const defaultLiveTime = 5000; // 5 seconds
 const toastExpiryTime = 1000 * 60 * 5; // 5 minutes
@@ -72,7 +73,7 @@ const addToToastQueue = (toastData) => {
 const removeFromToastQueue = (toastData) => {
   let queue = getToastQueue();
   queue.some((toastItem, index) => {
-    if (arrayIsEqual(toastItem, toastData)) {
+    if (toastItem === toastData) {
       queue.splice(index, 1);
       localStorage.setItem('toastQueue', JSON.stringify(queue));
       return true;
@@ -220,6 +221,14 @@ const renderNotifications = async () => {
       console.log('Expiry time reached, dropping toast');
       continue;
     };
+
+    // Wait for existing toasts to run out
+    while ($(document).find('.toast').length >= maxToasts) {
+      await wait(1000);
+    };
+
+    // Introduce artificial stagger (max 0.5s)
+    await wait(Math.random() * 500);
 
     renderToast(
       message,
