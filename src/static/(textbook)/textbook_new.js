@@ -8,7 +8,7 @@ $(() => {
     console.log(data);
 
     /**
-     * @type {{status: 200; message: string; data: { assignment_id: string }}?}
+     * @type {{status: 200; message: string; data: { textbook_id: string }}?}
      */
     const response = await fetch('/api/v1/textbook/create', {
       method: 'POST',
@@ -23,7 +23,7 @@ $(() => {
     if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
     else {
       renderToast(response.message, 'success');
-      window.location.href = `/assignment/${response.data.assignment_id}`;
+      window.location.href = `/store/${response.data.textbook_id}`;
     };
   });
 });
