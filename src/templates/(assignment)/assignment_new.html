@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
+
+
+{# Title #}
+{% block title %}
+  Create Assigment - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+
+  <form
+    id='assignmentForm'
+    role='form'
+    class='d-flex flex-column gap-3 align-items-center'
+  >
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Title of Assignment
+        <input type="text" id="assignmentTitle" class="form-control">
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Description
+        <textarea class="form-control" id="assignmentDescription" rows="3"></textarea>
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Due Date of Assignment
+        <input type="date" id="assignmentDueDate" class="form-control">
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Assignment Requirements
+        <input type="text" id="assignmentRequirements" class="form-control" maxlength="300">
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+  </form>
+  <script src="{{ url_for('static', filename = '(assignment)/assignment_new.js') }}"></script>
+{% endblock %}
