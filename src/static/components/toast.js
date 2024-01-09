@@ -4,7 +4,7 @@
 
 
 /**
- * Toast render starting time in milliseconds From `Date.now()`
+ * Toast render starting time in milliseconds From `Date.getTime()`
  * @typedef {number} toastStartTime
 */
 
@@ -27,7 +27,9 @@
  */
 
 
-const defaultLiveTime = 5000;
+const minDisplayTime = 2000; // 2 seconds
+const defaultLiveTime = 5000; // 5 seconds
+const toastExpiryTime = 1000 * 60 * 5; // 5 minutes
 
 
 
@@ -71,7 +73,9 @@ const removeFromToastQueue = (toastData) => {
   let queue = getToastQueue();
   queue.some((toastItem, index) => {
     if (arrayIsEqual(toastItem, toastData)) {
+      console.log(queue);
       queue.splice(index, 1);
+      console.log(queue);
       localStorage.setItem('toastQueue', JSON.stringify(queue));
       return true;
     };
@@ -85,9 +89,11 @@ const removeFromToastQueue = (toastData) => {
  * Render a toast
  * @param {toastMessage} message - The message to display
  * @param {toastCategory} category - The category of the toast
+ * @param {number?} displayTime - The time to display the toast
+ * @param {boolean} [initialRender=false] - Whether this is the initial render
  * @returns {void}
  */
-const renderToast = (message, category) => {
+const renderToast = (message, category, displayTime, initialRender = false) => {
   if (!inArray(category, ['info', 'success', 'danger'])) {
     throw new Error(`${category} is an invalid category`);
   };
@@ -104,17 +110,24 @@ const renderToast = (message, category) => {
   };
 
 
-  /** @type {HTMLElement} */
-  const toast = htmlToElement(formatString(template, { message: message }));
-
-
-  // Add to toast queue (in case of reload)
-  addToToastQueue([category, message]);
-
-
+  
+  
   // Time logic
   let interval;
   const start = new Date();
+  const liveTime = displayTime || defaultLiveTime;
+  
+  // Add to toast queue (in case of reload)
+  const savedPayload = [category, message, displayTime || start.getTime()]
+  if (!initialRender || (initialRender && !inArray(savedPayload, getToastQueue()))) {
+    addToToastQueue(savedPayload);
+  };
+
+  console.log(message, category, displayTime, liveTime)
+
+
+  /** @type {HTMLElement} */
+  const toast = htmlToElement(formatString(template, { message: message, liveTime: liveTime }));
 
   interval = setInterval(() => {
     if ($(toast)) {
@@ -140,7 +153,7 @@ const renderToast = (message, category) => {
         toast.remove();
 
         // Remove from queue
-        removeFromToastQueue([category, message]);
+        removeFromToastQueue(savedPayload);
       };
     };
   });
@@ -151,7 +164,7 @@ const renderToast = (message, category) => {
     childList: false,
     characterData: false
   });
-}
+};
 
 
 
@@ -190,7 +203,9 @@ const getNotifications = async () => {
 
 
 /**
- * Render notifications
+ * Fetches notifications and renders toasts
+ * * Expired toasts are dropped
+ * * Unrendered or interupted toasts are re-rendered, lasting between `minDisplayTime` and `defaultLiveTime`
  * @returns {Promise<void>}
  */
 const renderNotifications = async () => {
@@ -198,8 +213,24 @@ const renderNotifications = async () => {
   console.log(notifications);
 
   for (const notification of notifications) {
-    const [category, message] = Array.isArray(notification) ? notification : [null, notification];
-    renderToast(message, category);
+    const [category, message, startTime] = Array.isArray(notification) ? notification : [null, notification];
+
+    // Clean from queue
+    removeFromToastQueue([category, message, startTime]);
+
+    // Add dropping toast logic
+    const passedTime = startTime ? (new Date()).getTime() - startTime : 0;
+    if (startTime && (passedTime > toastExpiryTime)) {
+      console.log('Expiry time reached, dropping toast');
+      continue;
+    };
+
+    renderToast(
+      message,
+      category,
+      Math.min(Math.max(defaultLiveTime - passedTime, minDisplayTime), defaultLiveTime),
+      true
+    );
   };
 };
 
