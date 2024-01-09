@@ -10,6 +10,7 @@ class ClassroomCreateForm(FlaskForm):
   inviteEnabled = BooleanField(name = 'Invite Enabled', default = True)
   agreeToTOS    = BooleanField(name = 'I agree to the <a href="/">terms of service</a>', validators = [DataRequired()])
   submit        = SubmitField(name = 'Create')
+  confirmchange = SubmitField(name = 'Confirm')
 
   def validate(self, *args, **kwargs) -> bool:
     field_validation = super().validate(*args, **kwargs)
@@ -17,3 +18,5 @@ class ClassroomCreateForm(FlaskForm):
 
     # TODO: Validation
     return True
+
+
