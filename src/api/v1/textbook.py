@@ -159,7 +159,7 @@ def textbook_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  author = user if user.id == req.author_id else UserModel.query.filter(UserModel.id == req.author_id).first()
+  author = user if (req.author_id == 'None') or (user.id == req.author_id) else UserModel.query.filter(UserModel.id == req.author_id).first()
   if not isinstance(author, UserModel):
     return GenericReply(
       message = 'Invalid user',
