@@ -2,10 +2,11 @@
 Handles store routes
 """
 
+from src.utils.http import escape_id
 from src.service import auth_provider
-from src.database import UserModel, TextbookModel
 from src.utils.http import HTTPStatusCode
 from werkzeug.exceptions import BadRequest
+from src.database import UserModel, TextbookModel
 from src.utils.api import (
   StoreGetRequest, StoreGetReply, _TextbookGetData
 )
@@ -37,6 +38,17 @@ from flask import (
 @auth_provider.optional_login
 def store(user: UserModel | None):
   return render_template('(store)/store.html')
+
+
+
+
+# Store focus view
+@app.route('/store/<id:string>')
+@auth_provider.optional_login
+def store_focused(user: UserModel | None, textbook_id: str):
+  textbook_id = escape_id(textbook_id)
+  textbook = TextbookModel.query.filter(TextbookModel.id == textbook_id).first_or_404()
+  return render_template('(store)/store_focused.html', textbook = textbook, user = user)
 
 
 # Store Get
