@@ -2,7 +2,7 @@
 
 
 {% macro render_info() %}
-  <div class="toast mt-0 border-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-stack-toast-category="error">
+  <div class="toast mt-0 border-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay={liveTime} data-stack-toast-category="error">
     <div class="toast-header">
       <i class="fa-light fa-circle-exclamation text-danger" style="font-size: 1.0rem;"></i> &nbsp;&nbsp;
       <strong class="me-auto text-black">Action Needed</strong>
@@ -17,7 +17,7 @@
 
 
 {% macro render_success() %}
-  <div class="toast mt-0 border-success" role="alert" aria-live="polite" aria-atomic="true" data-stack-toast-category="info">
+  <div class="toast mt-0 border-success" role="alert" aria-live="polite" aria-atomic="true" data-bs-delay={liveTime} data-stack-toast-category="info">
     <div class="toast-header">
       <i class="fa-light fa-check text-success" style="font-size: 1.0rem;"></i> &nbsp;&nbsp;
       <strong class="me-auto text-black">Success</strong>
@@ -32,7 +32,7 @@
 
 
 {% macro render_danger() %}
-  <div class="toast mt-0 border-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-stack-toast-category="error">
+  <div class="toast mt-0 border-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay={liveTime} data-stack-toast-category="error">
     <div class="toast-header">
       <i class="fa-light fa-circle-exclamation text-danger" style="font-size: 1.0rem;"></i> &nbsp;&nbsp;
       <strong class="me-auto text-black">Action Needed</strong>

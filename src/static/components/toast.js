@@ -4,9 +4,41 @@
 
 
 /**
+ * Toast render starting time in milliseconds From `Date.getTime()`
+ * @typedef {number} toastStartTime
+*/
+
+
+/**
+ * Toast message string
+ * @typedef {string} toastMessage
+*/
+
+
+/**
+ * Supported toast categories
+ * @typedef {'info' | 'success' | 'danger'} toastCategory
+*/
+
+
+/**
+ * Saved toast data format
+ * @typedef {[toastCategory | null | string, toastMessage, toastStartTime?]} toastData
+ */
+
+
+const maxToasts = 3; // Maximum number of toasts to show at any one time
+const minDisplayTime = 2000; // 2 seconds
+const defaultLiveTime = 5000; // 5 seconds
+const toastExpiryTime = 1000 * 60 * 5; // 5 minutes
+
+
+
+
+/**
  * Fetch Toast Queue
-  * @returns {['info' | 'success' | 'danger' | null | string, string][]}
-  */
+ * @returns {toastData[]}
+ */
 const getToastQueue = () => {
   return JSON.parse(localStorage.getItem('toastQueue')) || new Array();
 };
@@ -23,7 +55,7 @@ const clearToastQueue = () => {
 
 /**
   * Add item to toast queue
-  * @param {['info' | 'success' | 'danger' | null | string, string]} toastData
+  * @param {toastData} toastData
   * @returns {void}
   */
 const addToToastQueue = (toastData) => {
@@ -35,13 +67,13 @@ const addToToastQueue = (toastData) => {
 
 /**
  * Remove first toast found in queue
- * @param {['info' | 'success' | 'danger' | null | string, string]} toastData
+ * @param {toastData} toastData
  * @returns {void}
  */
 const removeFromToastQueue = (toastData) => {
   let queue = getToastQueue();
   queue.some((toastItem, index) => {
-    if (arrayIsEqual(toastItem, toastData)) {
+    if (toastItem === toastData) {
       queue.splice(index, 1);
       localStorage.setItem('toastQueue', JSON.stringify(queue));
       return true;
@@ -54,11 +86,13 @@ const removeFromToastQueue = (toastData) => {
 
 /**
  * Render a toast
- * @param {string} message - The message to display
- * @param {'success' | 'info' | 'danger'} category - The category of the toast
+ * @param {toastMessage} message - The message to display
+ * @param {toastCategory} category - The category of the toast
+ * @param {number?} displayTime - The time to display the toast
+ * @param {boolean} [initialRender=false] - Whether this is the initial render
  * @returns {void}
  */
-const renderToast = (message, category) => {
+const renderToast = (message, category, displayTime, initialRender = false) => {
   if (!inArray(category, ['info', 'success', 'danger'])) {
     throw new Error(`${category} is an invalid category`);
   };
@@ -75,17 +109,22 @@ const renderToast = (message, category) => {
   };
 
 
-  /** @type {HTMLElement} */
-  const toast = htmlToElement(formatString(template, { message: message }));
-
-
-  // Add to toast queue (in case of reload)
-  addToToastQueue([category, message]);
-
-
+  
+  
   // Time logic
   let interval;
   const start = new Date();
+  const liveTime = displayTime || defaultLiveTime;
+  
+  // Add to toast queue (in case of reload)
+  const savedPayload = [category, message, displayTime || start.getTime()]
+  if (!initialRender || (initialRender && !inArray(savedPayload, getToastQueue()))) {
+    addToToastQueue(savedPayload);
+  };
+
+
+  /** @type {HTMLElement} */
+  const toast = htmlToElement(formatString(template, { message: message, liveTime: liveTime }));
 
   interval = setInterval(() => {
     if ($(toast)) {
@@ -111,7 +150,7 @@ const renderToast = (message, category) => {
         toast.remove();
 
         // Remove from queue
-        removeFromToastQueue([category, message]);
+        removeFromToastQueue(savedPayload);
       };
     };
   });
@@ -122,7 +161,7 @@ const renderToast = (message, category) => {
     childList: false,
     characterData: false
   });
-}
+};
 
 
 
@@ -131,7 +170,9 @@ const renderToast = (message, category) => {
  * Fetch notifications
  * [category, message] or message
  *
- * @returns {Promise<Array.<string | Array.<'info' | 'success' | 'danger', string>>>}
+ * @returns {Promise<Array.<
+ *   string | toastData
+ * >>}
  */
 const getNotifications = async () => {
 
@@ -140,7 +181,7 @@ const getNotifications = async () => {
    * @type {{
    *   status: 200;
    *   message: string;
-   *   data: Array.<string | ['info' | 'success' | 'danger', string]>;
+   *   data: Array.<toastMessage | toastData>;
    * } | null}
    */
   const data = await fetch('/api/v1/notify/get')
@@ -151,7 +192,6 @@ const getNotifications = async () => {
     });
 
   const httpNotif = (!data || (data.status !== 200)) ? [['danger', 'Failed to fetch notifications']] : data.data;
-  console.log(getToastQueue());
 
   return new Array(...httpNotif, ...getToastQueue());
 };
@@ -160,7 +200,9 @@ const getNotifications = async () => {
 
 
 /**
- * Render notifications
+ * Fetches notifications and renders toasts
+ * * Expired toasts are dropped
+ * * Unrendered or interupted toasts are re-rendered, lasting between `minDisplayTime` and `defaultLiveTime`
  * @returns {Promise<void>}
  */
 const renderNotifications = async () => {
@@ -168,8 +210,32 @@ const renderNotifications = async () => {
   console.log(notifications);
 
   for (const notification of notifications) {
-    const [category, message] = Array.isArray(notification) ? notification : [null, notification];
-    renderToast(message, category);
+    const [category, message, startTime] = Array.isArray(notification) ? notification : [null, notification];
+
+    // Clean from queue
+    removeFromToastQueue([category, message, startTime]);
+
+    // Add dropping toast logic
+    const passedTime = startTime ? (new Date()).getTime() - startTime : 0;
+    if (startTime && (passedTime > toastExpiryTime)) {
+      console.log('Expiry time reached, dropping toast');
+      continue;
+    };
+
+    // Wait for existing toasts to run out
+    while ($(document).find('.toast').length >= maxToasts) {
+      await wait(1000);
+    };
+
+    // Introduce artificial stagger (max 0.5s)
+    await wait(Math.random() * 500);
+
+    renderToast(
+      message,
+      category,
+      Math.min(Math.max(defaultLiveTime - passedTime, minDisplayTime), defaultLiveTime),
+      true
+    );
   };
 };
 
