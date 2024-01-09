@@ -38,9 +38,8 @@ DateRange = tuple[datetime, datetime] | datetime | None
 
 @app.route(f'{basePath}/list', methods = ['GET'])
 @auth_limit
-@require_login
 @lru_cache
-def textbooks_list_api(user: UserModel):
+def textbooks_list_api():
   req = TextbookListRequest(request)
 
   # Handle query
@@ -106,8 +105,7 @@ def textbooks_list_api(user: UserModel):
 
 @app.route(f'{basePath}/get', methods = ['GET'])
 @auth_limit
-@require_login
-def textbooks_get_api(user: UserModel):
+def textbooks_get_api():
   req = TextbookGetRequest(request)
 
   textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
