@@ -12,17 +12,8 @@ $(() => {
      */
     const response = await fetch('/api/v1/assignment/create', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': getAccessToken()
-      },
-      body: JSON.stringify({
-        author: user_id,
-        title: data.Title,
-        description: data.Description,
-        price: data.Price,
-        discount: data.Discount
-      })
+      headers: { 'X-CSRF-Token': getAccessToken() },
+      body: data
     }).then(res => {
       if (res.ok) {
         return res.json();
