@@ -7,7 +7,7 @@ from src.service import auth_provider
 
 from src.utils.http import HTTPStatusCode
 from src.utils.http import escape_id
-from src.utils.forms import ClassroomCreateForm
+from src.utils.forms import ClassroomCreateForm, ClassroomEditForm
 
 from src.utils.api import ClassroomCreateResponse, GenericResponse
 
@@ -40,7 +40,7 @@ def classroom(user: UserModel, id: str):
   if not isinstance(classroom, ClassroomModel):
     return render_template('(classroom)/classroom_error.html')
   
-  if classroom.is_member(user) and (user.privilege != 'Admin'):
+  if not classroom.is_member(user) and (user.privilege != 'Admin'):
     return render_template('(classroom)/classroom_error.html', message = 'You are not a member of this classroom!')
 
   return render_template('(classroom)/classroom.html', classroom = classroom)
@@ -56,11 +56,12 @@ def classroom_edit(user: UserModel, id: str):
   if not isinstance(classroom, ClassroomModel):
     return render_template('(classroom)/classroom_error.html')
   
-  if classroom.is_educator(user) and (user.privilege != 'Admin'):
+  if (not classroom.is_owner(user)) and (user.privilege != 'Admin'):
     return render_template('(classroom)/classroom_error.html', message = 'You are not authorized to edit this classroom')
 
-  form = None
-  return render_template('(classroom)/classroom_edit.html', form = form)
+  form = ClassroomEditForm(request.form)
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
+  return render_template('(classroom)/classroom_edit.html', form = form, classroom = classroom)
 
 
 @app.route('/classrooms/new', methods = ['GET'])
@@ -69,8 +70,3 @@ def classroom_new(user: UserModel):
   form = ClassroomCreateForm(request.form)
   return render_template('(classroom)/classroom_new.html', form = form)
 
-@app.route('/classrooms/edit/', methods = ['GET', 'POST'])
-@auth_provider.require_educator(unauthorized_redirect = '/pricing')
-def classroom_edit(user: UserModel):
-  form = ClassroomCreateForm(request.form)
-  return render_template('(classroom)/classroom_edit.html', form = form)
