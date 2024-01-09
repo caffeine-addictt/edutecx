@@ -1,0 +1,83 @@
+
+
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
+
+{# Title #}
+{% block title %}
+  Edit Assignment - EduTecX
+{% endblock %}
+
+{# Body #}
+{% block mainContent %}
+  <form
+    id='assignmentForm'
+    role='form'
+    class='d-flex flex-column gap-3 align-items-center'
+  >
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Title of Assignment
+        <input type="text" id="assignmentTitle" class="form-control">
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Description
+        <textarea class="form-control" id="assignmentDescription" rows="3"></textarea>
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Due Date of Assignment
+        <input type="date" id="assignmentDueDate" class="form-control">
+      </label>
+    </div>
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Assignment Requirements
+        <input type="text" id="assignmentRequirements" class="form-control" maxlength="300">
+      </label>
+    </div>
+    <button type="button" class="btn btn-primary" id="edit-assignment-button">Edit</button>
+    <button type="button" class="btn btn-danger" id="delete-assignment-button">Delete</button>
+  </form>
+
+  {# Delete Assignment Modal #}
+  <div class="modal fade" id="delete-assignment-modal" tabindex="-1" aria-labelledby="deleteAssignmentModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Delete Assigment</h5>
+          <button type="button" class="close" aria-label="Close" id="close-delete-assigment-modal-small">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete your Assignment?</p>
+          <p class="text-secondary">This action cannot be undone</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close-delete-assigment-modal-big">Close</button>
+          <button type="button" class="btn btn-primary" id="confirmed-delete-assigment">Delete Assigment</button>
+        </div>
+      </div>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    var assignment_id = `{{ assignment.id }}`;
+  </script>
+  <script src="{{ url_for('static', filename = '(assignment)/assignment_edit.js') }}"></script>
+{% endblock %}
+
+
+  
+
+{% block scripts %}
+
+  <script>
+    var classroom_id = `{{ assignment.id }}`;
+  </script>
+  <script src="{{ url_for('static', filename = '(assignment)/assignment_edit.js') }}"></script>
+
+{% endblock %}
