@@ -22,31 +22,43 @@
         <input type="text" id="textbookAuthor" class="form-control">
       </label>
     </div>
+
     <div class="form__group d-flex flex-column w-auto">
       <label>Upload the Textbook
         <input type="text" id="textbookUpload" class="form-control">
       </label>
     </div>
+
     <div class="form__group d-flex flex-column w-auto">
       <label>Title of Textbook
         <input type="text" id="textbookTitle" class="form-control">
       </label>
     </div>
+
     <div class="form__group d-flex flex-column w-auto">
       <label>Description of Textbook
         <textarea class="form-control" id="textbookDescription" rows="5" maxlength="200"></textarea>
       </label>
     </div>
+
     <div class="form__group d-flex flex-column w-auto">
       <label>Price of Textbook
         <input type="number" id="textbookPrice" class="form-control" min="1">
       </label>
     </div>
+
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Pages required for submission (etc. 1 or 1:5)
+        <input type="text" id="assignmentRequirements" class="form-control">
+      </label>
+    </div>
+
     <div class="form__group d-flex flex-column w-auto">
       <label>Discount Value for Textbook
         <input type="number" id="textbookPrice" class="form-control" min="0" max="3">
       </label>
     </div>
+
     <button type="submit" class="btn btn-primary" id="submit">Submit</button>
   </form>
 {% endblock %}
