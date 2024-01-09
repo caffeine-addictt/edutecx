@@ -112,7 +112,7 @@ def classroom_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  if (user.id != req.owner_id) and (user.privilege != 'Admin'):
+  if req.owner_id and (user.id != req.owner_id) and (user.privilege != 'Admin'):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED,
@@ -188,7 +188,7 @@ def classroom_edit_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and classroom.is_owner(user):
+  if (user.privilege != 'Admin') and not classroom.is_owner(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.BAD_REQUEST
@@ -223,7 +223,7 @@ def classroom_delete_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and classroom.is_owner(user):
+  if (user.privilege != 'Admin') and not classroom.is_owner(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.BAD_REQUEST
