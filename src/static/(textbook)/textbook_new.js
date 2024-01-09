@@ -23,7 +23,7 @@ $(() => {
     if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
     else {
       renderToast(response.message, 'success');
-      window.location.href = `/store/${response.data.textbook_id}`;
+      window.location.href = `/store`;
     };
   });
 });
