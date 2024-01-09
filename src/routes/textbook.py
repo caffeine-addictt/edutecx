@@ -24,7 +24,8 @@ def textbooks(user: UserModel):
 @auth_provider.require_login
 def textbooks_id(user: UserModel, id: str):
   id = escape_id(id)
-  return render_template('(textbook)/textbook.html')
+  textbook = TextbookModel.query.filter(TextbookModel.id == id).first()
+  return render_template('(textbook)/textbook.html', textbook = textbook ) 
 
 
 @app.route('/textbooks/new', methods = ['GET'])
