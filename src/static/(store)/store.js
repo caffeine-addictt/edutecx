@@ -8,7 +8,6 @@
  *   description: string;
  *   categories: string[];
  *   price: number;
- *   discount: number;
  *   uri: string;
  *   status: 'Available' | 'Unavailable' | 'DMCA';
  *   cover_image: string | null;
@@ -30,7 +29,6 @@ let textbookList = [];
  *   description: string;
  *   categories: string[];
  *   price: number;
- *   discount: number;
  *   uri: string;
  *   status: 'Available' | 'Unavailable' | 'DMCA';
  *   cover_image: string | null;
@@ -39,6 +37,11 @@ let textbookList = [];
  * }>>}
  */
 const fetchTextbooks = async () => {
+  let searchParams = ((new URL(location.href)).searchParams);
+  let criteria = searchParams.get('criteria');
+  criteria = ['or', 'and'].includes(criteria) ? criteria : 'or';
+
+  searchParams.set('criteria', criteria);
 
   /**
    * @type {{
@@ -51,7 +54,6 @@ const fetchTextbooks = async () => {
    *     description: string;
    *     categories: string[];
    *     price: number;
-   *     discount: number;
    *     uri: string;
    *     status: 'Available' | 'Unavailable' | 'DMCA';
    *     cover_image: string | null;
@@ -60,7 +62,7 @@ const fetchTextbooks = async () => {
    *   }>
    * } | void}
    */
-  // const data = await fetch('/api/v1/textbook/list', {
+  // const data = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
   //   method: 'GET',
   //   headers: { 'X-CSRF-TOKEN': getAccessToken() }
   // }).then(res => {
@@ -124,7 +126,6 @@ const fetchTextbooks = async () => {
  *   description: string;
  *   categories: string[];
  *   price: number;
- *   discount: number;
  *   uri: string;
  *   status: 'Available' | 'Unavailable' | 'DMCA';
  *   cover_image: string | null;

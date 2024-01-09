@@ -97,7 +97,6 @@ def store_get(user: UserModel | None):
       description = textbook.description,
       categories = textbook.categories,
       price = textbook.price,
-      discount = textbook.discount,
       cover_image = textbook.cover_image,
       created_at = textbook.created_at.timestamp(),
       updated_at = textbook.updated_at.timestamp()
