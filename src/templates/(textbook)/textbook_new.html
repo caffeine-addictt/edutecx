@@ -24,12 +24,6 @@
     </div>
 
     <div class="form__group d-flex flex-column w-auto">
-      <label>Upload the Textbook
-        <input type="text" id="textbookUpload" class="form-control">
-      </label>
-    </div>
-
-    <div class="form__group d-flex flex-column w-auto">
       <label>Title of Textbook
         <input type="text" id="textbookTitle" class="form-control">
       </label>
@@ -57,6 +51,11 @@
       <label>Discount Value for Textbook
         <input type="number" id="textbookPrice" class="form-control" min="0" max="3">
       </label>
+    </div>
+
+    <div class="form__group d-flex flex-column w-auto mb-3">
+      <label for="pdfUpload" class="form-label">Upload the Textbook</label>
+      <input class="form-control" type="file" id="pdfUpload" accept="application/pdf">
     </div>
 
     <button type="submit" class="btn btn-primary" id="submit">Submit</button>
