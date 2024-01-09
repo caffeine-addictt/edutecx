@@ -7,9 +7,6 @@ $(() => {
     const data = Object.fromEntries((new FormData(e.target)).entries());
     console.log(data);
 
-    if (!/^([0-9]+(:[0-9]+)?)$/.test(data.requirements)) return renderToast('Invalid Page Number(s)!', 'danger');
-    if (data.date && (((new Date()).now() - (new Date(data.date)).now()) >= 0)) return renderToast('Date cannot be in the past!', 'danger');
-
     /**
      * @type {{status: 200; message: string; data: { assignment_id: string }}?}
      */
