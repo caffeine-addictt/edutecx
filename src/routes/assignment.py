@@ -19,13 +19,6 @@ def assignments(user: UserModel):
   return render_template('(assignment)/assignment_list.html')
 
 
-@app.route('/assignments/<string:id>')
-@auth_provider.require_login
-def assignment(user: UserModel, id: str):
-  id = escape_id(id)      
-  return render_template('(assignment)/assignment.html')
-
-
 @app.route('/assignments/new', methods = ['GET'])
 @auth_provider.require_educator(unauthorized_redirect = '/pricing')
 def assignment_new(user: UserModel):
