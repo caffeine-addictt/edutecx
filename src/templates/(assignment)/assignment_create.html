@@ -2,16 +2,13 @@
 {% extends 'layout.html' %}
 {% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
 
-
 {# Title #}
 {% block title %}
-  Create Assigment - EduTecX
+  Create Assignment - EduTecX
 {% endblock %}
-
 
 {# Body #}
 {% block mainContent %}
-
   <form
     id='assignmentForm'
     role='form'
@@ -39,5 +36,5 @@
     </div>
     <button type="submit" class="btn btn-primary">Create</button>
   </form>
-  <script src="{{ url_for('static', filename = '(assignment)/assignment_create.js') }}"></script>
+  <script src="{{ url_for('static', filename='(assignment)/assignment_new.js') }}"></script>
 {% endblock %}

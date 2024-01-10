@@ -53,4 +53,3 @@ def assignment(user: UserModel, id: str):
         return render_template('(assignment)/assignment_error.html', message='You are not authorized to view this assignment!')
 
     return render_template('(assignment)/assignment.html', assignment=assignment)
-
