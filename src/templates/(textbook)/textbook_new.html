@@ -12,43 +12,55 @@
 {# Body #}
 {% block mainContent %}
 
-  <form
-    id='textbookForm'
-    role='form'
-    class='d-flex flex-column gap-3 align-items-center'
-  >
-    <div class="form__group d-flex flex-column w-auto">
-      <label>Author of Textbook</label>
-      <input name="author" type="text" id="textbookAuthor" class="form-control">
-    </div>
+<form id='textbookForm' role='form' class='d-flex flex-column gap-3 align-items-center'>
+  <div class="container border border-dark shadow p-3 mb-5 bg-body rounded mt-5">
+    <div class="row">
+        <div class="col-md-4 section1">
+            <div class="form__group mb-3">
+                <label for="pdfUpload" class="form-label">Upload the CoverPage</label>
+                <input name="upload" class="form-control" type="file" id="pdfUpload" accept="application/pdf">
+            </div>
+        </div>
 
-    <div class="form__group d-flex flex-column w-auto">
-      <label>Title of Textbook</label>
-      <input name="title" type="text" id="textbookTitle" class="form-control">
-    </div>
+        <div class="col-md-4 section2">
+            <div class="form__group mb-3 form-floating">
+              <input name="author" type="text" id="textbookAuthor" class="form-control" placeholder="Stephen King">  
+              <label>Author of Textbook</label>
+            </div>
 
-    <div class="form__group d-flex flex-column w-auto">
-      <label>Description of Textbook</label>
-      <textarea name="description" class="form-control" id="textbookDescription" rows="5" maxlength="200"></textarea>
-    </div>
+            <div class="form__group mb-3 form-floating">
+              <input name="title" type="text" id="textbookTitle" class="form-control" placeholder="Atomic Habits">
+              <label>Title of Textbook</label>
+            </div>
 
-    <div class="form__group d-flex flex-column w-auto">
-      <label>Price of Textbook</label>
-      <input name="price" type="number" id="textbookPrice" class="form-control" min="1">
-    </div>
+            <div class="form__group mb-3 form-floating">
+                <textarea name="description" class="form-control" id="textbookDescription" rows="5" maxlength="200" placeholder="The book is..."></textarea>
+                <label>Description of Textbook</label>
+            </div>
+        </div>
 
-    <div class="form__group d-flex flex-column w-auto">
-      <label>Discount Value for Textbook</label>
-      <input name="discount" type="number" id="textbookPrice" class="form-control" min="0" max="3">
-    </div>
+        <div class="col-md-4 section3">
+            <div class="form__group mb-3 form-floating">
+                <input name="price" type="number" id="textbookPrice" class="form-control" min="1" placeholder="100.00">
+                <label>Price of Textbook</label>
+            </div>
 
-    <div class="form__group d-flex flex-column w-auto mb-3">
-      <label for="pdfUpload" class="form-label">Upload the Textbook</label>
-      <input name="upload" class="form-control" type="file" id="pdfUpload" accept="application/pdf">
-    </div>
+            <div class="form__group mb-3 form-floating">
+                <input name="discount" type="number" id="textbookPrice" class="form-control" min="0" max="3" placeholder="0">
+                <label>Discount Value for Textbook</label>
+            </div>
 
-    <button type="submit" class="btn btn-primary" id="submit">Submit</button>
-  </form>
+            <div class="form__group mb-3">
+                <label for="pdfUpload" class="form-label">Upload the Textbook</label>
+                <input name="upload" class="form-control" type="file" id="pdfUpload" accept="application/pdf">
+                <button type="submit" class="btn btn-primary mt-5 w-100" id="submit">Create</button>
+            </div>
+        </div>
+    </div>
+  </div>
+</form>
+
+
 {% endblock %}
 
 
