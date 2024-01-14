@@ -89,6 +89,7 @@ def textbooks_list_api():
     status = HTTPStatusCode.OK,
     data = [_TextbookGetData(
       id = i.id,
+      author_name = i.name,
       author_id = i.author_id,
       title = i.title,
       description = i.description,
