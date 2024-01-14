@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
+
+
+{# Title #}
+{% block title %}
+  Create Textbook - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+
+  <form
+    id='textbookForm'
+    role='form'
+    class='d-flex flex-column gap-3 align-items-center'
+  >
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Author of Textbook</label>
+      <input name="author" type="text" id="textbookAuthor" class="form-control">
+    </div>
+
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Title of Textbook</label>
+      <input name="title" type="text" id="textbookTitle" class="form-control">
+    </div>
+
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Description of Textbook</label>
+      <textarea name="description" class="form-control" id="textbookDescription" rows="5" maxlength="200"></textarea>
+    </div>
+
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Price of Textbook</label>
+      <input name="price" type="number" id="textbookPrice" class="form-control" min="1">
+    </div>
+
+    <div class="form__group d-flex flex-column w-auto">
+      <label>Discount Value for Textbook</label>
+      <input name="discount" type="number" id="textbookPrice" class="form-control" min="0" max="3">
+    </div>
+
+    <div class="form__group d-flex flex-column w-auto mb-3">
+      <label for="pdfUpload" class="form-label">Upload the Textbook</label>
+      <input name="upload" class="form-control" type="file" id="pdfUpload" accept="application/pdf">
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="submit">Submit</button>
+  </form>
+{% endblock %}
+
+
+{% block scripts %}
+  <script>
+    var user_id = `{{ user.id }}`
+  </script>
+  <script src="{{ url_for('static', filename = '(textbook)/textbook_new.js') }}"></script>
+{% endblock %}

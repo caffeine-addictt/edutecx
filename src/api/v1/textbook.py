@@ -38,9 +38,8 @@ DateRange = tuple[datetime, datetime] | datetime | None
 
 @app.route(f'{basePath}/list', methods = ['GET'])
 @auth_limit
-@require_login
 @lru_cache
-def textbooks_list_api(user: UserModel):
+def textbooks_list_api():
   req = TextbookListRequest(request)
 
   # Handle query
@@ -79,7 +78,7 @@ def textbooks_list_api(user: UserModel):
     )
   ]
   
-  filtered = UserModel.query.filter(
+  filtered = TextbookModel.query.filter(
     and_(*query) if req.criteria == 'and' else or_(*query)
   ).paginate(page = req.page, error_out = False)
 
@@ -93,7 +92,6 @@ def textbooks_list_api(user: UserModel):
       description = i.description,
       categories = i.categories.split('|'),
       price = i.price,
-      discount = i.discount,
       uri = i.uri,
       status = i.status,
       cover_image = i.cover_image.uri if i.cover_image else None,
@@ -107,8 +105,7 @@ def textbooks_list_api(user: UserModel):
 
 @app.route(f'{basePath}/get', methods = ['GET'])
 @auth_limit
-@require_login
-def textbooks_get_api(user: UserModel):
+def textbooks_get_api():
   req = TextbookGetRequest(request)
 
   textbook = TextbookModel.query.filter(TextbookModel.id == req.textbook_id).first()
@@ -129,7 +126,6 @@ def textbooks_get_api(user: UserModel):
       description = textbook.description,
       categories = textbook.categories.split('|'),
       price = textbook.price,
-      discount = textbook.discount,
       uri = textbook.uri,
       status = textbook.status,
       cover_image = textbook.cover_image.uri if textbook.cover_image else None,
@@ -159,7 +155,7 @@ def textbook_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  author = user if user.id == req.author_id else UserModel.query.filter(UserModel.id == req.author_id).first()
+  author = user if (req.author_id == 'None') or (user.id == req.author_id) else UserModel.query.filter(UserModel.id == req.author_id).first()
   if not isinstance(author, UserModel):
     return GenericReply(
       message = 'Invalid user',
