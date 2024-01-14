@@ -54,6 +54,7 @@ $(async () => {
    *     message: string;
    *     data: {
    *       id         : string;
+   *       author_name: string;
    *       author_id  : string;
    *       title      : string;
    *       description: string;
@@ -88,6 +89,7 @@ $(async () => {
    *    message: string;
    *    data: {
    *      id         : string;
+   *      author_name: string;
    *      author_id  : string;
    *      title      : string;
    *      description: string;
