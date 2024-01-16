@@ -700,7 +700,6 @@ class TextbookListReply(_APIReply):
 @dataclass
 class _TextbookGetData(_APIBase):
   id         : str
-  author_name: str
   author_id  : str
   title      : str
   description: str
@@ -740,7 +739,6 @@ class _TextbookCreateData(_APIBase):
 class TextbookCreateRequest(_APIRequest):
   """API Request for textbook creation"""
   author_id  : str
-  author_name: str
   title      : str
   description: str
   price      : float
@@ -767,7 +765,6 @@ class TextbookEditRequest(_APIRequest):
   """API Request for textbook editing"""
   ignore_none = True
   textbook_id: str
-  author_name: str
   title      : str | None
   description: str | None
   categories : Optional[list[str]]
@@ -803,7 +800,6 @@ TextbookDeleteResponse = GenericResponse
 @dataclass
 class _CommentGetData(_APIBase):
   author_id: str
-  author_name: str
   submission_id: str
   assignment_id: str
   classroom_id: str
@@ -860,7 +856,6 @@ class CommentCreateResponse(_APIResponse):
 # EditableTextbook GET
 @dataclass
 class _EditableTextbookGetData(_APIBase):
-  author_name        : str
   editabletextbook_id: str
   user_id            : str
   textbook_id        : str
