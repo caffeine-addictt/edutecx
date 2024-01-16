@@ -3,7 +3,6 @@
  * Textbooks List
  * @type {Array.<{
 *   id: string;
-*   author_name: string;
 *   author_id: string;
 *   title: string;
 *   description: string;
@@ -25,7 +24,6 @@ let classroomList = [];
  * Fetch Textbooks
  * @type {Promise<Array.<{
 *   id: string;
-*   author_name: string;
 *   author_id: string;
 *   title: string;
 *   description: string;
@@ -46,7 +44,6 @@ const fetchTextbooks = async () => {
    *   message: string;
    *   data: Array.<{
    *   id: string;
-   *   author_name: string;
    *   author_id: string;
    *   title: string;
    *   description: string;
@@ -85,7 +82,6 @@ const fetchTextbooks = async () => {
  * Render Classrooms
  * @param {Array.<{
  *   id: string;
- *   author_name: string;
  *   author_id: string;
  *   title: string;
  *   description: string;
@@ -117,7 +113,6 @@ const renderTextbooks = async (filteredList) => {
       container.append(htmlToElement(formatString(template, {
         title: textbookData.title,
         id: textbookData.id,
-        author: textbookData.name
       })));
     });
   };
