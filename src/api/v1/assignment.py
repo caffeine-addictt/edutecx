@@ -2,7 +2,7 @@
 Assignment Endpoint
 """
 
-from src import db, limiter
+from src import limiter
 from src.database import AssignmentModel, ClassroomModel, UserModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
@@ -10,8 +10,8 @@ from src.utils.ext import utc_time
 from src.utils.api import (
   AssignmentGetRequest, AssignmentGetReply, _AssignmentGetData,
   AssignmentCreateRequest, AssignmentCreateReply, _AssignmentCreateData,
-  AssignmentEditRequest,
-  AssignmentDeleteRequest,
+  AssignmentEditRequest, AssignmentEditReply,
+  AssignmentDeleteRequest, AssignmentDeleteReply,
   GenericReply
 )
 
@@ -40,18 +40,13 @@ def assignment_get_api(user: UserModel):
   req = AssignmentGetRequest(request)
 
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Unable to locate assignment',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (
-    user.id not in [
-      assignment.classroom.owner_id,
-      *assignment.classroom.educator_ids,
-      *assignment.classroom.student_ids
-  ]):
+  if (user.privilege != 'Admin') and (not assignment.classroom.is_member(user)):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -103,7 +98,7 @@ def assignment_create_api(user: UserModel):
     return GenericReply(
       message = 'Invalid due date',
       status = HTTPStatusCode.BAD_REQUEST
-    ), HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   due_date = datetime.fromtimestamp(req.due_date) if isinstance(req.due_date, int) else None
 
@@ -149,33 +144,41 @@ def assignment_create_api(user: UserModel):
 @require_login
 def assignment_edit_api(user: UserModel):
   req = AssignmentEditRequest(request)
+  toChange = {key: '' if i == 'None' else i for key in [
+    'title',
+    'description',
+    'due_date',
+    'requirement'
+  ] if ((i := req.get(key, None)) and ((i not in [None, 'None'])) or (not req.ignore_none))}
+
+  if not any(toChange.values()):
+    return GenericReply(
+      message = 'No change supplied',
+      status = HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
 
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Unable to locate assignment',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if (user.privilege != 'Admin') and (user.id not in [assignment.classroom.owner_id, *assignment.classroom.educator_ids]):
+  if (user.privilege != 'Admin') and not assignment.classroom.is_privileged(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
     ).to_dict(), HTTPStatusCode.UNAUTHORIZED
   
-  # Manually state allow list
-  for key in [
-    'title',
-    'description',
-    'due_date',
-    'requirement'
-  ]:
-    value = req.get(key, None)
-
-    if (value is not None) or (not req.ignore_none):
-      assignment.__setattr__(key, value)
   
-  return GenericReply(
+  for key, value in toChange.items():
+    assignment.__setattr__(key, value)
+    
+  assignment.updated_at = utc_time.get()
+  assignment.save()
+
+  return AssignmentEditReply(
     message = 'Successfully edited assignment',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK
@@ -192,13 +195,13 @@ def assignment_delete_api(user: UserModel):
 
   # Validate
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
-  if not assignment or not isinstance(assignment, AssignmentModel):
+  if not isinstance(assignment, AssignmentModel):
     return GenericReply(
       message = 'Could not located assignment',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if user.id not in set(assignment.classroom.owner_id, *assignment.classroom.educator_ids):
+  if not assignment.classroom.is_privileged(user):
     return GenericReply(
       message = 'Unauthorized',
       status = HTTPStatusCode.UNAUTHORIZED
@@ -207,7 +210,7 @@ def assignment_delete_api(user: UserModel):
   assignment.delete()
 
 
-  return GenericReply(
+  return AssignmentDeleteReply(
     message = 'Assignment deleted successfully',
     status = HTTPStatusCode.OK
   ).to_dict(), HTTPStatusCode.OK

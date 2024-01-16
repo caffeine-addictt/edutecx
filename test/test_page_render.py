@@ -24,11 +24,11 @@ def test_routesExist(app: Flask, client: FlaskClient):
     # Purchasing routes
     '/store',
     '/cart',
-    '/checkout',
+    '/checkout-success',
+    '/checkout-cancel',
 
     # Auth routes
     '/login',
-    '/logout',
     '/register',
 
     # user routes
@@ -45,7 +45,8 @@ def test_routesExist(app: Flask, client: FlaskClient):
     # Admin routes
     '/dashboard',
     '/dashboard/users',
-    '/dashboard/sales'
+    '/dashboard/revenue',
+    '/dashboard/textbooks'
   ]:
     response = client.get(route)
 

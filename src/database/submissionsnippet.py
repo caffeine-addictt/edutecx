@@ -8,10 +8,11 @@ from src.service.cdn_provider import deleteFile, clonePage
 import uuid
 from thread import Thread
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Literal
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
+  Enum,
   String,
   DateTime,
   ForeignKey,
@@ -25,6 +26,10 @@ if TYPE_CHECKING:
   from .editabletextbook import EditableTextbookModel
 
 
+SnippetUploadStatus = Literal['Uploading', 'Uploaded']
+EnumSnippetUploadStatus = Enum('Uploading', 'Uploaded', name = 'SnippetUploadStatus')
+
+
 class SubmissionSnippetModel(db.Model):
   """Submission Snippet Model"""
 
@@ -34,11 +39,11 @@ class SubmissionSnippetModel(db.Model):
   student_id   : Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
   submission_id: Mapped[str] = mapped_column(ForeignKey('submission_table.id'), nullable = False)
 
-  uri       : Mapped[str]               = mapped_column(String, nullable = True)
-  iuri      : Mapped[str]               = mapped_column(String, nullable = True)
-  status    : Mapped[str]               = mapped_column(String, nullable = False, default = 'Uploading')
-  student   : Mapped['UserModel']       = relationship('UserModel', back_populates = 'snippets')
-  submission: Mapped['SubmissionModel'] = relationship('SubmissionModel', back_populates = 'snippet')
+  uri       : Mapped[str]                 = mapped_column(String, nullable = True)
+  iuri      : Mapped[str]                 = mapped_column(String, nullable = True)
+  status    : Mapped[SnippetUploadStatus] = mapped_column(EnumSnippetUploadStatus, nullable = False, default = 'Uploading')
+  student   : Mapped['UserModel']         = relationship('UserModel', back_populates = 'snippets')
+  submission: Mapped['SubmissionModel']   = relationship('SubmissionModel', back_populates = 'snippet')
 
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
@@ -75,21 +80,14 @@ class SubmissionSnippetModel(db.Model):
     return '%s(%s)' % (self.__class__.__name__, self.id)
   
 
-  def _updateURI(self, filePath: str) -> None:
-    self.iuri = filePath
-    self.status = 'Uploaded'
-    self.save()
-
   def _handle_upload(self, editabletextbook: 'EditableTextbookModel', pages: int | tuple[int, int]) -> None:
     filename = f'{self.id}-{self.student_id or ""}{self.submission_id}'
+    filePath = clonePage(editabletextbook.iuri, filename, pages)
 
-    uploadJob = Thread(clonePage, kwargs = {
-      'fileLocation': editabletextbook.iuri,
-      'newfilename': filename,
-      'pages': pages
-    })
-    uploadJob.add_hook(self._updateURI)
-    uploadJob.start()
+    self.iuri = filePath
+    self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
+    self.status = 'Uploaded'
+    self.save()
 
   
   def save(self) -> None:
@@ -97,10 +95,10 @@ class SubmissionSnippetModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
     Thread(target = deleteFile, args = [self.iuri]).start()
     
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()
 

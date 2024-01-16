@@ -4,6 +4,7 @@ services:
   app:
     image: appdev
     container_name: development
+    env_file: ../.env
 
     build:
       context: ..

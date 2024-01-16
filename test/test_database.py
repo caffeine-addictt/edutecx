@@ -46,7 +46,7 @@ def test_userModel(app: Flask):
       email = 'user_test_user@example.com',
       username = 'user_test_user',
       password = '<PASSWORD>',
-      privilege = 'User'
+      privilege = 'Student'
     )
     db.session.add(userNew)
 
@@ -71,7 +71,7 @@ def test_token_User_Relationship(app: Flask):
       email = 'token_test_user@example.com',
       username = 'token_test_user',
       password = '<PASSWORD>',
-      privilege = 'User'
+      privilege = 'Educator'
     )
     db.session.add(userNew)
 
@@ -126,7 +126,7 @@ def test_classroom_user_relationship(app: Flask):
       email = 'classroom_test_user@example.com',
       username = 'classroom_test_user',
       password = '<PASSWORD>',
-      privilege = 'User'
+      privilege = 'Student'
     )
     db.session.add(userOne)
     db.session.commit()
@@ -135,7 +135,7 @@ def test_classroom_user_relationship(app: Flask):
       email = 'classroom_test_user2@example.com',
       username = 'classroom_test2_user',
       password = '<PASSWORD>',
-      privilege = 'User'
+      privilege = 'Educator'
     )
     db.session.add(userTwo)
     db.session.commit()
@@ -144,7 +144,7 @@ def test_classroom_user_relationship(app: Flask):
       email = 'classroom_test_user3@example.com',
       username = 'classroom_test3_user',
       password = '<PASSWORD>',
-      privilege = 'User'
+      privilege = 'Student'
     )
     db.session.add(userThree)
     db.session.commit()

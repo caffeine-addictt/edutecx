@@ -72,7 +72,7 @@ class AssignmentModel(db.Model):
       The due date of the assignment
 
     `requirement: str`, optional (defaults to '')
-      Format = str(docID:pageNum) | str(docID:pageNum:pageNum) | str(docID:pageNum:pageNum,...)
+      Format = str(docID:pageNum) | str(docID:pageNum:pageNum)
 
     
     Returns
@@ -85,7 +85,7 @@ class AssignmentModel(db.Model):
     `AssertionError`
       The format for requirement is invalid
     """
-    assert re.match(r'^([a-zA-Z0-9]+:\d+(:[\d*+])?(,)?)*$', requirement or ''), 'Invalid requirement format [%s]' % requirement
+    assert re.match(r'^([a-za-Z0-9]{32}):\d+(:\d+)?$', requirement or ''), 'Invalid requirement format [%s]' % requirement
 
     self.classroom_id = classroom.id
     self.title = title
@@ -106,9 +106,9 @@ class AssignmentModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
-    for i in self.submissions: i.delete(commit = False)
+    for i in self.submissions: i.delete()
 
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()

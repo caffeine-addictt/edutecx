@@ -5,7 +5,7 @@ Setup Flask Environment Variables
 """
 
 import os
-from typing import Literal, Union, Optional, Required
+from typing import Literal, Optional
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -24,10 +24,12 @@ class ConfigBase:
   # \\\\\\ General ////// #
   # Production ENV
   ENV: Literal['development', 'production'] = 'development'
+  UNLIMITED_TIER_PRICE: float = 49.99
 
 
   # \\\\\\ Stripe ////// #
-  STRIPE_API_KEY: str = 'sk_test_51No3X2JZ5VDTodh10QYO5W45LIMqQwTJ6e2JjCSKp7l0xL13SoxKTTlmezkkKmpfRsfN8KVybXkfOevFeGbkyqBe007gkNlRRc'
+  STRIPE_PUBLIC_KEY: str = os.getenv('STRIPE_PUBLIC_KEY', '')
+  STRIPE_SECRET_KEY: str = os.getenv('STRIPE_SECRET_KEY', '')
 
 
   # \\\\\\ Flask ////// #
@@ -45,23 +47,20 @@ class ConfigBase:
   # \\\\\\ JWT ////// #
   # Docs https://flask-jwt-extended.readthedocs.io/en/3.0.0_release/options/
   JWT_SECRET_KEY: str = 'jwt-secret'
-  JWT_TOKEN_LOCATION: list[str] = ['headers', 'cookies']
+  JWT_TOKEN_LOCATION: list[str] = ['headers', 'cookies', 'json']
   JWT_ACCESS_TOKEN_EXPIRES: int = 60 * 60 # 1h in seconds
   JWT_REFRESH_TOKEN_EXPIRES: int = 30 * 24 * 60 * 60 #30 days in seconds
   PROPAGATE_EXCEPTIONS: bool = True
 
 
   # \\\\\\ Mail ////// #
-  MAIL_PORT: int = 25
-  MAIL_USE_TLS: bool = False
-  MAIL_USE_SSL: bool = True
-  MAIL_SERVER: Literal['localhost', 'smtp.google.com'] = 'smtp.google.com'
+  RESEND_API_KEY: str = os.getenv('RESEND_API_KEY', '')
 
 
   # \\\\\\ SQL ////// #
   # Docs https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/config/
-  SQLALCHEMY_ECHO: Optional[bool] = True
-  SQLALCHEMY_DATABASE_URI: Required[str] = 'sqlite:///testing.sqlite3'
+  SQLALCHEMY_ECHO: Optional[bool] = False
+  SQLALCHEMY_DATABASE_URI: str = 'sqlite:///testing.sqlite3'
 
 
 

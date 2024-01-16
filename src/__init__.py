@@ -2,14 +2,14 @@
 Initalizes Flask Application
 """
 
-import thread
 from flask import Flask
-from flask_mail import Mail
-from flask_migrate import Migrate
 from flask_limiter import Limiter, util
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 
+import resend
+import stripe
+import thread
 from logging import config
 from sqlalchemy import MetaData
 from config import get_production_config
@@ -30,9 +30,7 @@ metadata = MetaData(naming_convention = convention)
 thread.Settings.set_graceful_exit(False)
 
 db = SQLAlchemy(metadata = metadata)
-mail = Mail()
 jwt = JWTManager()
-migrate = Migrate()
 limiter = Limiter(
   key_func = util.get_remote_address,
   default_limits = ['5 per second'],
@@ -49,12 +47,6 @@ config.dictConfig({
     'console_fmt': {'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'}
   },
   'handlers': {
-    'general': {
-      'class': 'logging.handlers.RotatingFileHandler',
-      'filename': 'logs/general.log',
-      'formatter': 'file_fmt',
-      'level': 'DEBUG'
-    },
     'error': {
       'class': 'logging.handlers.RotatingFileHandler',
       'filename': 'logs/error.log',
@@ -65,12 +57,12 @@ config.dictConfig({
       'class': 'logging.StreamHandler',
       'formatter': 'console_fmt',
       'stream': 'ext://sys.stdout',
-      'level': 'DEBUG',
+      'level': 'INFO',
     }
   },
   'root': {
     'level': 'DEBUG',
-    'handlers': ['general', 'error', 'console']
+    'handlers': ['error', 'console']
   }
 })
 
@@ -97,11 +89,14 @@ def init_app(testing: bool = False) -> Flask:
   # Init Limiting
   limiter.init_app(app = app)
 
-  # Init Mail
-  mail.init_app(app = app)
+  # Init Email
+  resend.api_key = app.config.get('RESEND_API_KEY')
 
   # Init JWT
   jwt.init_app(app = app)
+
+  # Init Stripe
+  stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
 
   with app.app_context():
     # Import Database models
@@ -112,6 +107,5 @@ def init_app(testing: bool = False) -> Flask:
     from . import routes
 
     db.create_all()
-    migrate.init_app(app = app, db = db)
 
     return app

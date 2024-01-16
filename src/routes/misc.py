@@ -2,12 +2,11 @@
 Handles misc routing
 """
 
-from src.database import TextbookModel, UserModel
-from src.utils.http import escape_id
+from src.database import UserModel
+from src.service import auth_provider
+from src.utils.forms import ContactForm, ProfileEditForm
 
-from typing import List
 from flask import (
-  g,
   abort,
   flash,
   request,
@@ -15,91 +14,63 @@ from flask import (
   current_app as app
 )
 
-from src.service import auth_provider
+
 
 
 # General routes
 @app.route('/')
-def index():
+@auth_provider.optional_login
+def index(user: UserModel | None):
   return render_template('(misc)/root.html')
+
 
 @app.route('/home')
 @auth_provider.require_login
 def home(user: UserModel):
-  flash(message = user.username, category = 'danger')
-  return render_template('(misc)/home.html')
+  return render_template('(misc)/home.html', user = user)
+
 
 @app.route('/profile')
 @auth_provider.require_login
 def profile(user: UserModel):
-  return render_template('(misc)/profile.html')
+  form = ProfileEditForm()
+  form.email.data = user.email
+  form.username.data = user.username
+  return render_template(
+    '(misc)/profile.html',
+    form = form,
+    user_id = str(user.id),
+    profile_uri = user.profile_image.uri if user.profile_image else ''
+  )
 
 
-# Textbooks
-@app.route('/textbooks')
-@auth_provider.require_login
-def textbooks(user: UserModel):
-  user = g.current_user
-  textbooks = None # TODO: UserModel helper method
-  return render_template('(misc)/textbook_list.html', textbooks = textbooks)
-
-@app.route('/textbooks/<string:id>')
-@auth_provider.require_login
-def textbooks_id(user: UserModel, id: str):
-  id = escape_id(id)
-  textbook = None # TODO: UserModel helper method
-  return render_template('(misc)/textbook.html', textbook = textbook)
+@app.route('/privacy-policy')
+@auth_provider.optional_login
+def privacy_policy(user: UserModel | None):
+  return render_template('(misc)/privacy_policy.html')
 
 
-# Classrooms
-@app.route('/classrooms')
-@auth_provider.require_login
-def classrooms(user: UserModel):
-  # Check if user is in a classroom
-  isInClassroom = False
-  if not isInClassroom:
-    abort(404)
-
-  classes = None
-
-  return render_template('(misc)/classroom_list.html', classes = classes)
-
-@app.route('/classrooms/<string:id>')
-@auth_provider.require_login
-def classroom(user: UserModel):
-  # Check if user is in a classroom
-  isInClassroom = False
-  if not isInClassroom:
-    abort(404)
-
-  classes = None
-
-  return render_template('(misc)/classroom_list.html', classes = classes)
+@app.route('/terms-of-service')
+@auth_provider.optional_login
+def terms_of_service(user: UserModel | None):
+  return render_template('(misc)/terms_of_service.html')
 
 
-# Assignments
-@app.route('/assignments')
-@auth_provider.require_login
-def assignments(user: UserModel):
-  # Get assignments
-  return render_template('(misc)/assignment_list.html')
+@app.route('/contact-us')
+@auth_provider.optional_login
+def contact_us(user: UserModel | None):
+  form = ContactForm(request.form)
 
-@app.route('/assignments/<string:id>')
-@auth_provider.require_login
-def assignment(user: UserModel, id: str):
-  id = escape_id(id)
+  if form.email.data == '':
+    form.email.data = (user and user.email) or ''
 
-  return render_template('(misc)/assignment.html')
+  if form.validate_on_submit():
+    ...
+
+  return render_template('(misc)/contact_us.html', form = form)
 
 
-# Submissions
-@app.route('/submissions')
-@auth_provider.require_login
-def submissions(user: UserModel):
-  # Get submissions
-  return render_template('(misc)/submission_list.html')
-
-@app.route('/submissions/<string:id>')
-@auth_provider.require_login
-def submission(user: UserModel):
-  return render_template('(misc)/submission.html')
+@app.route('/up')
+@auth_provider.optional_login
+def up(user: UserModel | None):
+  return { 'status': 200 }, 200

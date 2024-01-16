@@ -1,0 +1,18 @@
+<!doctype html>
+{% extends 'layout.html' %}
+
+
+<!-- Title -->
+{% block title %}
+  Admin Homepage - EduTecX
+{% endblock %}
+
+
+<!-- Body -->
+{% block mainContent %}
+  <div class="d-flex gap-5 flex-row mx-auto my-auto">
+    <a href="/dashboard/users">Users</a>
+    <a href="/dashboard/revenue">Revenue</a>
+    <a href="/dashboard/textbooks">Textbooks</a>
+  </div>
+{% endblock %}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+
+
+{# Title #}
+{% block title %}
+  Submissions - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+  <h1>Submissions</h1>
+  <div id="submission__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50"></div>
+{% endblock %}
+
+
+{# Scripts #}
+{% block scripts %}
+  {# Write injected macros to variables #}
+  {# <script></script> #}
+  <script src="{{ url_for('static', filename = '(submission)/submission_list.js') }}"></script>
+{% endblock %}

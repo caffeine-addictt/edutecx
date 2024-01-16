@@ -7,25 +7,28 @@ from src.utils.ext import utc_time
 
 from datetime import datetime, timedelta
 from typing import Union, Literal
-from flask import current_app as app
 
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import (
   or_,
+  Enum,
   String,
   DateTime,
 )
+
+JWTType = Literal['access', 'refresh']
+EnumJWTType = Enum('access', 'refresh', name = 'TokenType')
 
 class JWTBlocklistModel(db.Model):
   """Stores revoked tokens"""
 
   __tablename__ = 'jwtblocklist_table'
 
-  jti: Mapped[str] = mapped_column(String, primary_key = True, unique = True, nullable = False)
-  token_type: Mapped[str] = mapped_column(String, nullable = False)
-  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+  jti       : Mapped[str]       = mapped_column(String, primary_key = True, unique = True, nullable = False)
+  token_type: Mapped[JWTType] = mapped_column(EnumJWTType, nullable = False)
+  created_at: Mapped[datetime]  = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
 
-  def __init__(self, jti: str, token_type: Literal['access', 'refresh']) -> None:
+  def __init__(self, jti: str, token_type: JWTType) -> None:
     """
     JWT Blocklist Model
 
@@ -51,21 +54,20 @@ class JWTBlocklistModel(db.Model):
     Commits self to the database\n
     Also invokes cleanup on expired tokens
     """
-    self.__class__.clear_expired(commit = False)
+    self.__class__.clear_expired()
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()
 
   @classmethod
   def clear_expired(
     cls,
     access_live_time: Union[str, int, float] = '1week',
-    refresh_live_time: Union[str, int, float] = '1week1',
-    commit: bool = True
+    refresh_live_time: Union[str, int, float] = '1week1'
   ) -> None:
     now = utc_time.get()
     access_lowest_limit = now - timedelta(seconds = utc_time.convertToTime(access_live_time))
@@ -75,4 +77,3 @@ class JWTBlocklistModel(db.Model):
       (cls.token_type.like('access') and cls.created_at.timestamp() <= access_lowest_limit.timestamp()),
       (cls.token_type.like('refresh') and cls.created_at.timestamp() <= refresh_lowest_limit.timestamp())
     )).delete()
-    if commit: db.session.commit()

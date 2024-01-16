@@ -35,9 +35,9 @@ class ClassroomModel(db.Model):
 
   # Stored as str(user1.id|user2.id|...)
   owner_id    : Mapped[str] = mapped_column(String, ForeignKey('user_table.id'), nullable = False)
-  educator_ids: Mapped[str] = mapped_column(String, nullable = True, default = None)
-  student_ids : Mapped[str] = mapped_column(String, nullable = True, default = None)
-  textbook_ids: Mapped[str] = mapped_column(String, nullable = True, default = None)
+  educator_ids: Mapped[str] = mapped_column(String, nullable = False, default = '')
+  student_ids : Mapped[str] = mapped_column(String, nullable = False, default = '')
+  textbook_ids: Mapped[str] = mapped_column(String, nullable = False, default = '')
 
   # Attributes
   owner      : Mapped['UserModel']             = relationship('UserModel', back_populates = 'owned_classrooms')
@@ -59,7 +59,8 @@ class ClassroomModel(db.Model):
     self,
     owner: 'UserModel',
     title: str,
-    description: str
+    description: str,
+    invite_enabled: bool = True
   ) -> None:
     """
     Classroom Model
@@ -74,10 +75,14 @@ class ClassroomModel(db.Model):
 
     `description: str`, required
       The description of the classroom
+
+    `invite_enabled: bool`, optional (Default to True)
+      Enable invite
     """
     self.owner_id = owner.id
     self.title = title
     self.description = description
+    self.invite_enabled = invite_enabled
 
   def __repr__(self):
     """To be used with cache indexing"""
@@ -120,6 +125,57 @@ class ClassroomModel(db.Model):
     from .user import UserModel as usr
     from .textbook import TextbookModel as tm
     return usr.query.filter(ClassroomModel.textbook_ids.contains(tm.id)).all()
+  
+
+  def is_student(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is a student in the classroom
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return user.id in self._clean_id_str(self.student_ids)
+  
+  def is_educator(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is an educator in the classroom
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return user.id in self._clean_id_str(self.educator_ids)
+  
+  def is_owner(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is the classroom owner
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return user.id == self.owner_id
+  
+  def is_member(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is a member of the classroom
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return self.is_student(user) or self.is_educator(user) or self.is_owner(user)
+  
+  def is_privileged(self, user: 'UserModel') -> bool:
+    """
+    Checks if the user is privileged in the classroom
+
+    Parameters
+    ----------
+    `user: UserModel`, required
+    """
+    return self.is_owner(user) or self.is_educator(user)
   
 
   # Editing
@@ -306,10 +362,10 @@ class ClassroomModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and cleans up references"""
-    if self.cover_image: self.cover_image.delete(commit = False)
-    for i in self.assignments: i.delete(commit = False)
+    if self.cover_image: self.cover_image.delete()
+    for i in self.assignments: i.delete()
 
     db.session.delete(self)
-    if commit: db.session.commit()
+    db.session.commit()

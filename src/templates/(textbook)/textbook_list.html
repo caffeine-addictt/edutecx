@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+
+
+{# Title #}
+{% block title %}
+  Textbooks - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+  <h1>Textbooks</h1>
+  <div id="textbooks__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50"></div>
+{% endblock %}
+
+
+{# Scripts #}
+{% block scripts %}
+  {# Write injected macros to variables #}
+  {# <script></script> #}
+  <script src="{{ url_for('static', filename = '(textbook)/textbook_list.js') }}"></script>
+{% endblock %}

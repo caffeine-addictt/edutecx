@@ -8,11 +8,12 @@ from src.service.cdn_provider import uploadTextbook, deleteFile
 import uuid
 from thread import Thread
 from datetime import datetime
-from typing import Optional, TYPE_CHECKING, List
+from typing import Optional, TYPE_CHECKING, List, Literal
 from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
+  Enum,
   Float,
   String,
   DateTime,
@@ -23,10 +24,17 @@ from sqlalchemy import (
 if TYPE_CHECKING:
   from .user import UserModel
   from .image import ImageModel
+  from .discount import DiscountModel
   from .editabletextbook import EditableTextbookModel
 
 
-# TODO: Textbook PDF upload
+TextbookStatus = Literal['Available', 'Unavailable', 'DMCA']
+EnumTextbookStatus = Enum('Available', 'Unavailable', 'DMCA', name = 'TextbookStatus')
+
+TextbookUploadStatus = Literal['Uploading', 'Uploaded']
+EnumTextbookUploadStatus = Enum('Uploading', 'Uploaded', name = 'TextbookUploadStatus')
+
+
 class TextbookModel(db.Model):
   """Textbook Model"""
 
@@ -39,17 +47,18 @@ class TextbookModel(db.Model):
   # Attributes
   title      : Mapped[str] = mapped_column(String, nullable = False)
   description: Mapped[str] = mapped_column(String, nullable = True, default = '')
-  categories : Mapped[str] = mapped_column(String, nullable = False, default = '') # 'category1|gaategory2...'
+  categories : Mapped[str] = mapped_column(String, nullable = False, default = '') # 'category1|category2...'
 
-  price      : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
-  discount   : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
-  author     : Mapped['UserModel'] = relationship('UserModel', back_populates = 'owned_textbooks')
+  price      : Mapped[float]                 = mapped_column(Float, nullable = False, default = 0.0)
+  author     : Mapped['UserModel']           = relationship('UserModel', back_populates = 'owned_textbooks')
+  discounts  : Mapped[List['DiscountModel']] = relationship('DiscountModel', back_populates = 'textbook')
 
-  uri        : Mapped[str]                    = mapped_column(String, nullable = True)
-  iuri       : Mapped[str]                    = mapped_column(String, nullable = True)
-  status     : Mapped[str]                    = mapped_column(String, nullable = False, default = 'Uploading')
-  cover_image: Mapped[Optional['ImageModel']] = relationship('ImageModel', back_populates = 'textbook')
-  derrived   : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'origin')
+  uri          : Mapped[str]                           = mapped_column(String, nullable = True)
+  iuri         : Mapped[str]                           = mapped_column(String, nullable = True)
+  status       : Mapped[TextbookStatus]                = mapped_column(EnumTextbookStatus, nullable = False, default = 'Available')
+  upload_status: Mapped[TextbookUploadStatus]          = mapped_column(EnumTextbookUploadStatus, nullable = False, default = 'Uploading')
+  cover_image  : Mapped[Optional['ImageModel']]        = relationship('ImageModel', back_populates = 'textbook')
+  derrived     : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'origin')
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
@@ -108,19 +117,14 @@ class TextbookModel(db.Model):
 
   def _upload_handler(self, file: FileStorage) -> None:
     """Threaded background upload process"""
-    def updateURI(filePath: str):
-      self.iuri = filePath
-      self.status = 'Uploaded'
-      self.save()
-
+    self.upload_status = 'Uploading'
     filename = f'{self.id}-{self.author_id or ""}'
 
-    uploadJob = Thread(uploadTextbook, kwargs = {
-      'file': file,
-      'filename': filename
-    })
-    uploadJob.add_hook(updateURI)
-    uploadJob.start()
+    filePath = uploadTextbook(file, filename)
+    self.iuri = filePath
+    self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
+    self.upload_status = 'Uploaded'
+    self.save()
   
   
   # DB
@@ -129,13 +133,12 @@ class TextbookModel(db.Model):
     db.session.add(self)
     db.session.commit()
 
-  def delete(self, commit: bool = True) -> None:
+  def delete(self) -> None:
     """Deletes the model and its references"""
     Thread(deleteFile, args = [self.iuri]).start()
 
-    if self.cover_image: self.cover_image.delete(commit = False)
-
+    if self.cover_image: self.cover_image.delete()
+    for i in self.discounts: i.delete()
 
     db.session.delete(self)
-    if commit: db.session.commit()
-    pass
+    db.session.commit()

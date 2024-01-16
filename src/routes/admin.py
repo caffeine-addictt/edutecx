@@ -2,63 +2,260 @@
 Managing Admin-Only routes
 """
 
-from src import db
-from src.utils.http import Parser, escape_id
+from functools import lru_cache
 from src.service.auth_provider import require_admin
+from src.utils.ext import utc_time
+from sqlalchemy import and_, or_
+from flask_sqlalchemy.query import Query
 from src.database import (
+  UserModel,
   SaleModel,
-  UserModel
+  TextbookModel
 )
 
-from flask import (
-  g,
-  request,
-  render_template,
-  current_app as app
+from src.utils.http import HTTPStatusCode
+from src.utils.api import (
+  AdminGraphGetRequest,
+  AdminGetRequest, AdminGetReply,
+  _UserGetData, _SaleGetData, _TextbookGetData,
+  GenericReply
 )
+
+import numpy
+from io import StringIO
+from datetime import datetime
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+from thread import ParallelProcessing
+from typing import Callable, Tuple, TypeVar, Any
+from werkzeug.exceptions import BadRequest
+from flask import (
+  request,
+  Response,
+  render_template,
+  current_app as app,
+  stream_template_string
+)
+
+
+# Config
+basePath: str = '/dashboard'
+
+_TModel = TypeVar('_TModel', UserModel, SaleModel, TextbookModel)
+_TYValue = TypeVar('_TYValue')
+_YFunc = Callable[[_TModel], _TYValue]
+LabelX = int
+LabelY = int
+
+DateRange = Tuple[datetime, datetime] | datetime | None
+
+
+
+
+# Helper functions
+def getDateRange(dateRange: DateRange = None) -> Tuple[datetime, datetime]:
+  if isinstance(dateRange, datetime):
+    return (
+      dateRange,
+      utc_time.skip('1y', dateRange)
+    )
+
+  if (not isinstance(dateRange, tuple)):
+    return (utc_time.unskip('6months'), utc_time.skip('6months'))
+  
+  return dateRange
+
+
+@lru_cache
+def fetchAll(model: type[_TModel], dateRange: DateRange = None) -> Query:
+  range_ = getDateRange(dateRange)
+  return model.query.filter(and_(
+    (range_[0] <= model.created_at),
+    (model.created_at <= range_[1])
+  ))
+
+
+# @lru_cache
+def drawGraph(
+  model: type[_TModel],
+  axisY: _YFunc[_TModel, _TYValue],
+  title: str,
+  labelCount: Tuple[LabelX, LabelY] = (6, 10),
+  ylabel: str = 'Count',
+  dateRange: DateRange = None
+) -> StringIO:
+  """
+  Draw the graph to an image
+
+  Parameters
+  ----------
+  `model: Model`, required
+    The model to draw a graph on
+  
+  `axisY: (model) -> Any`, required
+    The function to calculate an individual Y-Axis plot point
+  
+  `title: str`, required
+  
+  `labelCount: tuple[Xint, Yint]`, optional (defaults to tuple(6, 10))
+    How many graph labels per axis
+  
+  `ylabel: str`, optional (defaults to 'Count')
+    The Y-Axis title
+  
+  `dateRange: DateRange`, optional (defaults to None)
+    The year to consider, else defaults to the past 12 months
+  
+  Returns
+  -------
+  svg: StringIO
+  """
+  XValue = datetime
+
+  fetched: list[_TModel] = fetchAll(model, dateRange).all()
+  processed: list[Tuple[datetime, Any]] = []
+
+  try:
+    def _processor(m: _TModel) -> Tuple[XValue, _TYValue]:
+      return (
+        m.created_at,
+        axisY(m)
+      )
+    process = ParallelProcessing(_processor, dataset = fetched, max_threads = 4, daemon = True)
+    process.start()
+    processed = process.get_return_values()
+  
+  except Exception:
+    pass
+
+  if len(processed) < 12:
+    # Populate dummy data
+    first = processed[0][0] if len(processed) >= 1 else None
+    processed = [
+      (utc_time.unskip(f'{i}months', first), 0)
+      for i in range(13 - len(processed), 1, -1)
+    ] + processed
+
+
+  # Split format data
+  hashMap = {}
+  for x, y in processed:
+    curr: _TYValue | None = hashMap.get(x)
+    if isinstance(y, (int, float)):
+      # f'{x.month}/{x.year}'
+      hashMap[x] = (curr + y) if isinstance(curr, (int, float)) else y
+  
+  # Plotting
+  plt.figure(figsize = (16, 11))
+  plt.plot(tuple(hashMap.keys()), tuple(hashMap.values()))
+
+  # Curl X and Y points
+  _width = len(hashMap)
+  _height = max(hashMap.values())
+
+  plt.xticks(numpy.arange(0, _width + 1, max(1, round(_width / labelCount[0]))), minor = True)
+  plt.yticks(numpy.arange(0, _height + 1, max(1, round(_height / labelCount[1]))), minor = True)
+
+  # Format X-Axis dates
+  plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+
+  # Label
+  plt.title(title)
+  plt.xlabel('Time')
+  plt.ylabel(ylabel)
+  plt.tick_params('both')
+  plt.autoscale(True, 'both')
+
+  # Set Y-Axis Limit
+  plt.ylim([0, _height + 1])
+
+  # Write to stream
+  f = StringIO()
+  plt.savefig(f, format = 'svg')
+  plt.close()
+
+  return f
+
+
 
 
 # Routes
-basePath: str = '/dashboard'
-
 @app.route(basePath)
 @require_admin
 def dashboard(user: UserModel):
-  
-  return render_template('(admin)/index.html', data = Parser(
+  return render_template('(admin)/index.html')
+
+
+
+
+# Graph generate endpoint
+@app.route(f'{basePath}/graph', methods = ['POST'])
+@require_admin
+@lru_cache
+def dashboard_graph(user: UserModel):
+  req = AdminGraphGetRequest(request)
+
+  match req.graphFor:
+    case 'User':
+      svg = drawGraph(
+        UserModel,
+        lambda _: 1,
+        'Users Accounts Created Over a 12 Month Period',
+        ylabel = 'Accounts Created'
+      )
     
-  ))
+    case 'Revenue':
+      svg = drawGraph(
+        SaleModel,
+        lambda model: model.total_cost,
+        'Revenue Over a 12 Month Period',
+        ylabel = 'Total Revenue ($)'
+      )
+    
+    case 'Textbook':
+      svg = drawGraph(
+        TextbookModel,
+        lambda _: 1,
+        'Textbooks Created Over a 12 Month Period',
+        ylabel = 'Textbooks Created'
+      )
+    
+    case _:
+      return GenericReply(
+        message = 'Invalid graphFor',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  return Response(
+    stream_template_string(svg.getvalue()),
+    status = HTTPStatusCode.OK,
+    mimetype = 'image/svg+xml'
+  )
+
+
 
 
 # Users
-@app.route(f'{basePath}/users')
-def dashboard_users():
-
-  return render_template('(admin)/user_list.html', data = Parser(
-
-  ))
-
-@app.route(f'{basePath}/users/<string:id>')
-def dashboard_user(id: str):
-  id = escape_id(id)
-
-  return render_template('(admin)/user.html', data = Parser(
-    id = id, typeof = type(id)
-  ))
+@app.route(f'{basePath}/users', methods = ['GET'])
+@require_admin
+def dashboard_users(user: UserModel):
+  return render_template('(admin)/user.html')
 
 
-# Store
-@app.route(f'{basePath}/sales')
-def dashboard_sales():
 
-  return render_template('(admin)/sale_list.html', data = Parser(
 
-  ))
+# Revenue
+@app.route(f'{basePath}/revenue', methods = ['GET'])
+@require_admin
+def dashboard_revenue(user: UserModel):
+  return render_template('(admin)/revenue.html')
 
-@app.route(f'{basePath}/sales/<string:id>')
-def dashboard_sale(id: str):
-  id = escape_id(id)
 
-  return render_template('(auth)/sale.html', data = Parser(
 
-  ))
+
+# Textbooks
+@app.route(f'{basePath}/textbooks', methods = ['GET'])
+@require_admin
+def dashboard_textbooks(user: UserModel):
+  return render_template('(admin)/textbook.html')
