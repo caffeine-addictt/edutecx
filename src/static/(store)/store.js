@@ -3,7 +3,7 @@
  * Textbooks List
  * @type {Array.<{
  *   id: string;
- *   author_id: string;
+ *    id: string;
  *   title: string;
  *   description: string;
  *   categories: string[];
@@ -117,7 +117,6 @@ const renderTextbooks = async (filteredList = false) => {
       container.append(htmlToElement(formatString(deepCopy(template), {
         title: textbookData.title,
         id: textbookData.id,
-        // author: textbookData.author
       })));
     });
   };
