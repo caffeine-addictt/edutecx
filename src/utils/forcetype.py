@@ -45,7 +45,14 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
   if origin is Union or origin is Literal:
     for t in get_args(type_):
       interpretated = recursiveValidation(x, t)
-      if interpretated and (origin is not Literal or (origin is Literal and (interpretated == t))):
+
+      isLiteral = origin is Literal
+      isBool = (t is bool) or isinstance(t, bool)
+
+      if isLiteral and isBool and (x is None):
+        return None
+
+      if (interpretated is not None) and ((not isLiteral) or (isLiteral and (interpretated == t or (isBool and isinstance(interpretated, bool))))):
         return interpretated
       
   elif origin:
@@ -103,8 +110,8 @@ def recursiveValidation(x: Any, type_: Any) -> Optional[Any]:
 
       except Exception as e:
         raise e
-
-      if isinstance(interpretated, (type(type_) if isDefaultValue else type_)):
+      
+      if (interpretated is not None) and isinstance(interpretated, (type(type_) if isDefaultValue else type_)):
         return interpretated
       elif isDefaultValue:
         return type_
