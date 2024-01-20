@@ -121,12 +121,12 @@ const renderUser = (user) => {
 
   // Add hooks
   if (user.privilege === 'Admin') {
-    // manageButton.attr('disabled', true);
-    // manageButton.removeClass(['cursor-pointer', 'btn-primary']);
-    // $(newEntry).addClass('table-secondary')
+    manageButton.attr('disabled', true);
+    manageButton.removeClass(['cursor-pointer', 'btn-primary']);
+    $(newEntry).addClass('table-secondary')
     console.log('hi')
   }
-  // else {
+  else {
     manageButton.on('click', () => {
       const username = $('#update-user-username');
       const email = $('#update-user-email');
@@ -194,7 +194,7 @@ const renderUser = (user) => {
       $('#update-user-modal').modal('show');
       return true
     });
-  // };
+  };
 
   $('#user__container').append(newEntry);
 }
