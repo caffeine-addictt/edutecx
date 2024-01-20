@@ -705,7 +705,6 @@ class _TextbookGetData(_APIBase):
   description: str
   categories : list[str]
   price      : float
-  discount   : float
   uri        : str
   status     : str
   cover_image: Optional[str]
