@@ -127,13 +127,22 @@ const fetchSaleData = async (initialRender = false) => {
     $('#sale__container').empty();
     
     response.data.forEach(sale => {
+      const textbooks = sale.textbook_ids.map(textbookId => {
+        return `
+          <option value="${textbookId}">
+            <a href="/textbook/${textbookId}" target="_blank" class="textbook__link">
+              ${textbookId}
+            </a>
+          </option>`;
+      })
+
       const newSaleEntry = htmlToElement(formatString(deepCopy(saleTemplate), {
         'sale_id'     : sale.sale_id,
         'user_id'     : sale.user_id,
         'discount_id' : sale.discount_id,
-        'paid'        : sale.paid,
-        'paid_date'   : (new Date(sale.paid_at)).toDateString(),
-        'total_cost'  : sale.total_cost
+        'paid'        : sale.paid ? (new Date(sale.paid_at)).toDateString() : 'False',
+        'total_cost'  : sale.total_cost,
+        'texbook_ids' : textbooks.join('')
       }))
 
       const textbookIds = $(newSaleEntry).find('#sale__textbookids')

@@ -37,17 +37,17 @@
 
 
 {% macro render_sale_entry() %}
-  <div id="sale__container" class="d-flex flex-row w-100 h-auto align-content-between">
-    <p id="sale__id" class="w-25 h-auto">{sale_id}</p>
-    <p id="sale__userid" class="w-25 h-auto">{user_id}</p>
-    <p id="sale_discountid" class="w-25 h-auto">{discount_id}</p>
+  <tr>
+    <th id="sale__id" class="w-25 h-auto" scope="row">{sale_id}</td>
+    <td id="sale__userid" class="w-25 h-auto">{user_id}</td>
+    <td id="sale_discountid" class="w-25 h-auto">{discount_id}</td>
+    <td id="sale_paid" class="w-25 h-auto">{paid}</td>
+    <td id="sale__totalcost" class="w-25 h-auto">{total_cost}</td>
 
-    <select id="sale__textbookids" class="form-select w-25 h-auto">
-
-    </select>
-
-    <p id="sale__totalcost" class="w-25 h-auto">{total_cost}</p>
-    <p id="sale_paid" class="w-25 h-auto">{paid}</p>
-    <p id="sale__paidate" class="w-25 h-auto">{paid_date}</p>
-  </div>
+    <td class="w-25 h-auto">
+      <select id="sale__textbookids" class="form-select w-100 h-auto">
+        {textbook_ids}
+      </select>
+    </td>
+  </tr>
 {% endmacro %}
