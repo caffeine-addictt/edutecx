@@ -204,7 +204,7 @@ const fetchTextbookData = async (initialRender = false) => {
    *   }>;
    * } | void}
    */
-  const response = await fetch(`/dashboard/get?${searchParams.toString()}`, {
+  const response = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
     method: 'GET',
     headers: {
       'X-CSRF-TOKEN': getAccessToken()
