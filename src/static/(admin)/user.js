@@ -7,6 +7,32 @@
  */
 let times = 0;
 
+/**
+ * The mounted modal callback
+ * True will close the modal, false will not
+ * @type {null | () => Promise<boolean>}
+ */
+let modalCallback;
+
+/**
+ * The mounted modal reset
+ * @type {null | () => void}
+ */
+let modalReset;
+
+
+
+
+/**
+ * Render Modal Error
+ * @param {string} message
+ * @returns {void}
+ */
+const renderModalError = (message) => {
+  $('#update-user-error').text(message);
+  $('#update-user-error-parent').removeClass('d-none');
+};
+
 
 
 
@@ -54,11 +80,11 @@ const fetchGraphURI = async (initialRender = false) => {
   countdown = setInterval(() => {
     if (iterations === iterationsRequired) {
       clearInterval(countdown);
-      $('#graph__button').text('Resend Email');
+      $('#graph__button').text('Redraw Graph');
       $('#graph__button').attr('disabled', false);
     }
     else {
-      $('#graph__button').text(`Resend Email (${iterationsRequired - iterations}s)`);
+      $('#graph__button').text(`Redraw Graph (${iterationsRequired - iterations}s)`);
       iterations++;
     };
   }, 1000);
@@ -91,27 +117,36 @@ const renderUser = (user) => {
     'user_type'    : user.privilege,
   }));
 
+  const manageButton = $(newEntry).find('#user__manage_button');
+
   // Add hooks
   if (user.privilege === 'Admin') {
-    $(newEntry).find('#user__manage_button').remove();
+    // manageButton.attr('disabled', true);
+    // manageButton.removeClass(['cursor-pointer', 'btn-primary']);
+    // $(newEntry).addClass('table-secondary')
+    console.log('hi')
   }
-  else {
-    $(newEntry).find('#user__manage_button').on('click', () => {
+  // else {
+    manageButton.on('click', () => {
       const username = $('#update-user-username');
       const email = $('#update-user-email');
       const status = $('#update-user-status');
       const privilege = $('#update-user-privileges');
 
       // Change modal values
-      $('#modal-long-title').text(`Manage ${user.username}`);
-      username.val(user.username);
-      email.val(user.email);
-      status.val(user.status);
-      privilege.val(user.privilege);
+      modalReset = () => {
+        $('#modal-long-title').text(`Manage ${user.username}`);
+        username.val(user.username);
+        email.val(user.email);
+        status.val(user.status);
+        privilege.val(user.privilege);
+      };
+      if (modalReset) modalReset();
   
       // Add hooks
+      console.log('Mounting modal callback...')
       const submitButton = $('#update-user-modal').find('#confirmed-update-user')
-      submitButton.on('click', async () => {
+      modalCallback = async () => {
         submitButton.attr('disabled', true);
         submitButton.text('Updating...');
 
@@ -129,31 +164,37 @@ const renderUser = (user) => {
             "privilege": user.privilege !== privilege.val() ? privilege.val() : '',
           })
         }).then(res => {
-          if (res.ok) {
+          try {
             return res.json();
+          } catch (e) {
+            renderToast('Failed to update user', 'danger');
+            submitButton.text('Update Account');
+            submitButton.attr('disabled', false);
+            renderModalError('Failed to update user');
+            return false;
           };
         });
 
 
-        if (!response || response.status !== 200) {
-          renderToast(response ? response.message : 'Failed to update user', 'danger');
+        if (response.status !== 200) {
+          renderToast(response.message, 'danger');
+          renderModalError(response.message);
         }
         else {
-          if (response.message) renderToast(response.message, 'success');
+          renderToast(response.message, 'success');
           fetchUserData(true);
         };
 
         submitButton.text('Update Account');
-        $('#update-user-modal').modal('hide');
-        submitButton.off('click');
         submitButton.attr('disabled', false);
-      });
+      };
   
   
       // Show modal
       $('#update-user-modal').modal('show');
+      return true
     });
-  };
+  // };
 
   $('#user__container').append(newEntry);
 }
@@ -239,24 +280,41 @@ const fetchUserData = async (initialRender = false) => {
 
 
 
-// Run in parallel
-$(() => Promise.all([ fetchGraphURI(true), fetchUserData(true) ])
-  .then(values => console.log(values))
-  .catch(err => console.log(err)));
-
-
-$(() => {
+$(async () => {
   // Hooks
   $('#graph__button').on('click', async e => await fetchGraphURI());
   $('#user__button').on('click',  async e => await fetchUserData());
 
   // Modal hooks
+  $('#update-user-modal').find('#confirmed-update-user').on('click', async e => {
+    let closeModal = true;
+
+    try {
+      if (modalCallback) {
+        closeModal = await modalCallback();
+      };
+    }
+    finally {
+      if (closeModal) {
+        $('#update-user-modal').modal('hide');
+        modalCallback = null;
+        modalReset = null;
+      }
+      else if (modalReset) modalReset();
+    };
+  })
   $('#update-user-modal').find('#close-update-user-modal-big').on('click', () => {
-    $('#update-user-modal').find('#confirm-update-user').off('click');
     $('#update-user-modal').modal('hide');
+    modalCallback = null;
   });
   $('#update-user-modal').find('#close-update-user-modal-small').on('click', () => {
-    $('#update-user-modal').find('#confirm-update-user').off('click');
     $('#update-user-modal').modal('hide');
+    modalCallback = null;
   });
+
+
+  // Run in parallel
+  await Promise.all([ fetchGraphURI(true), fetchUserData(true) ])
+  .then(values => console.log(values))
+  .catch(err => console.log(err));
 });
