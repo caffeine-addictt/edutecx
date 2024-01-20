@@ -306,10 +306,12 @@ $(async () => {
   $('#update-user-modal').find('#close-update-user-modal-big').on('click', () => {
     $('#update-user-modal').modal('hide');
     modalCallback = null;
+    modalReset = null;
   });
   $('#update-user-modal').find('#close-update-user-modal-small').on('click', () => {
     $('#update-user-modal').modal('hide');
     modalCallback = null;
+    modalReset = null;
   });
 
 
