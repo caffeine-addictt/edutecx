@@ -73,7 +73,7 @@ const addToToastQueue = (toastData) => {
 const removeFromToastQueue = (toastData) => {
   let queue = getToastQueue();
   queue.some((toastItem, index) => {
-    if (toastItem === toastData) {
+    if (arrayIsEqual(toastItem, toastData)) {
       queue.splice(index, 1);
       localStorage.setItem('toastQueue', JSON.stringify(queue));
       return true;
@@ -207,7 +207,7 @@ const getNotifications = async () => {
  */
 const renderNotifications = async () => {
   const notifications = await getNotifications();
-  console.log(notifications);
+  console.log('Rendering toasts:', notifications);
 
   for (const notification of notifications) {
     const [category, message, startTime] = Array.isArray(notification) ? notification : [null, notification];
