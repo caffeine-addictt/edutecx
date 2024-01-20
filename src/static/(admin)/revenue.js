@@ -121,7 +121,7 @@ const fetchSaleData = async (initialRender = false) => {
   }
   else if (!response?.data || response.data.length === 0) {
     $('#sale__container').empty();
-    $('#sale__container').append('<p class="text-center">No sales found</p>');
+    $('#sale__container').append('<p class="text-center w-100">No sales found</p>');
   }
   else {
     $('#sale__container').empty();

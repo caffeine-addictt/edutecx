@@ -254,7 +254,7 @@ const fetchUserData = async (initialRender = false) => {
   }
   else if (!response?.data || response.data.length === 0) {
     $('#user__container').empty();
-    $('#user__container').append('<p class="text-center">No users found</p>');
+    $('#user__container').append('<p class="text-center w-100">No users found</p>');
   }
   else {
     $('#user__container').empty();

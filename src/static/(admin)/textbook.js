@@ -254,7 +254,7 @@ const fetchTextbookData = async (initialRender = false) => {
   }
   else if (!response?.data || response.data.length === 0) {
     $('#textbook__container').empty();
-    $('#textbook__container').append('<p class="text-center">No textbooks found</p>');
+    $('#textbook__container').append('<p class="text-center w-100">No textbooks found</p>');
   }
   else {
     $('#textbook__container').empty();
