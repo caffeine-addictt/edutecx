@@ -7,6 +7,32 @@
  */
 let times = 0;
 
+/**
+ * The mounted modal callback
+ * True will close the modal, false will not
+ * @type {null | () => Promise<boolean>}
+ */
+let modalCallback;
+
+/**
+ * The mounted modal reset
+ * @type {null | () => void}
+ */
+let modalReset;
+
+
+
+
+/**
+ * Render Modal Error
+ * @param {string} message
+ * @returns {void}
+ */
+const renderModalError = (message) => {
+  $('#update-textbook-error').text(message);
+  $('#update-textbook-error-parent').removeClass('d-none');
+};
+
 
 
 
@@ -114,8 +140,9 @@ const renderTextbook = (textbook) => {
     status.val(textbook.status);
 
     // Add hooks
+    console.log('Mounting modal callback...')
     const submitButton = $('#update-textbook-modal').find('#confirmed-update-textbook')
-    submitButton.on('click', async () => {
+    modalCallback = async () => {
       submitButton.attr('disabled', true);
       submitButton.text('Updating...');
 
@@ -133,29 +160,35 @@ const renderTextbook = (textbook) => {
           discount   : textbook.discount !== parseFloat($('#update-textbook-discount').val()) ? parseFloat($('#update-textbook-discount').val()) : null,
         })
       }).then(res => {
-        if (res.ok) {
+        try {
           return res.json();
+        } catch (e) {
+          renderToast('Failed to update textbook', 'danger');
+          submitButton.text('Update Textbook');
+          submitButton.attr('disabled', false);
+          renderModalError('Failed to update textbook');
+          return false;
         };
       });
 
 
-      if (!response || response.status !== 200) {
-        renderToast(response ? response.message : 'Failed to update textbook', 'danger');
+      if (response.status !== 200) {
+        renderToast(response.message, 'danger');
+        renderModalError(response.message);
       }
       else {
-        if (response.message) renderToast(response.message, 'success');
+        renderToast(response.message, 'success');
         fetchTextbookData(true);
       };
 
       submitButton.text('Update Textbook');
-      $('#update-textbook-modal').modal('hide');
-      submitButton.off('click');
       submitButton.attr('disabled', false);
-    });
+    };
 
 
     // Show modal
     $('#update-textbook-modal').modal('show');
+    return true;
   });
 
 
@@ -220,8 +253,8 @@ const fetchTextbookData = async (initialRender = false) => {
     renderToast('Failed to fetch textbooks!', 'danger');
   }
   else if (!response?.data || response.data.length === 0) {
-    $('#user__container').empty();
-    $('#user__container').append('<p class="text-center">No textbooks found</p>');
+    $('#textbook__container').empty();
+    $('#textbook__container').append('<p class="text-center">No textbooks found</p>');
   }
   else {
     $('#textbook__container').empty();
@@ -258,24 +291,43 @@ const fetchTextbookData = async (initialRender = false) => {
 
 
 
-// Run in parallel
-$(() => Promise.all([ fetchGraphURI(true), fetchTextbookData(true) ])
-  .then(values => console.log(values))
-  .catch(err => console.log(err)));
-
-
-$(() => {
+$(async () => {
   // Hooks
   $('#graph__button').on('click', async e => await fetchGraphURI());
   $('#textbook__button').on('click',  async e => await fetchTextbookData());
 
   // Modal hooks
+  $('#update-tetxbook-modal').find('#confirmed-update-textbook').on('click', async e => {
+    let closeModal = true;
+
+    try {
+      if (modalCallback) {
+        closeModal = await modalCallback();
+      };
+    }
+    finally {
+      if (closeModal) {
+        $('#update-textbook-modal').modal('hide');
+        modalCallback = null;
+        modalReset = null;
+      }
+      else if (modalReset) modalReset();
+    };
+  })
   $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-big').on('click', () => {
-    $('#update-tetxbook-modal').find('#confirm-update-tetxbook').off('click');
     $('#update-tetxbook-modal').modal('hide');
+    modalCallback = null;
+    modalReset = null;
   });
   $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-small').on('click', () => {
-    $('#update-tetxbook-modal').find('#confirm-update-tetxbook').off('click');
     $('#update-tetxbook-modal').modal('hide');
+    modalCallback = null;
+    modalReset = null;
   });
+
+
+  // Run in parallel
+  await Promise.all([ fetchGraphURI(true), fetchTextbookData(true) ])
+    .then(values => console.log(values))
+    .catch(err => console.log(err));
 });
