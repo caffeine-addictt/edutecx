@@ -1,15 +1,54 @@
 <!doctype html>
 
-{# Navbar Content #}
-<nav class='sticky top-0 z-50 h-fit w-full bg-secondary'>
+<!-- Place content in this div, so we dont introduce margin straight into body -->
+<nav class='navbar navbar-expand-lg navbar-light w-100' style="background-color: var(--background-color)">
+  <div class='container-fluid'>
 
-  
-  {# Place content in this div, so we dont introduce margin straight into body #}
-  <div class='d-flex flex-row justify-between px-4 pt-4 pb-2 w-[90%] mx-auto h-fit'>
-    navbar
+    <a class='navbar-brand' href='#'>
+      <img src='{{ url_for("static", filename = "assets/icons/logo_black.png") }}' alt='logo' width='50px' height='50px'>
+    </a>
+
+
+    <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent' aria-controls='navbarSupportedContent' aria-expanded='false' aria-label='Toggle navigation'>
+      <span class='navbar-toggler-icon'></span>
+    </button>
+
+
+    <div class='collapse navbar-collapse' id='navbarSupportedContent'>
+
+      <ul class='navbar-nav me-auto mb-2 mb-lg-0'>
+        <li class='nav-item'>
+          <a class='nav-link active' aria-current='page' href='/store'>Store</a>
+        </li>
+
+        <li class='nav-item'>
+          <a class='nav-link' href='#'>Policy</a>
+        </li>
+        
+        <li class='nav-item'>
+          <a class='nav-link' href='/contact-us' tabindex='-1' aria-disabled='true'>Contact Us</a>
+        </li>
+      </ul>
+
+
+      <form class='d-flex'>
+        <ul class='navbar-nav me-auto mb-2 mb-lg-0'>
+          <li class='nav-item'>
+            <a class='nav-link disabled' href='#' tabindex='-1' aria-disabled='true'>Help</a>
+          </li>
+
+          <li class='nav-item'>
+            <a class='nav-link active text-decoration-underline' href='/login' tabindex='-1' aria-disabled='true'>Login</a>
+          </li>
+
+          <li class='nav-item px-3'>
+            <a class='nav-link active btn btn-outline-dark' href='/register' tabindex='-1' aria-disabled='true'>Register</a>
+          </li>
+        </ul>
+      </form>
+
+    </div>
+
+
   </div>
-
-  
-  {# Scripts #}
-  <script src='{{ url_for("static", filename = "/components/navbar/index.js") }}'></script>
 </nav>
