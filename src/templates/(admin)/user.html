@@ -74,6 +74,7 @@
             <select id="update-user-privileges" class="form-select mb-2">
               <option value="Student">Student</option>
               <option value="Educator">Educator</option>
+              <option value="Admin">Admin</option>
             </select>
 
             <select id="update-user-status" class="form-select mb-2">
@@ -81,6 +82,8 @@
               <option value="Locked">Locked</option>
             </select>
           </form>
+
+          <div id="update-user-error-parent" class="bg-danger text-white rounded p-2 d-none"><span id="update-user-error"></span></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="close-update-user-modal-big">Close</button>
