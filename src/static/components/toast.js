@@ -3,30 +3,6 @@
 // let dangerTemplate = '';
 
 
-/**
- * Toast render starting time in milliseconds From `Date.getTime()`
- * @typedef {number} toastStartTime
-*/
-
-
-/**
- * Toast message string
- * @typedef {string} toastMessage
-*/
-
-
-/**
- * Supported toast categories
- * @typedef {'info' | 'success' | 'danger'} toastCategory
-*/
-
-
-/**
- * Saved toast data format
- * @typedef {[toastCategory | null | string, toastMessage, toastStartTime?]} toastData
- */
-
-
 const maxToasts = 3; // Maximum number of toasts to show at any one time
 const minDisplayTime = 2000; // 2 seconds
 const defaultLiveTime = 5000; // 5 seconds
@@ -54,10 +30,10 @@ const clearToastQueue = () => {
 
 
 /**
-  * Add item to toast queue
-  * @param {toastData} toastData
-  * @returns {void}
-  */
+ * Add item to toast queue
+ * @param {toastData} toastData
+ * @returns {void}
+ */
 const addToToastQueue = (toastData) => {
   let queue = getToastQueue();
   queue.push(toastData);
