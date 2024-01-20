@@ -19,16 +19,18 @@
 
 
 {% macro render_textbook_entry() %}
-  <div id="textbook__container" class="d-flex flex-row w-100 h-auto align-content-between">
-    <a id="textbook__id" href="/textbook/{textbook_id}" class="w-25 h-auto">{textbook_id}</a>
-    <p id="textbook__author" class="w-25 h-auto">{textbook_author}</p>
-    <p id="textbook__title" class="w-25 h-auto">{textbook_title}</p>
-    <p id="textbook__price" class="w-25 h-auto">{textbook_price}</p>
-    <p id="textbook__discount" class="w-25 h-auto">{textbook_discount}</p>
-    <p id="textbook__status" class="w-25 h-auto">{textbook_status}</p>
+  <tr>
+    <th id="textbook__id" class="w-25 h-auto" scope="row"><a href="/textbook/{textbook_id}">{textbook_id}</a></td>
+    <td id="textbook__author" class="w-25 h-auto">{textbook_author}</td>
+    <td id="textbook__title" class="w-25 h-auto">{textbook_title}</td>
+    <td id="textbook__price" class="w-25 h-auto">{textbook_price}</td>
+    <td id="textbook__discount" class="w-25 h-auto">{textbook_discount}</td>
+    <td id="textbook__status" class="w-25 h-auto">{textbook_status}</td>
 
-    <button id="textbook__manage_button" type="button" class="btn btn-primary"> Manage </button>
-  </div>
+    <td id="textbook__manage_button" class="w-25 h-auto">
+      <button id="textbook__manage_button" type="button" class="btn btn-primary"> Manage </button>
+    </td>
+  </tr>
 {% endmacro %}
 
 
