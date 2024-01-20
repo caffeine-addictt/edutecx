@@ -30,11 +30,24 @@
   </div>
 
   {# Users #}
-  <button id="user__button" type="button" class="btn btn-primary"> Reload Users </button>
-  <div id="user__container" >
+  <table class="table table-hover caption-top w-75 mb-5 mx-auto container-fluid">
+    <caption>
+      <button id="user__button" type="button" class="btn btn-primary align-self-end"> Reload Users </button>
+      <button id="user__export" type="button" class="btn btn-outline-dark align-self-end"> Export Users </button>
+    </caption>
 
-  </div>
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Email</th>
+        <th scope="col">Privilege</th>
+        <th scope="col">Status</th>
+        <th scope="col">Manage</th>
+      </tr>
+    </thead>
 
+    <tbody id="user__container" class="table-group-divider"></tbody>
+  </table>
 
 
 

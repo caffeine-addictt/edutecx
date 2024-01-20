@@ -3,14 +3,16 @@
 
 {# User Entry Template #}
 {% macro render_user_entry() %}
-  <div id="user__container" class="d-flex flex-row w-100 h-auto align-content-between">
-    <p id="user__id" class="w-25 h-auto">{user_id}</p>
-    <p id="user__email" class="w-25 h-auto">{user_email}</p>
-    <p id="user__type" class="w-25 h-auto">{user_type}</p>
-    <p id="user__status" class="w-25 h-auto">{user_status}</p>
+  <tr>
+    <th id="user__id" class="w-25 h-auto" scope="row">{user_id}</td>
+    <td id="user__email" class="w-25 h-auto">{user_email}</td>
+    <td id="user__type" class="w-25 h-auto">{user_type}</td>
+    <td id="user__status" class="w-25 h-auto">{user_status}</td>
 
-    <button id="user__manage_button" type="button" class="btn btn-primary"> Manage </button>
-  </div>
+    <td id="user__manage_button" class="w-25 h-auto">
+      <button id="user__manage_button" type="button" class="btn btn-primary"> Manage </button>
+    </td>
+  </tr>
 {% endmacro %}
 
 
