@@ -273,14 +273,14 @@ const fetchTextbookData = async (initialRender = false) => {
     $('#textbook__container').empty();
     $('#update-textbook-category').empty();
 
-    let renderedCategories = [];
+    // let renderedCategories = [];
     response.data.forEach(textbook => {
-      for (const category of textbook.categories) {
-        if (!renderedCategories.includes(category)) {
-          $('#update-textbook-category').append(`<option value="${category}">${category}</option>`);
-          renderedCategories.push(category);
-        };
-      };
+      // for (const category of textbook.categories.concat(['Math', 'Science', 'English', 'Computer Science'])) {
+      //   if (category && !renderedCategories.includes(category)) {
+      //     $('#update-textbook-category').append(`<option value="${category}">${category}</option>`);
+      //     renderedCategories.push(category);
+      //   };
+      // };
       renderTextbook(textbook)
     });
   };
@@ -311,7 +311,7 @@ $(async () => {
   $('#textbook__button').on('click',  async e => await fetchTextbookData());
 
   // Modal hooks
-  $('#update-tetxbook-modal').find('#confirmed-update-textbook').on('click', async e => {
+  $('#update-textbook-modal').find('#confirmed-update-textbook').on('click', async e => {
     let closeModal = true;
 
     try {
@@ -329,14 +329,14 @@ $(async () => {
       else if (modalReset) modalReset();
     };
   })
-  $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-big').on('click', () => {
-    $('#update-tetxbook-modal').modal('hide');
+  $('#update-textbook-modal').find('#close-update-textbook-modal-big').on('click', () => {
+    $('#update-textbook-modal').modal('hide');
     clearModalError();
     modalCallback = null;
     modalReset = null;
   });
-  $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-small').on('click', () => {
-    $('#update-tetxbook-modal').modal('hide');
+  $('#update-textbook-modal').find('#close-update-textbook-modal-small').on('click', () => {
+    $('#update-textbook-modal').modal('hide');
     clearModalError();
     modalCallback = null;
     modalReset = null;
