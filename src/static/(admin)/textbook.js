@@ -166,6 +166,8 @@ const renderTextbook = (textbook) => {
         };
       });
 
+      if (!response) return false;
+
 
       if (response.status !== 200) {
         renderToast(response.message, 'danger');

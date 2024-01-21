@@ -175,6 +175,8 @@ const renderUser = (user) => {
           };
         });
 
+        if (!response) return false;
+
 
         if (response.status !== 200) {
           renderToast(response.message, 'danger');
