@@ -38,9 +38,11 @@ def test_forceTyping():
   # Testing single clause
   assert forcetype('hi', int) == None
   assert forcetype('hi', str) == 'hi'
+  assert forcetype(True, bool) == True
+  assert forcetype(False, bool) == False
 
   # Testing Union types
-  assert forcetype(Exception(), typing.Union[int, str]) == None
+  assert forcetype(Exception(), typing.Union[int, str]) == ''
   assert forcetype('hi', typing.Union[int, str]) == 'hi'
   assert forcetype('hi', typing.Optional[int]) == None
   assert forcetype('hi', typing.Optional[str]) == 'hi'
@@ -49,6 +51,8 @@ def test_forceTyping():
   assert forcetype('hi', typing.Literal['hi', 'bye']) == 'hi'
   assert forcetype(None, typing.Literal[True]) == None
   assert forcetype([], typing.Literal['']) == None
+  assert forcetype(True, typing.Literal[True]) == True
+  assert forcetype(False, typing.Literal[False]) == False
 
   # Testing sequence declared types
   assert forcetype('hi', list[str]) == None
@@ -79,7 +83,7 @@ def test_forceTyping():
   # Use Cases (Booleans)
   assert forcetype(None, typing.Literal['y', 'n', True, False] | None) == None
   assert forcetype(None, typing.Literal['y', 'n', True, False]) == None
-  assert forcetype(False, typing.Literal['y', 'n', True, False]) == None
+  assert forcetype(False, typing.Literal['y', 'n', True, False]) == False
   assert forcetype(True, typing.Literal['y', 'n', True, False]) == True
 
   assert forcetype(None, '') == 'None'
