@@ -4,8 +4,8 @@
 <nav class='navbar navbar-expand-lg navbar-light w-100' style='background-color: var(--background-color)'>
   <div class='container-fluid'>
 
-    <a class='navbar-brand' href='#'>
-      <img src='{{ url_for('static', filename = 'assets/icons/logo_black.png') }}' alt='logo' width='50px' height='50px'>
+    <a class='navbar-brand' href='/'>
+      <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
     </a>
 
 
@@ -33,16 +33,13 @@
 
       <form class='d-flex'>
         <ul class='navbar-nav me-auto mb-2 mb-lg-0'>
-          <li class='nav-item'>
-            <a class='nav-link disabled' href='#' tabindex='-1' aria-disabled='true'>Help</a>
-          </li>
 
           <li class='nav-item'>
             <a class='nav-link active text-decoration-underline' href='/login' tabindex='-1' aria-disabled='true'>Login</a>
           </li>
 
-          <li class='nav-item px-3'>
-            <a class='nav-link active btn btn-outline-dark' href='/register' tabindex='-1' aria-disabled='true'>Register</a>
+          <li class='nav-item px-3 w-2'>
+            <a class='nav-link active register btn btn-outline-dark text-white px-3' href='/register' tabindex='-1' aria-disabled='true'>Register</a>
           </li>
         </ul>
       </form>
