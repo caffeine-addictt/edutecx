@@ -27,7 +27,7 @@
 {% macro render_text_field(field) %}
   <div class="form__group d-flex flex-column w-auto">
     {{ render_label(field) }}
-    {{ field(class_="form__field") }}
+    {{ field(class_="form__field form-control") }}
     {{ render_errors(field) }}
   </div>
 {% endmacro %}
@@ -43,6 +43,6 @@
 
 {% macro render_submit(field) %}
   <div class="form__group w-auto">
-    {{ field(class="btn btn-default btn-submit") }}
+    {{ field(class="btn btn-dark btn-submit") }}
   </div>
 {% endmacro %}
