@@ -6,7 +6,7 @@ a {
     color: inherit;
   }
 }
-
+// class selectors
 .classtile {
   width: 45%;
   &:hover {
@@ -17,23 +17,17 @@ a {
 
 // id selectors
 #maincontainer {
-  margin: 3vh 7vw;
+  margin: 3vh 10vw;
   background-color: #f2f2f2;
 }
 #myclassroomstitle {
-  display: flex;
-  justify-content: center;
   margin-top: 20px; 
   h1 {
     font-size: 1.3rem;
     white-space: nowrap;
   }
 }
-#createcontainer {
-  display: flex;
-  justify-content: flex-end;
-}
 #createanchor {
-  width: 35%;
+  width: 80%;
 }
 
