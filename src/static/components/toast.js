@@ -13,7 +13,7 @@ const toastExpiryTime = 1000 * 60 * 5; // 5 minutes
 
 /**
  * Fetch Toast Queue
- * @returns {toastData[]}
+ * @returns {toastQueueEntry[]}
  */
 const getToastQueue = () => {
   return JSON.parse(localStorage.getItem('toastQueue')) || new Array();
@@ -31,25 +31,25 @@ const clearToastQueue = () => {
 
 /**
  * Add item to toast queue
- * @param {toastData} toastData
+ * @param {toastQueueEntry} toastQueueEntry
  * @returns {void}
  */
-const addToToastQueue = (toastData) => {
+const addToToastQueue = (toastQueueEntry) => {
   let queue = getToastQueue();
-  queue.push(toastData);
+  queue.push(toastQueueEntry);
   localStorage.setItem('toastQueue', JSON.stringify(queue));
 };
 
 
 /**
  * Remove first toast found in queue
- * @param {toastData} toastData
+ * @param {toastQueueEntry} toastQueueEntry
  * @returns {void}
  */
-const removeFromToastQueue = (toastData) => {
+const removeFromToastQueue = (toastQueueEntry) => {
   let queue = getToastQueue();
   queue.some((toastItem, index) => {
-    if (arrayIsEqual(toastItem, toastData)) {
+    if (arrayIsEqual(toastItem, toastQueueEntry)) {
       queue.splice(index, 1);
       localStorage.setItem('toastQueue', JSON.stringify(queue));
       return true;
@@ -93,10 +93,13 @@ const renderToast = (message, category, displayTime, initialRender = false) => {
   const liveTime = displayTime || defaultLiveTime;
   
   // Add to toast queue (in case of reload)
+  /** @type {toastQueueEntry} */
   const savedPayload = [category, message, displayTime || start.getTime()]
   if (!initialRender || (initialRender && !inArray(savedPayload, getToastQueue()))) {
     addToToastQueue(savedPayload);
   };
+
+  console.log(savedPayload)
 
 
   /** @type {HTMLElement} */
@@ -146,19 +149,13 @@ const renderToast = (message, category, displayTime, initialRender = false) => {
  * Fetch notifications
  * [category, message] or message
  *
- * @returns {Promise<Array.<
- *   string | toastData
- * >>}
+ * @returns {Promise<toastAPIGet>}
  */
 const getNotifications = async () => {
 
   /**
    * Fetched notifications
-   * @type {{
-   *   status: 200;
-   *   message: string;
-   *   data: Array.<toastMessage | toastData>;
-   * } | null}
+   * @type {APIJSON<toastAPIGet> | null}
    */
   const data = await fetch('/api/v1/notify/get')
     .then(r => {
@@ -166,7 +163,7 @@ const getNotifications = async () => {
         return r.json();
       };
     });
-
+  
   const httpNotif = (!data || (data.status !== 200)) ? [['danger', 'Failed to fetch notifications']] : data.data;
 
   return new Array(...httpNotif, ...getToastQueue());
@@ -218,6 +215,4 @@ const renderNotifications = async () => {
 
 
 
-$(async () => {
-  await renderNotifications();
-});
+$(async () => await renderNotifications());

@@ -23,3 +23,9 @@
  * @property {string} message
  * @property {string} type
  */
+
+
+/**
+ * Toast format saved in queue
+ * @typedef {[toastCategory, toastMessage, toastStartTime?]} toastQueueEntry
+ */
