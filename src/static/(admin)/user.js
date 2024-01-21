@@ -20,6 +20,12 @@ let modalCallback;
  */
 let modalReset;
 
+/**
+ * User cooldown
+ * @type {ReturnType<typeof setInterval>}
+ */
+let cooldownManager;
+
 
 
 
@@ -275,11 +281,12 @@ const fetchUserData = async (initialRender = false) => {
   };
   
   // Countdown
-  let countdown;
+  clearInterval(cooldownManager);
+  
   let iterations = 0;
-  countdown = setInterval(() => {
+  cooldownManager = setInterval(() => {
     if (iterations === 30) {
-      clearInterval(countdown);
+      clearInterval(cooldownManager);
       $('#user__button').text('Reload Users');
       $('#user__button').attr('disabled', false);
     }

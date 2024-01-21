@@ -20,6 +20,12 @@ let modalCallback;
  */
 let modalReset;
 
+/**
+ * User cooldown
+ * @type {ReturnType<typeof setInterval>}
+ */
+let cooldownManager;
+
 
 
 
@@ -280,11 +286,12 @@ const fetchTextbookData = async (initialRender = false) => {
   };
   
   // Countdown
-  let countdown;
+  clearInterval(cooldownManager);
+  
   let iterations = 0;
-  countdown = setInterval(() => {
+  cooldownManager = setInterval(() => {
     if (iterations === 30) {
-      clearInterval(countdown);
+      clearInterval(cooldownManager);
       $('#textbook__button').text('Reload Textbooks');
       $('#textbook__button').attr('disabled', false);
     }
