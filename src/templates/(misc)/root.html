@@ -5,5 +5,116 @@
 {# Body #}
 {% block mainContent %}
 {# Everything goes here #}
+<div class='overlay-container'>
+  <img src='{{ url_for("static", filename = "assets/images/book1.png") }}' alt='image' class='img-fluid'>
+  <div class='overlay-text'>
+    <h1 style='font-size:6em;'>EduTecX</h1>
+    <p style='font-size:1.5em;'>Your Choice of Learning</p>
+  </div>
+</div>
 
+<!--About EduTecX-->
+<div class='px-4 py-5 my-5 text-center' style='font-family: var(--font)'>
+  <h1 class='display-5 fw-bold my-3'>EduTecX</h1>
+  <div class='col-lg-6 mx-auto'>
+    <p class='lead mb-4'>At EduTecX, we're revolutionizing the learning experience by embracing digital textbooks on our online education platform. Our commitment to sustainability drives us to minimize environmental impact while providing a dynamic and interactive learning environment.</p>
+    <p class='lead mb-4'>At EduTecX, we believe in the power of education to shape a brighter future. Join us on this journey as we redefine the way knowledge is shared, making learning not only effective but also environmentally conscious. Together, let's pave the way for a sustainable and connected educational ecosystem.
+    </p>
+    <div class='d-grid gap-2 d-sm-flex justify-content-sm-center my-3'>
+      <a href='/register' class='btn btn-dark btn-lg px-4 gap-3 px-5'>Join Us</a>
+    </div>
+  </div>
+</div>
+ 
+<!-- Parallax Section 1 -->
+<section id='section1' class='parallax' style='background-image: url("{{ url_for("static", filename = "assets/images/book3.png") }}"); height:700px;'>
+  <div class='parallax-text' style='font-family: var(--font)'>
+    <!--Type of Accounts-->
+    <div class='features container px-5 py-5 my-5 bg-white rounded' id='hanging-icons' style='color:black;'>
+      <h2 class='pb-2 border-bottom text-center'>Register An Account With Us</h2>
+      <div class='row g-4 py-5'>
+        <div class='col-lg-6 d-flex align-items-center justify-content-center'>
+          <div class='student icon-square bg-light text-dark flex-shrink-0 me-3 align-middle'>
+            <!-- Your content for the 'Student' section -->
+          </div>
+          <div>
+            <h2 class='text-center'>Student</h2>
+            <p class='text-center'>To be able to join classrooms, view assignments, and read our digital textbooks</p>
+            <a href='/register' class='btn btn-dark btn-lg px-4 gap-3 px-5y d-block mx-auto'>
+              Join as a Student
+            </a>
+          </div>
+        </div>
+        <div class='col-lg-6 d-flex align-items-center justify-content-center'>
+          <div class='educator icon-square bg-light text-dark flex-shrink-0 me-3 align-middle'>
+            <!-- Your content for the 'Educator' section -->
+          </div>
+          <div>
+            <h2 class='text-center'>Educators</h2>
+            <p class='text-center'>To be able to organize classrooms, produce assignments, and manage student details</p>
+            <a href='/register' class='btn btn-dark btn-lg px-4 gap-3 px-5y d-block mx-auto'>
+              Join as an Educator
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<!--Membership-->
+<div class='container py-3 my-5' style='font-family: var(--font)'>
+  <div class='pricing-header p-3 pb-md-4 mx-auto text-center'>
+    <h1 class='display-4 fw-normal'>Our Membership</h1>
+    <p class='fs-5 text-muted'>Want access to more privileges?</p>
+  </div>
+  <main>
+    <div class='row row-cols-1 row-cols-md-2 mb-2 text-center'>
+      <div class='col'>
+        <div class='card mb-4 rounded-3 shadow-sm'>
+          <div class='card-header py-3'>
+            <h4 class='my-0 fw-normal'>Free</h4>
+          </div>
+          <div class='card-body'>
+            <h1 class='card-title pricing-card-title'>$0<small class='text-muted fw-light'>/mo</small></h1>
+            <ul class='list-unstyled mt-3 mb-4'>
+              <li>Limited to 5 students a classroom</li>
+              <li>Limited to 5 classrooms creation</li>
+            </ul>
+            <a href='/register' class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto'>
+             Sign Up for Free
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class='col'>
+        <div class='card mb-4 rounded-3 shadow-sm border-dark'>
+          <div class='card-header py-3 text-white bg-dark border-dark'>
+            <h4 class='my-0 fw-normal'>Read Plan</h4>
+          </div>
+          <div class='card-body'>
+            <h1 class='card-title pricing-card-title'>$29<small class='text-muted fw-light'>/mo</small></h1>
+            <ul class='list-unstyled mt-3 mb-4'>
+              <li>Unlimited students in a classroom</li>
+              <li>Unlimited classroom creation</li>
+            </ul>
+            <a href='/register' class='btn btn-dark btn-lg px-4 gap-3 px-5y d-block mx-auto'>
+              Upgrade Now
+             </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<br>
+<br>
+
+<!-- Parallax Section 3 -->
+<section id='section3' class='parallax' style='background-image: url("{{ url_for("static", filename = "assets/images/book4.png") }}"); font-family: var(--font)'>
+  <div class='parallax-text'>
+    <p class='h1'>Shaping the Future of Learning, Sustainably.</p>
+  </div>
+</section>
 {% endblock %}
