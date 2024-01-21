@@ -1,6 +1,7 @@
 :root {
   --background-color: rgba(250,249,245, 1);
   --color: rgba(15,15,15,1);
+  --font: 'poppins';
 }
 
 @media (prefers-color-scheme: dark) {
@@ -75,4 +76,23 @@
   height: 50%;
   height: auto;
   display: block;
+}
+
+.parallax {
+  height: 350px;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+  margin-top: -56px; /* Adjust based on your navbar height */
+}
+
+.parallax-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  text-align: center;
 }
