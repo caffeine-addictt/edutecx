@@ -164,8 +164,8 @@ def textbook_create_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  uplaod = request.files.get('upload')
-  if not uplaod:
+  upload = request.files.get('upload')
+  if not upload:
     return GenericReply(
       message = 'Missing upload',
       status = HTTPStatusCode.BAD_REQUEST
@@ -174,7 +174,7 @@ def textbook_create_api(user: UserModel):
 
   newTextbook = TextbookModel(
     author = author,
-    file = uplaod,
+    file = upload,
     title = req.title,
     description = req.description,
     price = req.price,
