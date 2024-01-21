@@ -2,8 +2,9 @@
 API Parser
 """
 
+import inspect
 from .forcetype import recursiveValidation
-from typing import Any, Union, Literal, Optional, Mapping
+from typing import Any, Union, Literal, Optional, Mapping, get_origin, get_args
 
 from requests import Response as ReqResponse
 from flask import Request, Response as FlaskResponse
@@ -102,7 +103,7 @@ class _APIParser(_APIBase):
         continue
 
       interpreted = recursiveValidation(variable, variableType)
-      if (interpreted is not None) or self.get('ignore_none'):
+      if (interpreted is not None) or ((get_origin(variableType) is Union) and (issubclass(get_args(variableType)[-1], type(None)))):
         self.__dict__[variableName] = interpreted
       else:
         raise BadRequest('%s is not valid. Expected %s, Got %s' % (variableName, variableType, variable))
@@ -765,11 +766,11 @@ class TextbookEditRequest(_APIRequest):
   """API Request for textbook editing"""
   ignore_none = True
   textbook_id: str
-  title      : str | None
-  description: str | None
-  categories : Optional[list[str]]
-  price      : Optional[float]
-  discount   : Optional[float]
+  title      : Optional[str]
+  description: Optional[str]
+  categories : Optional[list[str]] = None
+  price      : Optional[float] = None
+  discount   : Optional[float] = None
 
 TextbookEditReply = GenericReply
 TextbookEditResponse = GenericResponse

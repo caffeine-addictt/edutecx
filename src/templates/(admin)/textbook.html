@@ -24,16 +24,31 @@
 {% block mainContent %}
 
   {# Graph #}
-  <button id="graph__button" type="button" class="btn btn-primary"> Redraw Graph </button>
   <div id="graph-container" class="mx-auto my-2 ratio-16x9 w-50 h-50">
     <div id="svg-render" class="w-100 h-100"></div>
   </div>
+  <button id="graph__button" type="button" class="btn btn-primary w-25 mx-auto"> Redraw Graph </button>
 
   {# Textbooks #}
-  <button id="textbook__button" type="button" class="btn btn-primary"> Reload Textbooks </button>
-  <div id="textbook__container" >
+  <table class="table table-hover caption-top w-75 mb-5 mx-auto container-fluid">
+    <caption>
+      <button id="textbook__button" type="button" class="btn btn-primary align-self-end"> Reload textbooks </button>
+      <button id="textbook__export" type="button" class="btn btn-outline-dark align-self-end"> Export textbooks </button>
+    </caption>
 
-  </div>
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Author</th>
+        <th scope="col">Title</th>
+        <th scope="col">Price</th>
+        <th scope="col">Status</th>
+        <th scope="col">Manage</th>
+      </tr>
+    </thead>
+
+    <tbody id="textbook__container" class="table-group-divider"></tbody>
+  </table>
 
 
 
@@ -64,11 +79,9 @@
               <option value="Unavailable">Unavailable</option>
               <option value="DMCA">DMCA</option>
             </select>
-
-            <select id="update-textbook-category" class="form-select mb-2" multiple>
-              <option value="Computer Science">Computer Science</option>
-            </select>
           </form>
+
+          <div id="update-textbook-error-parent" class="bg-danger text-white rounded p-2 d-none"><span id="update-textbook-error"></span></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="close-update-textbook-modal-big">Close</button>

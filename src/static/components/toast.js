@@ -3,30 +3,6 @@
 // let dangerTemplate = '';
 
 
-/**
- * Toast render starting time in milliseconds From `Date.getTime()`
- * @typedef {number} toastStartTime
-*/
-
-
-/**
- * Toast message string
- * @typedef {string} toastMessage
-*/
-
-
-/**
- * Supported toast categories
- * @typedef {'info' | 'success' | 'danger'} toastCategory
-*/
-
-
-/**
- * Saved toast data format
- * @typedef {[toastCategory | null | string, toastMessage, toastStartTime?]} toastData
- */
-
-
 const maxToasts = 3; // Maximum number of toasts to show at any one time
 const minDisplayTime = 2000; // 2 seconds
 const defaultLiveTime = 5000; // 5 seconds
@@ -37,7 +13,7 @@ const toastExpiryTime = 1000 * 60 * 5; // 5 minutes
 
 /**
  * Fetch Toast Queue
- * @returns {toastData[]}
+ * @returns {toastQueueEntry[]}
  */
 const getToastQueue = () => {
   return JSON.parse(localStorage.getItem('toastQueue')) || new Array();
@@ -54,26 +30,26 @@ const clearToastQueue = () => {
 
 
 /**
-  * Add item to toast queue
-  * @param {toastData} toastData
-  * @returns {void}
-  */
-const addToToastQueue = (toastData) => {
+ * Add item to toast queue
+ * @param {toastQueueEntry} toastQueueEntry
+ * @returns {void}
+ */
+const addToToastQueue = (toastQueueEntry) => {
   let queue = getToastQueue();
-  queue.push(toastData);
+  queue.push(toastQueueEntry);
   localStorage.setItem('toastQueue', JSON.stringify(queue));
 };
 
 
 /**
  * Remove first toast found in queue
- * @param {toastData} toastData
+ * @param {toastQueueEntry} toastQueueEntry
  * @returns {void}
  */
-const removeFromToastQueue = (toastData) => {
+const removeFromToastQueue = (toastQueueEntry) => {
   let queue = getToastQueue();
   queue.some((toastItem, index) => {
-    if (toastItem === toastData) {
+    if (arrayIsEqual(toastItem, toastQueueEntry)) {
       queue.splice(index, 1);
       localStorage.setItem('toastQueue', JSON.stringify(queue));
       return true;
@@ -117,10 +93,13 @@ const renderToast = (message, category, displayTime, initialRender = false) => {
   const liveTime = displayTime || defaultLiveTime;
   
   // Add to toast queue (in case of reload)
+  /** @type {toastQueueEntry} */
   const savedPayload = [category, message, displayTime || start.getTime()]
   if (!initialRender || (initialRender && !inArray(savedPayload, getToastQueue()))) {
     addToToastQueue(savedPayload);
   };
+
+  console.log(savedPayload)
 
 
   /** @type {HTMLElement} */
@@ -170,19 +149,13 @@ const renderToast = (message, category, displayTime, initialRender = false) => {
  * Fetch notifications
  * [category, message] or message
  *
- * @returns {Promise<Array.<
- *   string | toastData
- * >>}
+ * @returns {Promise<toastAPIGet>}
  */
 const getNotifications = async () => {
 
   /**
    * Fetched notifications
-   * @type {{
-   *   status: 200;
-   *   message: string;
-   *   data: Array.<toastMessage | toastData>;
-   * } | null}
+   * @type {APIJSON<toastAPIGet> | null}
    */
   const data = await fetch('/api/v1/notify/get')
     .then(r => {
@@ -190,7 +163,7 @@ const getNotifications = async () => {
         return r.json();
       };
     });
-
+  
   const httpNotif = (!data || (data.status !== 200)) ? [['danger', 'Failed to fetch notifications']] : data.data;
 
   return new Array(...httpNotif, ...getToastQueue());
@@ -207,7 +180,7 @@ const getNotifications = async () => {
  */
 const renderNotifications = async () => {
   const notifications = await getNotifications();
-  console.log(notifications);
+  console.log('Rendering toasts:', notifications);
 
   for (const notification of notifications) {
     const [category, message, startTime] = Array.isArray(notification) ? notification : [null, notification];
@@ -242,6 +215,4 @@ const renderNotifications = async () => {
 
 
 
-$(async () => {
-  await renderNotifications();
-});
+$(async () => await renderNotifications());

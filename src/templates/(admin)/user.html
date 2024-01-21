@@ -24,17 +24,30 @@
 {% block mainContent %}
 
   {# Graph #}
-  <button id="graph__button" type="button" class="btn btn-primary"> Redraw Graph </button>
   <div id="graph-container" class="mx-auto my-2 ratio-16x9 w-50 h-50">
     <div id="svg-render" class="w-100 h-100"></div>
   </div>
+  <button id="graph__button" type="button" class="btn btn-primary w-25 mx-auto"> Redraw Graph </button>
 
   {# Users #}
-  <button id="user__button" type="button" class="btn btn-primary"> Reload Users </button>
-  <div id="user__container" >
+  <table class="table table-hover caption-top w-75 mb-5 mx-auto container-fluid">
+    <caption>
+      <button id="user__button" type="button" class="btn btn-primary align-self-end"> Reload Users </button>
+      <button id="user__export" type="button" class="btn btn-outline-dark align-self-end"> Export Users </button>
+    </caption>
 
-  </div>
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Email</th>
+        <th scope="col">Privilege</th>
+        <th scope="col">Status</th>
+        <th scope="col">Manage</th>
+      </tr>
+    </thead>
 
+    <tbody id="user__container" class="table-group-divider"></tbody>
+  </table>
 
 
 
@@ -61,6 +74,7 @@
             <select id="update-user-privileges" class="form-select mb-2">
               <option value="Student">Student</option>
               <option value="Educator">Educator</option>
+              <option value="Admin">Admin</option>
             </select>
 
             <select id="update-user-status" class="form-select mb-2">
@@ -68,6 +82,8 @@
               <option value="Locked">Locked</option>
             </select>
           </form>
+
+          <div id="update-user-error-parent" class="bg-danger text-white rounded p-2 d-none"><span id="update-user-error"></span></div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="close-update-user-modal-big">Close</button>
