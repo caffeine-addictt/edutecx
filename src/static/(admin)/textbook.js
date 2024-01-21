@@ -104,7 +104,6 @@ const fetchGraphURI = async (initialRender = false) => {
  *   description: string;
  *   categories: string[];
  *   price: number;
- *   discount: number;
  *   uri: string;
  *   status: 'Uploading' | 'Uploaded';
  *   cover_image: string | null;
@@ -119,7 +118,6 @@ const renderTextbook = (textbook) => {
     'textbook_author'   : textbook.author_id,
     'textbook_title'    : textbook.title,
     'textbook_price'    : textbook.price,
-    'textbook_discount' : textbook.discount,
     'textbook_status'   : textbook.status
   }));
 
@@ -128,7 +126,6 @@ const renderTextbook = (textbook) => {
     const title = $('#update-textbook-title');
     const categories = $('#update-textbook-categories');
     const price = $('#update-textbook-price');
-    const discount = $('#update-textbook-discount');
     const status = $('#update-textbook-status');
 
     // Change modal values
@@ -136,7 +133,6 @@ const renderTextbook = (textbook) => {
     title.val(textbook.title);
     categories.val(textbook.categories);
     price.val(textbook.price);
-    discount.val(textbook.discount);
     status.val(textbook.status);
 
     // Add hooks
@@ -157,7 +153,6 @@ const renderTextbook = (textbook) => {
           title      : textbook.title !== $('#update-textbook-title').val() ? $('#update-textbook-title').val() : null,
           categories : textbook.categories !== $('#update-textbook-categories').val() ? $('#update-textbook-categories').val() : null,
           price      : textbook.price !== parseFloat($('#update-textbook-price').val()) ? parseFloat($('#update-textbook-price').val()) : null,
-          discount   : textbook.discount !== parseFloat($('#update-textbook-discount').val()) ? parseFloat($('#update-textbook-discount').val()) : null,
         })
       }).then(res => {
         try {
@@ -228,7 +223,6 @@ const fetchTextbookData = async (initialRender = false) => {
    *     description: string;
    *     categories: string[];
    *     price: number;
-   *     discount: number;
    *     uri: string;
    *     status: 'Uploading' | 'Uploaded';
    *     cover_image: string | null;
