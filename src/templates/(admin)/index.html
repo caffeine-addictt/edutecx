@@ -10,9 +10,49 @@
 
 <!-- Body -->
 {% block mainContent %}
-  <div class="d-flex gap-5 flex-row mx-auto my-auto">
-    <a href="/dashboard/users">Users</a>
-    <a href="/dashboard/revenue">Revenue</a>
-    <a href="/dashboard/textbooks">Textbooks</a>
+  <div class="d-flex gap-5 flex-wrap align-items-center justify-content-center mx-auto my-auto" style="min-height: calc(100vh - 64px)">
+
+    <div class="card px-3 py-2" style="width: fit-content; max-width: 30rem;">
+      <div class="card-header">
+        Users
+      </div>
+      <div class="card-body">
+        <ol>
+          <li>Manage User accounts</li>
+          <li>View User statistics</li>
+        </ol>
+      </div>
+
+      <a href="/dashboard/users" class="btn btn-primary">View Users</a>
+    </div>
+
+    <div class="card px-3 py-2" style="width: fit-content; max-width: 30rem;">
+      <div class="card-header">
+        Textbooks
+      </div>
+
+      <div class="card-body">
+        <ol>
+          <li>Manage Textbook information</li>
+          <li>View Textbook statistics</li>
+        </ol>
+      </div>
+
+      <a href="/dashboard/textbooks" class="btn btn-primary">View Textbooks</a>
+    </div>
+
+    <div class="card px-3 py-2" style="width: fit-content; max-width: 30rem;">
+      <div class="card-header">
+        Revenue
+      </div>
+
+      <div class="card-body">
+        <ol>
+          <li>View Revenue statistics</li>
+        </ol>
+      </div>
+
+      <a href="/dashboard/revenue" class="btn btn-primary">View Revenue</a>
+    </div>
   </div>
 {% endblock %}
