@@ -12,13 +12,6 @@
 {% block mainContent %}
   <div id="store__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-100 h-100">
 
-    {% if (user and ((user.privilege == 'Admin') or (user.id == textbook.author_id))) %}
-      {# Render Delete button #}
-      <button type="button" class="btn btn-danger" id="delete-textbook-button">
-        Delete
-      </button>
-    {% endif %}
-
     {# Delete Textbook Modal #}
     <div class="modal fade" id="delete-textbook-modal" tabindex="-1" aria-labelledby="deleteTextbookModal" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
@@ -41,28 +34,41 @@
       </div>
     </div>
 
-    {% if (textbook.cover_image and (textbook.cover_image.status == 'Uploaded')) %}
-      {# Cover Image #}
-      <div id="store__description" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-100 h-25">
-      <img src='{{ textbook.cover_image.uri }}'/>
-        <p></p>
-      </div>
-    {% endif %}
+   
       
-
-    {# Title #}
-    <div id="store__title" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-100 h-25">
-      <h1>{{ textbook.title }}</h1>
+    <div class='container '>
+      <div class='row'>
+        {% if (textbook.cover_image and (textbook.cover_image.status == 'Uploaded')) %}
+          {# Cover Image #}
+          <div class="col-md-4 mx-auto">
+            <div id="store__description" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-auto h-auto">
+              <img src='{{ textbook.cover_image.uri }}' class='img-fluid' alt='Book Cover'/>
+              <p></p>
+            </div>
+          </div>
+        {% endif %}
+    
+        {# Title #}
+        <div class="col-md-8 mx-auto m-auto">
+          <div id="store__title" class="d-flex flex-row gap-2 ratio-16x9 w-auto h-auto">
+            <h1>{{ textbook.title }}</h1>
+          </div>
+    
+          {# Textbook Description #}
+          <div id="store__description" class="d-flex flex-row gap-2 ratio-16x9 w-auto h-auto">
+            <p>{{ textbook.description }}</p>
+          </div>
+    
+          {% if (user and ((user.privilege == 'Admin') or (user.id == textbook.author_id))) %}
+            {# Render Delete button #}
+            <button type="button" class="btn btn-danger h-auto w-25" id="delete-textbook-button">
+              Delete
+            </button>
+          {% endif %}
+        </div>
+        <!-- TODO: Add more details with styling here -->
+      </div>
     </div>
-
-    {# Textbook Description #}
-    <div id="store__description" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-100 h-25">
-      <p>{{ textbook.description }}</p>
-    </div>
-
-    <!-- TODO: Add more details with styling here -->
-
-  </div>
 {% endblock %}
 
 
