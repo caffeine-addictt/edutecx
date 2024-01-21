@@ -4,36 +4,69 @@
 
 {# Title #}
 {% block title %}
-  Classroom - EduTecX
+Classroom - EduTecX
 {% endblock %}
 
 {# Styles #}
 {% block styles %}
-  <link href='{{ url_for("static", filename = "/(classroom)/classroom.scss") }}' rel='stylesheet/less' />
+<link href='{{ url_for("static", filename = "/(classroom)/classroom.scss") }}' rel='stylesheet/less' />
 {% endblock %}
 
 {# Body #}
 {% block mainContent %}
-  <div>
-    <div id="class_info" class="container mt-2">
-      <div class="row">
-        <div class="col-4">
-          
-        </div>
-        <div class="col-4">
-          <h1>{{ classroom.title }}</h1>
+<div id="main-container">
+  <div id="class-info" class="container-fluid mt-4 w-75">
+    <div class="row mx-4">
+      <div class="col-3">
+
+      </div>
+      <div class="col-6 my-2">
+        <h3>{{ classroom.title }}</h3>
           <p>{{ classroom.description }}</p>
           <p></p>
+      </div>
+      <div class="col-3 d-flex justify-content-end" id="editcontainer">
+        <a href="/classrooms/edit/{{ classroom.id }}" id="editanchor">
+          <button class="btn custom-btn-2 align-middle" id="editbutton">Edit</button>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div id="class-work" class="container-fluid w-75">
+    <div class="row">
+      <div class="col-md-6 my-3">
+        <div class="card p-3">
+
+          {# textbooks for class #}
+          <div>
+            <h5>Textbooks for {{ classroom.title }}</h5>
+            <hr>
+
+          </div>
+          {# announcements #}
+          <div>
+            <h5>Announcements</h5>
+            <hr>
+          </div>
         </div>
-        <div class="col-4">
-          <a href="/classrooms/edit/{{ classroom.id }}">
-            <button class="btn custom-btn-2 .align-middle" id="editbutton">Edit</button>
-          </a>
+        
+      </div>
+
+      <div class="col-md-6 my-3">
+        {# assignments #}
+        <div class="card p-3">
+          <div class="row">
+            <h5 class="col-8">Pending Assignments</h5>
+            <h5 class="col-4 text-end">Due Date</h5>
+          </div>
+          
+          <hr>
         </div>
       </div>
     </div>
   </div>
-  <!-- <div id="classroom__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
+</div>
+<!-- <div id="classroom__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
     classroom content
   </div> -->
 {% endblock %}
@@ -41,9 +74,9 @@
 
 {# Scripts #}
 {% block scripts %}
-  {# injected macros to variables #}
-  <script>
-    
-  </script> 
-  <script src="{{ url_for('static', filename = '(classroom)/classroom.js') }}"></script>
+{# injected macros to variables #}
+<script>
+
+</script>
+<script src="{{ url_for('static', filename = '(classroom)/classroom.js') }}"></script>
 {% endblock %}
