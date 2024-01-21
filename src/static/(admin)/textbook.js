@@ -34,6 +34,16 @@ const renderModalError = (message) => {
 };
 
 
+/**
+ * Clear Modal Error
+ * @returns {void}
+ */
+const clearModalError = () => {
+  $('#update-user-error').text('');
+  $('#update-user-error-parent').addClass('d-none');
+};
+
+
 
 
 /**
@@ -166,20 +176,21 @@ const renderTextbook = (textbook) => {
         };
       });
 
+      submitButton.text('Update Textbook');
+      submitButton.attr('disabled', false);
       if (!response) return false;
 
 
       if (response.status !== 200) {
         renderToast(response.message, 'danger');
         renderModalError(response.message);
+        return false;
       }
       else {
         renderToast(response.message, 'success');
-        fetchTextbookData(true);
+        fetchUserData(true);
+        return true;
       };
-
-      submitButton.text('Update Textbook');
-      submitButton.attr('disabled', false);
     };
 
 
@@ -304,6 +315,7 @@ $(async () => {
     finally {
       if (closeModal) {
         $('#update-textbook-modal').modal('hide');
+        clearModalError();
         modalCallback = null;
         modalReset = null;
       }
@@ -312,11 +324,13 @@ $(async () => {
   })
   $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-big').on('click', () => {
     $('#update-tetxbook-modal').modal('hide');
+    clearModalError();
     modalCallback = null;
     modalReset = null;
   });
   $('#update-tetxbook-modal').find('#close-update-tetxbook-modal-small').on('click', () => {
     $('#update-tetxbook-modal').modal('hide');
+    clearModalError();
     modalCallback = null;
     modalReset = null;
   });
