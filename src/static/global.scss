@@ -96,3 +96,22 @@
   color: #fff;
   text-align: center;
 }
+
+// Store
+.cart-icon {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: black; /* Bootstrap primary color */
+  color: #fff; /* White text */
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.cart-icon:hover {
+  background-color: black; /* Darker shade on hover */
+}
