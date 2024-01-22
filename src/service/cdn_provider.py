@@ -105,7 +105,7 @@ def _upload(
     return location
 
   elif fileType == 'Textbook':
-    ext = file.filename[-1]
+    ext = file.filename.split('.')[-1]
     if ext not in TextbookFileEXT:
       raise BadFileEXT()
     

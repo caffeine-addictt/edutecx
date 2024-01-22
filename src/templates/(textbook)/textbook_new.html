@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
+
+
+{# Title #}
+{% block title %}
+  Create Textbook - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+  <form id='textbookForm' role='form' class='d-flex flex-column gap-3 align-items-center'>
+    <div class="container border border-dark shadow p-3 mb-5 bg-body rounded mt-5">
+      <div class="row">
+          <div class="col-md-4 section1">
+              <div class="form__group mb-3">
+                  <label for="cover_img" class="form-label">Upload the Cover Image</label>
+                  <input name="cover_img" class="form-control" type="file" id="cover_img" accept="image/*">
+              </div>
+          </div>
+
+          <div class="col-md-4 section2">
+              <div class="form__group mb-3 form-floating">
+                <input name="author" type="text" id="textbookAuthor" class="form-control" placeholder="Stephen King">  
+                <label>Author of Textbook</label>
+              </div>
+
+              <div class="form__group mb-3 form-floating">
+                <input name="title" type="text" id="textbookTitle" class="form-control" placeholder="Atomic Habits">
+                <label>Title of Textbook</label>
+              </div>
+
+              <div class="form__group mb-3 form-floating">
+                  <textarea name="description" class="form-control" id="textbookDescription" rows="5" maxlength="200" placeholder="The book is..."></textarea>
+                  <label>Description of Textbook</label>
+              </div>
+          </div>
+
+          <div class="col-md-4 section3">
+              <div class="form__group mb-3 form-floating">
+                  <input name="price" type="number" id="textbookPrice" class="form-control" min="1" placeholder="100.00">
+                  <label>Price of Textbook</label>
+              </div>
+
+              <div class="form__group mb-3 form-floating">
+                  <input name="discount" type="number" id="textbookPrice" class="form-control" min="0" max="3" placeholder="0">
+                  <label>Discount Value for Textbook</label>
+              </div>
+
+              <div class="form__group mb-3">
+                  <label for="pdfUpload" class="form-label">Upload the Textbook</label>
+                  <input name="upload" class="form-control" type="file" id="pdfUpload" accept="application/pdf">
+                  <button type="submit" class="btn btn-primary mt-5 w-100" id="submit">Create</button>
+              </div>
+          </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+
+
+{% block scripts %}
+  <script>
+    var user_id = `{{ user.id }}`
+  </script>
+  <script src="{{ url_for('static', filename = '(textbook)/textbook_new.js') }}"></script>
+{% endblock %}

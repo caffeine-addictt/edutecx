@@ -101,6 +101,7 @@ class TextbookModel(db.Model):
     assert isinstance(price, float)
     assert isinstance(discount, float) and (0 <= discount <= 1)
 
+    self.id = uuid.uuid4().hex
     self.author_id = author.id
     self.title = title
     self.description = description

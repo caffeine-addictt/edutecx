@@ -2,10 +2,11 @@
 Handles store routes
 """
 
+from src.utils.http import escape_id
 from src.service import auth_provider
-from src.database import UserModel, TextbookModel
 from src.utils.http import HTTPStatusCode
 from werkzeug.exceptions import BadRequest
+from src.database import UserModel, TextbookModel
 from src.utils.api import (
   StoreGetRequest, StoreGetReply, _TextbookGetData
 )
@@ -39,77 +40,15 @@ def store(user: UserModel | None):
   return render_template('(store)/store.html')
 
 
-# Store Get
-@app.route('/store/get', methods = ['GET'])
+
+
+# Store focus view
+@app.route('/store/<string:textbook_id>')
 @auth_provider.optional_login
-def store_get(user: UserModel | None):
-  req = StoreGetRequest(request)
-
-  # Handle query
-  # regex to parse only proper categories
-  categories = re.match(re.compile(r'^[a-zA-Z-_,]$'), req.categories)
-  if (not categories) or (categories != req.categories):
-    raise BadRequest('Invalid characters in category filter')
-  categories = str(categories).split(',')
-
-  dateRange: tuple[datetime, datetime] = (
-    datetime.fromtimestamp(req.createdLower) if float('inf') != req.createdLower else utc_time.skip('1day'),
-    datetime.fromtimestamp(req.createdUpper) if float('inf') != req.createdUpper else utc_time.skip('1day')
-  )
-  priceRange = (req.priceLower, req.priceUpper)
-
-  if dateRange[0] > dateRange[1]:
-    raise BadRequest('createdLower is larger than createdUpper')
-  
-  if priceRange[0] > priceRange[1]:
-    raise BadRequest('priceLower is larger than priceUpper')
-  
-
-  # Build query
-  filterResult = filterTextbooks(
-    criteria = req.criteria,
-    filterPayload = HashableDict(
-      one = and_(
-        dateRange[0] <= TextbookModel.created_at,
-        TextbookModel.created_at <= dateRange[1]
-      ),
-      two = and_(
-        priceRange[0] <= TextbookModel.price,
-        TextbookModel.price <= priceRange[1]
-      ),
-      three = or_(*[
-        TextbookModel.categories.contains(category)
-        for category in categories
-      ]),
-      four = TextbookModel.title.contains(req.query)
-    ),
-    page = req.page
-  )
-
-  # Compile data
-  compiled: list[_TextbookGetData] = [
-    _TextbookGetData(
-      id = textbook.id,
-      uri = textbook.uri,
-      status = textbook.upload_status,
-      author_id = textbook.author_id,
-      title = textbook.title,
-      description = textbook.description,
-      categories = textbook.categories,
-      price = textbook.price,
-      discount = textbook.discount,
-      cover_image = textbook.cover_image,
-      created_at = textbook.created_at.timestamp(),
-      updated_at = textbook.updated_at.timestamp()
-    )
-    for textbook in filterResult
-  ]
-
-  return StoreGetReply(
-    message = 'Successfully fetched textbooks',
-    status = HTTPStatusCode.OK,
-    data = compiled
-  ).to_dict(), HTTPStatusCode.OK
+def store_focused(user: UserModel | None, textbook_id: str):
+  textbook_id = escape_id(textbook_id)
+  textbook = TextbookModel.query.filter(TextbookModel.id == textbook_id).first_or_404()
+  return render_template('(store)/store_focused.html', textbook = textbook, user = user)
 
 
 
