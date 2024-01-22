@@ -11,8 +11,9 @@
 
 {# Body #}
 {% block mainContent %}
+<h1 class='d-flex justify-content-center' style='font-family:--font;'>Publish Your Textbook</h1>
   <form id='textbookForm' role='form' class='d-flex flex-column gap-3 align-items-center'>
-    <div class="container border border-dark shadow p-3 mb-5 bg-body rounded mt-5">
+    <div class="container border border-dark shadow p-3 mb-5 bg-body rounded mt-3">
       <div class="row">
           <div class="col-md-4 section1">
               <div class="form__group mb-3">
@@ -52,7 +53,7 @@
               <div class="form__group mb-3">
                   <label for="pdfUpload" class="form-label">Upload the Textbook</label>
                   <input name="upload" class="form-control" type="file" id="pdfUpload" accept="application/pdf">
-                  <button type="submit" class="btn btn-primary mt-5 w-100" id="submit">Create</button>
+                  <button type="submit" class="btn btn-success mt-5 w-100" id="submit">Create</button>
               </div>
           </div>
       </div>
