@@ -12,47 +12,89 @@
 {# Body #}
 {% block mainContent %}
 <h1 class='d-flex justify-content-center' style='font-family:--font;'>Publish Your Textbook</h1>
-  <form id='textbookForm' role='form' class='d-flex flex-column gap-3 align-items-center'>
+  <form id='textbookForm' role='form' class='d-flex flex-column gap-3 align-items-center needs-validation' novalidate>
     <div class='container border border-dark shadow p-3 mb-5 bg-body rounded mt-3'>
       <div class='row'>
           <div class='col-md-4 section1'>
               <div class='form__group mb-3'>
                   <label for='cover_img' class='form-label'>Upload the Cover Image</label>
-                  <input name='cover_img' class='form-control' type='file' id='cover_img' accept='image/*'>
+                  <input name='cover_img' class='form-control' type='file' id='cover_img' accept='image/*' required>
+                  <div class="valid-feedback">
+                    Looks good!
+                  </div>
+                  <div class="invalid-feedback">
+                    Please upload a valid Cover Image.
+                  </div>
               </div>
           </div>
 
           <div class='col-md-4 section2'>
               <div class='form__group mb-3 form-floating'>
-                <input name='author' type='text' id='textbookAuthor' class='form-control' placeholder='Stephen King'>  
+                <input name='author' type='text' id='textbookAuthor' class='form-control' placeholder='Stephen King' required>  
                 <label>Author of Textbook</label>
+                <div class="valid-feedback">
+                  Looks good!
+                </div>
+                <div class="invalid-feedback">
+                  Please provide a valid Name.
+                </div>
               </div>
 
               <div class='form__group mb-3 form-floating'>
-                <input name='title' type='text' id='textbookTitle' class='form-control' placeholder='Atomic Habits'>
+                <input name='title' type='text' id='textbookTitle' class='form-control' placeholder='Atomic Habits' required>
                 <label>Title of Textbook</label>
+                <div class="valid-feedback">
+                  Looks good!
+                </div>
+                <div class="invalid-feedback">
+                  Please provide a valid Title.
+                </div>
               </div>
 
               <div class='form__group mb-3 form-floating'>
-                  <textarea name='description' class='form-control' id='textbookDescription' rows='5' maxlength='200' placeholder='The book is...'></textarea>
+                  <textarea name='description' class='form-control' id='textbookDescription' rows='5' maxlength='200' placeholder='The book is...' required></textarea>
                   <label>Description of Textbook</label>
+                  <div class="valid-feedback">
+                    Looks good!
+                  </div>
+                  <div class="invalid-feedback">
+                    Please provide a valid Description.
+                  </div>
               </div>
           </div>
 
           <div class='col-md-4 section3'>
               <div class='form__group mb-3 form-floating'>
-                  <input name='price' type='number' id='textbookPrice' class='form-control' min='1' placeholder='100.00'>
+                  <input name='price' type='number' id='textbookPrice' class='form-control' min='1' placeholder='100.00' required>
                   <label>Price of Textbook</label>
+                  <div class="valid-feedback">
+                    Looks good!
+                  </div>
+                  <div class="invalid-feedback">
+                    Please provide a valid Price.
+                  </div>
               </div>
 
               <div class='form__group mb-3 form-floating'>
-                  <input name='discount' type='number' id='textbookPrice' class='form-control' min='0' max='3' placeholder='0'>
+                  <input name='discount' type='number' id='textbookPrice' class='form-control' min='0' max='3' placeholder='0' required>
                   <label>Discount Value for Textbook</label>
+                  <div class="valid-feedback">
+                    Looks good!
+                  </div>
+                  <div class="invalid-feedback">
+                    Please provide a valid discount rate ranging from 0-3.
+                  </div>
               </div>
 
               <div class='form__group mb-3'>
                   <label for='pdfUpload' class='form-label'>Upload the Textbook</label>
-                  <input name='upload' class='form-control' type='file' id='pdfUpload' accept='application/pdf'>
+                  <input name='upload' class='form-control' type='file' id='pdfUpload' accept='application/pdf' required>
+                  <div class="valid-feedback">
+                    Looks good!
+                  </div>
+                  <div class="invalid-feedback">
+                    Please upload a valid copy of the textbook.
+                  </div>
                   <button type='submit' class='btn btn-success mt-5 w-100' id='submit'>Create</button>
               </div>
           </div>
