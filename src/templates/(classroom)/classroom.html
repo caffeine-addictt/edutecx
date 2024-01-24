@@ -16,11 +16,11 @@ Classroom - EduTecX
 {% block mainContent %}
 <div id="main-container">
   <div id="class-info" class="container-fluid mt-4 w-75">
-    <div class="row mx-4">
-      <div class="col-3">
-
+    <div class="row mr-4 h-100">
+      <div class="h-100 col-4 overflow-hidden d-flex justify-content-center align-items-center">
+        <img class="h-100 my-auto" src="https://img.freepik.com/free-vector/empty-classroom-interior-with-chalkboard_1308-65378.jpg" alt="class picture">
       </div>
-      <div class="col-6 my-2">
+      <div class="col-5 my-2">
         <h3>{{ classroom.title }}</h3>
           <p>{{ classroom.description }}</p>
           <p></p>
@@ -41,7 +41,9 @@ Classroom - EduTecX
           <div>
             <h5>Textbooks for {{ classroom.title }}</h5>
             <hr>
-
+            <div class="my-5">
+              none selected
+            </div>
           </div>
           {# announcements #}
           <div>
@@ -57,7 +59,7 @@ Classroom - EduTecX
         <div class="card p-3">
           <div class="row">
             <h5 class="col-8">Pending Assignments</h5>
-            <h5 class="col-4 text-end">Due Date</h5>
+            <h5 class="col-4 text-center">Due</h5>
           </div>
           
           <hr>
