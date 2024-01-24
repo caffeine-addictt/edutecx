@@ -2,13 +2,29 @@
 
 {# /classrooms #}
 {% macro  render_tile() %}
-  <a href="/classrooms/{id}" class="classtile">
-    <div class="card mb-3">
-      <div class="card-body">
-        <div style="height: 15vh; width: 30%;" class="border border-dark overflow-hidden d-flex justify-content-center align-items-center"><img class="h-100 mx-auto" src="https://img.freepik.com/free-vector/empty-classroom-interior-with-chalkboard_1308-65378.jpg" alt="class picture"/></div>
-        <h5 class="card-title">{title}</h5>
-        <p class="card-text">{teacher}</p>
+<a href="/classrooms/{id}" class="classtile">
+  <div class="card mb-3">
+      <div class="row g-0">
+          <div class="col-4 border">
+              <div style="height: 15vh; width: 100%;" class="border border-dark overflow-hidden d-flex justify-content-center align-items-center">
+                  <img class="h-100" src="https://img.freepik.com/free-vector/empty-classroom-interior-with-chalkboard_1308-65378.jpg" alt="class picture"/>
+              
+              </div>
+              <div class="card-body">
+                  <h5 class="card-title">{title}</h5>
+                  <p class="card-text">{teacher}</p>
+              </div>
+          </div>
+          <div class="col-8">
+              
+              <div class="card-body">
+                  <div class="row">
+                    <h6 class="col-8">Assignments</h6>
+                    <h6 class="col-4">Due</h6>
+                  </div>
+              </div>
+          </div>
       </div>
-    </div>
-  </a>
+  </div>
+</a>
 {% endmacro %}
