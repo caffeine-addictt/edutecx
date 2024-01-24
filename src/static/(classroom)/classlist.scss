@@ -9,8 +9,15 @@ a {
 // class selectors
 .classtile {
   width: 45%;
+  * {
+    transition: border .25s linear;
+  }
   &:hover {
-    color: #003366
+    color: #003366;
+    * {
+      border-color: #003366;
+    }
+      
   }
 }
 
@@ -19,6 +26,7 @@ a {
 #maincontainer {
   margin: 2vh 10vw;
   background-color: #f2f2f2;
+  font-family: --font;
 }
 #myclassroomstitle {
   margin-top: 20px; 
