@@ -1,6 +1,27 @@
 
 // Hooks
 $(() => {
+  // Bootstrap 5 Form Validation
+  (function () {
+    'use strict'
+  
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.querySelectorAll('.needs-validation')
+  
+    // Loop over them and prevent submission
+    Array.prototype.slice.call(forms)
+      .forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+  
+          form.classList.add('was-validated')
+        }, false)
+      })
+  })()
+
   $('#textbookForm').on('submit', async e => {
     e.preventDefault();
 
@@ -23,7 +44,7 @@ $(() => {
     if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
     else {
       renderToast(response.message, 'success');
-      window.location.href = `/store/${response.data.textbook_id}`;
+      window.location.href = `/store`;
     };
   });
 });

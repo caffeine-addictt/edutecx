@@ -1,7 +1,22 @@
 
 // On DOM Render
 $(() => {
-  $('#delete-textbook-button').on('click', async () => {
+  // Delete Textbook Flow
+  $('#delete-textbook-button').on('click', e => {
+    $('#delete-textbook-modal').modal('show');
+  });
+
+  $('#close-delete-textbook-modal-big').on('click', e => $('#delete-textbook-modal').modal('hide'));
+  $('#close-delete-textbook-modal-small').on('click', e => $('#delete-textbook-modal').modal('hide'));
+
+  $('#confirmed-delete-textbook').on('click', async e => {
+    $('#delete-textbook-modal').modal('hide');
+    renderToast('Deleting textbook...', 'info');
+    
+    /**
+     * Delete textbook
+     * @type {{status: number; message: string;}}
+     */
     const response = await fetch('/api/v1/textbook/delete', {
       method: 'POST',
       headers: {
@@ -13,8 +28,12 @@ $(() => {
 
     if (response.status === 200) {
       renderToast(response.message, 'success');
-      window.location.href = `/store`;
-    }
-    else renderToast(response.message, 'danger');
-  });
+      window.location = '/store';
+    } else {
+      renderToast(response.message, 'danger');
+    };
+
 });
+});
+
+

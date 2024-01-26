@@ -25,12 +25,11 @@ def textbooks(user: UserModel):
 @auth_provider.require_login
 def textbooks_focused(user: UserModel, id: str):
   id = escape_id(id)
-  textbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == id).first()
+  textbook = TextbookModel.query.filter(TextbookModel.id == id).first()
+  return render_template('(textbook)/textbook.html', textbook = textbook ) 
 
-  if not isinstance(textbook, EditableTextbookModel):
-    return render_template('(textbook)/textbook_error.html')
-  
-  if (textbook.user_id != user.id) and (user.privilege != 'Admin'):
-    raise Unauthorized()
-  
-  return render_template('(textbook)/textbook.html', textbook = textbook)
+
+@app.route('/textbooks/new', methods = ['GET'])
+@auth_provider.require_educator(unauthorized_redirect = '/pricing')
+def textbook_new(user: UserModel):
+  return render_template('(textbook)/textbook_new.html', user = user )

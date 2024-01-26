@@ -2,14 +2,23 @@
 
 {# /store #}
 {% macro  render_textbookListing() %}
-  <a href="/store/{id}" class="storeList w-25 h-auto d-flex flex-column text-decoration-none">
-    <div class="card mb-3 w-100 h-auto">
-      <div class="card-body w-100">
-        <div class="d-flex w-75 h-100 align-self-center mb-5"><img alt="class picture" class="w-100 h-100 align-self-center"/></div>
-        
-        <h5 class="card-title">{title}</h5>
-        <p class="card-text">{author}</p>
-      </div>
+<div class='col-3 mw-25 mh-25 p-2'>
+  <a href='/store/{id}' class='storeList h-auto d-flex flex-column text-decoration-none' style='min-width:200px;'>
+    <div class='col'>
+      <div class='card mb-3 w-100 h-auto'>
+        <div class='card-body w-100'>
+          <div class='d-flex w-75 h-100 align-self-center mb-5'>
+            <img alt='textbookCover' src='{cover_image}' class='w-100 h-100 ms-4 d-flex align-items-center justify-content-center'/>
+          </div>
+          <h5 class='card-title text-dark' style='text-align:right;float:left;'>
+            {title}
+          </h5>
+          <h5 class='card-title text-dark fw-bold' style='text-align:right;float:right;'>
+            <span>$</span>{price}
+          </h5>
+          <!--<p class='card-text'>{author_id}</p>-->
+        </div>
     </div>
   </a>
+</div>
 {% endmacro %}

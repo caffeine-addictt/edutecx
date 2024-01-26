@@ -10,37 +10,92 @@
 
 {# Body #}
 {% block mainContent %}
-  <div id="store__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-100 h-100">
+  <div id='store__container' class='d-flex flex-column gap-2 my-2 ratio-16x9 w-100 h-100'>
 
-    {% if (user and ((user.privilege == 'Admin') or (user.id == textbook.author_id))) %}
-      {# Render Delete button #}
-      <button type="button" class="btn btn-danger" id="delete-textbook-button">
-        Delete
-      </button>
-    {% endif %}
-
-    {# Title #}
-    <div id="store__title" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-100 h-25">
-      <h1>{{ textbook.title }}</h1>
+    {# Delete Textbook Modal #}
+    <div class='modal fade' id='delete-textbook-modal' tabindex='-1' aria-labelledby='deleteTextbookModal' aria-hidden='true'>
+      <div class='modal-dialog modal-dialog-centered' role='document'>
+        <div class='modal-content'>
+          <div class='modal-header'>
+            <h5 class='modal-title' id='exampleModalLongTitle'>Delete your textbook</h5>
+            <button type='button' class='close' aria-label='Close' id='close-delete-textbook-modal-small'>
+              <span aria-hidden='true'>&times;</span>
+            </button>
+          </div>
+          <div class='modal-body'>
+            <p>This action is <span class='text-danger'>IRREVERSIBLE!</span></p>
+            <p>Are you sure you want to delete your textbook?</p>
+          </div>
+          <div class='modal-footer'>
+            <button type='button' class='btn btn-secondary' id='close-delete-textbook-modal-big'>Close</button>
+            <button type='button' class='btn btn-danger' id='confirmed-delete-textbook'>Delete My Textbook</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    {# Textbook Description #}
-    <div id="store__description" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-100 h-25">
-      <p>{{ textbook.description }}</p>
+   
+      
+    <div class='container' style='font-family:--font;'>
+      <div class='row bg-dark text-light'>
+        {% if (textbook.cover_image and (textbook.cover_image.status == 'Uploaded')) %}
+          {# Cover Image #}
+          <div class='col-md-4 mx-auto border'>
+            <div id='store__description' class='d-flex flex-row gap-2 my-2 ratio-16x9 w-auto h-auto'>
+              <img src='{{ textbook.cover_image.uri }}' class='img-fluid' alt='Book Cover'/>
+              <p></p>
+            </div>
+          </div>
+        {% endif %}
+    
+        {# Title #}
+        <div class='col-md-8 mx-auto m-auto h-auto'>
+          <div id='store__title' class='d-flex flex-row gap-2 ratio-16x9 w-auto h-auto p-3'>
+            <h5 class='h5'>Title:</h5>
+            <h1 class='border-bottom'>{{ textbook.title }}</h1>
+          </div>
+          <br>
+          {# Textbook Description #}
+          <div id='store__description' class='d-flex flex-row gap-2 ratio-16x9 w-auto h-auto p-3'>
+            <h5 class='h6'>Description:</h5>
+            <p class='border-bottom'>{{ textbook.description }}</p>
+          </div>
+          
+          <br>
+          {# Textbook Description #}
+          <div id='store__price' class='d-flex flex-row gap-2 ratio-16x9 w-auto h-auto p-3'>
+            <span class='h6'>Cost:</span>
+            <p class='h5'><span>$</span>{{ textbook.price }}</p>
+          </div>
+
+          <!--Add to Cart-->
+          <button type='button' class='btn btn-success h-auto w-100 my-2' id='add-textbook-button'>
+            Add to Cart
+          </button>
+
+          {% if (user and ((user.privilege == 'Admin') or (user.id == textbook.author_id))) %}
+            {# Render Delete button #}
+            <button type='button' class='btn btn-danger h-auto w-100' id='delete-textbook-button'>
+              Delete
+            </button>
+          {% endif %}
+        </div>
+        <!-- TODO: Add more details with styling here -->
+      </div>
     </div>
-
-    <!-- TODO: Add more details with styling here -->
-
-  </div>
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
+  <script>
+    var textbook_id = `{{ textbook.id }}`
+  </script>
+
   {# Write injected macros to variables #}
-  <script src="{{ url_for('static', filename = '(store)/store_focused.js') }}"></script>
+  <script src='{{ url_for('static', filename = '(store)/store_focused.js') }}'></script>
 
   {% if (user.privilege == 'Admin') or (user.id == textbook.author_id) %}
-    <script src="{{ url_for('static', filename = '(store)/store_focused_delete.js') }}"></script>
+    <script src='{{ url_for('static', filename = '(store)/store_focused_delete.js') }}'></script>
   {% endif %}
 {% endblock %}
