@@ -81,8 +81,6 @@ def textbooks_list_api():
   filtered = TextbookModel.query.filter(
     and_(*query) if req.criteria == 'and' else or_(*query)
   ).paginate(page = req.page, error_out = False)
-  app.logger.error(f'{set(filtered)}')
-  app.logger.error(f'{filtered}')
 
   return TextbookListReply(
     message = 'Successfully fetched textbook list',

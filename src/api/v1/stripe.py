@@ -265,7 +265,7 @@ def cancel_stripe_subscription_api(user: UserModel):
   try:
     stripe.Subscription.modify(req.subscription_id, cancel_at_period_end = True)
   except Exception as e:
-    app.logger.error(f'{e}')
+    app.logger.error(f'Failed to cancel subscription: {e}')
     return GenericReply(
       message = 'Failed to cancel subscription',
       status = HTTPStatusCode.INTERNAL_SERVER_ERROR
