@@ -25,7 +25,7 @@ def textbooks(user: UserModel):
 @auth_provider.require_login
 def textbooks_focused(user: UserModel, id: str):
   id = escape_id(id)
-  textbook = TextbookModel.query.filter(TextbookModel.id == id).first()
+  textbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == id).first()
   return render_template('(textbook)/textbook.html', textbook = textbook ) 
 
 
