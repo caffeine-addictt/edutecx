@@ -25,7 +25,6 @@ if TYPE_CHECKING:
   from .user import UserModel
   from .image import ImageModel
   from .discount import DiscountModel
-  from .editabletextbook import EditableTextbookModel
 
 
 TextbookStatus = Literal['Available', 'Unavailable', 'DMCA']
@@ -58,7 +57,6 @@ class TextbookModel(db.Model):
   status       : Mapped[TextbookStatus]                = mapped_column(EnumTextbookStatus, nullable = False, default = 'Available')
   upload_status: Mapped[TextbookUploadStatus]          = mapped_column(EnumTextbookUploadStatus, nullable = False, default = 'Uploading')
   cover_image  : Mapped[Optional['ImageModel']]        = relationship('ImageModel', back_populates = 'textbook')
-  derrived     : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'origin')
 
   # Logs
   created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)

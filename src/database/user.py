@@ -28,7 +28,6 @@ if TYPE_CHECKING:
   from .textbook import TextbookModel
   from .sale import SaleModel
   from .image import ImageModel
-  from .editabletextbook import EditableTextbookModel
   from .submissionsnippet import SubmissionSnippetModel
 
 
@@ -86,8 +85,7 @@ class UserModel(db.Model):
   owned_classrooms: Mapped[List['ClassroomModel']]         = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner')
 
   # Textbooks
-  textbooks      : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'user')
-  owned_textbooks: Mapped[List['TextbookModel']]         = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author')
+  owned_textbooks: Mapped[List['TextbookModel']] = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author')
 
   # Transactions
   subscription_id     : Mapped[Optional[str]]      = mapped_column(String, nullable = True)
@@ -296,7 +294,6 @@ class UserModel(db.Model):
     for i in self.comments: i.delete()
     for i in self.submissions: i.delete()
 
-    for i in self.textbooks: i.delete()
     for i in self.transactions: i.delete()
     for i in self.owned_textbooks: i.delete()
     for i in self.owned_classrooms: i.delete()

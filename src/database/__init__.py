@@ -22,7 +22,6 @@ from .assignment import AssignmentModel
 from .image import ImageModel, ImageUploadStatus, EnumImageUploadStatus
 from .discount import DiscountModel
 from .textbook import TextbookModel, TextbookStatus, EnumTextbookStatus, TextbookUploadStatus, EnumTextbookUploadStatus
-from .editabletextbook import EditableTextbookModel, EditableTextbookUploadStatus, EnumEditableTextbookUploadStatus
 from .submissionsnippet import SubmissionSnippetModel, SnippetUploadStatus, EnumSnippetUploadStatus
 
 from .sale import SaleModel, SaleInfo, SaleType, EnumSaleType
