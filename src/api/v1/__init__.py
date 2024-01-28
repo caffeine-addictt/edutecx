@@ -7,14 +7,13 @@ from . import (
   stripe,
   notify,
 
+  user,
+  sale,
+  image,
+  comment,
+  textbook,
   classroom,
   assignment,
-  comment,
-  editabletextbook,
-  image,
-  sale,
-  user,
   submission,
-  submissionsnippet,
-  textbook
+  submissionsnippet
 )
