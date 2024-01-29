@@ -5,6 +5,7 @@ Submission Endpoint
 from src import limiter
 from src.database import SubmissionModel, UserModel, AssignmentModel, SubmissionSnippetModel, TextbookModel
 from src.service.auth_provider import require_login
+from src.service.cdn_provider import BadFileEXT
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
   SubmissionGetRequest, SubmissionGetReply, _SubmissionGetData,
@@ -73,13 +74,12 @@ def submission_get_api(user: UserModel):
 def submission_create_api(user: UserModel):
   req = SubmissionCreateRequest(request)
 
-  textbook = TextbookModel.query.filter(TextbookModel.id == req.editabletextbook_id).first()
-  if not isinstance(textbook, TextbookModel):
+  upload = request.files.get('upload')
+  if not upload:
     return GenericReply(
-      message = 'Could not locate editable textbook',
+      message = 'Missing upload',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
-  
 
   assignment = AssignmentModel.query.filter(AssignmentModel.id == req.assignment_id).first()
   if not isinstance(assignment, AssignmentModel):
@@ -95,15 +95,6 @@ def submission_create_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.UNAUTHORIZED
   
 
-  assignmentReq = tuple( int(i) for i in assignment.requirement.split(':')[1:] )
-  if len(assignmentReq) == 1: assignmentReq = assignmentReq[0]
-  elif len(assignmentReq) != 2:
-    return GenericReply(
-      message = 'Something went wrong!',
-      status = HTTPStatusCode.INTERNAL_SERVER_ERROR
-    ).to_dict(), HTTPStatusCode.INTERNAL_SERVER_ERROR
-  
-
   submission: Optional[SubmissionModel] = None
   snippet: Optional[SubmissionSnippetModel] = None
   try:
@@ -115,17 +106,25 @@ def submission_create_api(user: UserModel):
 
     snippet = SubmissionSnippetModel(
       student = user,
-      submission = submission
+      submission = submission,
+      upload = upload
     )
     snippet.save()
   
-  except Exception:
+  except Exception as e:
     if isinstance(submission, SubmissionModel):
       submission.delete()
     
     if isinstance(snippet, SubmissionSnippetModel):
       snippet.delete()
 
+    if isinstance(e, BadFileEXT):
+      return GenericReply(
+        message = str(e),
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+    app.logger.error(f'Failed to create submission: {e}')
     return GenericReply(
       message = 'Something went wrong!',
       status = HTTPStatusCode.INTERNAL_SERVER_ERROR

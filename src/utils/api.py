@@ -1147,7 +1147,6 @@ class _SubmissionCreateData(_APIBase):
 class SubmissionCreateRequest(_APIRequest):
   """API Request for creating submission"""
   assignment_id      : str
-  editabletextbook_id: str
 
 @dataclass
 class SubmissionCreateReply(_APIReply):
