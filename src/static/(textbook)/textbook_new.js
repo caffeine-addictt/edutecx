@@ -32,7 +32,7 @@ const handleSubmit = async (e) => {
 // Bootstrap validation and submit hook
 $(() => {
   /** @type {HTMLFormElement} */
-  const form = document.querySelector('.needs-validation')
+  const form = document.querySelector('.needs-validation');
   form.addEventListener('submit', async e => {
     e.preventDefault();
     form.classList.add('was-validated');
