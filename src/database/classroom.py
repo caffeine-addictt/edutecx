@@ -23,6 +23,7 @@ if TYPE_CHECKING:
   from .textbook import TextbookModel
   from .assignment import AssignmentModel
   from .image import ImageModel
+  from .assotiation import classroom_user_assotiation, classroom_textbook_assotiation
 
 
 class ClassroomModel(db.Model):
@@ -32,19 +33,19 @@ class ClassroomModel(db.Model):
 
   # Identifiers
   id: Mapped[str] = mapped_column(String, primary_key = True, unique = True, nullable = False, default = lambda: uuid.uuid4().hex)
-
-  # Stored as str(user1.id|user2.id|...)
   owner_id    : Mapped[str] = mapped_column(String, ForeignKey('user_table.id'), nullable = False)
-  educator_ids: Mapped[str] = mapped_column(String, nullable = False, default = '')
-  student_ids : Mapped[str] = mapped_column(String, nullable = False, default = '')
-  textbook_ids: Mapped[str] = mapped_column(String, nullable = False, default = '')
+
+  owner    : Mapped['UserModel']       = relationship('UserModel', back_populates = 'owned_classrooms')
+  educators: Mapped[List['UserModel']] = relationship('UserModel', primaryjoin = 'and_(classroom_user_assotiation.classroom_id == ClassroomModel.id, classroom_user_assotiation.role == "Educator")', secondary = 'classroom_user_assotiation', overlaps = 'members,students,classrooms')
+  students : Mapped[List['UserModel']] = relationship('UserModel', primaryjoin = 'and_(classroom_user_assotiation.classroom_id == ClassroomModel.id, classroom_user_assotiation.role == "Student")', secondary = 'classroom_user_assotiation', overlaps = 'members,educators,classrooms')
+  members  : Mapped[List['UserModel']] = relationship('UserModel', secondary = 'classroom_user_assotiation', back_populates = 'classrooms')
 
   # Attributes
-  owner      : Mapped['UserModel']             = relationship('UserModel', back_populates = 'owned_classrooms')
   title      : Mapped[str]                     = mapped_column(String, nullable = False, default = 'My Classroom')
   description: Mapped[str]                     = mapped_column(String, nullable = True, default = None)
   assignments: Mapped[List['AssignmentModel']] = relationship('AssignmentModel', back_populates = 'classroom')
   cover_image: Mapped[Optional['ImageModel']]  = relationship('ImageModel', back_populates = 'classroom')
+  textbooks  : Mapped[List['TextbookModel']]   = relationship('TextbookModel', secondary = 'classroom_textbook_assotiation', back_populates = 'classrooms')
 
   # Invite
   invite_id     : Mapped[str]  = mapped_column(String, unique = True, nullable = False, default = lambda: uuid.uuid4().hex)
@@ -79,7 +80,10 @@ class ClassroomModel(db.Model):
     `invite_enabled: bool`, optional (Default to True)
       Enable invite
     """
-    self.owner_id = owner.id
+    self.id = uuid.uuid4().hex
+    self.invite_id = uuid.uuid4().hex
+
+    self.owner = owner
     self.title = title
     self.description = description
     self.invite_enabled = invite_enabled
@@ -87,44 +91,6 @@ class ClassroomModel(db.Model):
   def __repr__(self):
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
-
-  
-  # Private
-  @staticmethod
-  def _clean_id_str(data: Optional[str] = '', separator: str = '|') -> list[str]:
-    """
-    Turns DB model saved data str('id1|id2|id3|...) to list[str, ...]
-
-    
-    Parameters
-    ----------
-    `data: str`, required
-    `separator: str`, optional (defaults to '|')
-
-
-    Returns
-    -------
-    `data: list[str]`
-    """
-    return [i for i in (data or '').split(separator) if i]
-
-  
-  # Properties
-  @property
-  def students(self) -> list['UserModel'] | None:
-    from .user import UserModel as usr
-    return usr.query.filter(ClassroomModel.student_ids.contains(usr.id)).all()
-  
-  @property
-  def educators(self) -> list['UserModel'] | None:
-    from .user import UserModel as usr
-    return usr.query.filter(ClassroomModel.educator_ids.contains(usr.id)).all()
-    
-  @property
-  def textbooks(self) -> list['TextbookModel'] | None:
-    from .user import UserModel as usr
-    from .textbook import TextbookModel as tm
-    return usr.query.filter(ClassroomModel.textbook_ids.contains(tm.id)).all()
   
 
   def is_student(self, user: 'UserModel') -> bool:
@@ -135,7 +101,7 @@ class ClassroomModel(db.Model):
     ----------
     `user: UserModel`, required
     """
-    return user.id in self._clean_id_str(self.student_ids)
+    return user in self.students
   
   def is_educator(self, user: 'UserModel') -> bool:
     """
@@ -145,7 +111,7 @@ class ClassroomModel(db.Model):
     ----------
     `user: UserModel`, required
     """
-    return user.id in self._clean_id_str(self.educator_ids)
+    return user in self.educators
   
   def is_owner(self, user: 'UserModel') -> bool:
     """
@@ -155,7 +121,7 @@ class ClassroomModel(db.Model):
     ----------
     `user: UserModel`, required
     """
-    return user.id == self.owner_id
+    return user == self.owner
   
   def is_member(self, user: 'UserModel') -> bool:
     """
@@ -203,9 +169,7 @@ class ClassroomModel(db.Model):
       add_students(user2, user3)
     ```
     """
-    current_data = self._clean_id_str(self.student_ids)
-    appended_data = set(current_data + [i.id for i in students if i.id != self.owner_id]) # Casted to set to prevent duplicates
-    self.student_ids = '|'.join(appended_data)
+    self.students.extend(students)
     return None
 
   def remove_students(self, *students: 'UserModel') -> None:
@@ -231,10 +195,7 @@ class ClassroomModel(db.Model):
       remove_students(user2, user3)
     ```
     """
-    to_exclude = set([str(i.id) for i in students]) # Casted to set to prevent duplicates
-    current_data = self._clean_id_str(self.student_ids)
-    filtered_data = set([i for i in current_data if i not in to_exclude]) # Casted to set to prevent duplicates
-    self.student_ids = '|'.join(filtered_data)
+    self.students = [i for i in self.students if i not in students]
     return None
 
 
@@ -262,9 +223,13 @@ class ClassroomModel(db.Model):
       add_educators(user2, user3)
     ```
     """
-    current_data = self._clean_id_str(self.educator_ids)
-    appended_data = set(current_data + [i.id for i in educators if i.id != self.owner_id]) # Casted to set to prevent duplicates
-    self.educator_ids = '|'.join(appended_data)
+    from .assotiation import classroom_user_assotiation
+    for educator in educators:
+      classroom_user_assotiation(
+        classroom = self,
+        user = educator,
+        role = 'Educator'
+      ).save()
     return None
 
   def remove_educators(self, *educators: 'UserModel') -> None:
@@ -290,10 +255,7 @@ class ClassroomModel(db.Model):
       remove_educators(user2, user3)
     ```
     """
-    to_exclude = set([str(i.id) for i in educators]) # Casted to set to prevent duplicates
-    current_data = self._clean_id_str(self.educator_ids)
-    filtered_data = set([i for i in current_data if i not in to_exclude]) # Casted to set to prevent duplicates
-    self.educator_ids = '|'.join(filtered_data)
+    self.educators = [i for i in self.educators if i not in educators]
     return None
 
 
@@ -321,9 +283,7 @@ class ClassroomModel(db.Model):
       add_textbooks(doc2, doc3)
     ```
     """
-    current_data = self._clean_id_str(self.textbook_ids)
-    appended_data = set(current_data + [i.id for i in textbooks]) # Casted to set to prevent duplicates
-    self.textbook_ids = '|'.join(appended_data)
+    self.textbooks = list(set(self.textbooks + list(textbooks)))
     return None
 
   def remove_textbooks(self, *textbooks: 'TextbookModel') -> None:
@@ -349,10 +309,7 @@ class ClassroomModel(db.Model):
       remove_textbooks(doc2, doc3)
     ```
     """
-    to_exclude = set([str(i.id) for i in textbooks]) # Casted to set to prevent duplicates
-    current_data = self._clean_id_str(self.textbook_ids)
-    filtered_data = set([i for i in current_data if i not in to_exclude]) # Casted to set to prevent duplicates
-    self.textbook_ids = '|'.join(filtered_data)
+    self.textbooks = [i for i in self.textbooks if i not in textbooks]
     return None
 
 

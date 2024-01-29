@@ -6,7 +6,7 @@ from src import limiter
 from flask_limiter import util
 
 from sqlalchemy import and_
-from src.database import UserModel, TextbookModel, EditableTextbookModel, SaleModel, SaleInfo, DiscountModel
+from src.database import UserModel, TextbookModel, SaleModel, SaleInfo, DiscountModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
@@ -140,12 +140,7 @@ def create_stripe_checkout_session_api(user: UserModel):
   
 
   # Ensure textbook is not already owned
-  foundIDS = [ i.id for i in found ]
-  alreadyowned = EditableTextbookModel.query.filter(and_(
-    EditableTextbookModel.user_id == user.id,
-    EditableTextbookModel.textbook_id.in_(foundIDS)
-  )).all()
-  if len(alreadyowned) > 0:
+  if any((user in i.bought_by) for i in found):
     return GenericReply(
       message = 'One or more textbook(s) already owned',
       status = HTTPStatusCode.BAD_REQUEST
@@ -238,7 +233,7 @@ def create_stripe_checkout_session_api(user: UserModel):
 def cancel_stripe_subscription_api(user: UserModel):
   req = StripeSubscriptionCancelRequest(request)
 
-  if req.subscription_id == 'None':
+  if (not req.subscription_id) or (req.subscription_id == 'None'):
     return GenericReply(
       message = 'Invalid subscription id',
       status = HTTPStatusCode.BAD_REQUEST
@@ -265,7 +260,7 @@ def cancel_stripe_subscription_api(user: UserModel):
   try:
     stripe.Subscription.modify(req.subscription_id, cancel_at_period_end = True)
   except Exception as e:
-    app.logger.error(f'{e}')
+    app.logger.error(f'Failed to cancel subscription: {e}')
     return GenericReply(
       message = 'Failed to cancel subscription',
       status = HTTPStatusCode.INTERNAL_SERVER_ERROR
@@ -290,7 +285,7 @@ def cancel_stripe_subscription_api(user: UserModel):
 def stripe_expiresession_api(user: UserModel):
   req = StripeExpireRequest(request)
 
-  if req.session_id == 'None':
+  if (not req.session_id) or (req.session_id == 'None'):
     return GenericReply(
       message = 'Invalid session id',
       status = HTTPStatusCode.BAD_REQUEST
@@ -331,7 +326,7 @@ def stripe_expiresession_api(user: UserModel):
 def stripe_status_api(user: UserModel):
   req = StripeStatusRequest(request)
 
-  if req.session_id == 'None':
+  if (not req.session_id) or (req.session_id == 'None'):
     return GenericReply(
       message = 'Invalid session id',
       status = HTTPStatusCode.BAD_REQUEST
@@ -408,13 +403,10 @@ def stripe_webhook_api():
       sale.save()
 
       # Handle making textbooks availble to user
-      items = stripe.checkout.Session.list_line_items(event.data.object['id'])
       if sale.type == 'OneTime':
         for info in sale.textbooks.values():
-          EditableTextbookModel(
-            user = sale.user,
-            textbook = info.textbook
-          ).save()
+          info.textbook.bought_by.append(sale.user)
+          info.textbook.save()
 
 
 

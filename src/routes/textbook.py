@@ -4,7 +4,6 @@ Handles textbook routes
 
 from src.database import UserModel, TextbookModel
 from src.service import auth_provider
-
 from src.utils.http import escape_id
 from flask import (
   render_template,
@@ -22,13 +21,16 @@ def textbooks(user: UserModel):
 
 @app.route('/textbooks/<string:id>')
 @auth_provider.require_login
-def textbooks_id(user: UserModel, id: str):
+def textbooks_focused(user: UserModel, id: str):
   id = escape_id(id)
   textbook = TextbookModel.query.filter(TextbookModel.id == id).first()
-  return render_template('(textbook)/textbook.html', textbook = textbook ) 
+  if not isinstance(textbook, TextbookModel):
+    return render_template('(textbook)/textbook_error.html', message = 'Unable to locate textbook')
+  
+  return render_template('(textbook)/textbook.html', textbook = textbook)
 
 
 @app.route('/textbooks/new', methods = ['GET'])
 @auth_provider.require_educator(unauthorized_redirect = '/pricing')
 def textbook_new(user: UserModel):
-  return render_template('(textbook)/textbook_new.html', user = user )
+  return render_template('(textbook)/textbook_new.html', user = user)

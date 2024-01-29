@@ -124,7 +124,7 @@ def sale_get_api(user: UserModel):
       sale_id = sale.id,
       user_id =  user.id,
       discount_id = sale.discount_id if sale.discount_id else None,
-      textbook_ids = [ i.split(':')[0] for i in sale.textbook_ids.split(',') ] if sale.textbook_ids else [],
+      textbook_ids = list(sale.textbooks.keys()),
       paid = sale.paid,
       paid_at = sale.paid_at.timestamp() if sale.paid_at else None,
       total_cost = sale.total_cost

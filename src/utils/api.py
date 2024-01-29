@@ -427,7 +427,7 @@ class _AssignmentGetData(_APIBase):
   title       : str
   description : str
   due_date    : Union[float, str]
-  textbooks   : str
+  textbooks   : list[str]
   requirement : str
   submissions : list[str]
   created_at  : float
@@ -1147,7 +1147,6 @@ class _SubmissionCreateData(_APIBase):
 class SubmissionCreateRequest(_APIRequest):
   """API Request for creating submission"""
   assignment_id      : str
-  editabletextbook_id: str
 
 @dataclass
 class SubmissionCreateReply(_APIReply):

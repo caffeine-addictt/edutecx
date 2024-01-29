@@ -38,6 +38,13 @@ from flask_jwt_extended import (
 )
 
 
+class IgnoreException(Exception):
+  """
+  Exception to be ignored in try-except
+  """
+  pass
+
+
 # Config
 @jwt.user_identity_loader
 def user_identity_loader(user: 'UserModel'):
@@ -46,7 +53,7 @@ def user_identity_loader(user: 'UserModel'):
 
 @jwt.user_lookup_loader
 def user_lookup_loader(jwtHeader, jwtPayload):
-  identity = jwtPayload["sub"]
+  identity = jwtPayload['sub']
   return UserModel.query.filter(UserModel.id == identity).first()
 
 
@@ -73,16 +80,16 @@ def refresh_token(response):
     refresh_token = request.cookies.get('refresh_token_cookie')
 
     if not access_token or not refresh_token:
-      raise Exception('Not logged in')
+      raise IgnoreException('Not logged in')
     
     access_decoded = decode_token(access_token, allow_expired = True)
     refresh_decoded = decode_token(refresh_token)
 
     if refresh_decoded['exp'] <= utc_time.get().timestamp():
-      raise Exception('Refresh token expired')
+      raise IgnoreException('Refresh token expired')
     
     if utc_time.skip('1h').timestamp() < access_decoded['exp']:
-      raise Exception('Access token not close to being expired')
+      raise IgnoreException('Access token not close to being expired')
     
     # Try to refresh access token
     refresh_response = requests.post(
@@ -96,10 +103,12 @@ def refresh_token(response):
     
     set_access_cookies(response, str(data.data.get('access_token')))
     app.logger.info('Successfully Auto-Refreshed expiring access token')
-
-    return response
+  
+  except IgnoreException: pass
   except Exception as e:
-    app.logger.info(f'Failed to auto-refresh expiring access token: {e}')
+    app.logger.error(f'Failed to auto-refresh after request expiring access token: {e}')
+  
+  finally:
     return response
 
 
@@ -149,30 +158,34 @@ def expired_token_loader(jwtHeader, jwtPayload):
       refresh_token = request.cookies.get('refresh_token_cookie')
 
       if not accesss_token or not refresh_token:
-        raise Exception('No cookies')
+        raise IgnoreException('No cookies')
       
       decoded_refresh = decode_token(refresh_token)
       if not decoded_refresh.get('remember_me'):
-        raise Exception('Did not log in with remember me checked!')
+        raise IgnoreException('Did not log in with remember me checked!')
       
       response = requests.post(
         f'{request.root_url}api/v1/refresh',
         headers = {'Authorization': f'Bearer {refresh_token}'}
       )
+
+      if response.status_code != HTTPStatusCode.OK:
+        raise Exception(f'Endpoint returned Code: {response.status_code}')
+
       data = TokenRefreshResponse(response)
 
       if (data.status == HTTPStatusCode.OK) and not data.data.get('access_token'):
-        raise Exception('Unable to refresh')
+        raise Exception('No access token returned from api/v1/refresh')
       
       successfulRefresh = make_response(
         redirect(request.path, code = HTTPStatusCode.FOUND),
         HTTPStatusCode.FOUND
       )
 
-      app.logger.error('Auto-Refreshed expired access token with refresh token')
       set_access_cookies(successfulRefresh, str(data.data.get('access_token')))
       return successfulRefresh, HTTPStatusCode.FOUND
-
+    
+    except IgnoreException: pass
     except Exception as e:
       app.logger.error(f'Failed to Auto-Refresh expired access token with refresh token: {e}')
     

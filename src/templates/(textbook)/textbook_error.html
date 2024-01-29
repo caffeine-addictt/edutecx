@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+{% extends 'layout.html' %}
+
+
+{# Title #}
+{% block title %}
+  Textbook Not Found - EduTecX
+{% endblock %}
+
+
+{# Body #}
+{% block mainContent %}
+  <div id="textbook_not_found__container">
+    <h1>{{ message or 'Textbook Not Found!' }}</h1>
+    <a href="/textbooks">Back</a>
+
+    <p>Was this not expected? <a href="/contact-us">Let us know!</a></p>
+  </div>
+{% endblock %}

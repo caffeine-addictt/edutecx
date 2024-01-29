@@ -61,7 +61,7 @@ def assignment_get_api(user: UserModel):
       title = assignment.title,
       description = assignment.description,
       due_date = assignment.due_date.timestamp(),
-      textbooks = assignment.textbooks,
+      textbooks = [i.id for i in assignment.textbooks],
       requirement = assignment.requirement,
       submissions = [ i.id for i in assignment.submissions ],
       created_at = assignment.created_at.timestamp(),
@@ -108,7 +108,7 @@ def assignment_create_api(user: UserModel):
     ClassroomModel.id == req.classroom_id,
     or_(
       ClassroomModel.owner_id == user.id,
-      ClassroomModel.educator_ids.contains(user.id)
+      ClassroomModel.educators.contains(user)
     )
   )).first()
 
@@ -144,7 +144,7 @@ def assignment_create_api(user: UserModel):
 @require_login
 def assignment_edit_api(user: UserModel):
   req = AssignmentEditRequest(request)
-  toChange = {key: '' if i == 'None' else i for key in [
+  toChange = {key: '' if not i or i == 'None' else i for key in [
     'title',
     'description',
     'due_date',

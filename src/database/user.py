@@ -28,8 +28,8 @@ if TYPE_CHECKING:
   from .textbook import TextbookModel
   from .sale import SaleModel
   from .image import ImageModel
-  from .editabletextbook import EditableTextbookModel
   from .submissionsnippet import SubmissionSnippetModel
+  from .assotiation import user_textbook_assotiation
 
 
 UserStatus = Literal['Active', 'Locked']
@@ -83,11 +83,12 @@ class UserModel(db.Model):
   comments        : Mapped[List['CommentModel']]           = relationship('CommentModel', back_populates = 'author')
   submissions     : Mapped[List['SubmissionModel']]        = relationship('SubmissionModel', back_populates = 'student')
   snippets        : Mapped[List['SubmissionSnippetModel']] = relationship('SubmissionSnippetModel', back_populates = 'student')
-  owned_classrooms: Mapped[List['ClassroomModel']]         = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner')
+  classrooms      : Mapped[List['ClassroomModel']]         = relationship('ClassroomModel', secondary = 'classroom_user_assotiation', back_populates = 'members')
+  owned_classrooms: Mapped[List['ClassroomModel']]         = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner', overlaps = 'classrooms', viewonly = True)
 
   # Textbooks
-  textbooks      : Mapped[List['EditableTextbookModel']] = relationship('EditableTextbookModel', back_populates = 'user')
-  owned_textbooks: Mapped[List['TextbookModel']]         = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author')
+  textbooks      : Mapped[List['TextbookModel']] = relationship('TextbookModel', secondary = 'user_textbook_assotiation', back_populates = 'bought_by')
+  owned_textbooks: Mapped[List['TextbookModel']] = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author', overlaps = 'textbooks')
 
   # Transactions
   subscription_id     : Mapped[Optional[str]]      = mapped_column(String, nullable = True)
@@ -123,6 +124,7 @@ class UserModel(db.Model):
     `privilege: PrivilegeTypes`
       Look at src.database.PrivilegeTypes
     """
+    self.id = uuid.uuid4().hex
     self.email     = email
     self.username  = username
     self.privilege = privilege
@@ -133,46 +135,11 @@ class UserModel(db.Model):
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
 
-
-  # Private
-  @staticmethod
-  def _clean_id_str(data: Optional[str] = '', separator: str = '|') -> list[str]:
-    """
-    Turns DB model saved data str('id1|id2|id3|...) to list[str, ...]
-
-    
-    Parameters
-    ----------
-    `data: str`, required
-    `separator: str`, optional (defaults to '|')
-
-
-    Returns
-    -------
-    `data: list[str]`
-    """
-    return [i for i in (data or '').split(separator) if i]
-
     
   # Properties
   @property
   def password(self) -> None:
     raise AttributeError('Password is not reaadable!')
-
-  @cached_property
-  def classrooms(self) -> list[ClassroomMember]:
-    from .classroom import ClassroomModel as cm # Import in runtime to prevent circular imports
-
-    asStudent: list['ClassroomModel'] = cm.query.filter(cm.student_ids.contains(self.id)).all()
-    asEducator: list['ClassroomModel'] = cm.query.filter(cm.educator_ids.contains(self.id)).all()
-    asOwner: list['ClassroomModel'] = self.owned_classrooms
-
-    classes: list[ClassroomMember] = []
-    for i in asStudent: classes.append(ClassroomMember(self, i, 'Student'))
-    for i in asEducator: classes.append(ClassroomMember(self, i, 'Educator'))
-    for i in asOwner: classes.append(ClassroomMember(self, i, 'Owner'))
-
-    return classes
 
   # Editing
   def join_class(self, *classrooms: 'ClassroomModel', commits: bool = True) -> None:
@@ -200,11 +167,10 @@ class UserModel(db.Model):
       join_class(class2, class3)
     ```
     """
-    cleaned_classroms = set(classrooms)
-    joined_classes = set( i.classroom.id for i in self.classrooms )
+    cleaned_classrooms = set(classrooms)
 
-    for class_ in cleaned_classroms:
-      if class_.id in joined_classes:
+    for class_ in cleaned_classrooms:
+      if class_ in self.classrooms:
         class_.add_students(self)
         
 
@@ -236,17 +202,17 @@ class UserModel(db.Model):
       exit_class(class2, class3)
     ```
     """
-    cleanedClassroms = set( i.id for i in classrooms )
+    cleaned_classrooms = set(classrooms)
 
     for class_ in self.classrooms:
-      match ((class_.classroom.id in cleanedClassroms) and class_.role):
-        case 'Student':
-          class_.classroom.remove_students(self)
-          break
+      if class_ not in cleaned_classrooms:
+        continue
 
-        case 'Educator':
-          class_.classroom.remove_educators(self)
-          break
+      if self in class_.students:
+        class_.remove_students(self)
+      
+      if self in class_.educators:
+        class_.remove_educators(self)
 
     if commits: db.session.commit()
     return None
@@ -296,11 +262,10 @@ class UserModel(db.Model):
     for i in self.comments: i.delete()
     for i in self.submissions: i.delete()
 
-    for i in self.textbooks: i.delete()
     for i in self.transactions: i.delete()
     for i in self.owned_textbooks: i.delete()
     for i in self.owned_classrooms: i.delete()
-    self.exit_class(*[ i.classroom for i in self.classrooms])
+    self.exit_class(*self.classrooms)
 
     db.session.delete(self)
     db.session.commit()

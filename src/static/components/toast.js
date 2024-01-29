@@ -155,7 +155,7 @@ const getNotifications = async () => {
 
   /**
    * Fetched notifications
-   * @type {APIJSON<toastAPIGet> | null}
+   * @type {APIJSON<toastAPIGet> | void}
    */
   const data = await fetch('/api/v1/notify/get')
     .then(r => {

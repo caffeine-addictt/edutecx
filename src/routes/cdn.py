@@ -56,28 +56,6 @@ def uploaded_images(user: UserModel | None, filename: str):
 
 
 
-# Editable Textbooks
-@app.route('/public/editabletextbook/<path:filename>', methods = ['GET'])
-@auth_provider.require_login
-def editable_textbook_cdn(user: UserModel, filename: str):
-  if user.privilege == 'Admin':
-    return serve(
-      cdn_provider.EditableTextbookLocation,
-      filename
-    )
-  
-  for book in user.owned_textbooks:
-    if book.iuri.endswith(filename):
-      return serve(
-        cdn_provider.EditableTextbookLocation,
-        filename
-      )
-  
-  raise NotFound()
-
-
-
-
 # Textbooks
 @app.route('/public/textbook/<path:filename>', methods = ['GET'])
 @auth_provider.require_login

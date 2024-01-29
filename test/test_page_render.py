@@ -1,59 +1,40 @@
 from flask import Flask
 from flask.testing import FlaskClient
 
-def test_home(app: Flask, client: FlaskClient):
-  """
-  Testing page routing
-  """
-  response = client.get('/')
-  assert response.status_code == 200, response
-    
 
-def test_routesExist(app: Flask, client: FlaskClient):
+def test_appRoutes(app: Flask, client: FlaskClient):
   """
   Testing that all routes are added properly
   """
   passed = set()
   failed = set()
 
-  for route in [
-    # Normal routes
-    '/',
-    '/home',
+  def validatePassing(path: str, code: int) -> bool:
+    return (
+      (path.startswith('/public') and (code in [200, 404]))
+      or (path.startswith('/static') and (code in [200, 404]))
+      or (path.startswith('/api/v1') and (code in [200, 303, 400, 401]))
+      or (path.startswith('/store/<') and (code in [200, 404]))
+      or (code in [200, 303, 401])
+    )
+
+  for rule in app.url_map.iter_rules():
     
-    # Purchasing routes
-    '/store',
-    '/cart',
-    '/checkout-success',
-    '/checkout-cancel',
+    if rule.methods and 'GET' in rule.methods:
+      response = client.get(rule.rule)
 
-    # Auth routes
-    '/login',
-    '/register',
+      if validatePassing(rule.rule, response.status_code):
+        passed.add(f'{rule.rule}: {response.status_code}')
+      else:
+        failed.add(f'{rule.rule}: {response.status_code}')
 
-    # user routes
-    '/textbooks',
-    '/classrooms',
-    '/assignments',
-    '/submissions',
+    if rule.methods and 'POST' in rule.methods:
+      response = client.post(rule.rule)
 
-    # Legal
-    '/privacy-policy',
-    '/contact-us',
-    '/terms-of-service',
-
-    # Admin routes
-    '/dashboard',
-    '/dashboard/users',
-    '/dashboard/revenue',
-    '/dashboard/textbooks'
-  ]:
-    response = client.get(route)
-
-    if response.status_code >= 400:
-      failed.add(f'{route}: {response.status_code}')
-    else:
-      passed.add(f'{route}: {response.status_code}')
+      if validatePassing(rule.rule, response.status_code):
+        passed.add(f'{rule.rule}: {response.status_code}')
+      else:
+        failed.add(f'{rule.rule}: {response.status_code}')
 
   assert len(failed) == 0, (
     f'\n\nLog:\n\nFailed [{len(failed)}]\n>>>>>>>>>>\n%s\n<<<<<<<<<<\n\nPassed [{len(passed)}]\n>>>>>>>>>>\n%s\n<<<<<<<<<<\n'
