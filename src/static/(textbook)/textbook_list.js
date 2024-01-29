@@ -1,70 +1,31 @@
 
 /**
  * Textbooks List
- * @type {Array.<{
-*   id: string;
-*   author_id: string;
-*   title: string;
-*   description: string;
-*   categories: string[];
-*   price: number;
-*   uri: string;
-*   status: 'Available' | 'Unavailable' | 'DMCA';
-*   cover_image: string | null;
-*   created_at: number;
-*   update_at: number;
- * }>}
+ * @type {Array.<TextbookGetData>}
  */
-let classroomList = [];
+let textbookList = [];
 
 
 
 
 /**
  * Fetch Textbooks
- * @type {Promise<Array.<{
-*   id: string;
-*   author_id: string;
-*   title: string;
-*   description: string;
-*   categories: string[];
-*   price: number;
-*   uri: string;
-*   status: 'Available' | 'Unavailable' | 'DMCA';
-*   cover_image: string | null;
-*   created_at: number;
-*   update_at: number;
- * }>>}
+ * @returns {Promise<Array.<TextbookGetData>>}
  */
 const fetchTextbooks = async () => {
+  let searchParams = ((new URL(location.href)).searchParams);
+  let criteria = searchParams.get('criteria');
+  criteria = ['or', 'and'].includes(criteria) ? criteria : 'or';
 
-  /**
-   * @type {{
-   *   status: number;
-   *   message: string;
-   *   data: Array.<{
-   *   id: string;
-   *   author_id: string;
-   *   title: string;
-   *   description: string;
-   *   categories: string[];
-   *   price: number;
-   *   uri: string;
-   *   status: 'Available' | 'Unavailable' | 'DMCA';
-   *   cover_image: string | null;
-   *   created_at: number;
-   *   update_at: number;
-   *   }>
-   * } | null}
-   */
-  const data = await fetch('/api/v1/store/list', {
+  searchParams.set('requestFor', 'Sale');
+  searchParams.set('criteria', criteria);
+
+
+  /** @type {APIJSON<TextbookGetData[]> | void} */
+  const data = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
     method: 'GET',
     headers: { 'X-CSRF-TOKEN': getAccessToken() }
-  }).then(res => {
-    if (res.ok) {
-      return res.json();
-    };
-  });
+  }).then(res => res.json()).catch(e => console.log(e));
 
   if (!data || data.status !== 200) {
     renderToast('Failed to fetch textbooks', 'danger');
@@ -72,27 +33,15 @@ const fetchTextbooks = async () => {
     return data?.data || new Array();
   };
 
-  return data.data
-}
+  return data.data;
+};
 
 
 
 
 /**
  * Render Classrooms
- * @param {Array.<{
- *   id: string;
- *   author_id: string;
- *   title: string;
- *   description: string;
- *   categories: string[];
- *   price: number;
- *   uri: string;
- *   status: 'Available' | 'Unavailable' | 'DMCA';
- *   cover_image: string | null;
- *   created_at: number;
- *   update_at: number;
- * }>?} filteredList
+ * @param {Array.<TextbookGetData>?} filteredList
  * @returns {Promise<void>}
  */
 const renderTextbooks = async (filteredList) => {
@@ -102,17 +51,18 @@ const renderTextbooks = async (filteredList) => {
   if ((filteredList || textbookList).length === 0) {
     container.append(htmlToElement(
       `<p class="text-secondary fs-5 mb-0">
-        You are not in any classrooms. 
-        Join with an invite link or <a href='/classrooms/new'>create one</a>!
+        You do not have any textbooks.
+        Purchase one <a href='/store'>here</a>!
       </p>`
     ));
   }
   else {
-    template = deepCopy(tile);
-    (filteredList || textbookList).forEach(textbookdata => {
+    template = deepCopy(cardTemplate);
+    (filteredList || textbookList).forEach(textbookData => {
       container.append(htmlToElement(formatString(template, {
         title: textbookData.title,
-        id: textbookData.id,
+        description: textbookData.description,
+        id: textbookData.id
       })));
     });
   };
@@ -121,26 +71,11 @@ const renderTextbooks = async (filteredList) => {
 
 
 
-/**
- * Handle Filtering
- * @returns {void}
- */
-const handleFiltering = () => {
-  // TODO: Generate NEW array from `classroomList`
-  // TODO: Call renderClassrooms( newFilteredClassrooms );
-}
-
-
-
-
 // On DOM Render
 $(async () => {
-  classroomList = await fetchClassrooms();
-  renderClassrooms();
+  classroomList = await fetchTextbooks();
+  renderTextbooks();
+
+
+  // Hooks
 });
-
-
-// Hooks
-$(() => {
-  // TODO: Handle query and filtering
-})
