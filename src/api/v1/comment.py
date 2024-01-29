@@ -72,7 +72,7 @@ def comment_get_api(user: UserModel):
 def comment_create_api(user: UserModel):
   req = CommentCreateRequest(request)
 
-  if (req.text == 'None'):
+  if (not req.text) or (req.text == 'None'):
     return GenericReply(
       message = 'Invalid text',
       status = HTTPStatusCode.BAD_REQUEST

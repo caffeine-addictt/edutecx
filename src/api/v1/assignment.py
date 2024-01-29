@@ -144,7 +144,7 @@ def assignment_create_api(user: UserModel):
 @require_login
 def assignment_edit_api(user: UserModel):
   req = AssignmentEditRequest(request)
-  toChange = {key: '' if i == 'None' else i for key in [
+  toChange = {key: '' if not i or i == 'None' else i for key in [
     'title',
     'description',
     'due_date',

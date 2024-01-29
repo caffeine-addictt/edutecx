@@ -233,7 +233,7 @@ def create_stripe_checkout_session_api(user: UserModel):
 def cancel_stripe_subscription_api(user: UserModel):
   req = StripeSubscriptionCancelRequest(request)
 
-  if req.subscription_id == 'None':
+  if (not req.subscription_id) or (req.subscription_id == 'None'):
     return GenericReply(
       message = 'Invalid subscription id',
       status = HTTPStatusCode.BAD_REQUEST
@@ -285,7 +285,7 @@ def cancel_stripe_subscription_api(user: UserModel):
 def stripe_expiresession_api(user: UserModel):
   req = StripeExpireRequest(request)
 
-  if req.session_id == 'None':
+  if (not req.session_id) or (req.session_id == 'None'):
     return GenericReply(
       message = 'Invalid session id',
       status = HTTPStatusCode.BAD_REQUEST
@@ -326,7 +326,7 @@ def stripe_expiresession_api(user: UserModel):
 def stripe_status_api(user: UserModel):
   req = StripeStatusRequest(request)
 
-  if req.session_id == 'None':
+  if (not req.session_id) or (req.session_id == 'None'):
     return GenericReply(
       message = 'Invalid session id',
       status = HTTPStatusCode.BAD_REQUEST

@@ -106,7 +106,7 @@ def classroom_get_api(user: UserModel):
 def classroom_create_api(user: UserModel):
   req = ClassroomCreateRequest(request)
 
-  if (req.title == 'None') or (req.description == 'None'):
+  if (not req.title) or (req.title == 'None') or (not req.description) or (req.description == 'None'):
     return GenericReply(
       message = 'Invalid title or description',
       status = HTTPStatusCode.BAD_REQUEST
@@ -166,7 +166,7 @@ def classroom_create_api(user: UserModel):
 @require_login
 def classroom_edit_api(user: UserModel):
   req = ClassroomEditRequest(request)
-  toChange = {key: '' if i == 'None' else i for key in [
+  toChange = {key: '' if not i or i == 'None' else i for key in [
     'classroom_id',
     'title',
     'description',

@@ -143,19 +143,19 @@ def textbooks_get_api():
 def textbook_create_api(user: UserModel):
   req = TextbookCreateRequest(request)
 
-  if req.title == 'None':
+  if (not req.title) or (req.title == 'None'):
     return GenericReply(
       message = 'Missing title',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if req.description == 'None':
+  if (not req.description) or (req.description == 'None'):
     return GenericReply(
       message = 'Missing description',
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  author = user if (req.author_id == 'None') or (user.id == req.author_id) else UserModel.query.filter(UserModel.id == req.author_id).first()
+  author = user if (not req.author_id) or (req.author_id == 'None') or (user.id == req.author_id) else UserModel.query.filter(UserModel.id == req.author_id).first()
   if not isinstance(author, UserModel):
     return GenericReply(
       message = 'Invalid user',
@@ -204,7 +204,7 @@ def textbook_create_api(user: UserModel):
 def textbooks_edit_api(user: UserModel):
   req = TextbookEditRequest(request)
 
-  toChange = {key: '' if i == 'None' else i for key in [
+  toChange = {key: '' if not i or i == 'None' else i for key in [
     'title',
     'description',
     'categories',
