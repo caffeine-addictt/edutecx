@@ -181,6 +181,7 @@ def uploadImage(file: FileStorage, filename: str) -> str:
 
 
 
+
 def deleteImage(filename: str) -> None:
   _dirCheck()
 
@@ -188,117 +189,6 @@ def deleteImage(filename: str) -> None:
   if os.path.exists(fileLocation):
     os.remove(fileLocation)
 
-def cloneTextbook(fileLocation: str, newfilename: str) -> str:
-  """
-  Clone a textbook upload
-
-  Parameters
-  ----------
-  `fileLocation: str`, required
-    The iuri of the file to clone
-
-  `newfilename: str`, required
-  """
-  _dirCheck()
-
-  if not os.path.exists(fileLocation):
-    raise FileDoesNotExistError()
-
-  ext = fileLocation.split('.')[-1]
-  if ext not in TextbookFileEXT:
-    raise BadFileEXT()
-  
-  newfilename = _get_unique_filename(
-    EditableTextbookLocation,
-    newfilename,
-    ext
-  )
-
-  newfileLocation = os.path.join(EditableTextbookLocation, newfilename)
-  shutil.copy2(fileLocation, newfileLocation)
-  return newfileLocation
-
-
-
-def clonePage(fileLocation: str, newfilename: str, pages: int | tuple[int, int]) -> str:
-  """
-  Clone a textbook's pages
-  
-  Parameters
-  ----------
-  `fileLocation: str`, required
-    The iuri of the file to clone
-  
-  `newfilename: str`, required
-
-  `pages: int | tuple[int, int]`, required
-    The page indexes (Page 1 => index 0)
-    Tuple is the same as pageList[index1 : index2]
-  """
-  _dirCheck()
-
-
-  # Validate inputs
-  if isinstance(pages, tuple):
-    assert len(pages) == 2, 'Pages tuple argument must contain exactly two numbers (start_index, end_index)'
-    assert all([ isinstance(i, int) for i in pages ]), 'Pages argument must contain exactly two numbers (start_index, end_index)'
-
-  if not os.path.exists(fileLocation):
-    raise FileDoesNotExistError()
-
-  ext = fileLocation.split('.')[-1]
-  if ext not in TextbookFileEXT:
-    raise BadFileEXT()
-  
-  
-  # Fetch filename
-  newfilename = _get_unique_filename(
-    SubmittedSnippetLocation,
-    newfilename,
-    ext
-  )
-  
-  
-  # Write PDF
-  reader = _injectCopyright(PdfReader(fileLocation))
-  written = PdfWriter()
-
-  # Add copyright notice
-  written.add_page(reader.pages[0])
-
-  for pageIndex in range( *(pages[0] + 1, pages[1] + 1) if isinstance(pages, tuple) else (pages + 1, pages + 2) ):
-    written.add_page(reader.pages[pageIndex])
-
-  newfileLocation = os.path.join(SubmittedSnippetLocation, newfilename)
-  with open(newfileLocation, 'wb') as out:
-    written.write(out)
-
-  return newfileLocation
-
-
-
-def updateEditableTextbook(fileLocation: str, file: FileStorage) -> None:
-  """
-  Replace current upload with new file
-  
-  Parameters
-  ----------
-  `fileLocation: str`, required
-    The iuri of the file to replace
-  
-  `file: FileStorage`, required
-    From request.form.files[0]
-  """
-  _dirCheck()
-
-  if not os.path.exists(fileLocation):
-    raise FileDoesNotExistError()
-  
-  writer = _injectCopyright(PdfReader(file.stream))
-
-  os.remove(fileLocation)
-  with open(fileLocation, 'wb') as out:
-    writer.write(out)
 
 
 
