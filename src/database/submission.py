@@ -24,7 +24,6 @@ if TYPE_CHECKING:
   from .submissionsnippet import SubmissionSnippetModel
 
 
-# TODO: Add the edited page of textbookModel (after figuring out how to edit it :'>)
 class SubmissionModel(db.Model):
   """Submission Model"""
 
