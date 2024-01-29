@@ -26,7 +26,8 @@ if TYPE_CHECKING:
   from .image import ImageModel
   from .discount import DiscountModel
   from .classroom import ClassroomModel
-  from .assotiation import user_textbook_assotiation, classroom_textbook_assotiation
+  from .assignment import AssignmentModel
+  from .assotiation import user_textbook_assotiation, classroom_textbook_assotiation, assignment_textbook_assotiation
 
 
 TextbookStatus = Literal['Available', 'Unavailable', 'DMCA']
@@ -50,11 +51,12 @@ class TextbookModel(db.Model):
   description: Mapped[str] = mapped_column(String, nullable = True, default = '')
   categories : Mapped[str] = mapped_column(String, nullable = False, default = '') # 'category1|category2...'
 
-  price      : Mapped[float]                 = mapped_column(Float, nullable = False, default = 0.0)
-  author     : Mapped['UserModel']           = relationship('UserModel', back_populates = 'owned_textbooks')
-  discounts  : Mapped[List['DiscountModel']] = relationship('DiscountModel', back_populates = 'textbook')
-  bought_by  : Mapped[List['UserModel']]     = relationship('UserModel', secondary = 'user_textbook_assotiation', back_populates = 'textbooks')
-  classrooms : Mapped[List['ClassroomModel']] = relationship('ClassroomModel', secondary = 'classroom_textbook_assotiation', back_populates = 'textbooks')
+  price      : Mapped[float]                   = mapped_column(Float, nullable = False, default = 0.0)
+  author     : Mapped['UserModel']             = relationship('UserModel', back_populates = 'owned_textbooks')
+  discounts  : Mapped[List['DiscountModel']]   = relationship('DiscountModel', back_populates = 'textbook')
+  bought_by  : Mapped[List['UserModel']]       = relationship('UserModel', secondary = 'user_textbook_assotiation', back_populates = 'textbooks')
+  classrooms : Mapped[List['ClassroomModel']]  = relationship('ClassroomModel', secondary = 'classroom_textbook_assotiation', back_populates = 'textbooks')
+  assignments: Mapped[List['AssignmentModel']] = relationship('AssignmentModel', secondary = 'assignment_textbook_assotiation', back_populates = 'textbooks')
 
   uri          : Mapped[str]                           = mapped_column(String, nullable = True)
   iuri         : Mapped[str]                           = mapped_column(String, nullable = True)

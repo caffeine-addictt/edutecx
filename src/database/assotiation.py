@@ -56,3 +56,10 @@ classroom_textbook_assotiation = db.Table(
   Column('classroom_id', String, ForeignKey('classroom_table.id')),
   Column('textbook_id', String, ForeignKey('textbook_table.id'))
 )
+
+
+assignment_textbook_assotiation = db.Table(
+  'assignment_textbook_assotiation',
+  Column('assignment_id', String, ForeignKey('assignment_table.id')),
+  Column('textbook_id', String, ForeignKey('textbook_table.id'))
+)

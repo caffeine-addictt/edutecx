@@ -19,8 +19,10 @@ from sqlalchemy import (
 
 # Import UserModel at runtime to prevent circular imports
 if TYPE_CHECKING:
+  from .textbook import TextbookModel
   from .classroom import ClassroomModel
-  from.submission import SubmissionModel
+  from .submission import SubmissionModel
+  from .assotiation import assignment_textbook_assotiation
 
 
 class AssignmentModel(db.Model):
@@ -37,8 +39,8 @@ class AssignmentModel(db.Model):
   title      : Mapped[str]                     = mapped_column(String, nullable = False)
   description: Mapped[str]                     = mapped_column(String, nullable = False)
   due_date   : Mapped[datetime]                = mapped_column(DateTime, nullable = True)
-  textbooks  : Mapped[str]                     = mapped_column(String, nullable = True)
   requirement: Mapped[str]                     = mapped_column(String, nullable = True)
+  textbooks  : Mapped[List['TextbookModel']]   = relationship('TextbookModel', secondary = 'assignment_textbook_assotiation', back_populates = 'assignments')
   submissions: Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'assignment')
 
   # Logs
@@ -52,7 +54,8 @@ class AssignmentModel(db.Model):
     title: str,
     description: str,
     due_date: Optional[datetime] = None,
-    requirement: str = ''
+    requirement: str = '',
+    textbooks: List['TextbookModel'] = []
   ) -> None:
     """
     Assignment model
@@ -73,6 +76,9 @@ class AssignmentModel(db.Model):
 
     `requirement: str`, optional (defaults to '')
       Format = str(docID:pageNum) | str(docID:pageNum:pageNum)
+    
+    `textbooks: TextbookModel[]`, optional (defaults to [])
+      The textbooks to allocate to the assignment
 
     
     Returns
@@ -91,6 +97,7 @@ class AssignmentModel(db.Model):
     self.title = title
     self.description = description
     self.requirement = requirement
+    self.textbooks = textbooks
 
     if due_date is not None:
       self.due_date = due_date
