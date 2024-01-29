@@ -29,6 +29,7 @@ if TYPE_CHECKING:
   from .sale import SaleModel
   from .image import ImageModel
   from .submissionsnippet import SubmissionSnippetModel
+  from .assotiation import user_textbook_assotiation
 
 
 UserStatus = Literal['Active', 'Locked']
@@ -85,7 +86,8 @@ class UserModel(db.Model):
   owned_classrooms: Mapped[List['ClassroomModel']]         = relationship('ClassroomModel', primaryjoin = 'UserModel.id == ClassroomModel.owner_id', back_populates = 'owner')
 
   # Textbooks
-  owned_textbooks: Mapped[List['TextbookModel']] = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author')
+  textbooks      : Mapped[List['TextbookModel']] = relationship('TextbookModel', secondary = 'user_textbook_assotiation', back_populates = 'bought_by')
+  owned_textbooks: Mapped[List['TextbookModel']] = relationship('TextbookModel', primaryjoin = 'UserModel.id == TextbookModel.author_id', back_populates = 'author', overlaps = 'textbooks')
 
   # Transactions
   subscription_id     : Mapped[Optional[str]]      = mapped_column(String, nullable = True)

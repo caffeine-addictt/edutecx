@@ -25,3 +25,6 @@ from .textbook import TextbookModel, TextbookStatus, EnumTextbookStatus, Textboo
 from .submissionsnippet import SubmissionSnippetModel, SnippetUploadStatus, EnumSnippetUploadStatus
 
 from .sale import SaleModel, SaleInfo, SaleType, EnumSaleType
+
+# Assocations
+from .assotiation import user_textbook_assotiation
