@@ -4,8 +4,6 @@ Handles textbook routes
 
 from src.database import UserModel, TextbookModel
 from src.service import auth_provider
-
-from werkzeug.exceptions import Unauthorized
 from src.utils.http import escape_id
 from flask import (
   render_template,
@@ -26,6 +24,9 @@ def textbooks(user: UserModel):
 def textbooks_focused(user: UserModel, id: str):
   id = escape_id(id)
   textbook = TextbookModel.query.filter(TextbookModel.id == id).first()
+  if not isinstance(textbook, TextbookModel):
+    return render_template('(textbook)/textbook_error.html', message = 'Unable to locate textbook')
+  
   return render_template('(textbook)/textbook.html', textbook = textbook)
 
 
