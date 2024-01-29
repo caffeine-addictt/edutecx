@@ -23,6 +23,19 @@
 
 
 /**
+ * @typedef {Object} UserGetData
+ * @property {string} user_id
+ * @property {string} email
+ * @property {string} username
+ * @property {'Active' | 'Locked'} status
+ * @property {'Student' | 'Educator' | 'Admin'} privilege
+ * @property {string | null} profile_image
+ * @property {number} created_at
+ * @property {number} last_login
+ */
+
+
+/**
  * @typedef {Object} TextbookGetData
  * @property {string} id
  * @property {string} author_id

@@ -113,16 +113,7 @@ const fetchGraphURI = async (initialRender = false) => {
 
 /**
  * Render user entry
- * @param {{
- *   user_id      : string;
- *   email        : string;
- *   status       : 'Active' | 'Locked';
- *   username     : string;
- *   privilege    : 'Student' | 'Educator' | 'Admin';
- *   profile_image: string | null;
- *   created_at   : number;
- *   last_login   : number;
- * }} user - The user to render
+ * @param {UserGetData} user - The user to render
  * @returns {void}
  */
 const renderUser = (user) => {
@@ -241,31 +232,14 @@ const fetchUserData = async (initialRender = false) => {
   searchParams.set('criteria', criteria)
 
   /**
-   * @type {{
-   *   status : 200;
-   *   message: string;
-   *   data?: Array.<{
-   *     user_id      : string;
-   *     email        : string;
-   *     status       : 'Active' | 'Locked';
-   *     username     : string;
-   *     privilege    : 'Student' | 'Educator' | 'Admin';
-   *     profile_image: string | null;
-   *     created_at   : number;
-   *     last_login   : number;
-   *   }>;
-   * } | void}
+   * @type {APIJSON<UserGetData[]> | void}
    */
   const response = await fetch(`/api/v1/user/list?${searchParams.toString()}`, {
     method: 'GET',
     headers: {
       'X-CSRF-TOKEN': getAccessToken()
     }
-  }).then(res => {
-    if (res.ok) {
-      return res.json();
-    };
-  });
+  }).then(res => res.json()).catch(err => console.log(err));
 
   if (!response || response.status !== 200) {
     if (response) console.log(response.message);
