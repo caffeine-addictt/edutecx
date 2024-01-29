@@ -29,44 +29,28 @@ const renderTextbookPage = async () => {
   textbookFetchController = new AbortController();
 
   /**
-   * @type {{
-   *   status : 200;
-   *   message: string;
-   *   data: Array.<{
-   *     user_id            : string;
-   *     textbook_id        : string;
-   *     editabletextbook_id: string;
-   *     uri                : string;
-   *     status             : 'Uploading' | 'Uploaded';
-   *     created_at         : number;
-   *     updated_at         : number;
-   *   }>;
-   * } | {
-   *   status : 500;
-   *   message: string;
-   * }}
+   * @type {APIJSON<TextbookGetData[]>}
    */
   const response = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
     method: 'GET',
     signal: textbookFetchController.signal
-  }).then(async res => await res.json());
+  }).then(res => res.json()).catch(err => console.log(err));
 
-  if (response.status !== 200) {
-    renderToast(response.message, 'danger');
+  if (!response || response.status !== 200) {
+    renderToast(response ? response.message : 'Something went wrong!', 'danger');
   }
   else {
     response.data.forEach((item) => {
       $('#textbook__container').append(htmlToElement(`${item.uri}`));
-    })
-  }
+    });
+  };
 
   // Undisable forward/previous button
-}
+};
 
 
 
 // Initial Render
 $(() => {
   renderTextbookPage();
-
-})
+});
