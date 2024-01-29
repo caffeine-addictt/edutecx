@@ -23,6 +23,7 @@ if TYPE_CHECKING:
   from .textbook import TextbookModel
   from .assignment import AssignmentModel
   from .image import ImageModel
+  from .assotiation import classroom_user_assotiation, classroom_textbook_assotiation
 
 
 class ClassroomModel(db.Model):
@@ -44,6 +45,7 @@ class ClassroomModel(db.Model):
   description: Mapped[str]                     = mapped_column(String, nullable = True, default = None)
   assignments: Mapped[List['AssignmentModel']] = relationship('AssignmentModel', back_populates = 'classroom')
   cover_image: Mapped[Optional['ImageModel']]  = relationship('ImageModel', back_populates = 'classroom')
+  textbooks  : Mapped[List['TextbookModel']]   = relationship('TextbookModel', secondary = 'classroom_textbook_assotiation', back_populates = 'classrooms')
 
   # Invite
   invite_id     : Mapped[str]  = mapped_column(String, unique = True, nullable = False, default = lambda: uuid.uuid4().hex)
@@ -281,9 +283,7 @@ class ClassroomModel(db.Model):
       add_textbooks(doc2, doc3)
     ```
     """
-    current_data = self._clean_id_str(self.textbook_ids)
-    appended_data = set(current_data + [i.id for i in textbooks]) # Casted to set to prevent duplicates
-    self.textbook_ids = '|'.join(appended_data)
+    self.textbooks = list(set(self.textbooks + list(textbooks)))
     return None
 
   def remove_textbooks(self, *textbooks: 'TextbookModel') -> None:
@@ -309,10 +309,7 @@ class ClassroomModel(db.Model):
       remove_textbooks(doc2, doc3)
     ```
     """
-    to_exclude = set([str(i.id) for i in textbooks]) # Casted to set to prevent duplicates
-    current_data = self._clean_id_str(self.textbook_ids)
-    filtered_data = set([i for i in current_data if i not in to_exclude]) # Casted to set to prevent duplicates
-    self.textbook_ids = '|'.join(filtered_data)
+    self.textbooks = [i for i in self.textbooks if i not in textbooks]
     return None
 
 

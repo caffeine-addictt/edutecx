@@ -49,3 +49,10 @@ class classroom_user_assotiation(db.Model):
   def delete(self) -> None:
     db.session.delete(self)
     db.session.commit()
+
+
+classroom_textbook_assotiation = db.Table(
+  'classroom_textbook_assotiation',
+  Column('classroom_id', String, ForeignKey('classroom_table.id')),
+  Column('textbook_id', String, ForeignKey('textbook_table.id'))
+)

@@ -28,4 +28,5 @@ from .sale import SaleModel, SaleInfo, SaleType, EnumSaleType
 
 # Assocations
 from .assotiation import user_textbook_assotiation, \
+                         classroom_textbook_assotiation, \
                          classroom_user_assotiation, ClassroomMemberRole, EnumClassroomMemberRole

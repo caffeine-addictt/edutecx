@@ -25,7 +25,8 @@ if TYPE_CHECKING:
   from .user import UserModel
   from .image import ImageModel
   from .discount import DiscountModel
-  from .assotiation import user_textbook_assotiation
+  from .classroom import ClassroomModel
+  from .assotiation import user_textbook_assotiation, classroom_textbook_assotiation
 
 
 TextbookStatus = Literal['Available', 'Unavailable', 'DMCA']
@@ -53,6 +54,7 @@ class TextbookModel(db.Model):
   author     : Mapped['UserModel']           = relationship('UserModel', back_populates = 'owned_textbooks')
   discounts  : Mapped[List['DiscountModel']] = relationship('DiscountModel', back_populates = 'textbook')
   bought_by  : Mapped[List['UserModel']]     = relationship('UserModel', secondary = 'user_textbook_assotiation', back_populates = 'textbooks')
+  classrooms : Mapped[List['ClassroomModel']] = relationship('ClassroomModel', secondary = 'classroom_textbook_assotiation', back_populates = 'textbooks')
 
   uri          : Mapped[str]                           = mapped_column(String, nullable = True)
   iuri         : Mapped[str]                           = mapped_column(String, nullable = True)
