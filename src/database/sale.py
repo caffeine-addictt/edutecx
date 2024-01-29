@@ -26,6 +26,8 @@ if TYPE_CHECKING:
   from .user import UserModel
   from .textbook import TextbookModel
   from .discount import DiscountModel
+  from .assotiation import sale_textbook_assotiation
+
 
 SaleType = Literal['OneTime', 'Subscription']
 EnumSaleType = Enum('OneTime', 'Subscription', name = 'SaleType')
@@ -44,7 +46,6 @@ class SaleModel(db.Model):
   # Identifiers
   id          : Mapped[str]           = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
   user_id     : Mapped[str]           = mapped_column(ForeignKey('user_table.id'), nullable = False)
-  textbook_ids: Mapped[Optional[str]] = mapped_column(String, nullable = True) # str(id:cost,id2:cost,...)
   discount_id : Mapped[Optional[str]] = mapped_column(ForeignKey('discount_table.id'), nullable = True)
 
   # Stripe IDs
@@ -55,8 +56,10 @@ class SaleModel(db.Model):
   type         : Mapped[SaleType]                  = mapped_column(EnumSaleType, nullable = False)
   paid         : Mapped[bool]                      = mapped_column(Boolean, nullable = False, default = False)
   total_cost   : Mapped[float]                     = mapped_column(Float, nullable = False)
-  user         : Mapped['UserModel']               = relationship('UserModel')
-  used_discount: Mapped[Optional['DiscountModel']] = relationship('DiscountModel', back_populates = 'used_by')
+
+  user         : Mapped['UserModel']                       = relationship('UserModel')
+  used_discount: Mapped[Optional['DiscountModel']]         = relationship('DiscountModel', back_populates = 'used_by')
+  data         : Mapped[List['sale_textbook_assotiation']] = relationship('sale_textbook_assotiation', back_populates = 'sale')
 
   # Logs
   paid_at   : Mapped[datetime] = mapped_column(DateTime, nullable = True)
@@ -133,12 +136,14 @@ class SaleModel(db.Model):
     self.total_cost = total_cost or 0
 
     if saleType == 'OneTime':
-      ids = []
+      from .assotiation import sale_textbook_assotiation as sta
+      self.data = []
       for info in (saleinfo or []):
         self.total_cost += info.cost
-        ids.append(f'{info.textbook.id}:{info.textbook.price}')
 
-      self.textbook_ids = ','.join(ids)
+        newSta = sta(self, info.textbook, info.textbook.price)
+        newSta.save()
+        self.data.append(newSta)
     
     if discount:
       discount.used += 1
@@ -152,18 +157,12 @@ class SaleModel(db.Model):
 
   @cached_property
   def textbooks(self) -> Dict[str, SaleInfo]:
-    if self.textbook_ids is None:
+    if self.type != 'OneTime':
       raise ValueError('Is not a one-time sale')
-    
-    data = {}
-    for v in self.textbook_ids.split(','): uid, cost = v.split(':'); data[uid] = cost
-
-    from .textbook import TextbookModel as tm
-    queried: List['TextbookModel'] = tm.query.filter(TextbookModel.id.in_(list(data.keys()))).all()
 
     return {
-      txtbook.id: SaleInfo(data[txtbook.id], txtbook)
-      for txtbook in queried
+      assotiation.textbook.id: SaleInfo(assotiation.cost, assotiation.textbook)
+      for assotiation in self.data
     }
 
   

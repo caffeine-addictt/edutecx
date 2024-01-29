@@ -3,13 +3,15 @@ Assosiation tables for many-to-many relaionships
 '''
 
 from src import db
-from sqlalchemy import ForeignKey, Column, String, Enum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey, Column, String, Float, Enum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
   from .user import UserModel
+  from .sale import SaleModel
+  from .textbook import TextbookModel
   from .classroom import ClassroomModel
 
 
@@ -63,3 +65,34 @@ assignment_textbook_assotiation = db.Table(
   Column('assignment_id', String, ForeignKey('assignment_table.id')),
   Column('textbook_id', String, ForeignKey('textbook_table.id'))
 )
+
+
+
+class sale_textbook_assotiation(db.Model):
+  __tablename__ = 'sale_textbook_assotiation'
+
+  sale_id = Column(String, ForeignKey('sale_table.id'), nullable = False, primary_key = True)
+  textbook_id = Column(String, ForeignKey('textbook_table.id'), nullable = False, primary_key = True)
+
+  sale: Mapped['SaleModel'] = relationship('SaleModel', back_populates = 'data')
+  textbook: Mapped['TextbookModel'] = relationship('TextbookModel', back_populates = 'sales')
+  cost: Mapped[float] = mapped_column(Float, nullable = False)
+
+  def __init__(self, sale: 'SaleModel', textbook: 'TextbookModel', cost: int | float) -> None:
+    self.cost = cost
+    self.sale_id = sale.id
+    self.textbook_id = textbook.id
+  
+  def __repr__(self) -> str:
+    return f'SaleTextbook({self.sale_id}, {self.textbook_id})'
+  
+  def __hash__(self) -> int:
+    return hash((self.sale_id, self.textbook_id))
+  
+  def save(self) -> None:
+    db.session.add(self)
+    db.session.commit()
+  
+  def delete(self) -> None:
+    db.session.delete(self)
+    db.session.commit()
