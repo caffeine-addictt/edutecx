@@ -113,19 +113,7 @@ const fetchGraphURI = async (initialRender = false) => {
 
 /**
  * Render textbook entry
- * @param {{
- *   id: string;
- *   author_id: string;
- *   title: string;
- *   description: string;
- *   categories: string[];
- *   price: number;
- *   uri: string;
- *   status: 'Uploading' | 'Uploaded';
- *   cover_image: string | null;
- *   created_at: number;
- *   updated_at: number;
- * }} textbook - The textbook to render
+ * @param {TextbookGetData} textbook - The textbook to render
  * @returns {void}
  */
 const renderTextbook = (textbook) => {
@@ -232,23 +220,7 @@ const fetchTextbookData = async (initialRender = false) => {
   searchParams.set('criteria', criteria)
 
   /**
-   * @type {{
-   *   status : 200;
-   *   message: string;
-   *   data: Array.<{
-   *     id: string;
-   *     author_id: string;
-   *     title: string;
-   *     description: string;
-   *     categories: string[];
-   *     price: number;
-   *     uri: string;
-   *     status: 'Uploading' | 'Uploaded';
-   *     cover_image: string | null;
-   *     created_at: number;
-   *     updated_at: number;
-   *   }>;
-   * } | void}
+   * @type {APIJSON<TextbookGetData[]> | void}
    */
   const response = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
     method: 'GET',
