@@ -36,3 +36,21 @@
  * @property {number} created_at
  * @property {number} updated_at
  */
+
+
+/**
+ * @typedef {Object} ClassroomGetData
+ * @property {string} id
+ * @property {string} owner_id
+ * @property {string[]} educator_ids
+ * @property {string[]} student_ids
+ * @property {string[]} textbook_ids
+ * @property {string} title
+ * @property {string} description
+ * @property {string[]} assignments
+ * @property {string | null} cover_image
+ * @property {string} invite_id
+ * @property {boolean} invite_enabled
+ * @property {number} created_at
+ * @property {number} updated_at
+ */
