@@ -165,11 +165,16 @@ def test_classroom_user_relationship(app: Flask):
     # Check
     foundClassroom: ClassroomModel | None = ClassroomModel.query.filter(ClassroomModel.id == classNew.id).first()
 
-    assert foundClassroom and foundClassroom.students
-    assert foundClassroom and len(foundClassroom.students) == 1
+    assert isinstance(foundClassroom, ClassroomModel)
 
-    assert foundClassroom and foundClassroom.educators
-    assert foundClassroom and len(foundClassroom.educators) == 1
+    assert foundClassroom.members
+    assert len(foundClassroom.members) == 2
+
+    assert foundClassroom.students
+    assert len(foundClassroom.students) == 1
+
+    assert foundClassroom.educators
+    assert len(foundClassroom.educators) == 1
 
   run()
 
