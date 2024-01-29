@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
+{% from 'macros/textbook.html' import render_textbook_card %}
 
 
 {# Title #}
@@ -17,7 +18,8 @@
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  <script>
+    var cardTemplate = `{{ render_textbook_card() }}`
+  </script>
   <script src="{{ url_for('static', filename = '(textbook)/textbook_list.js') }}"></script>
 {% endblock %}
