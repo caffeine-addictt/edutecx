@@ -18,13 +18,13 @@ from werkzeug.datastructures import FileStorage
 UploadBaseLocation = os.path.join(os.getcwd(), 'src', 'uploads')
 
 CopyrightNoticeLocation = os.path.join(UploadBaseLocation, 'copyright.pdf')
-SubmittedSnippetLocation = os.path.join(UploadBaseLocation, 'textbook_snippets')
-EditableTextbookLocation = os.path.join(UploadBaseLocation, 'textbook_forks')
+SubmissionUpload = os.path.join(UploadBaseLocation, 'SubmissionUpload')
 TextbookLocation = os.path.join(UploadBaseLocation, 'textbooks')
 ImageLocation = os.path.join(UploadBaseLocation, 'images')
 
 TextbookFileEXT = ['pdf']
 ImageFileEXT = ['png', 'jpg', 'jpeg']
+SubmissionFileEXT = ['pdf', 'txt', 'docx', 'doc', 'odt']
 
 class BadFileEXT(Exception):
   """Raised when file extension is not supported"""
@@ -43,8 +43,8 @@ def _dirCheck():
   if not os.path.isdir(UploadBaseLocation):
     os.mkdir(UploadBaseLocation)
 
-  if not os.path.isdir(EditableTextbookLocation):
-    os.mkdir(EditableTextbookLocation)
+  if not os.path.isdir(SubmissionUpload):
+    os.mkdir(SubmissionUpload)
 
   if not os.path.isdir(TextbookLocation):
     os.mkdir(TextbookLocation)
@@ -76,53 +76,70 @@ def _get_unique_filename(dir: str, filename: str, extension: str) -> str:
     else: return filename
 
 
+
+
 def _upload(
-  fileType: Literal['Image', 'Textbook'],
+  fileType: Literal['Image', 'Textbook', 'Submission'],
   file: FileStorage,
   filename: str
 ):
   _dirCheck()
   if not file.filename:
     raise BadFileEXT('File does not have a name')
-
+  
+  ext = file.filename.split('.')[-1]
 
   # Upload the file
-  if fileType == 'Image':
-    ext = file.filename.split('.')[-1]
-    if ext not in ImageFileEXT:
-      raise BadFileEXT(f'{ext} is not supported')
-    
-    filename = _get_unique_filename(
-      ImageLocation,
-      filename,
-      ext
-    )
-
-    # Save the file
-    location = os.path.join(ImageLocation, filename)
-    file.save(location)
-    file.close()
-    return location
-
-  elif fileType == 'Textbook':
-    ext = file.filename.split('.')[-1]
-    if ext not in TextbookFileEXT:
-      raise BadFileEXT()
-    
-    filename = _get_unique_filename(
-      TextbookLocation,
-      filename,
-      ext
-    )
-
-    # Inject copyright notice
-    writer = _injectCopyright(PdfReader(file.stream))
-
-    location = os.path.join(TextbookLocation, filename)
-    with open(location, 'wb') as out:
-      writer.write(out)
+  match fileType:
+    case 'Image':
+      if ext not in ImageFileEXT:
+        raise BadFileEXT(f'{ext} is not supported')
       
-    return location
+      filename = _get_unique_filename(
+        ImageLocation,
+        filename,
+        ext
+      )
+
+      # Save the file
+      location = os.path.join(ImageLocation, filename)
+      file.save(location)
+      file.close()
+      return location
+
+    case 'Textbook':
+      if ext not in TextbookFileEXT:
+        raise BadFileEXT()
+      
+      filename = _get_unique_filename(
+        TextbookLocation,
+        filename,
+        ext
+      )
+
+      # Inject copyright notice
+      writer = _injectCopyright(PdfReader(file.stream))
+
+      location = os.path.join(TextbookLocation, filename)
+      with open(location, 'wb') as out:
+        writer.write(out)
+        
+      return location
+    
+    case 'Submission':
+      if ext not in SubmissionFileEXT:
+        raise BadFileEXT()
+      
+      filename = _get_unique_filename(
+        SubmissionUpload,
+        filename,
+        ext
+      )
+
+      location = os.path.join(SubmissionUpload, filename)
+      file.save(location)
+      file.close()
+      return location
 
 
 
@@ -178,6 +195,32 @@ def uploadImage(file: FileStorage, filename: str) -> str:
     Raised when the file extension is not valid for an image
   """
   return _upload('Image', file, filename)
+
+def uploadSubmission(file: FileStorage, filename: str) -> str:
+  """
+  Upload submission to CDN
+
+  Parameters
+  ----------
+  `file: FileStorage`, required
+    The file data to upload
+
+  `filename: str`, required
+    The filename of the uplaoded, will overwrite if invalid
+
+
+  Returns
+  -------
+  `Interalpath: str`
+    The interal path to access the uploaded content
+
+
+  Raises
+  ------
+  `BadFileEXT`
+    Raised when the file extension is not valid for an image
+  """
+  return _upload('Submission', file, filename)
 
 
 

@@ -3,12 +3,13 @@ Submission Snippet Model
 """
 
 from src import db
-from src.service.cdn_provider import deleteFile, clonePage
+from src.service.cdn_provider import deleteFile, uploadSubmission
 
 import uuid
 from thread import Thread
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal
+from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
@@ -50,7 +51,8 @@ class SubmissionSnippetModel(db.Model):
   def __init__(
     self,
     student: 'UserModel',
-    submission: 'SubmissionModel'
+    submission: 'SubmissionModel',
+    upload: FileStorage
   ) -> None:
     """
     Submission Snippet Model
@@ -60,24 +62,26 @@ class SubmissionSnippetModel(db.Model):
     `student: UserModel`, required
 
     `submission: SubmissionModel`, required
+
+    `upload: FileStorage`, required
     """
     self.student_id = student.id
     self.submission_id = submission.id
-    # self._handle_upload(editabletextbook, pages)
+    self._handle_upload(upload)
 
   def __repr__(self) -> str:
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
   
 
-  # def _handle_upload(self, editabletextbook: 'EditableTextbookModel', pages: int | tuple[int, int]) -> None:
-  #   filename = f'{self.id}-{self.student_id or ""}{self.submission_id}'
-  #   filePath = clonePage(editabletextbook.iuri, filename, pages)
+  def _handle_upload(self, upload: FileStorage) -> None:
+    filename = f'{self.id}-{self.student_id or ""}{self.submission_id}'
+    filePath = uploadSubmission(upload, filename)
 
-  #   self.iuri = filePath
-  #   self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
-  #   self.status = 'Uploaded'
-  #   self.save()
+    self.iuri = filePath
+    self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
+    self.status = 'Uploaded'
+    self.save()
 
   
   def save(self) -> None:
