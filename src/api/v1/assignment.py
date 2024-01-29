@@ -108,7 +108,7 @@ def assignment_create_api(user: UserModel):
     ClassroomModel.id == req.classroom_id,
     or_(
       ClassroomModel.owner_id == user.id,
-      ClassroomModel.educator_ids.contains(user.id)
+      ClassroomModel.educators.contains(user)
     )
   )).first()
 
