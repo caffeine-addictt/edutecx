@@ -61,7 +61,7 @@ def assignment_get_api(user: UserModel):
       title = assignment.title,
       description = assignment.description,
       due_date = assignment.due_date.timestamp(),
-      textbooks = assignment.textbooks,
+      textbooks = [i.id for i in assignment.textbooks],
       requirement = assignment.requirement,
       submissions = [ i.id for i in assignment.submissions ],
       created_at = assignment.created_at.timestamp(),

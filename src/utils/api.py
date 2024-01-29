@@ -427,7 +427,7 @@ class _AssignmentGetData(_APIBase):
   title       : str
   description : str
   due_date    : Union[float, str]
-  textbooks   : str
+  textbooks   : list[str]
   requirement : str
   submissions : list[str]
   created_at  : float
