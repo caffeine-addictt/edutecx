@@ -27,4 +27,5 @@ from .submissionsnippet import SubmissionSnippetModel, SnippetUploadStatus, Enum
 from .sale import SaleModel, SaleInfo, SaleType, EnumSaleType
 
 # Assocations
-from .assotiation import user_textbook_assotiation
+from .assotiation import user_textbook_assotiation, \
+                         classroom_user_assotiation, ClassroomMemberRole, EnumClassroomMemberRole
