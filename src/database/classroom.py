@@ -79,6 +79,9 @@ class ClassroomModel(db.Model):
     `invite_enabled: bool`, optional (Default to True)
       Enable invite
     """
+    self.id = uuid.uuid4().hex
+    self.invite_id = uuid.uuid4().hex
+    
     self.owner_id = owner.id
     self.title = title
     self.description = description
