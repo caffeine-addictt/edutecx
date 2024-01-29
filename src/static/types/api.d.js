@@ -23,6 +23,19 @@
 
 
 /**
+ * @typedef {Object} SaleGetData
+ * @property {string} sale_id
+ * @property {string} user_id
+ * @property {string | null} discount_id
+ * @property {string[]} textbook_ids
+ * @property {'OneTime' | 'Subscription'} type
+ * @property {number} total_cost
+ * @property {boolean} paid
+ * @property {number} paid_at
+ */
+
+
+/**
  * @typedef {Object} UserGetData
  * @property {string} user_id
  * @property {string} email
