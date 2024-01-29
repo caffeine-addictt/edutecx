@@ -3,7 +3,7 @@ Submission Endpoint
 """
 
 from src import limiter
-from src.database import SubmissionModel, UserModel, AssignmentModel, SubmissionSnippetModel, EditableTextbookModel
+from src.database import SubmissionModel, UserModel, AssignmentModel, SubmissionSnippetModel, TextbookModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
@@ -73,8 +73,8 @@ def submission_get_api(user: UserModel):
 def submission_create_api(user: UserModel):
   req = SubmissionCreateRequest(request)
 
-  editabletextbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == req.editabletextbook_id).first()
-  if not isinstance(editabletextbook, EditableTextbookModel):
+  textbook = TextbookModel.query.filter(TextbookModel.id == req.editabletextbook_id).first()
+  if not isinstance(textbook, TextbookModel):
     return GenericReply(
       message = 'Could not locate editable textbook',
       status = HTTPStatusCode.BAD_REQUEST
@@ -115,9 +115,7 @@ def submission_create_api(user: UserModel):
 
     snippet = SubmissionSnippetModel(
       student = user,
-      submission = submission,
-      editabletextbook = editabletextbook,
-      pages = assignmentReq
+      submission = submission
     )
     snippet.save()
   

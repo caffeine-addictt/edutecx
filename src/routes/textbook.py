@@ -2,7 +2,7 @@
 Handles textbook routes
 """
 
-from src.database import UserModel, EditableTextbookModel
+from src.database import UserModel, TextbookModel
 from src.service import auth_provider
 
 from werkzeug.exceptions import Unauthorized
@@ -25,7 +25,7 @@ def textbooks(user: UserModel):
 @auth_provider.require_login
 def textbooks_focused(user: UserModel, id: str):
   id = escape_id(id)
-  textbook = EditableTextbookModel.query.filter(EditableTextbookModel.id == id).first()
+  textbook = TextbookModel.query.filter(TextbookModel.id == id).first()
   return render_template('(textbook)/textbook.html', textbook = textbook)
 
 

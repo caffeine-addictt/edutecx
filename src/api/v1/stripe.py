@@ -6,7 +6,7 @@ from src import limiter
 from flask_limiter import util
 
 from sqlalchemy import and_
-from src.database import UserModel, TextbookModel, EditableTextbookModel, SaleModel, SaleInfo, DiscountModel
+from src.database import UserModel, TextbookModel, SaleModel, SaleInfo, DiscountModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
 from src.utils.api import (
@@ -140,12 +140,7 @@ def create_stripe_checkout_session_api(user: UserModel):
   
 
   # Ensure textbook is not already owned
-  foundIDS = [ i.id for i in found ]
-  alreadyowned = EditableTextbookModel.query.filter(and_(
-    EditableTextbookModel.user_id == user.id,
-    EditableTextbookModel.textbook_id.in_(foundIDS)
-  )).all()
-  if len(alreadyowned) > 0:
+  if any((user in i.bought_by) for i in found):
     return GenericReply(
       message = 'One or more textbook(s) already owned',
       status = HTTPStatusCode.BAD_REQUEST
@@ -408,13 +403,10 @@ def stripe_webhook_api():
       sale.save()
 
       # Handle making textbooks availble to user
-      items = stripe.checkout.Session.list_line_items(event.data.object['id'])
       if sale.type == 'OneTime':
         for info in sale.textbooks.values():
-          EditableTextbookModel(
-            user = sale.user,
-            textbook = info.textbook
-          ).save()
+          info.textbook.bought_by.append(sale.user)
+          info.textbook.save()
 
 
 
