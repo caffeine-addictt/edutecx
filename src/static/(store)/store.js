@@ -1,19 +1,7 @@
 
 /**
  * Textbooks List
- * @type {Array.<{
- *   id: string;
- *    id: string;
- *   title: string;
- *   description: string;
- *   categories: string[];
- *   price: number;
- *   uri: string;
- *   status: 'Available' | 'Unavailable' | 'DMCA';
- *   cover_image: string | null;
- *   created_at: number;
- *   updated_at: number;
- * }>}
+ * @type {Array.<TextbookGetData>}
  */
 let textbookList = [];
 
@@ -22,19 +10,7 @@ let textbookList = [];
 
 /**
  * Fetch Textbooks
- * @type {Promise<Array.<{
- *   id: string;
- *   author_id: string;
- *   title: string;
- *   description: string;
- *   categories: string[];
- *   price: number;
- *   uri: string;
- *   status: 'Available' | 'Unavailable' | 'DMCA';
- *   cover_image: string | null;
- *   created_at: number;
- *   updated_at: number;
- * }>>}
+ * @type {Promise<Array.<TextbookGetData>>}
  */
 const fetchTextbooks = async () => {
   let searchParams = ((new URL(location.href)).searchParams);
@@ -43,25 +19,7 @@ const fetchTextbooks = async () => {
 
   searchParams.set('criteria', criteria);
 
-  /**
-   * @type {{
-   *   status: number;
-   *   message: string;
-   *   data?: Array.<{
-   *     id: string;
-   *     author_id: string;
-   *     title: string;
-   *     description: string;
-   *     categories: string[];
-   *     price: number;
-   *     uri: string;
-   *     status: 'Available' | 'Unavailable' | 'DMCA';
-   *     cover_image: string | null;
-   *     created_at: number;
-   *     updated_at: number;
-   *   }>
-   * } | void}
-   */
+  /** @type {APIJSON<TextbookGetData[]> | void} */
   const data = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
     method: 'GET',
     headers: { 'X-CSRF-TOKEN': getAccessToken() }
@@ -85,19 +43,7 @@ const fetchTextbooks = async () => {
 
 /**
  * Render Textbooks
- * @param {Array.<{
- *   id: string;
- *   author_id: string;
- *   title: string;
- *   description: string;
- *   categories: string[];
- *   price: number;
- *   uri: string;
- *   status: 'Available' | 'Unavailable' | 'DMCA';
- *   cover_image: string | null;
- *   created_at: number;
- *   update_at: number;
- * }>?} filteredList
+ * @param {Array.<TextbookGetData>} filteredList
  * @returns {Promise<void>}
  */
 const renderTextbooks = async (filteredList = false) => {

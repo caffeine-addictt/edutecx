@@ -12,17 +12,7 @@ const getSubscription = async (tierType) => {
   renderToast('Preparing our servers...', 'success');
 
   /**
-   * @type {{
-   *   status : 200;
-   *   message: string;
-   *   data: {
-   *     public_key: string;
-   *     session_id: string;
-   *   }
-   * } | {
-   *   status : 404;
-   *   message: string;
-   * }}
+   * @type {APIJSON<StripeSessionData>}
    */
   const response = await fetch('/api/v1/stripe/create-subscription-session', {
     method: 'POST',
@@ -31,13 +21,12 @@ const getSubscription = async (tierType) => {
       'X-CSRF-TOKEN': getAccessToken()
     },
     body: JSON.stringify({ tier: tierType })
-  }).then(async res => await res.json());
+  }).then(res => res.json()).catch(err => console.log(err));
 
-  if (response.status === 401) window.location.href = '/login?callbackURI=' + encodeURIComponent(window.location.pathname);
+  if (response?.status === 401) window.location.href = '/login?callbackURI=' + encodeURIComponent(window.location.pathname);
 
-  if (response.status !== 200) {
-    console.log(response)
-    renderToast(response.message.toString(), 'danger');
+  if (!response || response?.status !== 200) {
+    renderToast(response ? response.message.toString() : 'Something went wrong!', 'danger');
     return;
   };
   try {
@@ -46,14 +35,14 @@ const getSubscription = async (tierType) => {
     stripe.redirectToCheckout({ sessionId: response.data.session_id });
   }
   catch (err) {
-    console.log(err)
-    renderToast('Failed to redirect to stripe!', 'danger')
+    console.log(err);
+    renderToast('Failed to redirect to stripe!', 'danger');
   };
-}
+};
 
 
 
 /** Hooks */
 $(() => {
   $('#unlimited_button').on('click', async e => await getSubscription('Unlimited'));
-})
+});
