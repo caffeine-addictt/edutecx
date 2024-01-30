@@ -55,19 +55,31 @@ Clone github repository<br>
 If successful, you should see a new folder appear
 ```sh
 git clone https://github.com/caffeine-addictt/NYP_Sem2_AppDev
-git clone git+https://github.com/caffeine-addictt/NYP_Sem2_AppDev
 ```
 <br><br>
 
-## 5. Virturalize
-Install python virtualenv
-```sh
-// Try other commands if not working
-py -m pip install virtualenv
-python -m pip install virtualenv
-python3 -m pip install virtualenv
+## 5a. Setup WSL (Windows)
+Open CMD and run the following and restart your machine
+```bash
+wsl --install -d Debian
 ```
 
+Open CMD and enter WSL
+```bash
+wsl
+```
+
+Install dependencies
+```sh
+sudo apt update
+sudo apt upgrade
+sudo apt install git nano python3 python3-pip
+```
+
+Open VSCode in Debian WSL and continue.
+<br><br>
+
+## 5. Virturalize
 Create virtualenv
 ```sh
 // !!IMPORTANT!!
@@ -75,31 +87,18 @@ Create virtualenv
 // Ensure you `cd` into the project root folder
 // If successfuly, you should see a new folder apepar in your project root
 
-// Try other commands if not working
-py -m venv venv
-python -m venv venv
 python3 -m venv venv
 ```
 
 Start virtualenv<br>
 If successful, you should see `(venv)` in your terminal
 ```sh
-// Try other commands if not working
-venv\Scripts\activate
-venv\Scripts\activate.bat
-venv\Scripts\activate.ps1
-
-// Linux
 source venv/bin/activate
 ```
 
 Install python packages
 ```sh
-// Try other commands if not working
 pip install -r requirements.txt
-py -m pip install -r requirements.txt
-python -m pip install -r requirements.txt
-python3 -m pip install -r requirements.txt
 ```
 <br><br>
 
@@ -175,11 +174,10 @@ git push -u origin <Your Feature Branch Name>
 # 8. Running Files
 Start server
 ```sh
-# -B stops generation of pycache, remove if you want it
-py -B -m run.py
-python -B -m run.py
-python3 -B -m run.py
+gunicorn --bind=0.0.0.0:8000 --threads=3 --workers=3 --reload run:app
 ```
+
+Run with `--preload` and not `--reload` if the workers fail to boot for the error message
 
 
 
@@ -194,9 +192,7 @@ If you wish to remove them, Run the following:
   - Note that it will not remove pytest cache in proj root
 
 ```sh
-py -B -m clear_pycache.py
 python -B -m clear_pycache.py
-python3 -B -m clear_pycache.py
 ```
 
 <br><br><br><br><br>
