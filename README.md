@@ -194,6 +194,22 @@ If you wish to remove them, Run the following:
 ```sh
 python -B -m clear_pycache.py
 ```
+<br><br>
+
+# 10. Running production build locally
+```sh
+// Login on docker
+docker login --username <github-username> --password <github-accesstoken> ghcr.io
+
+// Pull remote docker image
+docker pull ghcr.io/caffeine-addictt-edutecx-build:latest
+
+// List existing docker images
+docker images ls
+
+// Run docker image
+docker run -p 8080:8080 <first 3 characters of image ID>
+```
 
 <br><br><br><br><br>
 
