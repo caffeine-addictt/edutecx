@@ -1,22 +1,16 @@
 # Important
-`DO NOT commit directly to master`
+`DO NOT commit directly to main`
 <br><br>
 Before doing anything:<br>
 
 > 1. `git branch`<br>
->       Make sure you are on the expected branch
+>       Make sure you are on the correct feature branch
 >
 > 2. `git status`<br>
-        Make sure you are up-to-date
+        Make sure your files are up-to-date
 >
-> 3. `git pull`<br>
+> 3. `git pull/merge`<br>
 >       If you are not up-to-date (step2)
->
-> 4. `git fetch <parent branch name / 'main'>`<br>
->       Pulls from origin (main)
->
-> 5. `git merge origin`<br>
->       Merge origin into your branch
 
 <br><br><br><br><br>
 
