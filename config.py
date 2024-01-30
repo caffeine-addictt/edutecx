@@ -86,8 +86,6 @@ class ProductionConfig(ConfigBase):
   ENV = 'production'
   DEBUG = False
 
-  STRIPE_API_KEY = ''
-
   SECRET_KEY = 'L&>SdT@-Z*y[%(fxN6L>Us1PQ{WAp7&u'
   SESSION_TYPE = 'sqlalchemy'
 
