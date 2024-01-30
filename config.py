@@ -80,10 +80,12 @@ class ProductionConfig(ConfigBase):
   ENV = 'production'
   DEBUG = False
 
-  SECRET_KEY = 'L&>SdT@-Z*y[%(fxN6L>Us1PQ{WAp7&u'
+  SECRET_KEY = os.getenv('SECRET_KEY', 'wdwarr498dYHD*#G#$^Rui4')
   SESSION_TYPE = 'sqlalchemy'
 
   SQLALCHEMY_ECHO = False
+
+  JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret')
 
 
 
