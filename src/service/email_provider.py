@@ -14,7 +14,7 @@ from functools import wraps
 from typing import Literal, TypeVar, ParamSpec, Callable, Concatenate
 
 
-EmailSender: str = 'edutecx@ngjx.org'
+EmailSender: str = 'contact@edutecx.ngjx.org'
 EmailType = Literal['Verification']
 
 
@@ -70,7 +70,7 @@ def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') 
     match emailType:
       case 'Verification':
         resend.Emails.send({
-          'from': 'EduTecX <contact@edutecx.ngjx.org>',
+          'from': f'EduTecX Team <{EmailSender}>',
           'to': [email],
           'subject': 'Email Verification',
           'text': f'Dear {data.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{data.cta_link}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team',
