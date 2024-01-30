@@ -49,7 +49,7 @@ def apiv1_Login():
   req = LoginRequest(request)
 
   # Ensure email and password exist
-  if (req.email == 'None') or (req.password == 'None'):
+  if (not req.email) or (req.email == 'None') or (not req.password) or (req.password == 'None'):
     return GenericReply(
       message = 'Missing email or password',
       status = HTTPStatusCode.BAD_REQUEST
@@ -97,7 +97,8 @@ def apiV1Register():
   req = RegisterRequest(request)
 
   # Ensure email and password exist
-  if (req.email == 'None') or (req.username == 'None') or (req.password == 'None'):
+  if (not req.email) or (not req.username) or (not req.password) or \
+      (req.email == 'None') or (req.username == 'None') or (req.password == 'None'):
     return GenericReply(
       message = 'Missing email, username or password',
       status = HTTPStatusCode.BAD_REQUEST

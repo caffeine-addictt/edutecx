@@ -88,22 +88,7 @@ const fetchSaleData = async (initialRender = false) => {
   searchParams.set('requestFor', 'Sale')
   searchParams.set('criteria', criteria)
 
-  /**
-   * @type {{
-   *   status : 200;
-   *   message: string;
-   *   data: Array.<{
-   *     type        : 'OneTime' | 'Subscription';
-   *     sale_id     : string;
-   *     user_id     : string;
-   *     discount_id : string | null;
-   *     textbook_ids: string[];
-   *     paid        : number;
-   *     paid_at     : number;
-   *     total_cost  : number;
-   *   }>;
-   * } | void}
-   */
+  /** @type {APIJSON<SaleGetData[]> | void} */
   const response = await fetch(`/api/v1/sale/list?${searchParams.toString()}`, {
     method: 'GET',
     headers: {

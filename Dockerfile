@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 COPY . /app
 
 # Start server
-CMD ["gunicorn", "--reload", "--bind=0.0.0.0:80", "--workers=2", "--threads=2",  "run:app"]
+CMD ["gunicorn", "--bind=0.0.0.0:8080", "--workers=2", "--threads=2",  "run:app"]

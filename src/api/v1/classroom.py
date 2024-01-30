@@ -41,13 +41,13 @@ def classroom_list_api(user: UserModel):
     status = HTTPStatusCode.OK,
     data = [
       _ClassroomListData(
-        id = classroom.classroom.id,
-        owner_id = classroom.classroom.owner_id,
-        owner_username = classroom.classroom.owner.username,
-        title = classroom.classroom.title,
-        description = classroom.classroom.description,
-        cover_image = classroom.classroom.cover_image.id if classroom.classroom.cover_image else None,
-        created_at = classroom.classroom.created_at.timestamp()
+        id = classroom.id,
+        owner_id = classroom.owner_id,
+        owner_username = classroom.owner.username,
+        title = classroom.title,
+        description = classroom.description,
+        cover_image = classroom.cover_image.id if classroom.cover_image else None,
+        created_at = classroom.created_at.timestamp()
       )
       for classroom in user.classrooms
     ]
@@ -83,9 +83,9 @@ def classroom_get_api(user: UserModel):
     data = _ClassroomGetData(
       id = classroom.id,
       owner_id = classroom.owner_id,
-      educator_ids = classroom.educator_ids.split('|'),
-      student_ids = classroom.student_ids.split('|'),
-      textbook_ids = classroom.textbook_ids.split('|'),
+      educator_ids = [i.id for i in classroom.educators],
+      student_ids = [i.id for i in classroom.students],
+      textbook_ids = [i.id for i in classroom.textbooks],
       title = classroom.title,
       description = classroom.description,
       assignments = [ i.id for i in classroom.assignments ],
@@ -106,7 +106,7 @@ def classroom_get_api(user: UserModel):
 def classroom_create_api(user: UserModel):
   req = ClassroomCreateRequest(request)
 
-  if (req.title == 'None') or (req.description == 'None'):
+  if (not req.title) or (req.title == 'None') or (not req.description) or (req.description == 'None'):
     return GenericReply(
       message = 'Invalid title or description',
       status = HTTPStatusCode.BAD_REQUEST
@@ -166,7 +166,7 @@ def classroom_create_api(user: UserModel):
 @require_login
 def classroom_edit_api(user: UserModel):
   req = ClassroomEditRequest(request)
-  toChange = {key: '' if i == 'None' else i for key in [
+  toChange = {key: '' if not i or i == 'None' else i for key in [
     'classroom_id',
     'title',
     'description',
@@ -260,15 +260,13 @@ def classroom_join_api(user: UserModel):
   
   
   # Impose limitations
-  memberList = classroom._clean_id_str(classroom.student_ids) + classroom._clean_id_str(classroom.educator_ids) + [ classroom.owner_id ]
-
-  if user.id in memberList:
+  if user in classroom.members:
     return GenericReply(
       message = 'You are already a member of this classroom',
       status = HTTPStatusCode.FORBIDDEN
     ).to_dict(), HTTPStatusCode.FORBIDDEN
 
-  if (classroom.owner.membership == 'Free') and (len(memberList) > 5):
+  if (classroom.owner.membership == 'Free') and (len(classroom.members) > 5):
     return GenericReply(
       message = 'The classroom owner has reached the classroom limit',
       status = HTTPStatusCode.FORBIDDEN

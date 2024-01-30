@@ -1,0 +1,13 @@
+{# Macros for textbook pages #}
+
+
+{# /textbooks #}
+{% macro  render_textbook_card() %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{title}</h5>
+      <p class="card-text">{description}</p>
+      <a href="/textbooks/{id}" class="btn btn-primary">View Details</a>
+    </div>
+  </div>
+{% endmacro %}

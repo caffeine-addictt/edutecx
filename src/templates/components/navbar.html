@@ -35,11 +35,11 @@
         <ul class='navbar-nav me-auto mb-2 mb-lg-0'>
 
           <li class='nav-item'>
-            <a class='nav-link active text-decoration-underline' href='/login' tabindex='-1' aria-disabled='true'>Login</a>
+            <a id="login-navlink" class='nav-link active text-decoration-underline' tabindex='-1' aria-disabled='true'>Login</a>
           </li>
 
           <li class='nav-item px-3 w-2'>
-            <a class='nav-link active register btn btn-outline-dark text-white px-3' href='/register' tabindex='-1' aria-disabled='true'>Register</a>
+            <a id="register-navlink" class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true'>Register</a>
           </li>
         </ul>
       </form>
@@ -49,3 +49,10 @@
 
   </div>
 </nav>
+
+<script>
+  $(() => {
+    $("#login-navlink").attr('href', `/login?callbackURI=${encodeURI(window.location.pathname)}`);
+    $("#register-navlink").attr('href', `/register?callbackURI=${encodeURI(window.location.pathname)}`);
+  });
+</script>

@@ -51,7 +51,6 @@ def classroom(user: UserModel, id: str):
 def classroom_edit(user: UserModel, id: str):
   id = escape_id(id)
   classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
-  app.logger.error(f'{classroom}')
 
   if not isinstance(classroom, ClassroomModel):
     return render_template('(classroom)/classroom_error.html')

@@ -69,7 +69,7 @@
           </div>
 
           <!--Add to Cart-->
-          <button type='button' class='btn btn-success h-auto w-100 my-2' id='add-textbook-button'>
+          <button type='button' class='btn btn-success h-auto w-100 my-2' id='add-to-cart-button'>
             Add to Cart
           </button>
 
@@ -93,9 +93,9 @@
   </script>
 
   {# Write injected macros to variables #}
-  <script src='{{ url_for('static', filename = '(store)/store_focused.js') }}'></script>
+  <script src='{{ url_for("static", filename = "(store)/store_focused.js") }}'></script>
 
   {% if (user.privilege == 'Admin') or (user.id == textbook.author_id) %}
-    <script src='{{ url_for('static', filename = '(store)/store_focused_delete.js') }}'></script>
+    <script src='{{ url_for("static", filename = "(store)/store_focused_delete.js") }}'></script>
   {% endif %}
 {% endblock %}

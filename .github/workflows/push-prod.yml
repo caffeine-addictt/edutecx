@@ -1,0 +1,29 @@
+name: Push docker image to prod
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-build:
+    if: contains('["caffeine-addictt"]', github.actor)
+    name: Run tests
+    runs-on: ubuntu-latest
+
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Login to docker
+        run: |
+          docker login --username caffeine-addictt --password ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }} ghcr.io
+      
+      - name: Build image
+        run: |
+          docker build . --tag ghcr.io/caffeine-addictt/edutecx-build:latest
+
+      - name: Push image
+        run: |
+          docker push ghcr.io/caffeine-addictt/edutecx-build:latest

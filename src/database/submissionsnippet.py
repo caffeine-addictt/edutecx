@@ -3,12 +3,13 @@ Submission Snippet Model
 """
 
 from src import db
-from src.service.cdn_provider import deleteFile, clonePage
+from src.service.cdn_provider import deleteFile, uploadSubmission
 
 import uuid
 from thread import Thread
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal
+from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import (
@@ -23,7 +24,6 @@ from sqlalchemy import (
 if TYPE_CHECKING:
   from .user import UserModel
   from .submission import SubmissionModel
-  from .editabletextbook import EditableTextbookModel
 
 
 SnippetUploadStatus = Literal['Uploading', 'Uploaded']
@@ -52,8 +52,7 @@ class SubmissionSnippetModel(db.Model):
     self,
     student: 'UserModel',
     submission: 'SubmissionModel',
-    editabletextbook: 'EditableTextbookModel',
-    pages: int | tuple[int, int]
+    upload: FileStorage
   ) -> None:
     """
     Submission Snippet Model
@@ -64,25 +63,20 @@ class SubmissionSnippetModel(db.Model):
 
     `submission: SubmissionModel`, required
 
-    `editabletextbook: EditableTextbookModel`, required
-      The pages to clone from
-
-    `pages: int | tuple[int, int]`, required
-      The page indexes (Page 1 => index 0)
-      Tuple is the same as pageList[index1 : index2]
+    `upload: FileStorage`, required
     """
     self.student_id = student.id
     self.submission_id = submission.id
-    self._handle_upload(editabletextbook, pages)
+    self._handle_upload(upload)
 
   def __repr__(self) -> str:
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
   
 
-  def _handle_upload(self, editabletextbook: 'EditableTextbookModel', pages: int | tuple[int, int]) -> None:
+  def _handle_upload(self, upload: FileStorage) -> None:
     filename = f'{self.id}-{self.student_id or ""}{self.submission_id}'
-    filePath = clonePage(editabletextbook.iuri, filename, pages)
+    filePath = uploadSubmission(upload, filename)
 
     self.iuri = filePath
     self.uri = f'/public/textbook/{filePath.split("/")[-1]}'

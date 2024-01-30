@@ -18,41 +18,17 @@ let classroomList = [];
 
 /**
  * Fetch Classrooms
- * @type {Promise<Array.<{
- *   id: string;
- *   owner_id: string;
- *   owner_username: string;
- *   title: string;
- *   description: string;
- *   cover_image: string | null;
- *   created_at: number
- * }>>}
+ * @type {Promise<ClassroomGetData[]>}
  */
 const fetchClassrooms = async () => {
 
   /**
-   * @type {{
-   *   status: number;
-   *   message: string;
-   *   data: Array.<{
-   *     id: string;
-   *     owner_id: string;
-   *     owner_username: string;
-   *     title: string;
-   *     description: string;
-   *     cover_image: string | null;
-   *     created_at: number
-   *   }>
-   * } | null}
+   * @type {APIJSON<ClassroomGetData[]> | void}
    */
   const data = await fetch('/api/v1/classroom/list', {
     method: 'GET',
     headers: { 'X-CSRF-TOKEN': getAccessToken() }
-  }).then(res => {
-    if (res.ok) {
-      return res.json();
-    };
-  });
+  }).then(res => res.json()).catch(err => console.log(err));
 
   if (!data || data.status !== 200) {
     renderToast('Failed to fetch classrooms', 'danger');
@@ -68,15 +44,7 @@ const fetchClassrooms = async () => {
 
 /**
  * Render Classrooms
- * @param {Array.<{
- *   id: string;
- *   owner_id: string;
- *   owner_username: string;
- *   title: string;
- *   description: string;
- *   cover_image: string | null;
- *   created_at: number
- * }>?} filteredList
+ * @param {ClassroomGetData[]?} filteredList
  * @returns {Promise<void>}
  */
 const renderClassrooms = async (filteredList) => {

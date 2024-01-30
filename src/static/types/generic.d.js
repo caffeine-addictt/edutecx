@@ -9,18 +9,6 @@
 
 /**
  * Successfuly json response
- * @typedef _SuccessfulAPIJSON
- * @property {200} status
- * @property {T} data
- * @template T
- * 
- * @typedef {_GenericAPIJSON & _SuccessfulAPIJSON<T>} WithDataJSON
- * @template T
- */
-
-
-/**
- * API Json response
- * @typedef {_SuccessfulAPIJSON<T> | _GenericAPIJSON} APIJSON
+ * @typedef {_GenericAPIJSON & { status: 200; data: T }} APIJSON
  * @template T
  */
