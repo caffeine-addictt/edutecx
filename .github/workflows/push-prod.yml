@@ -22,7 +22,7 @@ jobs:
       
       - name: Build image
         run: |
-          docker build . -f .devcontainer/Dockerfile --tag ghcr.io/caffeine-addictt/edutecx-build:latest
+          docker build . --tag ghcr.io/caffeine-addictt/edutecx-build:latest
 
       - name: Push image
         run: |
