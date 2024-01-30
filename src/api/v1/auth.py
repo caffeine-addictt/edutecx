@@ -230,7 +230,7 @@ def apiV1SendVerificationEmail(user: UserModel):
   newToken = TokenModel(user = user, token_type = 'Verification')
 
   try:
-    email_provider.send_email(
+    res = email_provider.send_email(
       user.email,
       emailType = 'Verification',
       data = email_provider.VerificationEmailData(
@@ -238,6 +238,10 @@ def apiV1SendVerificationEmail(user: UserModel):
         cta_link = 'https://edutecx.ngjx.org/verify/' + str(newToken.token),
       )
     )
+
+    if res != True:
+      raise Exception(res[1])
+
     newToken.save()
 
   except Exception as e:
