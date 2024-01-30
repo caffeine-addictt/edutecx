@@ -153,7 +153,7 @@ def apiV1Register():
 
   # Send verification code
   try:
-    email_provider.send_email(
+    res = email_provider.send_email(
       req.email,
       emailType = 'Verification',
       data = email_provider.VerificationEmailData(
@@ -161,6 +161,9 @@ def apiV1Register():
         cta_link = 'https://edutecx.ngjx.org/verify/' + str(token.token),
       )
     )
+
+    if res != True:
+      raise Exception(res[1])
 
   except Exception as e:
     app.logger.error(f'Failed to send verification email: {e}')

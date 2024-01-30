@@ -56,7 +56,7 @@ def dns_check(email: str) -> bool:
 
 
 @_enforce_email
-def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') -> bool:
+def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') -> Literal[True] | tuple[Literal[False], str]:
   """
   Send email
 
@@ -77,8 +77,8 @@ def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') 
           'html': render_template('email/verification.html', **data.to_dict()),
         })
     return True
-  except Exception:
-    return False
+  except Exception as e:
+    return False, str(e)
 
 
 
