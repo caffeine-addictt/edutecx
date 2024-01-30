@@ -38,12 +38,6 @@ class ConfigBase:
   SECRET_KEY: str
 
 
-  # \\\\\\ Session ////// #
-  # Docs https://flask-session.readthedocs.io/en/latest/config.html
-  SESSION_TYPE : Literal['filesystem', 'sqlalchemy']
-  PERMANENT_SESSION_LIFETIME: int = 2 * 60 * 60 # 2h in seconds
-
-
   # \\\\\\ JWT ////// #
   # Docs https://flask-jwt-extended.readthedocs.io/en/3.0.0_release/options/
   JWT_SECRET_KEY: str = 'jwt-secret'
