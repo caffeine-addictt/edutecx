@@ -8,7 +8,7 @@ import io
 import os
 import re
 import uuid
-from cloudinary import uploader
+from cloudinary import uploader, api
 from pypdf import PdfReader, PdfWriter
 
 from typing import Literal, Optional, overload
@@ -181,8 +181,7 @@ def _production_upload(
 
   res = uploader.upload(
     updatedFile or file,
-    folder = Cloudinary_Folders[fileType],
-    resource_type = 'image'
+    folder = Cloudinary_Folders[fileType]
   )
   return res['public_id']
 
@@ -280,6 +279,17 @@ def deleteFile(fileLocation: str) -> None:
     The iuri of the file to delete
   """
   _dirCheck()
+
+  if ENV == 'production':
+    res = api.delete_resources(
+      public_ids = [fileLocation],
+      type = 'upload'
+    )
+
+    if res['deleted'][fileLocation] != 'deleted':
+      raise Exception('Failed to delete file from CDN')
+
+    return
 
   if not os.path.exists(fileLocation):
     raise FileDoesNotExistError()
