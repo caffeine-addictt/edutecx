@@ -5,12 +5,13 @@ Setup Flask Environment Variables
 """
 
 import os
-from typing import Literal, Optional, overload
+import inspect
+from typing import Literal, Optional, Mapping, Callable, Any, overload
 
 from dotenv import load_dotenv
 load_dotenv()
 
-
+SecretVar = str | Callable[[], str]
 
 
 @overload
@@ -45,7 +46,7 @@ def getEnv(environmentName: str, defaultValue: Optional[str] = None, *, strict: 
   """
   fetched = os.getenv(environmentName)
 
-  if strict and (fetched is None) and (fetched != defaultValue):
+  if strict and (fetched is None):
     raise ValueError(
       f'Environment variable {environmentName} is not set!' \
       + f' Add it to .env file "{environmentName}=<value>" or set it to a default value "getEnv("{environmentName}", <value>)".'
@@ -74,19 +75,19 @@ class ConfigBase:
 
 
   # \\\\\\ Stripe ////// #
-  STRIPE_PUBLIC_KEY: str
-  STRIPE_SECRET_KEY: str
+  STRIPE_PUBLIC_KEY: SecretVar
+  STRIPE_SECRET_KEY: SecretVar
 
 
   # \\\\\\ Flask ////// #
   # Docs https://flask.palletsprojects.com/en/3.0.x/config/
   DEBUG: Optional[bool] = True
-  SECRET_KEY: str
+  SECRET_KEY: SecretVar
 
 
   # \\\\\\ JWT ////// #
   # Docs https://flask-jwt-extended.readthedocs.io/en/3.0.0_release/options/
-  JWT_SECRET_KEY: str
+  JWT_SECRET_KEY: SecretVar
   JWT_TOKEN_LOCATION: list[str] = ['headers', 'cookies', 'json']
   JWT_ACCESS_TOKEN_EXPIRES: int = 60 * 60 # 1h in seconds
   JWT_REFRESH_TOKEN_EXPIRES: int = 30 * 24 * 60 * 60 #30 days in seconds
@@ -94,12 +95,12 @@ class ConfigBase:
 
 
   # \\\\\\ Mail ////// #
-  RESEND_API_KEY: str
+  RESEND_API_KEY: SecretVar
 
   # \\\\\\ SQL ////// #
   # Docs https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/config/
   SQLALCHEMY_ECHO: Optional[bool] = False
-  SQLALCHEMY_DATABASE_URI: str
+  SQLALCHEMY_DATABASE_URI: SecretVar
 
 
 
@@ -133,32 +134,36 @@ class ProductionConfig(ConfigBase):
 
   ENV = 'production'
 
-  STRIPE_PUBLIC_KEY = getEnv('STRIPE_PUBLIC_KEY', strict = True)
-  STRIPE_SECRET_KEY = getEnv('STRIPE_SECRET_KEY', strict = True)
+  STRIPE_PUBLIC_KEY = lambda: getEnv('STRIPE_PUBLIC_KEY', strict = True)
+  STRIPE_SECRET_KEY = lambda: getEnv('STRIPE_SECRET_KEY', strict = True)
 
   DEBUG = False
-  SECRET_KEY = getEnv('SECRET_KEY', strict = True)
+  SECRET_KEY = lambda: getEnv('SECRET_KEY', strict = True)
 
-  JWT_SECRET_KEY = getEnv('JWT_SECRET_KEY', strict = True)
+  JWT_SECRET_KEY = lambda: getEnv('JWT_SECRET_KEY', strict = True)
 
-  RESEND_API_KEY = getEnv('RESEND_API_KEY', strict = True)
-
-  SESSION_TYPE = 'sqlalchemy'
+  RESEND_API_KEY = lambda: getEnv('RESEND_API_KEY', strict = True)
 
   SQLALCHEMY_ECHO = False
-  SQLALCHEMY_DATABASE_URI = getEnv('SQLALCHEMY_DATABASE_URI', strict = True)
+  SQLALCHEMY_DATABASE_URI = lambda: getEnv('SQLALCHEMY_DATABASE_URI', strict = True)
 
 
 
 
+def fetch_attribute_tree(a: type[object]) -> list[tuple[str, Any]]:
+  return [ i for i in inspect.getmembers(a) if not i[0].startswith('_')]
 
+def get_environment_config() -> Mapping[str, Any]:
+  config: list[tuple[str, Any]] = []
 
-
-def get_production_config() -> str:
-  match getEnv('PROD', strict = True):
+  match getEnv('ENV', strict = True):
     case 'development':
-      return 'config.DevelopmentConfig'
+      config = fetch_attribute_tree(DevelopmentConfig)
     case 'production':
-      return 'config.ProductionConfig'
-    
-  return 'config.DevelopmentConfig'
+      config = fetch_attribute_tree(ProductionConfig)
+
+  # Interpret env file values
+  return {
+    i[0]: i[1]() if callable(i[1]) else i[1]
+    for i in config
+  }

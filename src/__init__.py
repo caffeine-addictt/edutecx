@@ -12,7 +12,7 @@ import stripe
 import thread
 from logging import config
 from sqlalchemy import MetaData
-from config import get_production_config
+from config import get_environment_config
 
 
 # Migrations naming convention setup
@@ -79,7 +79,7 @@ def init_app(testing: bool = False) -> Flask:
 
   app = Flask(__name__)
   app.testing = testing
-  app.config.from_object(get_production_config())
+  app.config.from_mapping(get_environment_config())
 
   print('\nImported environment variables')
 
