@@ -51,6 +51,9 @@ def getEnv(environmentName: str, defaultValue: Optional[str] = None, *, strict: 
       f'Environment variable {environmentName} is not set!' \
       + f' Add it to .env file "{environmentName}=<value>" or set it to a default value "getEnv("{environmentName}", <value>)".'
     )
+  
+  if fetched is None:
+    print(f'Environment variable {environmentName} is not set! Using default value "{defaultValue}".')
 
   return fetched or defaultValue
 
