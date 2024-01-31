@@ -22,7 +22,7 @@ jobs:
       
       - name: Add environment variables
         run: |
-          export ENV=development
+          echo "ENV=development" >> .env
 
       - name: Install dependencies
         run: |
