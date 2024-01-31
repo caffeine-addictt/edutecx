@@ -2,7 +2,7 @@
 Handles user uploaded content serving
 """
 
-from src.database import UserModel
+from src.database import UserModel, SubmissionSnippetModel
 from src.service import auth_provider, cdn_provider
 cdn_provider._dirCheck()
 
@@ -106,3 +106,29 @@ def uploaded_textbooks(user: UserModel, ident: str):
   
     else: raise Unauthorized()
   raise NotFound()
+
+
+
+
+# Submissions
+@app.route('/public/submission/<path:ident>', methods = ['GET'])
+@auth_provider.require_login
+def uploaded_submissions(user: UserModel, ident: str):
+  if user.privilege == 'Admin':
+    return serve(
+      'submission-uploads' if ENV == 'production' else cdn_provider.SubmissionUpload,
+      ident
+    )
+  
+
+  snippet = SubmissionSnippetModel.query.filter(SubmissionSnippetModel.iuri.contains(ident)).first()
+  if not isinstance(snippet, SubmissionSnippetModel):
+    raise NotFound()
+  
+  if (snippet.student == user) or snippet.submission.assignment.classroom.is_privileged(user):
+    return serve(
+      'submission-uploads' if ENV == 'production' else cdn_provider.SubmissionUpload,
+      ident
+    )
+  
+  raise Unauthorized()
