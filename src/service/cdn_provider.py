@@ -270,16 +270,6 @@ def uploadSubmission(file: FileStorage, filename: str) -> str:
 
 
 
-def deleteImage(filename: str) -> None:
-  _dirCheck()
-
-  fileLocation = os.path.join(ImageLocation, filename)
-  if os.path.exists(fileLocation):
-    os.remove(fileLocation)
-
-
-
-
 def deleteFile(fileLocation: str) -> None:
   """
   Delete file
