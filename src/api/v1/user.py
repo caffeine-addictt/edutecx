@@ -173,7 +173,7 @@ def user_edit_api(user: UserModel):
       status = HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
-  if req.username and (req.username != 'None') and not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{5,20}$', req.username):
+  if req.username and (req.username != 'None') and not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{4,20}$', req.username):
     return GenericReply(
       message = 'Username has to be between 5 to 20 charcters inclusive, start with a letter and only {_-} special characters are allowed',
       status = HTTPStatusCode.BAD_REQUEST

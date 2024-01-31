@@ -112,7 +112,7 @@ def apiV1Register():
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   # Validate Username
-  if not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{5,20}$', req.username):
+  if not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{4,20}$', req.username):
     return GenericReply(
       message = 'Username has to be between 5 to 20 charcters inclusive, start with a letter and only {_-} special characters are allowed',
       status = HTTPStatusCode.BAD_REQUEST
@@ -153,7 +153,7 @@ def apiV1Register():
 
   # Send verification code
   try:
-    email_provider.send_email(
+    res = email_provider.send_email(
       req.email,
       emailType = 'Verification',
       data = email_provider.VerificationEmailData(
@@ -161,6 +161,9 @@ def apiV1Register():
         cta_link = 'https://edutecx.ngjx.org/verify/' + str(token.token),
       )
     )
+
+    if res != True:
+      raise Exception(res[1])
 
   except Exception as e:
     app.logger.error(f'Failed to send verification email: {e}')
@@ -227,7 +230,7 @@ def apiV1SendVerificationEmail(user: UserModel):
   newToken = TokenModel(user = user, token_type = 'Verification')
 
   try:
-    email_provider.send_email(
+    res = email_provider.send_email(
       user.email,
       emailType = 'Verification',
       data = email_provider.VerificationEmailData(
@@ -235,6 +238,10 @@ def apiV1SendVerificationEmail(user: UserModel):
         cta_link = 'https://edutecx.ngjx.org/verify/' + str(newToken.token),
       )
     )
+
+    if res != True:
+      raise Exception(res[1])
+
     newToken.save()
 
   except Exception as e:

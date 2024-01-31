@@ -25,7 +25,7 @@ user_textbook_assotiation = db.Table(
 
 
 ClassroomMemberRole = Literal['Owner', 'Educator', 'Student']
-EnumClassroomMemberRole = Enum('Owner', 'Educator', 'Student')
+EnumClassroomMemberRole = Enum('Owner', 'Educator', 'Student', name = 'classroomMmemberRole')
 class classroom_user_assotiation(db.Model):
   __tablename__ = 'classroom_user_assotiation'
 

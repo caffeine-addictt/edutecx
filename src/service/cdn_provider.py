@@ -4,17 +4,25 @@ CDN manager for the app
 Change to switch to an actual CDN upload if pushing to prod
 """
 
+import io
 import os
 import re
 import uuid
-import shutil
+from cloudinary import uploader, api
 from pypdf import PdfReader, PdfWriter
 
-from typing import Literal
+from typing import Literal, Optional, overload
 from werkzeug.datastructures import FileStorage
 
 
 # Setup
+ENV = os.getenv('ENV', '')
+Cloudinary_Folders = {
+  'Image': 'image-uploads',
+  'Textbook': 'textbook-uploads',
+  'Submission': 'submission-uploads'
+}
+
 UploadBaseLocation = os.path.join(os.getcwd(), 'src', 'uploads')
 
 CopyrightNoticeLocation = os.path.join(UploadBaseLocation, 'copyright.pdf')
@@ -40,6 +48,8 @@ class FileDoesNotExistError(Exception):
 
 def _dirCheck():
   """Ensure that the upload directories exist"""
+  if ENV == 'production': return
+
   if not os.path.isdir(UploadBaseLocation):
     os.mkdir(UploadBaseLocation)
 
@@ -64,8 +74,23 @@ def _injectCopyright(file: PdfReader) -> PdfWriter:
   return writer
 
 
+@overload
+def _get_unique_filename() -> str:
+  """For production"""
+  ...
+
+@overload
 def _get_unique_filename(dir: str, filename: str, extension: str) -> str:
   """Ensure edge case where file already exists (although unliekly as filename would be uuid, but doesn't hurt to be sure)"""
+  ...
+
+def _get_unique_filename(dir: Optional[str] = None, filename: Optional[str] = None, extension: Optional[str] = None) -> str:
+  if ENV == 'production':
+    return uuid.uuid4().hex
+  
+  if not dir or not filename or not extension:
+    raise ValueError('dir, filename, and extension are required for development upload')
+
   regex = re.compile(r'[^a-zA-Z0-9-]')
   filename = regex.sub('', filename)
   while True:
@@ -78,7 +103,7 @@ def _get_unique_filename(dir: str, filename: str, extension: str) -> str:
 
 
 
-def _upload(
+def _development_upload(
   fileType: Literal['Image', 'Textbook', 'Submission'],
   file: FileStorage,
   filename: str
@@ -142,6 +167,25 @@ def _upload(
       return location
 
 
+def _production_upload(
+  fileType: Literal['Image', 'Textbook', 'Submission'],
+  file: FileStorage
+):
+  updatedFile = None
+
+  file.filename = _get_unique_filename()
+
+  if fileType == 'Textbook':
+    updatedFile = io.BytesIO(file.stream.read())
+    _injectCopyright(PdfReader(file.stream)).write_stream(updatedFile)
+
+  res = uploader.upload(
+    updatedFile or file,
+    folder = Cloudinary_Folders[fileType]
+  )
+  return res['public_id']
+
+
 
 
 def uploadTextbook(file: FileStorage, filename: str) -> str:
@@ -168,7 +212,7 @@ def uploadTextbook(file: FileStorage, filename: str) -> str:
   `BadFileEXT`
     Raised when the file extension is not valid for a textbook
   """
-  return _upload('Textbook', file, filename)
+  return _production_upload('Textbook', file) if ENV == 'production' else _development_upload('Textbook', file, filename)
 
 def uploadImage(file: FileStorage, filename: str) -> str:
   """
@@ -194,7 +238,7 @@ def uploadImage(file: FileStorage, filename: str) -> str:
   `BadFileEXT`
     Raised when the file extension is not valid for an image
   """
-  return _upload('Image', file, filename)
+  return _production_upload('Image', file) if ENV == 'production' else _development_upload('Image', file, filename)
 
 def uploadSubmission(file: FileStorage, filename: str) -> str:
   """
@@ -220,17 +264,7 @@ def uploadSubmission(file: FileStorage, filename: str) -> str:
   `BadFileEXT`
     Raised when the file extension is not valid for an image
   """
-  return _upload('Submission', file, filename)
-
-
-
-
-def deleteImage(filename: str) -> None:
-  _dirCheck()
-
-  fileLocation = os.path.join(ImageLocation, filename)
-  if os.path.exists(fileLocation):
-    os.remove(fileLocation)
+  return _production_upload('Submission', file) if ENV == 'production' else _development_upload('Submission', file, filename)
 
 
 
@@ -245,6 +279,17 @@ def deleteFile(fileLocation: str) -> None:
     The iuri of the file to delete
   """
   _dirCheck()
+
+  if ENV == 'production':
+    res = api.delete_resources(
+      public_ids = [fileLocation],
+      type = 'upload'
+    )
+
+    if res['deleted'][fileLocation] != 'deleted':
+      raise Exception('Failed to delete file from CDN')
+
+    return
 
   if not os.path.exists(fileLocation):
     raise FileDoesNotExistError()
