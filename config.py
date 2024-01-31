@@ -130,8 +130,6 @@ class DevelopmentConfig(ConfigBase):
 
   JWT_SECRET_KEY = 'jwt-secret'
 
-  RESEND_API_KEY = getEnv('RESEND_API_KEY', '')
-
   SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.sqlite3'
 
 

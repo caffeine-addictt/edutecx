@@ -2,6 +2,7 @@
 Email Provider
 """
 
+import os
 import re
 import resend
 import email_validator
@@ -69,6 +70,14 @@ def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') 
   try:
     match emailType:
       case 'Verification':
+        if os.getenv('ENV') == 'development':
+          from flask import current_app as app, request
+          app.logger.info(
+            f'Emails are not send in development.'
+            + f' Go to {data.cta_link.replace("https://edutecx.ngjx.org/", request.root_url)} to verify your account'
+          )
+          return True
+
         resend.Emails.send({
           'from': f'EduTecX Team <{EmailSender}>',
           'to': [email],
