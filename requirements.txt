@@ -4,6 +4,7 @@ blinker==1.7.0
 certifi==2023.11.17
 charset-normalizer==3.3.2
 click==8.1.7
+cloudinary==1.38.0
 colorama==0.4.6
 contourpy==1.2.0
 cycler==0.12.1

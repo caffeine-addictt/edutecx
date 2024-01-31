@@ -97,10 +97,17 @@ class ConfigBase:
   # \\\\\\ Mail ////// #
   RESEND_API_KEY: SecretVar
 
+
   # \\\\\\ SQL ////// #
   # Docs https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/config/
   SQLALCHEMY_ECHO: Optional[bool] = False
   SQLALCHEMY_DATABASE_URI: SecretVar
+
+
+  # \\\\\\ Cloudinary //// //
+  CLOUDINARY_CLOUD_NAME: SecretVar
+  CLOUDINARY_API_KEY: SecretVar
+  CLOUDINARY_API_SECRET: SecretVar
 
 
 
@@ -146,6 +153,10 @@ class ProductionConfig(ConfigBase):
 
   SQLALCHEMY_ECHO = False
   SQLALCHEMY_DATABASE_URI = lambda: getEnv('SQLALCHEMY_DATABASE_URI', strict = True)
+
+  CLOUDINARY_CLOUD_NAME = lambda: getEnv('CLOUDINARY_CLOUD_NAME', strict = True)
+  CLOUDINARY_API_KEY = lambda: getEnv('CLOUDINARY_API_KEY', strict = True)
+  CLOUDINARY_API_SECRET = lambda: getEnv('CLOUDINARY_API_SECRET', strict = True)
 
 
 

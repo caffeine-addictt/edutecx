@@ -10,6 +10,7 @@ from flask_jwt_extended import JWTManager
 import resend
 import stripe
 import thread
+import cloudinary
 from logging import config
 from sqlalchemy import MetaData
 from config import get_environment_config
@@ -97,6 +98,14 @@ def init_app(testing: bool = False) -> Flask:
 
   # Init Stripe
   stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
+
+  # Init cloudinary
+  cloudinary.config(
+    cloud_name = app.config.get('CLOUDINARY_CLOUD_NAME'),
+    api_key = app.config.get('CLOUDINARY_API_KEY'),
+    api_secret = app.config.get('CLOUDINARY_API_SECRET'),
+    secure = app.config.get('ENV') == 'production'
+  )
 
   with app.app_context():
     # Import Database models
