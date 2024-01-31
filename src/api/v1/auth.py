@@ -112,7 +112,7 @@ def apiV1Register():
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
   
   # Validate Username
-  if not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{5,20}$', req.username):
+  if not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{4,20}$', req.username):
     return GenericReply(
       message = 'Username has to be between 5 to 20 charcters inclusive, start with a letter and only {_-} special characters are allowed',
       status = HTTPStatusCode.BAD_REQUEST
