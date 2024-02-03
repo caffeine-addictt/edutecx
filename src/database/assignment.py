@@ -20,7 +20,8 @@ from sqlalchemy import (
 # Import UserModel at runtime to prevent circular imports
 if TYPE_CHECKING:
   from .classroom import ClassroomModel
-  from.submission import SubmissionModel
+  from .submission import SubmissionModel
+  from .association import assignment_textbook_association
 
 
 class AssignmentModel(db.Model):
@@ -29,22 +30,41 @@ class AssignmentModel(db.Model):
   __tablename__ = 'assignment_table'
 
   # Identifiers
-  id          : Mapped[str]              = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
-  classroom_id: Mapped[str]              = mapped_column(ForeignKey('classroom_table.id'), nullable = False)
-  classroom   : Mapped['ClassroomModel'] = relationship('ClassroomModel', back_populates = 'assignments')
+  id: Mapped[str] = mapped_column(
+    String,
+    unique=True,
+    primary_key=True,
+    nullable=False,
+    default=lambda: uuid.uuid4().hex,
+  )
+  classroom_id: Mapped[str] = mapped_column(
+    ForeignKey('classroom_table.id'), nullable=False
+  )
+  classroom: Mapped['ClassroomModel'] = relationship(
+    'ClassroomModel', back_populates='assignments'
+  )
 
   # Attributes
-  title      : Mapped[str]                     = mapped_column(String, nullable = False)
-  description: Mapped[str]                     = mapped_column(String, nullable = False)
-  due_date   : Mapped[datetime]                = mapped_column(DateTime, nullable = True)
-  textbooks  : Mapped[str]                     = mapped_column(String, nullable = True)
-  requirement: Mapped[str]                     = mapped_column(String, nullable = True)
-  submissions: Mapped[List['SubmissionModel']] = relationship('SubmissionModel', back_populates = 'assignment')
+  title: Mapped[str] = mapped_column(String, nullable=False)
+  description: Mapped[str] = mapped_column(String, nullable=False)
+  due_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+  requirement: Mapped[str] = mapped_column(String, nullable=True)
+  textbooks: Mapped[List['TextbookModel']] = relationship(
+    'TextbookModel',
+    secondary='assignment_textbook_association',
+    back_populates='assignments',
+  )
+  submissions: Mapped[List['SubmissionModel']] = relationship(
+    'SubmissionModel', back_populates='assignment'
+  )
 
   # Logs
-  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
-  updated_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
-
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime, nullable=False, default=datetime.utcnow
+  )
+  updated_at: Mapped[datetime] = mapped_column(
+    DateTime, nullable=False, default=datetime.utcnow
+  )
 
   def __init__(
     self,
@@ -52,7 +72,8 @@ class AssignmentModel(db.Model):
     title: str,
     description: str,
     due_date: Optional[datetime] = None,
-    requirement: str = ''
+    requirement: str = '',
+    textbooks: List['TextbookModel'] = [],
   ) -> None:
     """
     Assignment model
@@ -74,7 +95,10 @@ class AssignmentModel(db.Model):
     `requirement: str`, optional (defaults to '')
       Format = str(docID:pageNum) | str(docID:pageNum:pageNum)
 
-    
+    `textbooks: TextbookModel[]`, optional (defaults to [])
+      The textbooks to allocate to the assignment
+
+
     Returns
     -------
     `AssignmentModel`
@@ -85,7 +109,9 @@ class AssignmentModel(db.Model):
     `AssertionError`
       The format for requirement is invalid
     """
-    assert re.match(r'^([a-za-Z0-9]{32}):\d+(:\d+)?$', requirement or ''), 'Invalid requirement format [%s]' % requirement
+    assert re.match(r'^([a-za-Z0-9]{32}):\d+(:\d+)?$', requirement or ''), (
+      'Invalid requirement format [%s]' % requirement
+    )
 
     self.classroom_id = classroom.id
     self.title = title
@@ -99,7 +125,6 @@ class AssignmentModel(db.Model):
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
 
-
   # DB
   def save(self) -> None:
     """Commits the model"""
@@ -108,7 +133,8 @@ class AssignmentModel(db.Model):
 
   def delete(self) -> None:
     """Deletes the model and its references"""
-    for i in self.submissions: i.delete()
+    for i in self.submissions:
+      i.delete()
 
     db.session.delete(self)
     db.session.commit()
