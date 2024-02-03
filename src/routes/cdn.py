@@ -2,16 +2,20 @@
 Handles user uploaded content serving
 """
 
-from src.database import UserModel, SubmissionSnippetModel
+import requests
+import cloudinary.api
+from flask import current_app as app
+from flask import Response, request, send_file, send_from_directory
+
+
+from typing import Literal, Union, overload
+from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
+
+
+from src.database import SubmissionSnippetModel, UserModel
 from src.service import auth_provider, cdn_provider
 
 cdn_provider._dirCheck()
-
-import requests
-import cloudinary.api
-from werkzeug.exceptions import Unauthorized, BadRequest, NotFound
-from typing import Union, Literal, overload
-from flask import request, Response, send_file, send_from_directory, current_app as app
 
 
 ENV = app.config.get('ENV')
@@ -74,7 +78,7 @@ def noindex():
 # Images
 @app.route('/public/image/<path:ident>', methods=['GET'])
 @auth_provider.optional_login
-def uploaded_images(user: UserModel | None, ident: str):
+def uploaded_images(_: UserModel | None, ident: str):
   return serve(
     'image-uploads' if ENV == 'production' else cdn_provider.ImageLocation, ident
   )
