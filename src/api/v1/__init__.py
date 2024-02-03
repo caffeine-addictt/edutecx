@@ -6,7 +6,6 @@ from . import (
   auth,
   stripe,
   notify,
-
   user,
   sale,
   image,
@@ -15,5 +14,5 @@ from . import (
   classroom,
   assignment,
   submission,
-  submissionsnippet
+  submissionsnippet,
 )

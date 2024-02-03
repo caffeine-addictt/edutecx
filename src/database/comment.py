@@ -28,27 +28,43 @@ class CommentModel(db.Model):
   __tablename__ = 'comment_table'
 
   # Identifiers
-  id           : Mapped[str] = mapped_column(String, primary_key = True, unique = True, nullable = False, default = lambda: uuid.uuid4().hex)
-  submission_id: Mapped[str] = mapped_column(ForeignKey('submission_table.id'), nullable = False)
-  author_id    : Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
+  id: Mapped[str] = mapped_column(
+    String,
+    primary_key=True,
+    unique=True,
+    nullable=False,
+    default=lambda: uuid.uuid4().hex,
+  )
+  submission_id: Mapped[str] = mapped_column(
+    ForeignKey('submission_table.id'), nullable=False
+  )
+  author_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable=False)
 
   # Attributes
-  text      : Mapped[str]               = mapped_column(String, nullable = False)
-  author    : Mapped['UserModel']       = relationship('UserModel', back_populates = 'comments')
-  submission: Mapped['SubmissionModel'] = relationship('SubmissionModel', back_populates = 'comments')
+  text: Mapped[str] = mapped_column(String, nullable=False)
+  author: Mapped['UserModel'] = relationship('UserModel', back_populates='comments')
+  submission: Mapped['SubmissionModel'] = relationship(
+    'SubmissionModel', back_populates='comments'
+  )
 
   # Logs
-  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
-  updated_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime, nullable=False, default=datetime.utcnow
+  )
+  updated_at: Mapped[datetime] = mapped_column(
+    DateTime, nullable=False, default=datetime.utcnow
+  )
 
-  def __init__(self, author: 'UserModel', submission: 'SubmissionModel', text: str) -> None:
+  def __init__(
+    self, author: 'UserModel', submission: 'SubmissionModel', text: str
+  ) -> None:
     """
     Comment Model
 
     Parameters
     ----------
     `author: UserModel`, required
-    
+
     `submission: SubmissionModel`, required
 
     `text: String`, required
@@ -60,7 +76,6 @@ class CommentModel(db.Model):
   def __repr__(self):
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
-
 
   # DB
   def save(self) -> None:

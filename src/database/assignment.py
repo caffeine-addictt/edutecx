@@ -95,7 +95,7 @@ class AssignmentModel(db.Model):
 
     `requirement: str`, optional (defaults to '')
       Format = str(docID:pageNum) | str(docID:pageNum:pageNum)
-    
+
     `textbooks: TextbookModel[]`, optional (defaults to [])
       The textbooks to allocate to the assignment
 

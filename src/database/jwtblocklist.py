@@ -17,16 +17,21 @@ from sqlalchemy import (
 )
 
 JWTType = Literal['access', 'refresh']
-EnumJWTType = Enum('access', 'refresh', name = 'TokenType')
+EnumJWTType = Enum('access', 'refresh', name='TokenType')
+
 
 class JWTBlocklistModel(db.Model):
   """Stores revoked tokens"""
 
   __tablename__ = 'jwtblocklist_table'
 
-  jti       : Mapped[str]       = mapped_column(String, primary_key = True, unique = True, nullable = False)
-  token_type: Mapped[JWTType] = mapped_column(EnumJWTType, nullable = False)
-  created_at: Mapped[datetime]  = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+  jti: Mapped[str] = mapped_column(
+    String, primary_key=True, unique=True, nullable=False
+  )
+  token_type: Mapped[JWTType] = mapped_column(EnumJWTType, nullable=False)
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime, nullable=False, default=datetime.utcnow
+  )
 
   def __init__(self, jti: str, token_type: JWTType) -> None:
     """
@@ -67,13 +72,25 @@ class JWTBlocklistModel(db.Model):
   def clear_expired(
     cls,
     access_live_time: Union[str, int, float] = '1week',
-    refresh_live_time: Union[str, int, float] = '1week1'
+    refresh_live_time: Union[str, int, float] = '1week1',
   ) -> None:
     now = utc_time.get()
-    access_lowest_limit = now - timedelta(seconds = utc_time.convertToTime(access_live_time))
-    refresh_lowest_limit = now - timedelta(seconds = utc_time.convertToTime(refresh_live_time))
+    access_lowest_limit = now - timedelta(
+      seconds=utc_time.convertToTime(access_live_time)
+    )
+    refresh_lowest_limit = now - timedelta(
+      seconds=utc_time.convertToTime(refresh_live_time)
+    )
 
-    cls.query.filter(or_(
-      (cls.token_type.like('access') and cls.created_at.timestamp() <= access_lowest_limit.timestamp()),
-      (cls.token_type.like('refresh') and cls.created_at.timestamp() <= refresh_lowest_limit.timestamp())
-    )).delete()
+    cls.query.filter(
+      or_(
+        (
+          cls.token_type.like('access')
+          and cls.created_at.timestamp() <= access_lowest_limit.timestamp()
+        ),
+        (
+          cls.token_type.like('refresh')
+          and cls.created_at.timestamp() <= refresh_lowest_limit.timestamp()
+        ),
+      )
+    ).delete()
