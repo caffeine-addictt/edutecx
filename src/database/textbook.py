@@ -12,13 +12,7 @@ from typing import Optional, TYPE_CHECKING, List, Literal
 from werkzeug.datastructures import FileStorage
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import (
-  Enum,
-  Float,
-  String,
-  DateTime,
-  ForeignKey
-)
+from sqlalchemy import Enum, Float, String, DateTime, ForeignKey
 
 # Import at runtime to prevent circular imports
 if TYPE_CHECKING:
@@ -28,14 +22,19 @@ if TYPE_CHECKING:
   from .discount import DiscountModel
   from .classroom import ClassroomModel
   from .assignment import AssignmentModel
-  from .assotiation import user_textbook_assotiation, classroom_textbook_assotiation, assignment_textbook_assotiation, sale_textbook_assotiation
+  from .association import (
+    user_textbook_association,
+    classroom_textbook_association,
+    assignment_textbook_association,
+    sale_textbook_association,
+  )
 
 
 TextbookStatus = Literal['Available', 'Unavailable', 'DMCA']
-EnumTextbookStatus = Enum('Available', 'Unavailable', 'DMCA', name = 'TextbookStatus')
+EnumTextbookStatus = Enum('Available', 'Unavailable', 'DMCA', name='TextbookStatus')
 
 TextbookUploadStatus = Literal['Uploading', 'Uploaded']
-EnumTextbookUploadStatus = Enum('Uploading', 'Uploaded', name = 'TextbookUploadStatus')
+EnumTextbookUploadStatus = Enum('Uploading', 'Uploaded', name='TextbookUploadStatus')
 
 
 class TextbookModel(db.Model):
@@ -44,41 +43,73 @@ class TextbookModel(db.Model):
   __tablename__ = 'textbook_table'
 
   # Identifier
-  id       : Mapped[str] = mapped_column(String, unique = True, primary_key = True, nullable = False, default = lambda: uuid.uuid4().hex)
-  author_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable = False)
+  id: Mapped[str] = mapped_column(
+    String,
+    unique=True,
+    primary_key=True,
+    nullable=False,
+    default=lambda: uuid.uuid4().hex,
+  )
+  author_id: Mapped[str] = mapped_column(ForeignKey('user_table.id'), nullable=False)
 
   # Attributes
-  title      : Mapped[str]   = mapped_column(String, nullable = False)
-  description: Mapped[str]   = mapped_column(String, nullable = True, default = '')
-  categories : Mapped[str]   = mapped_column(String, nullable = False, default = '') # 'category1|category2...'
-  price      : Mapped[float] = mapped_column(Float, nullable = False, default = 0.0)
+  title: Mapped[str] = mapped_column(String, nullable=False)
+  description: Mapped[str] = mapped_column(String, nullable=True, default='')
+  categories: Mapped[str] = mapped_column(
+    String, nullable=False, default=''
+  )  # 'category1|category2...'
+  price: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
-  author     : Mapped['UserModel']                       = relationship('UserModel', back_populates = 'owned_textbooks')
-  discounts  : Mapped[List['DiscountModel']]             = relationship('DiscountModel', back_populates = 'textbook')
-  bought_by  : Mapped[List['UserModel']]                 = relationship('UserModel', secondary = 'user_textbook_assotiation', back_populates = 'textbooks')
-  classrooms : Mapped[List['ClassroomModel']]            = relationship('ClassroomModel', secondary = 'classroom_textbook_assotiation', back_populates = 'textbooks')
-  assignments: Mapped[List['AssignmentModel']]           = relationship('AssignmentModel', secondary = 'assignment_textbook_assotiation', back_populates = 'textbooks')
-  sales      : Mapped[List['sale_textbook_assotiation']] = relationship('sale_textbook_assotiation', back_populates = 'textbook')
+  author: Mapped['UserModel'] = relationship(
+    'UserModel', back_populates='owned_textbooks'
+  )
+  discounts: Mapped[List['DiscountModel']] = relationship(
+    'DiscountModel', back_populates='textbook'
+  )
+  bought_by: Mapped[List['UserModel']] = relationship(
+    'UserModel', secondary='user_textbook_association', back_populates='textbooks'
+  )
+  classrooms: Mapped[List['ClassroomModel']] = relationship(
+    'ClassroomModel',
+    secondary='classroom_textbook_association',
+    back_populates='textbooks',
+  )
+  assignments: Mapped[List['AssignmentModel']] = relationship(
+    'AssignmentModel',
+    secondary='assignment_textbook_association',
+    back_populates='textbooks',
+  )
+  sales: Mapped[List['sale_textbook_association']] = relationship(
+    'sale_textbook_association', back_populates='textbook'
+  )
 
-  uri          : Mapped[str]                           = mapped_column(String, nullable = True)
-  iuri         : Mapped[str]                           = mapped_column(String, nullable = True)
-  status       : Mapped[TextbookStatus]                = mapped_column(EnumTextbookStatus, nullable = False, default = 'Available')
-  upload_status: Mapped[TextbookUploadStatus]          = mapped_column(EnumTextbookUploadStatus, nullable = False, default = 'Uploading')
-  cover_image  : Mapped[Optional['ImageModel']]        = relationship('ImageModel', back_populates = 'textbook')
+  uri: Mapped[str] = mapped_column(String, nullable=True)
+  iuri: Mapped[str] = mapped_column(String, nullable=True)
+  status: Mapped[TextbookStatus] = mapped_column(
+    EnumTextbookStatus, nullable=False, default='Available'
+  )
+  upload_status: Mapped[TextbookUploadStatus] = mapped_column(
+    EnumTextbookUploadStatus, nullable=False, default='Uploading'
+  )
+  cover_image: Mapped[Optional['ImageModel']] = relationship(
+    'ImageModel', back_populates='textbook'
+  )
 
   # Logs
-  created_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
-  updated_at: Mapped[datetime] = mapped_column(DateTime, nullable = False, default = datetime.utcnow)
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime, nullable=False, default=datetime.utcnow
+  )
+  updated_at: Mapped[datetime] = mapped_column(
+    DateTime, nullable=False, default=datetime.utcnow
+  )
 
   def __init__(
     self,
     author: 'UserModel',
     file: FileStorage,
-
     title: str,
     description: str = '',
     categories: List[str] = [],
-
     price: float = 0.0,
     discount: float = 0.0,
   ) -> None:
@@ -116,11 +147,10 @@ class TextbookModel(db.Model):
     self.price = price
     self.discount = discount
     self._upload_handler(file)
-      
+
   def __repr__(self) -> str:
     """To be used with cache indexing"""
     return '%s(%s)' % (self.__class__.__name__, self.id)
-  
 
   def _upload_handler(self, file: FileStorage) -> None:
     """Threaded background upload process"""
@@ -132,8 +162,7 @@ class TextbookModel(db.Model):
     self.uri = f'/public/textbook/{filePath.split("/")[-1]}'
     self.upload_status = 'Uploaded'
     self.save()
-  
-  
+
   # DB
   def save(self) -> None:
     """Commits the model"""
@@ -142,10 +171,12 @@ class TextbookModel(db.Model):
 
   def delete(self) -> None:
     """Deletes the model and its references"""
-    Thread(deleteFile, args = [self.iuri]).start()
+    Thread(deleteFile, args=[self.iuri]).start()
 
-    if self.cover_image: self.cover_image.delete()
-    for i in self.discounts: i.delete()
+    if self.cover_image:
+      self.cover_image.delete()
+    for i in self.discounts:
+      i.delete()
 
     db.session.delete(self)
     db.session.commit()
