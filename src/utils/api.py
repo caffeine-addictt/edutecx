@@ -1107,6 +1107,27 @@ class SaleaGetResponse(_APIResponse):
 
 
 
+# Submission LIST
+class SubmissionListRequest(_APIRequest):
+  """API Request for listing submissions"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class SubmissionListReply(_APIReply):
+  """API Reply for listing submissions"""
+  data: list['_SubmissionGetData']
+
+
+
+
+
+
+
+
 # Submission GET
 @dataclass
 class _SubmissionGetData(_APIBase):

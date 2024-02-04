@@ -80,3 +80,15 @@
  * @property {number} created_at
  * @property {number} updated_at
  */
+
+
+/**
+ * @typedef {Object} SubmissionGetData
+ * @property {string} submission_id
+ * @property {string} student_id
+ * @property {string} assignment_id
+ * @property {string[]} comments
+ * @property {string} snippet
+ * @property {number} created_at
+ * @property {number} updated_at
+ */

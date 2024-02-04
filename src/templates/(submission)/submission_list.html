@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
+{% from 'macros/submission.html' import render_submission_card % %}
 
 
 {# Title #}
@@ -17,7 +18,8 @@
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  <script>
+    var cardTemplate = `{{ render_submission_card() }}`
+  </script>
   <script src="{{ url_for('static', filename = '(submission)/submission_list.js') }}"></script>
 {% endblock %}

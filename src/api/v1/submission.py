@@ -13,7 +13,10 @@ from src.database import (
 from src.service.auth_provider import require_login
 from src.service.cdn_provider import BadFileEXT
 from src.utils.http import HTTPStatusCode
+from src.utils.ext import utc_time
 from src.utils.api import (
+  SubmissionListRequest,
+  SubmissionListReply,
   SubmissionGetRequest,
   SubmissionGetReply,
   _SubmissionGetData,
@@ -26,7 +29,9 @@ from src.utils.api import (
 )
 
 from typing import Optional
+from datetime import datetime
 from flask_limiter import util
+from sqlalchemy import and_, or_
 from flask import request, current_app as app
 
 
@@ -35,6 +40,72 @@ basePath: str = '/api/v1/submission'
 auth_limit = limiter.shared_limit(
   '100 per hour', scope=lambda _: request.host, key_func=util.get_remote_address
 )
+
+DateRange = tuple[datetime, datetime] | datetime | None
+
+
+@app.route(f'{basePath}/list', methods=['GET'])
+@auth_limit
+@require_login
+def submission_list_api(user: UserModel):
+  req = SubmissionListRequest(request)
+
+  # Handle query
+  dateRange: DateRange = (
+    datetime.fromtimestamp(req.createdLower)
+    if float('inf') != req.createdLower
+    else utc_time.skip('1day'),
+    datetime.fromtimestamp(req.createdUpper)
+    if float('inf') != req.createdUpper
+    else utc_time.skip('1day'),
+  )
+
+  if dateRange[0] > dateRange[1]:
+    return GenericReply(
+      message='createdLower is larger than createdUpper',
+      status=HTTPStatusCode.BAD_REQUEST,
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if req.query == 'None':
+    req.query = ''
+
+  return SubmissionListReply(
+    message='Successfully fetched submissions',
+    status=HTTPStatusCode.OK,
+    data=[
+      _SubmissionGetData(
+        submission_id=submission.id,
+        student_id=submission.student_id,
+        assignment_id=submission.assignment_id,
+        comments=[i.id for i in submission.comments],
+        snippet=submission.snippet.uri,
+        created_at=submission.created_at.timestamp(),
+        updated_at=submission.updated_at.timestamp(),
+      )
+      for submission in user.submissions
+      if (
+        (
+          (req.criteria == 'and') and (
+            (dateRange[0] <= submission.created_at)
+            and (submission.created_at <= dateRange[1])
+            and (
+              req.query in submission.id
+              or req.query in submission.assignment.classroom.title
+            )
+          )
+        )
+        or (
+          (req.criteria == 'or') and (
+            (dateRange[0] <= submission.created_at and submission.created_at <= dateRange[1])
+            or (
+              req.query in submission.id
+              or req.query in submission.assignment.classroom.title
+            )
+          )
+        )
+      )
+    ],
+  ).to_dict()
 
 
 @app.route(f'{basePath}/get', methods=['GET'])
