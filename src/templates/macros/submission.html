@@ -1,0 +1,11 @@
+{% macro render_submission_card() %}
+  <div class="container d-flex flex-column">
+    {submission_date}
+    <p>{comment_count}</p>
+    
+    <a href="/submissions/{id}" class="btn btn-primary">
+      Go to submission
+    </a>
+  </div>
+{% endmacro %}
+
