@@ -1,15 +1,7 @@
 
 /**
  * Classrooms List
- * @type {Array.<{
-*     id: string;
-*     owner_id: string;
-*     owner_username: string;
-*     title: string;
-*     description: string;
-*     cover_image: string | null;
-*     created_at: number
- * }>}
+ * @type {ClassroomGetData[]}
  */
 let classroomList = [];
 
