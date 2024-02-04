@@ -2,7 +2,7 @@
 Handles submission routes
 """
 
-from src.database import UserModel
+from src.database import UserModel, SubmissionModel
 from src.service import auth_provider
 
 from src.utils.http import escape_id
@@ -19,4 +19,17 @@ def submissions(_: UserModel):
 @auth_provider.require_login
 def submission(user: UserModel, id: str):
   id = escape_id(id)
-  return render_template('(submission)/submission.html')
+
+  submission = SubmissionModel.query.filter(SubmissionModel.id == id).first()
+  if not isinstance(submission, SubmissionModel):
+    return render_template(
+      '(submission)/submission_error.html', message='Unable to locate submission'
+    )
+
+  if (user.privilege != 'Admin') and (
+    (submission.student_id != user.id)
+    or (not submission.assignment.classroom.is_privileged(user))
+  ):
+    return render_template('(submission)/submission_error.html', message='Unauthorized')
+
+  return render_template('(submission)/submission.html', submission=submission)
