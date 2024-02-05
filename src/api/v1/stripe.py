@@ -5,7 +5,6 @@ Stripe Endpoint'
 from src import limiter
 from flask_limiter import util
 
-from sqlalchemy import and_
 from src.database import UserModel, TextbookModel, SaleModel, SaleInfo, DiscountModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
@@ -46,10 +45,10 @@ def create_stripe_subscription_session_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   # Validate discount
-  discount = (req.discount != 'None') and DiscountModel.query.filter(
+  discount = (req.discount not in ['None', '']) and DiscountModel.query.filter(
     DiscountModel.code == req.discount
   ).first()
-  if (req.discount != 'None') and not isinstance(discount, DiscountModel):
+  if (req.discount not in ['None', '']) and not isinstance(discount, DiscountModel):
     return GenericReply(
       message='Invalid discount code', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -79,9 +78,9 @@ def create_stripe_subscription_session_api(user: UserModel):
     line_items=[{'price': price['id'], 'quantity': 1}],
     mode='subscription',
     success_url=url_for('checkout_success', _external=True)
-    + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?session_id={CHECKOUT_SESSION_ID}',
     cancel_url=url_for('checkout_cancel', _external=True)
-    + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?session_id={CHECKOUT_SESSION_ID}',
   )
 
   SaleModel(
@@ -112,10 +111,10 @@ def create_stripe_checkout_session_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   # Validate discount
-  discount = (req.discount != 'None') and DiscountModel.query.filter(
+  discount = (req.discount not in ['None', '']) and DiscountModel.query.filter(
     DiscountModel.code == req.discount
   ).first()
-  if (req.discount != 'None') and not isinstance(discount, DiscountModel):
+  if (req.discount not in ['None', '']) and not isinstance(discount, DiscountModel):
     return GenericReply(
       message='Invalid discount code', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -137,7 +136,7 @@ def create_stripe_checkout_session_api(user: UserModel):
 
   # Ensure discount is valid
   if discount:
-    if discount.textbook and (not discount.textbook.id in found):
+    if discount.textbook and (discount.textbook.id not in found):
       return GenericReply(
         message='Invalid discount code', status=HTTPStatusCode.BAD_REQUEST
       ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -166,10 +165,13 @@ def create_stripe_checkout_session_api(user: UserModel):
   items: list[str] = []
   saleinfo: list[SaleInfo] = []
   for txtbook in found:
-    if discount and discount.textbook and discount.textbook.id == txtbook.id:
-      cost = round(txtbook.price * discount.multiplier * 100, 2)
+    if discount and (
+      (discount.textbook and discount.textbook.id == txtbook.id)
+      or (not discount.textbook)
+    ):
+      cost = round(txtbook.price * discount.multiplier, 2)
     else:
-      cost = round(txtbook.price * (discount.multiplier if discount else 1) * 100, 2)
+      cost = round(txtbook.price * (discount.multiplier if discount else 1), 2)
     saleinfo.append(SaleInfo(cost, txtbook))
     items.append(
       stripe.Price.create(
@@ -187,9 +189,9 @@ def create_stripe_checkout_session_api(user: UserModel):
     mode='payment',
     payment_method_types=['card'],
     success_url=url_for('checkout_success', _external=True)
-    + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?session_id={CHECKOUT_SESSION_ID}',
     cancel_url=url_for('checkout_cancel', _external=True)
-    + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?session_id={CHECKOUT_SESSION_ID}',
   )
 
   # Generate SaleModel
@@ -274,7 +276,13 @@ def stripe_expiresession_api(user: UserModel):
 
   try:
     if pending.session_id:
-      stripe.checkout.Session.expire(pending.session_id)
+      session = stripe.checkout.Session.retrieve(pending.session_id)
+      if session['status'] == 'open':
+        stripe.checkout.Session.expire(pending.session_id)
+
+      app.logger.error(
+        f'Skipping expiring {session["status"]} session [{pending.session_id}]'
+      )
 
   except Exception as e:
     app.logger.error(f'Failed to expire session {pending.session_id}: {e}')
@@ -362,7 +370,7 @@ def stripe_webhook_api():
 
       sale.save()
 
-      # Handle making textbooks availble to user
+      # Handle making textbooks available to user
       if sale.type == 'OneTime':
         for info in sale.textbooks.values():
           info.textbook.bought_by.append(sale.user)

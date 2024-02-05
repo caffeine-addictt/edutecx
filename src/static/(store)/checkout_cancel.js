@@ -4,14 +4,14 @@
  * @param {string} sessionID
  * @returns {Promise<{status: number; message: string;}>}
  */
-const checkoutCancel = async (sessionID) => await fetch('/api/v1/checkout/cancel', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': getAccessToken()
-    },
-    body: JSON.stringify({ session_id: sessionID })
-  }).then(async res => await res.json());
+const checkoutCancel = async (sessionID) => await fetch('/api/v1/stripe/expire-session', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRF-TOKEN': getAccessToken()
+  },
+  body: JSON.stringify({ session_id: sessionID })
+}).then(async res => await res.json());
 
 
 
@@ -25,7 +25,7 @@ $(async () => {
     return;
   }
 
-  
+
   let counter = 0;
   while (true) {
     const response = await checkoutCancel(sessionID);
@@ -33,12 +33,12 @@ $(async () => {
     if (response.status !== 200) {
       renderToast(response.message, 'error');
 
-      await wait( (2**counter + Math.random()) * 1000 );
+      await wait((2 ** counter + Math.random()) * 1000);
       counter++;
 
       continue;
     };
-    
+
     // Render success
     break;
   }

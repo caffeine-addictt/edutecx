@@ -82,7 +82,7 @@ class SaleModel(db.Model):
     saleinfo: List[SaleInfo],
     session_id: Optional[str] = None,
     discount: Optional['DiscountModel'] = None,
-  ) -> None:
+    ) -> None:
     """
     Sale Model
 
@@ -108,7 +108,7 @@ class SaleModel(db.Model):
     total_cost: float,
     session_id: Optional[str] = None,
     discount: Optional['DiscountModel'] = None,
-  ) -> None:
+    ) -> None:
     """
     Sale Model
 
@@ -134,7 +134,8 @@ class SaleModel(db.Model):
     *,
     session_id: Optional[str] = None,
     discount: Optional['DiscountModel'] = None,
-  ) -> None:
+    ) -> None:
+    self.id = uuid.uuid4().hex
     self.user_id = user.id
     self.session_id = session_id
     self.type = saleType
@@ -150,7 +151,7 @@ class SaleModel(db.Model):
         self.total_cost += info.cost
 
         newSta = sta(self, info.textbook, info.textbook.price)
-        newSta.save()
+        db.session.add(newSta)
         self.data.append(newSta)
 
     if discount:
@@ -179,5 +180,7 @@ class SaleModel(db.Model):
 
   def delete(self) -> None:
     """Deletes the model and its references"""
+    for i in self.data:
+      i.delete()
     db.session.delete(self)
     db.session.commit()
