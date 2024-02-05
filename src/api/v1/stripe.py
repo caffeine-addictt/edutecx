@@ -45,10 +45,10 @@ def create_stripe_subscription_session_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   # Validate discount
-  discount = (req.discount != 'None') and DiscountModel.query.filter(
+  discount = (req.discount not in ['None', '']) and DiscountModel.query.filter(
     DiscountModel.code == req.discount
   ).first()
-  if (req.discount != 'None') and not isinstance(discount, DiscountModel):
+  if (req.discount not in ['None', '']) and not isinstance(discount, DiscountModel):
     return GenericReply(
       message='Invalid discount code', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
