@@ -5,7 +5,6 @@ Stripe Endpoint'
 from src import limiter
 from flask_limiter import util
 
-from sqlalchemy import and_
 from src.database import UserModel, TextbookModel, SaleModel, SaleInfo, DiscountModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
@@ -79,9 +78,9 @@ def create_stripe_subscription_session_api(user: UserModel):
     line_items=[{'price': price['id'], 'quantity': 1}],
     mode='subscription',
     success_url=url_for('checkout_success', _external=True)
-    + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?session_id={CHECKOUT_SESSION_ID}',
     cancel_url=url_for('checkout_cancel', _external=True)
-    + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?session_id={CHECKOUT_SESSION_ID}',
   )
 
   SaleModel(
@@ -137,7 +136,7 @@ def create_stripe_checkout_session_api(user: UserModel):
 
   # Ensure discount is valid
   if discount:
-    if discount.textbook and (not discount.textbook.id in found):
+    if discount.textbook and (discount.textbook.id not in found):
       return GenericReply(
         message='Invalid discount code', status=HTTPStatusCode.BAD_REQUEST
       ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -187,9 +186,9 @@ def create_stripe_checkout_session_api(user: UserModel):
     mode='payment',
     payment_method_types=['card'],
     success_url=url_for('checkout_success', _external=True)
-    + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?session_id={CHECKOUT_SESSION_ID}',
     cancel_url=url_for('checkout_cancel', _external=True)
-    + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?session_id={CHECKOUT_SESSION_ID}',
   )
 
   # Generate SaleModel
@@ -362,7 +361,7 @@ def stripe_webhook_api():
 
       sale.save()
 
-      # Handle making textbooks availble to user
+      # Handle making textbooks available to user
       if sale.type == 'OneTime':
         for info in sale.textbooks.values():
           info.textbook.bought_by.append(sale.user)
