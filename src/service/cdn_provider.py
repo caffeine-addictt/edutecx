@@ -20,7 +20,7 @@ ENV = os.getenv('ENV', '')
 Cloudinary_Folders = {
   'Image': 'image-uploads',
   'Textbook': 'textbook-uploads',
-  'Submission': 'submission-uploads'
+  'Submission': 'submission-uploads',
 }
 
 UploadBaseLocation = os.path.join(os.getcwd(), 'src', 'uploads')
@@ -34,21 +34,25 @@ TextbookFileEXT = ['pdf']
 ImageFileEXT = ['png', 'jpg', 'jpeg']
 SubmissionFileEXT = ['pdf', 'txt', 'docx', 'doc', 'odt']
 
+
 class BadFileEXT(Exception):
   """Raised when file extension is not supported"""
+
   def __init__(self, message: str = 'File extension is not supported', *args, **kwargs):
     super().__init__(message, *args, **kwargs)
+
+
 class FileDoesNotExistError(Exception):
   """Raised when file does not exist"""
+
   def __init__(self, message: str = 'File does not exist', *args, **kwargs):
     super().__init__(message, *args, **kwargs)
 
 
-
-
 def _dirCheck():
   """Ensure that the upload directories exist"""
-  if ENV == 'production': return
+  if ENV == 'production':
+    return
 
   if not os.path.isdir(UploadBaseLocation):
     os.mkdir(UploadBaseLocation)
@@ -61,8 +65,6 @@ def _dirCheck():
 
   if not os.path.isdir(ImageLocation):
     os.mkdir(ImageLocation)
-
-
 
 
 def _injectCopyright(file: PdfReader) -> PdfWriter:
@@ -79,15 +81,21 @@ def _get_unique_filename() -> str:
   """For production"""
   ...
 
+
 @overload
 def _get_unique_filename(dir: str, filename: str, extension: str) -> str:
   """Ensure edge case where file already exists (although unliekly as filename would be uuid, but doesn't hurt to be sure)"""
   ...
 
-def _get_unique_filename(dir: Optional[str] = None, filename: Optional[str] = None, extension: Optional[str] = None) -> str:
+
+def _get_unique_filename(
+  dir: Optional[str] = None,
+  filename: Optional[str] = None,
+  extension: Optional[str] = None,
+  ) -> str:
   if ENV == 'production':
     return uuid.uuid4().hex
-  
+
   if not dir or not filename or not extension:
     raise ValueError('dir, filename, and extension are required for development upload')
 
@@ -98,20 +106,17 @@ def _get_unique_filename(dir: Optional[str] = None, filename: Optional[str] = No
 
     if os.path.exists(os.path.join(dir, filename)):
       filename = uuid.uuid4().hex
-    else: return filename
-
-
+    else:
+      return filename
 
 
 def _development_upload(
-  fileType: Literal['Image', 'Textbook', 'Submission'],
-  file: FileStorage,
-  filename: str
-):
+  fileType: Literal['Image', 'Textbook', 'Submission'], file: FileStorage, filename: str
+  ):
   _dirCheck()
   if not file.filename:
     raise BadFileEXT('File does not have a name')
-  
+
   ext = file.filename.split('.')[-1]
 
   # Upload the file
@@ -119,12 +124,8 @@ def _development_upload(
     case 'Image':
       if ext not in ImageFileEXT:
         raise BadFileEXT(f'{ext} is not supported')
-      
-      filename = _get_unique_filename(
-        ImageLocation,
-        filename,
-        ext
-      )
+
+      filename = _get_unique_filename(ImageLocation, filename, ext)
 
       # Save the file
       location = os.path.join(ImageLocation, filename)
@@ -135,12 +136,8 @@ def _development_upload(
     case 'Textbook':
       if ext not in TextbookFileEXT:
         raise BadFileEXT()
-      
-      filename = _get_unique_filename(
-        TextbookLocation,
-        filename,
-        ext
-      )
+
+      filename = _get_unique_filename(TextbookLocation, filename, ext)
 
       # Inject copyright notice
       writer = _injectCopyright(PdfReader(file.stream))
@@ -148,18 +145,14 @@ def _development_upload(
       location = os.path.join(TextbookLocation, filename)
       with open(location, 'wb') as out:
         writer.write(out)
-        
+
       return location
-    
+
     case 'Submission':
       if ext not in SubmissionFileEXT:
         raise BadFileEXT()
-      
-      filename = _get_unique_filename(
-        SubmissionUpload,
-        filename,
-        ext
-      )
+
+      filename = _get_unique_filename(SubmissionUpload, filename, ext)
 
       location = os.path.join(SubmissionUpload, filename)
       file.save(location)
@@ -168,9 +161,8 @@ def _development_upload(
 
 
 def _production_upload(
-  fileType: Literal['Image', 'Textbook', 'Submission'],
-  file: FileStorage
-):
+  fileType: Literal['Image', 'Textbook', 'Submission'], file: FileStorage
+  ):
   updatedFile = None
 
   file.filename = _get_unique_filename()
@@ -180,12 +172,9 @@ def _production_upload(
     _injectCopyright(PdfReader(file.stream)).write_stream(updatedFile)
 
   res = uploader.upload(
-    updatedFile or file,
-    folder = Cloudinary_Folders[fileType]
+    updatedFile.getvalue() if updatedFile else file, folder=Cloudinary_Folders[fileType]
   )
   return res['public_id']
-
-
 
 
 def uploadTextbook(file: FileStorage, filename: str) -> str:
@@ -198,13 +187,13 @@ def uploadTextbook(file: FileStorage, filename: str) -> str:
     The file data to upload
 
   `filename: str`, required
-    The filename of the uplaoded, will overwrite if invalid
+    The filename of the uploaded, will overwrite if invalid
 
 
   Returns
   -------
   `Interalpath: str`
-    The interal path to access the uploaded content
+    The internal path to access the uploaded content
 
 
   Raises
@@ -212,7 +201,12 @@ def uploadTextbook(file: FileStorage, filename: str) -> str:
   `BadFileEXT`
     Raised when the file extension is not valid for a textbook
   """
-  return _production_upload('Textbook', file) if ENV == 'production' else _development_upload('Textbook', file, filename)
+  return (
+    _production_upload('Textbook', file)
+    if ENV == 'production'
+    else _development_upload('Textbook', file, filename)
+  )
+
 
 def uploadImage(file: FileStorage, filename: str) -> str:
   """
@@ -224,13 +218,13 @@ def uploadImage(file: FileStorage, filename: str) -> str:
     The file data to upload
 
   `filename: str`, required
-    The filename of the uplaoded, will overwrite if invalid
+    The filename of the uploaded, will overwrite if invalid
 
 
   Returns
   -------
   `Interalpath: str`
-    The interal path to access the uploaded content
+    The internal path to access the uploaded content
 
 
   Raises
@@ -238,7 +232,12 @@ def uploadImage(file: FileStorage, filename: str) -> str:
   `BadFileEXT`
     Raised when the file extension is not valid for an image
   """
-  return _production_upload('Image', file) if ENV == 'production' else _development_upload('Image', file, filename)
+  return (
+    _production_upload('Image', file)
+    if ENV == 'production'
+    else _development_upload('Image', file, filename)
+  )
+
 
 def uploadSubmission(file: FileStorage, filename: str) -> str:
   """
@@ -250,13 +249,13 @@ def uploadSubmission(file: FileStorage, filename: str) -> str:
     The file data to upload
 
   `filename: str`, required
-    The filename of the uplaoded, will overwrite if invalid
+    The filename of the uploaded, will overwrite if invalid
 
 
   Returns
   -------
   `Interalpath: str`
-    The interal path to access the uploaded content
+    The internal path to access the uploaded content
 
 
   Raises
@@ -264,15 +263,17 @@ def uploadSubmission(file: FileStorage, filename: str) -> str:
   `BadFileEXT`
     Raised when the file extension is not valid for an image
   """
-  return _production_upload('Submission', file) if ENV == 'production' else _development_upload('Submission', file, filename)
-
-
+  return (
+    _production_upload('Submission', file)
+    if ENV == 'production'
+    else _development_upload('Submission', file, filename)
+  )
 
 
 def deleteFile(fileLocation: str) -> None:
   """
   Delete file
-  
+
   Parameters
   ----------
   `fileLocation: str`, required
@@ -281,10 +282,7 @@ def deleteFile(fileLocation: str) -> None:
   _dirCheck()
 
   if ENV == 'production':
-    res = api.delete_resources(
-      public_ids = [fileLocation],
-      type = 'upload'
-    )
+    res = api.delete_resources(public_ids=[fileLocation], type='upload')
 
     if res['deleted'][fileLocation] != 'deleted':
       raise Exception('Failed to delete file from CDN')
@@ -293,5 +291,5 @@ def deleteFile(fileLocation: str) -> None:
 
   if not os.path.exists(fileLocation):
     raise FileDoesNotExistError()
-  
+
   os.remove(fileLocation)
