@@ -35,8 +35,8 @@ const proceedToPayment = async () => {
 $(async () => {
   /** @type {string[]} */
   const items = getCartItems();
-  
-  
+
+
   /** @type {Array.<Promise<APIJSON<TextbookGetData>>>} */
   const queryPayloads = [];
 
@@ -50,8 +50,8 @@ $(async () => {
 
   /** @type {Array.<APIJSON<TextbookGetData>>} */
   const responses = await Promise.all(queryPayloads);
+  console.log(responses);
 
-  
   // Populate HTML
   responses.forEach(res => {
     if (res.status === 200) {

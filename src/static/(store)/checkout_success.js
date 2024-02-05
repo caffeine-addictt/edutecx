@@ -4,7 +4,7 @@
  * @param {string} sessionID
  * @returns {Promise<void | APIJSON<StripeSessionStatus>>}
  */
-const checkoutStatus = async (sessionID) => await fetch('/api/v1/checkout/status', {
+const checkoutStatus = async (sessionID) => await fetch('/api/v1/stripe/status', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ $(async () => {
     if (response?.status !== 200) {
       renderToast(response ? response.message : 'Something went wrong!', 'error');
 
-      await wait( (2**counter + Math.random()) * 1000 );
+      await wait((2 ** counter + Math.random()) * 1000);
       counter++;
 
       continue;
