@@ -73,7 +73,7 @@ const renderTextbooks = async (filteredList) => {
 
 // On DOM Render
 $(async () => {
-  classroomList = await fetchTextbooks();
+  textbookList = await fetchTextbooks();
   renderTextbooks();
 
 

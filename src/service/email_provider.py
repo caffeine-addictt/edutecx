@@ -2,6 +2,7 @@
 Email Provider
 """
 
+import os
 import re
 import resend
 import email_validator
@@ -14,7 +15,7 @@ from functools import wraps
 from typing import Literal, TypeVar, ParamSpec, Callable, Concatenate
 
 
-EmailSender: str = 'edutecx@ngjx.org'
+EmailSender: str = 'contact@edutecx.ngjx.org'
 EmailType = Literal['Verification']
 
 
@@ -56,7 +57,7 @@ def dns_check(email: str) -> bool:
 
 
 @_enforce_email
-def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') -> bool:
+def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') -> Literal[True] | tuple[Literal[False], str]:
   """
   Send email
 
@@ -69,16 +70,24 @@ def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') 
   try:
     match emailType:
       case 'Verification':
+        if os.getenv('ENV') == 'development':
+          from flask import current_app as app, request
+          app.logger.info(
+            f'Emails are not send in development.'
+            + f' Go to {data.cta_link.replace("https://edutecx.ngjx.org/", request.root_url)} to verify your account'
+          )
+          return True
+
         resend.Emails.send({
-          'from': 'EduTecX <contact@edutecx.ngjx.org>',
+          'from': f'EduTecX Team <{EmailSender}>',
           'to': [email],
           'subject': 'Email Verification',
           'text': f'Dear {data.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{data.cta_link}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team',
           'html': render_template('email/verification.html', **data.to_dict()),
         })
     return True
-  except Exception:
-    return False
+  except Exception as e:
+    return False, str(e)
 
 
 

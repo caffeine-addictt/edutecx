@@ -2,6 +2,9 @@ name: Run Python tests
 
 on: [ push ]
 
+env:
+  ENV: development
+
 jobs:
   build:
 

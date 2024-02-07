@@ -11,7 +11,23 @@
 {# Body #}
 {% block mainContent %}
   <div id="submission__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-    submission content
+    {submission.assignment.title}
+    {submission.assignment.description}
+    
+    {% for comment in submission.comments %}
+      <div>
+        {comment.author.username}
+        {comment.text}
+      </div>
+    {% endfor %}
+
+    <form id="newCommentForm">
+      <div class="form-floating">
+        <textarea name="text" class="form-control" placeholder="Leave a comment here" id="commentText" style="height: 100px"></textarea>
+        <label for="commentText">Comment</label>
+      </div>
+      <button type="button" class="btn btn-primary">New Comment</button>
+    </form>
   </div>
 
   {# 
@@ -24,7 +40,5 @@
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
   <script src="{{ url_for('static', filename = '(submission)/submission.js') }}"></script>
 {% endblock %}

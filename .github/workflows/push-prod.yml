@@ -9,9 +9,8 @@ on:
 jobs:
   publish-build:
     if: contains('["caffeine-addictt"]', github.actor)
-    name: Run tests
+    name: Publish docker image
     runs-on: ubuntu-latest
-
 
     steps:
       - uses: actions/checkout@v3
@@ -27,3 +26,21 @@ jobs:
       - name: Push image
         run: |
           docker push ghcr.io/caffeine-addictt/edutecx-build:latest
+  
+
+  trigger-redeploy:
+    if: contains('["caffeine-addictt"]', github.actor)
+    needs: publish-build
+    name: Trigger production deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install packages
+        run: |
+          sudo apt upgrade
+          sudo apt update
+          sudo apt install -y curl
+      
+      - name: Trigger deployment
+        run: |
+          curl ${{ secrets.REDEPLOY_ENDPOINT }}

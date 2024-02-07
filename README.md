@@ -172,6 +172,11 @@ git push -u origin <Your Feature Branch Name>
 <br><br>
 
 # 8. Running Files
+Set environment variables
+```sh
+echo "ENV=development" >> .env
+```
+
 Start server
 ```sh
 gunicorn --bind=0.0.0.0:8000 --threads=3 --workers=3 --reload run:app
