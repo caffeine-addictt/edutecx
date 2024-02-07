@@ -21,21 +21,25 @@ EmailType = Literal['Verification']
 
 T = TypeVar('T')
 P = ParamSpec('P')
-def _enforce_email(func: Callable[Concatenate[str, P], T]) -> Callable[Concatenate[str, P], T]:
+
+
+def _enforce_email(
+  func: Callable[Concatenate[str, P], T],
+  ) -> Callable[Concatenate[str, P], T]:
   """
   Decorator to enforce email format with RegEx
 
   Email must be first argument
   """
+
   @wraps(func)
   def wrapper(email: str, *args: P.args, **kwargs: P.kwargs) -> T:
     regex = re.compile(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)')
     if not regex.fullmatch(email):
       raise ValueError('Invalid email')
     return func(email, *args, **kwargs)
+
   return wrapper
-
-
 
 
 @_enforce_email
@@ -48,16 +52,16 @@ def dns_check(email: str) -> bool:
   `email: str`
   """
   try:
-    email_validator.validate_email(email, check_deliverability = True)
+    email_validator.validate_email(email, check_deliverability=True)
   except Exception:
     return False
   return True
 
 
-
-
 @_enforce_email
-def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') -> Literal[True] | tuple[Literal[False], str]:
+def send_email(
+  email: str, emailType: EmailType, data: 'VerificationEmailData'
+  ) -> Literal[True] | tuple[Literal[False], str]:
   """
   Send email
 
@@ -72,24 +76,25 @@ def send_email(email: str, emailType: EmailType, data: 'VerificationEmailData') 
       case 'Verification':
         if os.getenv('ENV') == 'development':
           from flask import current_app as app, request
+
           app.logger.info(
-            f'Emails are not send in development.'
-            + f' Go to {data.cta_link.replace("https://edutecx.ngjx.org/", request.root_url)} to verify your account'
+            'Emails are not send in development.'
+              + f' Go to {data.cta_link.replace("https://edutecx.ngjx.org/", request.root_url)} to verify your account'
           )
           return True
 
-        resend.Emails.send({
-          'from': f'EduTecX Team <{EmailSender}>',
-          'to': [email],
-          'subject': 'Email Verification',
-          'text': f'Dear {data.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{data.cta_link}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team',
-          'html': render_template('email/verification.html', **data.to_dict()),
-        })
+        resend.Emails.send(
+          {
+            'from': f'EduTecX Team <{EmailSender}>',
+            'to': [email],
+            'subject': 'Email Verification',
+            'text': f'Dear {data.username},\n\nThank you for registering with EduTecX! Please click the following link to verify your account:\n\n{data.cta_link}\n\nIf you did not register with EduTecX, please ignore this email.\n\nBest regards,\nThe EduTecX Team',
+            'html': render_template('email/verification.html', **data.to_dict()),
+          }
+        )
     return True
   except Exception as e:
     return False, str(e)
-
-
 
 
 # Email DATA #
@@ -98,7 +103,7 @@ class VerificationEmailData(_APIBase):
   """
   Verification Email Data
 
-  Paramters
+  Parameters
   ---------
   title: Fills the `<title />` tag in `<head />`
   preheader: Some customers will see this as a preview text
@@ -115,6 +120,7 @@ class VerificationEmailData(_APIBase):
   footer_three: Third Footer text wrapped in `<a />`
   footer_three_link: Third Footer link
   """
+
   username: str
   title: str = 'Verify Your EduTecX Email'
   preheader: str = 'Welcome to EduTecX, verify your email to get started!'
