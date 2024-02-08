@@ -11,49 +11,59 @@
 
 {# Body #}
 {% block mainContent %}
-  <h1>Profile</h1>
 
-  <form id="profileForm" action="" class="d-flex flex-column gap-3 w-25 h-50">
-
-    <div class="d-flex flex-row gap-3 mx-auto align-items-center w-100 h-100">
-      {# Left #}
-      <div class="d-flex flex-column gap-3 w-25 h-50">
-        {{ render_text_field(form.username) }}
-        {{ render_text_field(form.email) }}
-        {{ render_text_field(form.password) }}
-        {{ render_text_field(form.confirm) }}
-      </div>
-
-      {# Right #}
-      <div id="profile__container" class="d-flex align-items-center gap-3 mw-100 mh-100">
-        <label class="form__label">
-          <input
-            type="file"
-            id="profile__input"
-            name="profile__input"
-            accept="image/png, image/jpeg"
-            class="d-none"
-            hidden
-          />
-          <div class="d-flex w-100 h-100 position-relative">
-            <!-- Text overlaay on picture upload -->
-            <span
-              id="overlay-text"
-              class="w-100 h-auto order-first align-self-center position-absolute text-center text-secondary"
-            >
-              Upload Profile Picture
-            </span>
-            <img id="profile__image" src="{{ profile_uri }}" width="200" height="200" />
+  <div class="d-flex justify-content-center">
+    
+    <form id="profileForm" action="" class="d-flex flex-column gap-3 w-50 align-self-center align-items-center">
+      <h1 style="font-family:--font;">Your Profile</h1>
+      <div class="container d-flex flex-row gap-3 mx-3 align-items-center w-100 h-100 border border-dark shadow p-5 bg-body rounded">
+        {# Profile Content #}
+        <div class="row">
+          {# Left #}
+          <div id="profile__container" class="col d-flex align-items-center gap-3 mw-100 mh-100">
+            <label class="form__label">
+              <input
+                type="file"
+                id="profile__input"
+                name="profile__input"
+                accept="image/png, image/jpeg"
+                class="d-none"
+                hidden
+              />
+              <div class="col-md-4 d-flex w-100 h-100 position-relative">
+                <!-- Text overlaay on picture upload -->
+                <span
+                  id="overlay-text"
+                  class="w-100 h-auto order-first align-self-center position-absolute text-center text-secondary"
+                >
+                  Upload Profile Picture
+                </span>
+                <img id="profile__image" src="{{ profile_uri }}" width="200" height="200" class="rounded-circle border border-outline"/>
+              </div>
+            </label>
+            
           </div>
-        </label>
-      </div>
-    </div>
+          
+          {# Right #}
+          <div class="col d-flex flex-column gap-3 w-25 h-50">
+            {{ render_text_field(form.username) }}
+            {{ render_text_field(form.email) }}
+            {{ render_text_field(form.password) }}
+            {{ render_text_field(form.confirm) }}
+          </div>
+        </div>
 
-
-    {{ render_submit(form.submit) }}
-    <button type="button" class="btn btn-secondary fade opacity-0" id="cancel-changes-button"> Cancel Changes </button>
-    <button type="button" class="btn btn-danger" id="delete-account-button"> Delete Account </button>
-  </form>
+        {# Buttons #}
+        <div class="row">
+            <div class="col d-flex flex-column">
+              {{ render_submit(form.submit) }}
+              <button type="button" class="btn btn-danger" id="delete-account-button"> Delete Account </button>
+              <button type="button" class="btn btn-secondary fade opacity-0" id="cancel-changes-button"> Cancel Changes </button>
+            </div>
+        </div>
+    </form>
+  </div>
+  
 
 
 
