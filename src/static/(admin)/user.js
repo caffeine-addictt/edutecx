@@ -67,14 +67,14 @@ const fetchGraphURI = async (initialRender = false) => {
   /**
    * @type {Response}
    */
-  const response = await fetch('/dashboard/graph', {
+  const response = await fetch('/api/v1/admin/draw', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'X-CSRF-TOKEN': getAccessToken()
     },
     body: JSON.stringify({
-      "graphFor": "User"
+      'graphFor': 'User'
     })
   })
 
@@ -278,6 +278,8 @@ $(async () => {
   // Hooks
   $('#graph__button').on('click', async e => await fetchGraphURI());
   $('#user__button').on('click',  async e => await fetchUserData());
+
+  $('#user__export').on('click', () => {window.location.href = '/api/v1/admin/export/User';});
 
   // Modal hooks
   $('#update-user-modal').find('#confirmed-update-user').on('click', async e => {
