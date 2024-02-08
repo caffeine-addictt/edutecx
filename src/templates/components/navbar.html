@@ -23,27 +23,54 @@
         </li>
 
         <li class='nav-item'>
-          <a class='nav-link' href='#'>Policy</a>
+          <a class='nav-link' href='/privacy-policy'>Policy</a>
         </li>
-
+        
         <li class='nav-item'>
           <a class='nav-link' href='/contact-us' tabindex='-1' aria-disabled='true'>Contact Us</a>
         </li>
       </ul>
 
+      {# Not Logged in #}
+      {% if not g.user %}
+      <form class='d-flex'>
+        <ul class='navbar-nav me-auto mb-2 mb-lg-0 gap-3 px-3'>
+
+          
+            <li class='nav-item'>
+              <a id="login-navlink" class='nav-link active text-decoration-underline' tabindex='-1' aria-disabled='true'>Login</a>
+            </li>
+
+            <li class='nav-item w-2'>
+              <a id="register-navlink" class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true'>Register</a>
+            </li>        
+          </ul>
+        </form>
+          {% endif %}
 
 
-      <ul class='navbar-nav me-4 mb-2 mb-lg-0'>
+          {# Logged in #}
+          {% if g.user %}
+          <ul class='navbar-nav me-4 mb-2 mb-lg-0'>
 
-        <li class='nav-item'>
-          <a class='nav-link' href='/textbooks'>Textbooks</a>
-        </li>
+            <li class='nav-item'>
+              <a class='nav-link' href='/textbooks'>Textbooks</a>
+            </li>
+    
+            <li class='nav-item'>
+              <a class='nav-link' href='/classrooms'>Classrooms</a>
+            </li>
+            {% if g.user.privilege == 'Admin' %}
+            <li class='nav-item w-2'>
+              <a class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true' href='/dashboard'>Dashboard</a>
+            </li>
+            {% endif %}
+            
+          </ul>
 
-        <li class='nav-item'>
-          <a class='nav-link' href='/classrooms'>Classrooms</a>
-        </li>
-        
-      </ul>
+            
+          {% endif %}
+
 
     </div>
     <a class='nav-link' href='/profile'>
@@ -54,6 +81,12 @@
   </div>
 </nav>
 
-<script>
+{% if not g.user %}
+  <script>
+    $(() => {
+      $("#login-navlink").attr('href', window.location.pathname === '/' ? '/login' : `/login?callbackURI=${encodeURI(window.location.pathname)}`);
+      $("#register-navlink").attr('href', window.location.pathname === '/' ? '/register' : `/register?callbackURI=${encodeURI(window.location.pathname)}`);
+    });
+  </script>
+{% endif %}
 
-</script>
