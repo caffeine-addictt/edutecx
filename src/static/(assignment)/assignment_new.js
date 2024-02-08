@@ -1,19 +1,11 @@
 
 // Hooks
 $(() => {
-  $('#assignmentRequirements').on('input', e => {
-    e.target.value = e.target.value.replace(/([^0-9:]+)/gi, '') 
-  })
-
-
-
   $('#assignmentForm').on('submit', async e => {
     e.preventDefault();
 
     const data = Object.fromEntries((new FormData(e.target)).entries());
-    console.log(data);
 
-    if (!/^([0-9]+(:[0-9]+)?)$/.test(data.requirements)) return renderToast('Invalid Page Number(s)!', 'danger');
     if (data.date && (((new Date()).now() - (new Date(data.date)).now()) >= 0)) return renderToast('Date cannot be in the past!', 'danger');
 
     /**
