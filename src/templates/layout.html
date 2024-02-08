@@ -66,7 +66,11 @@
   <body class='d-flex flex-column min-vh-100 vw-100 mw-100' style="background-color: var(--background-color)">
     {# Import Navbar #}
     {% block navComponent %}
-      {% include 'components/navbar.html' %}
+      {% if false %}
+        {% include 'components/navbar.html' %}
+      {% else %}
+        {% include 'components/rootnavbar.html' %}
+      {% endif %}
     {% endblock %}
 
 
