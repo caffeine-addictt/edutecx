@@ -1322,25 +1322,3 @@ UserDeleteResponse = GenericResponse
 # Admin Graph GET
 class AdminGraphGetRequest(_APIRequest):
   graphFor: Literal['User', 'Textbook', 'Revenue']
-
-
-
-
-
-
-
-
-# Admin GET
-class AdminGetRequest(_APIRequest):
-  requestFor: Literal['User', 'Textbook', 'Sale']
-  criteria: Literal['and', 'or']
-  query = ''
-  page = 1
-  priceLower = 0.0
-  priceUpper = float('inf')
-  createdLower = 0.0
-  createdUpper = float('inf')
-
-@dataclass
-class AdminGetReply(_APIReply):
-  data: list[_UserGetData | _SaleGetData | _TextbookGetData]

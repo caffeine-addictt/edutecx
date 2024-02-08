@@ -4,6 +4,7 @@ Import V1
 
 from . import (
   auth,
+  admin,
   stripe,
   notify,
   user,

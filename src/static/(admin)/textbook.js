@@ -67,7 +67,7 @@ const fetchGraphURI = async (initialRender = false) => {
   /**
    * @type {Response}
    */
-  const response = await fetch('/dashboard/graph', {
+  const response = await fetch('/api/v1/admin/draw', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -281,6 +281,8 @@ $(async () => {
   // Hooks
   $('#graph__button').on('click', async e => await fetchGraphURI());
   $('#textbook__button').on('click',  async e => await fetchTextbookData());
+
+  $('#textbook__export').on('click', () => {window.location.href = '/api/v1/admin/export/User';});
 
   // Modal hooks
   $('#update-textbook-modal').find('#confirmed-update-textbook').on('click', async e => {

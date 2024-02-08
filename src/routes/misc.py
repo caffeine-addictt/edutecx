@@ -3,18 +3,10 @@ Handles misc routing
 """
 
 from src.database import UserModel
-from src.service import auth_provider
+from src.service import auth_provider, email_provider
 from src.utils.forms import ContactForm, ProfileEditForm
 
-from flask import (
-  abort,
-  flash,
-  request,
-  render_template,
-  current_app as app
-)
-
-
+from flask import abort, flash, request, render_template, current_app as app
 
 
 # General routes
@@ -27,7 +19,7 @@ def index(user: UserModel | None):
 @app.route('/home')
 @auth_provider.require_login
 def home(user: UserModel):
-  return render_template('(misc)/home.html', user = user)
+  return render_template('(misc)/home.html', user=user)
 
 
 @app.route('/profile')
@@ -38,9 +30,9 @@ def profile(user: UserModel):
   form.username.data = user.username
   return render_template(
     '(misc)/profile.html',
-    form = form,
-    user_id = str(user.id),
-    profile_uri = user.profile_image.uri if user.profile_image else ''
+    form=form,
+    user_id=str(user.id),
+    profile_uri=user.profile_image.uri if user.profile_image else '',
   )
 
 
@@ -67,10 +59,10 @@ def contact_us(user: UserModel | None):
   if form.validate_on_submit():
     ...
 
-  return render_template('(misc)/contact_us.html', form = form)
+  return render_template('(misc)/contact_us.html', form=form)
 
 
 @app.route('/up')
 @auth_provider.optional_login
 def up(user: UserModel | None):
-  return { 'status': 200 }, 200
+  return {'status': 200}, 200

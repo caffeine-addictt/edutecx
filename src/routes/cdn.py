@@ -37,7 +37,7 @@ def serve(location: str, identifier: str) -> auth_provider.RouteResponse:
 
 def serve(
   location: Union[CloudinaryFolder, str], identifier: str
-) -> auth_provider.RouteResponse:
+  ) -> auth_provider.RouteResponse:
   if not identifier:
     raise BadRequest('Invalid identifier')
 
@@ -57,7 +57,6 @@ def serve(
 
   elif ENV == 'production':
     raise BadRequest('Invalid location')
-  print(identifier)
   return send_from_directory(
     location,
     identifier,
