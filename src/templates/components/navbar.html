@@ -4,9 +4,19 @@
 <nav class='navbar navbar-expand-lg navbar-light w-100 shadow-sm' style='background-color: var(--background-color)'>
   <div class='container-fluid'>
 
+    {# If not logged in, logo leads to root page#}
+    {% if not g.user %}
+    <a class='navbar-brand' href='/'>
+      <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
+    </a>
+
+    {# If logged in, logo leads to /home #}
+    {% else %}
     <a class='navbar-brand' href='/home'>
       <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
     </a>
+    {% endif %}
+    
 
 
     <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent'
