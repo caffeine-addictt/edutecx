@@ -67,7 +67,7 @@ const fetchGraphURI = async (initialRender = false) => {
   /**
    * @type {Response}
    */
-  const response = await fetch('/dashboard/graph', {
+  const response = await fetch('/api/v1/admin/draw', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
