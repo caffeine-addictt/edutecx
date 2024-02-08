@@ -55,7 +55,7 @@ def classroom_list_api(user: UserModel):
         cover_image=classroom.cover_image.id if classroom.cover_image else None,
         created_at=classroom.created_at.timestamp(),
       )
-      for classroom in user.classrooms
+      for classroom in (user.classrooms + user.owned_classrooms)
     ],
   ).to_dict(), HTTPStatusCode.OK
 
