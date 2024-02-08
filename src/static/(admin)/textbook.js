@@ -282,6 +282,8 @@ $(async () => {
   $('#graph__button').on('click', async e => await fetchGraphURI());
   $('#textbook__button').on('click',  async e => await fetchTextbookData());
 
+  $('#textbook__export').on('click', () => {window.location.href = '/api/v1/admin/export/User';});
+
   // Modal hooks
   $('#update-textbook-modal').find('#confirmed-update-textbook').on('click', async e => {
     let closeModal = true;

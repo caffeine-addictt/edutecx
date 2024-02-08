@@ -279,6 +279,8 @@ $(async () => {
   $('#graph__button').on('click', async e => await fetchGraphURI());
   $('#user__button').on('click',  async e => await fetchUserData());
 
+  $('#user__export').on('click', () => {window.location.href = '/api/v1/admin/export/User';});
+
   // Modal hooks
   $('#update-user-modal').find('#confirmed-update-user').on('click', async e => {
     let closeModal = true;

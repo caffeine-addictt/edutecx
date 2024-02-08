@@ -6,9 +6,9 @@ import numpy
 import logging
 from io import StringIO
 from sqlalchemy import and_
+from functools import cache
 from datetime import datetime
 import matplotlib.pyplot as plt
-from functools import cache
 import matplotlib.dates as mdates
 from thread import ParallelProcessing
 from flask_sqlalchemy.query import Query
@@ -17,6 +17,7 @@ from flask import (
   request,
   Response,
   current_app as app,
+  stream_with_context,
   stream_template_string
 )
 
@@ -26,8 +27,6 @@ from src.service import auth_provider
 from src.utils.ext import utc_time
 from src.utils.api import (
   AdminGraphGetRequest,
-  AdminGetRequest, AdminGetReply,
-  _UserGetData, _SaleGetData, _TextbookGetData,
   GenericReply
 )
 
@@ -56,7 +55,7 @@ def getDateRange(dateRange: DateRange = None) -> Tuple[datetime, datetime]:
     )
 
   if (not isinstance(dateRange, tuple)):
-    return (utc_time.unskip('6months'), utc_time.skip('6months'))
+    return (utc_time.unskip('6months', utc_time.get()), utc_time.skip('6months', utc_time.get()))
   
   return dateRange
 
@@ -149,9 +148,6 @@ def drawGraph(
   plt.xticks(numpy.arange(0, _width + 1, max(1, round(_width / labelCount[0]))), minor = True)
   plt.yticks(numpy.arange(0, _height + 1, max(1, round(_height / labelCount[1]))), minor = True)
 
-  # Format X-Axis dates
-  plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
-
   # Label
   plt.title(title)
   plt.xlabel('Time')
@@ -210,4 +206,55 @@ def admin_draw_api(_: UserModel):
     stream_template_string(svg.getvalue()),
     status = HTTPStatusCode.OK,
     mimetype = 'image/svg+xml'
+  )
+
+
+@app.route(f'{basePath}/export/<string:exportFor>', methods = ['GET'])
+@auth_provider.require_admin
+def admin_export_api(_: UserModel | None, exportFor: str):
+  fetched: list[UserModel | TextbookModel | SaleModel]
+  match exportFor:
+    case 'Revenue':
+      fetched = fetchAll(SaleModel).all()
+    case 'Textbook':
+      fetched = fetchAll(TextbookModel).all()
+    case 'User':
+      fetched = fetchAll(UserModel).all()
+    case _:
+      return GenericReply(
+        message = 'Invalid exportFor! Must be one of User, Textbook, or Revenue',
+        status = HTTPStatusCode.BAD_REQUEST
+      ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+
+  def generator():
+    if (exportFor == 'Revenue'):
+      yield 'id,type,created_at,total_cost,paid,paid_at\n'
+
+      for model in fetched:
+        if not isinstance(model, SaleModel):
+          continue
+        yield f'{model.id},{model.type},{model.created_at},{model.total_cost},{model.paid},{model.paid_at}\n'
+
+    elif (exportFor == 'User'):
+      yield 'id,username,email,status,created_at,privilege\n'
+
+      for model in fetched:
+        if not isinstance(model, UserModel):
+          continue
+        yield f'{model.id},{model.username},{model.email},{model.status},{model.created_at},{model.privilege}' + ('\n' if model != fetched[-1] else '')
+
+    elif (exportFor == 'Textbook'):
+      yield 'id,title,author,price,status,created_at\n'
+
+      for model in fetched:
+        if not isinstance(model, TextbookModel):
+          continue
+        yield f'{model.id},{model.title},{model.author},{model.price},{model.status},{model.created_at}' + ('\n' if model != fetched[-1] else '')
+
+  return Response(
+    generator(),
+    mimetype = 'application/octet-stream',
+    status = HTTPStatusCode.OK,
+    headers = {'Content-Disposition': f'attachment; filename={exportFor}-{datetime.now().isoformat()}.csv'}
   )
