@@ -1,15 +1,26 @@
 <!doctype html>
 
 <!-- Place content in this div, so we dont introduce margin straight into body -->
-<nav class='navbar navbar-expand-lg navbar-light w-100' style='background-color: var(--background-color)'>
+<nav class='navbar navbar-expand-lg navbar-light w-100 shadow-sm' style='background-color: var(--background-color)'>
   <div class='container-fluid'>
 
-    <a class='navbar-brand' href='/'>
-      <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
-    </a>
+    {# If not logged in, logo leads to root page#}
+    {% if not g.user %}
+      <a class='navbar-brand' href='/'>
+        <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
+      </a>
+
+    {# If logged in, logo leads to /home #}
+    {% else %}
+      <a class='navbar-brand' href='/home'>
+        <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
+      </a>
+    {% endif %}
+    
 
 
-    <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent' aria-controls='navbarSupportedContent' aria-expanded='false' aria-label='Toggle navigation'>
+    <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent'
+      aria-controls='navbarSupportedContent' aria-expanded='false' aria-label='Toggle navigation'>
       <span class='navbar-toggler-icon'></span>
     </button>
 
@@ -18,11 +29,11 @@
 
       <ul class='navbar-nav me-auto mb-2 mb-lg-0'>
         <li class='nav-item'>
-          <a class='nav-link active' aria-current='page' href='/store'>Store</a>
+          <a class='nav-link' aria-current='page' href='/store'>Store</a>
         </li>
 
         <li class='nav-item'>
-          <a class='nav-link' href='#'>Policy</a>
+          <a class='nav-link' href='/privacy-policy'>Policy</a>
         </li>
         
         <li class='nav-item'>
@@ -30,29 +41,59 @@
         </li>
       </ul>
 
+      {# Not Logged in #}
+      {% if not g.user %}
+        <form class='d-flex'>
+          <ul class='navbar-nav me-auto mb-2 mb-lg-0 gap-3 px-3'>
 
-      <form class='d-flex'>
-        <ul class='navbar-nav me-auto mb-2 mb-lg-0'>
+          
+            <li class='nav-item'>
+              <a id="login-navlink" class='nav-link active text-decoration-underline' tabindex='-1' aria-disabled='true'>Login</a>
+            </li>
+
+            <li class='nav-item w-2'>
+              <a id="register-navlink" class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true'>Register</a>
+            </li>        
+          </ul>
+        </form>
+      {% endif %}
+
+
+      {# Logged in #}
+      {% if g.user %}
+        <ul class='navbar-nav me-4 mb-2 mb-lg-0'>
 
           <li class='nav-item'>
-            <a id="login-navlink" class='nav-link active text-decoration-underline' tabindex='-1' aria-disabled='true'>Login</a>
+            <a class='nav-link' href='/textbooks'>Textbooks</a>
           </li>
-
-          <li class='nav-item px-3 w-2'>
-            <a id="register-navlink" class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true'>Register</a>
+    
+          <li class='nav-item'>
+            <a class='nav-link' href='/classrooms'>Classrooms</a>
           </li>
+          {% if g.user.privilege == 'Admin' %}
+            <li class='nav-item w-2'>
+              <a class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true' href='/dashboard'>Dashboard</a>
+            </li>
+          {% endif %}
+            
         </ul>
-      </form>
+        <a class='nav-link' href='/profile'>
+          <img src='/static/assets/icons/profile_icon.png' alt='profile' width='30px' height='30px'>
+        </a>
+            
+      {% endif %}
+
 
     </div>
-
-
   </div>
 </nav>
 
-<script>
-  $(() => {
-    $("#login-navlink").attr('href', `/login?callbackURI=${encodeURI(window.location.pathname)}`);
-    $("#register-navlink").attr('href', `/register?callbackURI=${encodeURI(window.location.pathname)}`);
-  });
-</script>
+{% if not g.user %}
+  <script>
+    $(() => {
+      $("#login-navlink").attr('href', window.location.pathname === '/' ? '/login' : `/login?callbackURI=${encodeURI(window.location.pathname)}`);
+      $("#register-navlink").attr('href', window.location.pathname === '/' ? '/register' : `/register?callbackURI=${encodeURI(window.location.pathname)}`);
+    });
+  </script>
+{% endif %}
+
