@@ -6,6 +6,14 @@ let defaultValues = {};
 
 
 const handleChange = e => {
+  const profileImage = $('#profile__image');
+  if (profileImage.attr('src') !== '') {
+    $('#pfp-icon').addClass('visually-hidden');
+  }
+  else {
+    $('#pfp-icon').removeClass('visually-hidden');
+  };
+
   for (const key in defaultValues) {
     if (
       ((defaultValues[key] || '') !== $(`[id='${key}']`).val())
@@ -60,26 +68,11 @@ $(() => {
       reader.onload = a => {
         currentSrc = a.target.result;
         $('#profile__image').attr('src', a.target.result);
-        
-        if (currentSrc !== '') {
-          $('#pfp-icon').addClass('visually-hidden');
-        }
-        else {
-          $('#pfp-icon').removeClass('visually-hidden');
-        };
-
         handleChange();
       };
       reader.readAsDataURL(e.target.files[0]);
     };
   });
-
-  if (currentSrc !== '') {
-    $('#pfp-icon').addClass('visually-hidden');
-  }
-  else {
-    $('#pfp-icon').removeClass('visually-hidden');
-  };
   
   handleChange();
 });
