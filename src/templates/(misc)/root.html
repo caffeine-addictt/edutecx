@@ -26,7 +26,7 @@
   </div>
   
   <!-- Parallax Section 1 -->
-  <section id='section1' class='parallax' style='background-image: url("/static/assets/images/book3.png"); height:700px;'>
+  <section id='section1' class='parallax' style='background-image: url("/static/assets/images/book3.png"); min-height:700px;'>
     <div class='parallax-text' style='font-family: var(--font)'>
       <!--Type of Accounts-->
       <div class='features container px-5 py-5 my-5 bg-white rounded' id='hanging-icons' style='color:black;'>
@@ -114,6 +114,92 @@
   <section id='section3' class='parallax' style='background-image: url("/static/assets/images/book4.png"); font-family: var(--font)'>
     <div class='parallax-text'>
       <p class='h1'>Shaping the Future of Learning, Sustainably.</p>
+    </div>
+  </section>
+
+  <!-- Our Team -->
+  <section class="bg-light py-3 py-md-5 py-xl-8">
+    <div class="container">
+      <div class="row justify-content-md-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
+          <h2 class="mb-4 display-5 text-center">Our Team</h2>
+          <p class="text-secondary mb-5 text-center lead fs-4">We are a group of innovative, experienced, and proficient teams. You will love to collaborate with us.</p>
+          <hr class="w-50 mx-auto mb-5 mb-xl-9 border-dark-subtle">
+        </div>
+      </div>
+    </div>
+  
+    <div class="container overflow-hidden">
+      <div class="row gy-4 gy-lg-0 gx-xxl-5">
+
+        {# Profile 1 #}
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="card border-0 border-bottom border-dark shadow-sm overflow-hidden">
+            <div class="card-body p-0 rounded-circle">
+              <figure class="m-0 p-0">
+                <img class="img-fluid" loading="lazy" src="/static/assets/icons/logo_black.png" alt="image">
+                <figcaption class="m-0 p-4">
+                  <h4 class="mb-1">Jun Xiang</h4>
+                  <a href="https://github.com/caffeine-addictt" target="_blank" style="height:100px; width:100px;" class="text-decoration-none"><i class="bi bi-github"> caffeine-addictt</i></a>
+                  <br/>
+                  <a href="#" target="_blank" style="height:100px; width:100px;" class="text-decoration-none"><i class="bi bi-linkedin"> Jun Xiang</i></a>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+
+        {# Profile 2 #}
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="card border-0 border-bottom border-dark shadow-sm overflow-hidden">
+            <div class="card-body p-0">
+              <figure class="m-0 p-0">
+                <img class="img-fluid" loading="lazy" src="/static/assets/icons/logo_black.png" alt="">
+                <figcaption class="m-0 p-4">
+                  <h4 class="mb-1">Chloe</h4>
+                  <a href="https://github.com/chloelkl" target="_blank" style="height:100px; width:100px;" class="text-decoration-none"><i class="bi bi-github"> chloelkl</i></a>
+                  <br/>
+                  <a href="#" target="_blank" style="height:100px; width:100px;" class="text-decoration-none"><i class="bi bi-linkedin"> Chloe</i></a>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+
+        {# Profile 3 #}
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="card border-0 border-bottom border-dark shadow-sm overflow-hidden">
+            <div class="card-body p-0">
+              <figure class="m-0 p-0">
+                <img class="img-fluid" loading="lazy" src="/static/assets/icons/logo_black.png" alt="">
+                <figcaption class="m-0 p-4">
+                  <h4 class="mb-1">Andrew</h4>
+                  <a href="https://github.com/AndrewAce" target="_blank" style="height:100px; width:100px;" class="text-decoration-none"><i class="bi bi-github"> AndrewAce</i></a>
+                  <br/>
+                  <a href="#" target="_blank" style="height:100px; width:100px;" class="text-decoration-none"><i class="bi bi-linkedin"> Andrew</i></a>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+
+        {# Profile 4 #}
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="card border-0 border-bottom border-dark shadow-sm overflow-hidden">
+            <div class="card-body p-0">
+              <figure class="m-0 p-0">
+                <img class="img-fluid" loading="lazy" src="/static/assets/icons/logo_black.png" alt="">
+                <figcaption class="m-0 p-4">
+                  <h4 class="mb-1">Mani</h4>
+                  <a href="https://github.com/maann1" target="_blank" style="height:100px; width:100px;" class="text-decoration-none"><i class="bi bi-github" ></i> maann1</a>
+                  <br/>
+                  <a href="#" target="_blank" style="height:100px; width:100px;" class="text-decoration-none"><i class="bi bi-linkedin"> Mani</i></a>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 {% endblock %}
