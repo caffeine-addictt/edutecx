@@ -53,16 +53,34 @@ $(() => {
   };
 
   $(`[id='profile__input']`).on('change', e => {
+    let currentSrc =  $('#profile__image').attr('src');
+
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
       reader.onload = a => {
+        currentSrc = a.target.result;
         $('#profile__image').attr('src', a.target.result);
+        
+        if (currentSrc !== '') {
+          $('#pfp-icon').addClass('visually-hidden');
+        }
+        else {
+          $('#pfp-icon').removeClass('visually-hidden');
+        };
+
         handleChange();
       };
       reader.readAsDataURL(e.target.files[0]);
     };
   });
 
+  if (currentSrc !== '') {
+    $('#pfp-icon').addClass('visually-hidden');
+  }
+  else {
+    $('#pfp-icon').removeClass('visually-hidden');
+  };
+  
   handleChange();
 });
 
