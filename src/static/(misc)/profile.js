@@ -27,8 +27,6 @@ const handleChange = () => {
 
       // Ungrey save button
       $('#submit').attr('disabled', false);
-
-      console.log('Changes detected');
       return;
     };
   };
@@ -39,8 +37,6 @@ const handleChange = () => {
 
   // Grey save button
   $('#submit').attr('disabled', true);
-
-  console.log('No changes');
 };
 
 
