@@ -35,11 +35,17 @@
                   id="overlay-text"
                   class="w-100 h-auto order-first align-self-center position-absolute text-center text-secondary"
                 >
-                <svg xmlns="http://www.w3.org/2000/svg" width="77" height="77" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="77" height="77" fill="currentColor" class="bi bi-person" id="pfp-icon" viewBox="0 0 16 16">
                   <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
                 </svg>
                 </span>
                 <img id="profile__image" src="{{ profile_uri }}" width="200" height="200" class="rounded-circle border border-dark"/>
+              </div>
+
+              {# Login & Delete #}
+              <div class="d-flex flex-column mt-3 align-items-center">
+                <a id='logout-navlink' class='nav-link active text-decoration-underline ml-2' tabindex='-1' aria-disabled='true' href='/logout'>Logout</a>
+                <button type="button" class="btn text-danger text-decoration-underline" id="delete-account-button"> Delete Account </button>
               </div>
             </label>
             
@@ -58,11 +64,11 @@
               </div>
               <div class="mb-3">
                 <label for="password" class="form-label fs-4">Change Password</label>
-                <input type="password" class="form-control" id="password" value='{{ g.user.password}}'>
+                <input type="password" class="form-control" id="password" value='{{ g.user.password}}' autocomplete="off">
               </div>
               <div class="mb-3">
                 <label for="confirmPassword" class="form-label fs-4">Confirm Password</label>
-                <input type="password" class="form-control" id="confirmPassword" value='{{ g.user.confirm }}'>
+                <input type="password" class="form-control" id="confirmPassword" value='{{ g.user.confirm }}' autocomplete="off">
               </div>
             </div>
             
@@ -71,17 +77,9 @@
             <div class="p-1">
               <div class="container">
                 <div class="row">
-                  <div class="col">
-                    <button type="submit" class="btn btn-light w-100" style="background-color:#003366;color:white;">Save Changes</button>
-                  </div>
-                </div>
-                <div class="row mt-3 ">
-                  <div class="col d-flex justify-content-between gap-1">
-                    <button type="button" class="btn">
-                      <a id='logout-navlink' class='nav-link active text-decoration-underline ml-2' tabindex='-1' aria-disabled='true' href='/logout'>Logout</a>
-                    </button>
-                    <button type="button" class="btn btn-danger" id="delete-account-button"> Delete Account </button>
-                    <button type="button" class="btn btn-secondary fade opacity-0" id="cancel-changes-button"> Cancel Changes </button>
+                  <div class="col d-flex justify-content-end gap-1">
+                    <button type="button" class="btn btn-outline-secondary fade opacity-0" id="cancel-changes-button"> Cancel Changes </button>
+                    <button type="submit" class="btn btn-light" style="background-color:#003366;color:white;">Save Changes</button>
                   </div>
                 </div>
               </div>
@@ -100,7 +98,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLongTitle">Update your account</h5>
-          <button type="button" class="close" aria-label="Close" id="close-update-account-modal-small">
+          <button type="button" class="close btn btn-white border" aria-label="Close" id="close-update-account-modal-small">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -109,8 +107,7 @@
           <p class="text-secondary">Updating your email will require you to verify your new email.</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="close-update-account-modal-big">Close</button>
-          <button type="button" class="btn btn-primary" id="confirmed-update-account">Update My Account</button>
+          <button type="button" class="btn" id="confirmed-update-account" style="background-color:#003366;color:white;">Update My Account</button>
         </div>
       </div>
     </div>
@@ -125,7 +122,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLongTitle">Delete your account</h5>
-          <button type="button" class="close" aria-label="Close" id="close-delete-account-modal-small">
+          <button type="button" class="close btn btn-white border" aria-label="Close" id="close-delete-account-modal-small">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -134,7 +131,6 @@
           <p>Are you sure you want to delete your account?</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="close-delete-account-modal-big">Close</button>
           <button type="button" class="btn btn-danger" id="confirmed-delete-account">Delete My Account</button>
         </div>
       </div>
