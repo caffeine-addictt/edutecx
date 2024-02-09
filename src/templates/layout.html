@@ -5,7 +5,7 @@
     <meta name = 'viewport' content = 'width=device-width, initial-scale=1.0'>
     <link rel='shortcut icon' media='(prefers-color-scheme: dark)' href='{{ url_for("static", filename = "assets/icons/favicon_white.ico") }}' />
     <link rel='shortcut icon' media='(prefers-color-scheme: light)' href='{{ url_for("static", filename = "assets/icons/favicon_black.ico") }}' />
-
+    
     
 
     {# Default Title #}
@@ -21,6 +21,9 @@
     {# Globals SCSS #}
     <link href = '{{ url_for("static", filename = "global.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
 
+    {# Boostrap Icons#}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     {# Bootstrap CSS v5.2.1 #}
     <link
       href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css'
