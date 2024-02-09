@@ -55,11 +55,11 @@ def apiv1_Login():
 
   # Ensure email and password exist
   if (
-    (not req.email)
-    or (req.email == 'None')
-    or (not req.password)
-    or (req.password == 'None')
-  ):
+      (not req.email)
+      or (req.email == 'None')
+      or (not req.password)
+      or (req.password == 'None')
+      ):
     return GenericReply(
       message='Missing email or password', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -101,13 +101,13 @@ def apiV1Register():
 
   # Ensure email and password exist
   if (
-    (not req.email)
-    or (not req.username)
-    or (not req.password)
-    or (req.email == 'None')
-    or (req.username == 'None')
-    or (req.password == 'None')
-  ):
+      (not req.email)
+      or (not req.username)
+      or (not req.password)
+      or (req.email == 'None')
+      or (req.username == 'None')
+      or (req.password == 'None')
+      ):
     return GenericReply(
       message='Missing email, username or password', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -122,7 +122,7 @@ def apiV1Register():
   # Validate Username
   if not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{4,20}$', req.username):
     return GenericReply(
-      message='Username has to be between 5 to 20 charcters inclusive, start with a letter and only {_-} special characters are allowed',
+      message='Username has to be between 5 to 20 characters inclusive, start with a letter and only {_-} special characters are allowed',
       status=HTTPStatusCode.BAD_REQUEST,
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
@@ -268,10 +268,10 @@ def apiV1VerifyEmail(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   if (
-    not user.token
-    or (user.token.token_type != 'Verification')
-    or (user.token.token != req.token)
-  ):
+      not user.token
+      or (user.token.token_type != 'Verification')
+      or (user.token.token != req.token)
+      ):
     return GenericReply(
       message='Invalid token', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
