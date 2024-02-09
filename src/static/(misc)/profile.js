@@ -5,7 +5,7 @@ let defaultValues = {};
 
 
 
-const handleChange = e => {
+const handleChange = () => {
   const profileImage = $('#profile__image');
   if (profileImage.attr('src') !== '') {
     $('#pfp-icon').addClass('visually-hidden');
@@ -19,7 +19,7 @@ const handleChange = e => {
       ((defaultValues[key] || '') !== $(`[id='${key}']`).val())
       ||
       (key === 'profile__image' && (defaultValues[key] || '') !== $(`[id='${key}']`).attr('src'))
-     ) {
+    ) {
 
       // Animate "Cancel Changes" button to visible
       $('#cancel-changes-button').removeClass('opacity-0 disabled');
@@ -49,11 +49,11 @@ const handleChange = e => {
 // Hooks
 $(() => {
   defaultValues = {
-    'username'       : $('#username').val() || '',
-    'email'          : $('#email').val() || '',
-    'password'       : $('#password').val() || '',
+    'username': $('#username').val() || '',
+    'email': $('#email').val() || '',
+    'password': $('#password').val() || '',
     'confirmPassword': $('#confirmPassword').val() || '',
-    'profile__image' : $('#profile__image').attr('src') || '',
+    'profile__image': $('#profile__image').attr('src') || '',
   }
 
   for (const key in defaultValues) {
@@ -61,7 +61,7 @@ $(() => {
   };
 
   $(`[id='profile__input']`).on('change', e => {
-    let currentSrc =  $('#profile__image').attr('src');
+    let currentSrc = $('#profile__image').attr('src');
 
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
@@ -73,14 +73,14 @@ $(() => {
       reader.readAsDataURL(e.target.files[0]);
     };
   });
-  
+
   handleChange();
 });
 
 
 // Event Listeners
 $(() => {
-  $('#cancel-changes-button').on('click', e => {
+  $('#cancel-changes-button').on('click', () => {
     for (const key in defaultValues) {
       $(`[id='${key}']`).val(defaultValues[key]);
     };
@@ -97,10 +97,10 @@ $(() => {
     $('#update-account-modal').modal('show');
   });
 
-  $('#close-update-account-modal-big').on('click', e => $('#update-account-modal').modal('hide'));
-  $('#close-update-account-modal-small').on('click', e => $('#update-account-modal').modal('hide'));
+  $('#close-update-account-modal-big').on('click', () => $('#update-account-modal').modal('hide'));
+  $('#close-update-account-modal-small').on('click', () => $('#update-account-modal').modal('hide'));
 
-  $('#confirmed-update-account').on('click', async e => {
+  $('#confirmed-update-account').on('click', async () => {
     $('#update-account-modal').modal('hide');
     renderToast('Updating account...', 'info');
 
@@ -141,17 +141,17 @@ $(() => {
 
 
   // Delete Account Flow
-  $('#delete-account-button').on('click', e => {
+  $('#delete-account-button').on('click', () => {
     $('#delete-account-modal').modal('show');
   });
 
-  $('#close-delete-account-modal-big').on('click', e => $('#delete-account-modal').modal('hide'));
-  $('#close-delete-account-modal-small').on('click', e => $('#delete-account-modal').modal('hide'));
+  $('#close-delete-account-modal-big').on('click', () => $('#delete-account-modal').modal('hide'));
+  $('#close-delete-account-modal-small').on('click', () => $('#delete-account-modal').modal('hide'));
 
-  $('#confirmed-delete-account').on('click', async e => {
+  $('#confirmed-delete-account').on('click', async () => {
     $('#delete-account-modal').modal('hide');
     renderToast('Deleting account...', 'info');
-    
+
     /**
      * Delete account
      * @type {{status: number; message: string;}}
