@@ -2,7 +2,7 @@
 RESTful auth api for session persistence with jwt w/ rate limiting
 """
 
-from src import db, limiter
+from src import limiter
 from flask_limiter import util
 from src.service import email_provider
 from src.service import auth_provider
@@ -10,7 +10,7 @@ from src.utils.ext import utc_time
 
 from src.utils.http import HTTPStatusCode
 from src.utils.passwords import hash_password
-from src.database import UserModel, TokenModel, JWTBlocklistModel
+from src.database import UserModel, TokenModel
 from sqlalchemy import or_
 
 from src.utils.api import (
@@ -33,7 +33,6 @@ from flask import (
   current_app as app,
 )
 from flask_jwt_extended import (
-  decode_token,
   jwt_required,
   get_current_user,
   create_access_token,
@@ -164,7 +163,7 @@ def apiV1Register():
       ),
     )
 
-    if res != True:
+    if res is not True:
       raise Exception(res[1])
 
   except Exception as e:
@@ -232,7 +231,7 @@ def apiV1SendVerificationEmail(user: UserModel):
       ),
     )
 
-    if res != True:
+    if res is not True:
       raise Exception(res[1])
 
     newToken.save()
