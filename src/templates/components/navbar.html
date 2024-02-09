@@ -6,15 +6,15 @@
 
     {# If not logged in, logo leads to root page#}
     {% if not g.user %}
-    <a class='navbar-brand' href='/'>
-      <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
-    </a>
+      <a class='navbar-brand' href='/'>
+        <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
+      </a>
 
     {# If logged in, logo leads to /home #}
     {% else %}
-    <a class='navbar-brand' href='/home'>
-      <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
-    </a>
+      <a class='navbar-brand' href='/home'>
+        <img src='/static/assets/icons/logo_black.png' alt='logo' width='50px' height='50px'>
+      </a>
     {% endif %}
     
 
@@ -43,8 +43,8 @@
 
       {# Not Logged in #}
       {% if not g.user %}
-      <form class='d-flex'>
-        <ul class='navbar-nav me-auto mb-2 mb-lg-0 gap-3 px-3'>
+        <form class='d-flex'>
+          <ul class='navbar-nav me-auto mb-2 mb-lg-0 gap-3 px-3'>
 
           
             <li class='nav-item'>
@@ -56,38 +56,35 @@
             </li>        
           </ul>
         </form>
-          {% endif %}
+      {% endif %}
 
 
           {# Logged in #}
-          {% if g.user %}
-          <ul class='navbar-nav me-4 mb-2 mb-lg-0'>
+      {% if g.user %}
+        <ul class='navbar-nav me-4 mb-2 mb-lg-0'>
 
-            <li class='nav-item'>
-              <a class='nav-link' href='/textbooks'>Textbooks</a>
-            </li>
+          <li class='nav-item'>
+            <a class='nav-link' href='/textbooks'>Textbooks</a>
+          </li>
     
-            <li class='nav-item'>
-              <a class='nav-link' href='/classrooms'>Classrooms</a>
-            </li>
-            {% if g.user.privilege == 'Admin' %}
+          <li class='nav-item'>
+            <a class='nav-link' href='/classrooms'>Classrooms</a>
+          </li>
+          {% if g.user.privilege == 'Admin' %}
             <li class='nav-item w-2'>
               <a class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true' href='/dashboard'>Dashboard</a>
             </li>
-            {% endif %}
-            
-          </ul>
-          <a class='nav-link' href='/profile'>
-            <img src='/static/assets/icons/profile_icon.png' alt='profile' width='30px' height='30px'>
-          </a>
-            
           {% endif %}
+            
+        </ul>
+        <a class='nav-link' href='/profile'>
+          <img src='/static/assets/icons/profile_icon.png' alt='profile' width='30px' height='30px'>
+        </a>
+            
+      {% endif %}
 
 
     </div>
-    
-
-
   </div>
 </nav>
 
