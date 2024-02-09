@@ -22,7 +22,7 @@ const handleChange = e => {
      ) {
 
       // Animate "Cancel Changes" button to visible
-      $('#cancel-changes-button').removeClass('opacity-0');
+      $('#cancel-changes-button').removeClass('opacity-0 disabled');
       $('#cancel-changes-button').addClass('opacity-100');
 
       // Ungrey save button
@@ -35,7 +35,7 @@ const handleChange = e => {
 
   // Animate "Cancel Changes" button to not visible
   $('#cancel-changes-button').removeClass('opacity-100');
-  $('#cancel-changes-button').addClass('opacity-0');
+  $('#cancel-changes-button').addClass('opacity-0 disabled');
 
   // Grey save button
   $('#submit').attr('disabled', true);
@@ -49,15 +49,15 @@ const handleChange = e => {
 // Hooks
 $(() => {
   defaultValues = {
-    'Username'            : $('#Username').val() || '',
-    'Email'               : $('#Email').val() || '',
-    'Change Password'     : $('#Change Password').val() || '',
-    'Confirm New Password': $('#Confirm New Password').val() || '',
-    'profile__image'      : $('#profile__image').attr('src') || '',
+    'username'       : $('#username').val() || '',
+    'email'          : $('#email').val() || '',
+    'password'       : $('#password').val() || '',
+    'confirmPassword': $('#confirmPassword').val() || '',
+    'profile__image' : $('#profile__image').attr('src') || '',
   }
 
   for (const key in defaultValues) {
-    $(`[id='${key}']`).on('change', handleChange);
+    $(`[id='${key}']`).on('input', handleChange);
   };
 
   $(`[id='profile__input']`).on('change', e => {
@@ -107,9 +107,9 @@ $(() => {
     // Generate formData
     const formattedData = new FormData();
     formattedData.append('user_id', `${user_id}`);
-    if (defaultValues['Username'] !== ($('#Username').val() || '')) formattedData.append('username', $('#Username').val());
-    if (defaultValues['Email'] !== ($('#Email').val() || '')) formattedData.append('email', $('#Email').val());
-    if (defaultValues['Change Password'] !== ($('#Change Password').val() || '')) formattedData.append('password', $('#Change Password').val());
+    if (defaultValues['username'] !== ($('#username').val() || '')) formattedData.append('username', $('#username').val());
+    if (defaultValues['email'] !== ($('#email').val() || '')) formattedData.append('email', $('#email').val());
+    if (defaultValues['password'] !== ($('#password').val() || '')) formattedData.append('password', $('#password').val());
     if (defaultValues['profile__image'] !== ($('#profile__image').attr('src') || '')) formattedData.append('upload', $('#profile__input')[0].files[0]);
 
     /**
