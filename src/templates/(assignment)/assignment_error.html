@@ -11,7 +11,7 @@
 {# Body #}
 {% block mainContent %}
   <div id="assignment_not_found__container">
-    <h1>{{ message or 'Assignment Not Found!' }}</h1>
+    <h1>{{ message|safe or 'Assignment Not Found!' }}</h1>
     <a href="/assignments">Back</a>
 
     <p>Was this not expected? <a href="/contact-us">Let us know!</a></p>
