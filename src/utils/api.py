@@ -650,8 +650,8 @@ class ClassroomJoinRequest(_APIRequest):
   """API Request for classroom joining"""
   invite_id: str
 
-ClassroomJoinReply = GenericReply
-ClassroomJoinResponse = GenericResponse
+ClassroomJoinReply = ClassroomCreateReply
+ClassroomJoinResponse = ClassroomCreateResponse
 
 
 
