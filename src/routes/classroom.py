@@ -5,10 +5,11 @@ Handles classroom routes
 from src.database import UserModel, ClassroomModel
 from src.service import auth_provider
 
-from src.utils.http import HTTPStatusCode
-from src.utils.http import escape_id
+from src.utils.http import escape_id, HTTPStatusCode
 from src.utils.forms import ClassroomCreateForm, ClassroomEditForm
+from src.utils.api import ClassroomJoinResponse
 
+import requests
 from flask import (
   flash,
   request,
@@ -78,20 +79,24 @@ def classroom_new(user: UserModel):
 @auth_provider.require_login
 def classroom_join(user: UserModel, id: str):
   id = escape_id(id)
-  classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
 
-  if not isinstance(classroom, ClassroomModel):
-    return render_template('(classroom)/classroom_error.html')
+  response = requests.post(
+    f'{request.url_root}api/v1/classroom/join',
+    headers={'Authorization': f'Bearer {request.cookies.get("access_token_cookie")}'},
+    json={'invite_id': id},
+  )
 
-  if not classroom.invite_enabled:
+  if response.status_code != HTTPStatusCode.OK:
+    flash(response.json().get('message'), 'danger')
     return render_template(
       '(classroom)/classroom_error.html',
-      message='This classroom does not accept invites!',
+      message=response.json().get('message'),
+      HTTPStatusCode=response.status_code,
     )
 
-  classroom.students.append(user)
-  classroom.save()
-
-  flash('Joined classroom!')
-
-  return redirect('/classrooms/' + id, code=HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
+  else:
+    body = ClassroomJoinResponse(response)
+    flash(body.message, 'success')
+    return redirect(
+      f'/classrooms/{body.data.classroom_id}', HTTPStatusCode.SEE_OTHER
+    ), HTTPStatusCode.SEE_OTHER
