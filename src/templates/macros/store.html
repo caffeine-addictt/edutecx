@@ -2,22 +2,21 @@
 
 {# /store #}
 {% macro  render_textbookListing() %}
-<div class='col-3 mw-25 mh-25 p-2'>
-  <a href='/store/{id}' class='storeList h-auto d-flex flex-column text-decoration-none' style='min-width:200px;'>
-    <div class='col'>
-      <div class='card mb-3 w-100 h-auto'>
-        <div class='card-body w-100'>
-          <div class='d-flex w-75 h-100 align-self-center mb-5'>
-            <img alt='textbookCover' src='{cover_image}' class='w-100 h-100 ms-4 d-flex align-items-center justify-content-center'/>
-          </div>
-          <h5 class='card-title text-dark' style='text-align:right;float:left;'>
-            {title}
-          </h5>
-          <h5 class='card-title text-dark fw-bold' style='text-align:right;float:right;'>
-            <span>$</span>{price}
-          </h5>
-          <!--<p class='card-text'>{author_id}</p>-->
+<div class='col-lg-3 col-md-4 col-sm-6 col-12 p-2'>
+  <a href='/store/{{ id }}' class='storeList h-auto d-flex flex-column text-decoration-none'>
+    <div class='card mb-3'>
+      <div class='card-body'>
+        <div class='d-flex justify-content-center mb-3'>
+          <img alt='textbookCover' src='{cover_image}' class='img-fluid' style='min-width:220px; max-width:220px; min-height:220px; max-height:220px;'/>
         </div>
+        <h5 class='card-title text-dark text-center'>
+          {title}
+        </h5>
+        <h5 class='card-title text-dark fw-bold text-center'>
+          <span>$</span>{price}
+        </h5>
+        <!--<p class='card-text'>{author_id}</p>-->
+      </div>
     </div>
   </a>
 </div>
