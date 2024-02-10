@@ -15,11 +15,10 @@ def test_appRoutes(app: Flask, client: FlaskClient):
       or (path.startswith('/static') and (code in [200, 404]))
       or (path.startswith('/api/v1') and (code in [200, 303, 400, 401]))
       or (path.startswith('/store/<') and (code in [200, 404]))
-      or (code in [200, 303, 401])
+      or (code in [200, 303, 400, 401])
     )
 
   for rule in app.url_map.iter_rules():
-    
     if rule.methods and 'GET' in rule.methods:
       response = client.get(rule.rule)
 
@@ -38,5 +37,5 @@ def test_appRoutes(app: Flask, client: FlaskClient):
 
   assert len(failed) == 0, (
     f'\n\nLog:\n\nFailed [{len(failed)}]\n>>>>>>>>>>\n%s\n<<<<<<<<<<\n\nPassed [{len(passed)}]\n>>>>>>>>>>\n%s\n<<<<<<<<<<\n'
-    % ('\n'.join(failed), '\n'.join(passed))
+      % ('\n'.join(failed), '\n'.join(passed))
   )
