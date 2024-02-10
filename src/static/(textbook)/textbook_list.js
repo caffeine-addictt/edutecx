@@ -17,7 +17,6 @@ const fetchTextbooks = async () => {
   let criteria = searchParams.get('criteria');
   criteria = ['or', 'and'].includes(criteria) ? criteria : 'or';
 
-  searchParams.set('requestFor', 'Sale');
   searchParams.set('criteria', criteria);
 
 
