@@ -18,24 +18,26 @@
   >
     <div class="form__group d-flex flex-column w-auto">
       <label>Title of Assignment
-        <input type="text" id="assignmentTitle" class="form-control">
+        <input name='title' type="text" id="assignmentTitle" class="form-control">
       </label>
     </div>
     <div class="form__group d-flex flex-column w-auto">
       <label>Description
-        <textarea class="form-control" id="assignmentDescription" rows="3"></textarea>
+        <textarea name='description' class="form-control" id="assignmentDescription" rows="3"></textarea>
       </label>
     </div>
     <div class="form__group d-flex flex-column w-auto">
       <label>Due Date of Assignment
-        <input type="date" id="assignmentDueDate" class="form-control">
+        <input name='due_date' type="date" id="assignmentDueDate" class="form-control">
       </label>
     </div>
     <div class="form__group d-flex flex-column w-auto">
       <label>Assignment Requirements
-        <input type="text" id="assignmentRequirements" class="form-control" maxlength="300">
+        <input name="requirements" type="text" id="assignmentRequirements" class="form-control" maxlength="300">
       </label>
     </div>
+
+    <button id="submit" type="submit" class="btn btn-primary">Create Assignment</button>
   </form>
 {% endblock %}
 

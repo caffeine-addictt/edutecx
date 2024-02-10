@@ -2,11 +2,11 @@
 Handles assignment routes
 """
 
-from src.database import UserModel, AssignmentModel
+from src.database import UserModel, AssignmentModel, ClassroomModel
 from src.service import auth_provider
-
 from src.utils.http import escape_id
-from flask import render_template, current_app as app
+
+from flask import request, render_template, current_app as app
 
 
 @app.route('/assignments')
@@ -37,5 +37,21 @@ def assignment(user: UserModel, id: str):
 
 @app.route('/assignments/new', methods=['GET'])
 @auth_provider.require_educator(unauthorized_redirect='/pricing')
-def assignment_new(user: UserModel):
+def assignment_new(_: UserModel):
+  classroomID = escape_id(request.args.get('classroomID', ''))
+  if not classroomID:
+    return render_template(
+      '(assignment)/assignment_error.html',
+      message='Classroom ID not specified. Create one from the <a href="/classrooms">classrooms page</a>.',
+    )
+
+  classroom = (
+    classroomID
+    and ClassroomModel.query.filter_by(ClassroomModel.id == classroomID).first()
+  )
+  if not isinstance(classroom, ClassroomModel):
+    return render_template(
+      '(assignment)/assignment_error.html', message='Classroom does not exist'
+    )
+
   return render_template('(assignment)/assignment_new.html')
