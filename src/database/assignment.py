@@ -4,7 +4,6 @@ Assignment model
 
 from src import db
 
-import re
 import uuid
 from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
@@ -49,7 +48,7 @@ class AssignmentModel(db.Model):
   title: Mapped[str] = mapped_column(String, nullable=False)
   description: Mapped[str] = mapped_column(String, nullable=False)
   due_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-  requirement: Mapped[str] = mapped_column(String, nullable=True)
+  requirement: Mapped[str] = mapped_column(String, nullable=False)
   textbooks: Mapped[List['TextbookModel']] = relationship(
     'TextbookModel',
     secondary='assignment_textbook_association',
@@ -75,7 +74,7 @@ class AssignmentModel(db.Model):
     due_date: Optional[datetime] = None,
     requirement: str = '',
     textbooks: List['TextbookModel'] = [],
-  ) -> None:
+    ) -> None:
     """
     Assignment model
 
@@ -93,8 +92,8 @@ class AssignmentModel(db.Model):
     `due_date: Optional[datetime]`, optional (defaults to None)
       The due date of the assignment
 
-    `requirement: str`, optional (defaults to '')
-      Format = str(docID:pageNum) | str(docID:pageNum:pageNum)
+    `requirement: str`, required
+      What needs to be done to complete the assignment
 
     `textbooks: TextbookModel[]`, optional (defaults to [])
       The textbooks to allocate to the assignment
@@ -108,14 +107,7 @@ class AssignmentModel(db.Model):
     `AssignmentModel`
 
 
-    Raises
-    ------
-    `AssertionError`
-      The format for requirement is invalid
     """
-    assert re.match(r'^([a-za-Z0-9]{32}):\d+(:\d+)?$', requirement or ''), (
-      'Invalid requirement format [%s]' % requirement
-    )
 
     self.classroom_id = classroom.id
     self.title = title

@@ -21,7 +21,6 @@ from src.utils.api import (
   GenericReply,
 )
 
-import re
 from datetime import datetime
 from flask_limiter import util
 from flask import request, current_app as app
@@ -79,15 +78,6 @@ def assignment_get_api(user: UserModel):
 def assignment_create_api(user: UserModel):
   req = AssignmentCreateRequest(request)
 
-  # Validate requirement
-  if (not re.match(r'^(\d+(:\d+)?)$', req.requirement)) or (
-    (i := req.requirement.split(':'))
-    and ((len(i) > 2) or ((len(i) == 2) and (i[1] < i[0])))
-  ):
-    return GenericReply(
-      message='Invalid requirement', status=HTTPStatusCode.BAD_REQUEST
-    ).to_dict(), HTTPStatusCode.BAD_REQUEST
-
   # Validate due_date
   if (req.due_date != 'infinity' and not isinstance(req.due_date, int)) or (
     utc_time.get().timestamp() >= int(req.due_date)
@@ -113,7 +103,27 @@ def assignment_create_api(user: UserModel):
       message='Invalid classroom', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  newAssignment: AssignmentModel = AssignmentModel(
+  if not req.title or (req.title == 'None'):
+    return GenericReply(
+      message='Invalid title', status=HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if not req.description or (req.description == 'None'):
+    return GenericReply(
+      message='Invalid description', status=HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if not req.requirement or (req.requirement == 'None'):
+    return GenericReply(
+      message='Invalid requirement', status=HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if due_date and due_date < utc_time.get():
+    return GenericReply(
+      message='Due date is in the past', status=HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  newAssignment = AssignmentModel(
     classroom=classroom,
     title=req.title,
     description=req.description,
