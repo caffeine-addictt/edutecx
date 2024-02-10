@@ -28,15 +28,9 @@
         <div class='bg-white border rounded shadow-sm overflow-hidden'>
 
           <form id='contactUsForm' role='form' class='needs-validation' novalidate>
+            
             <div class='row gy-4 gy-xl-5 p-4 p-xl-5'>
               <div class='col-12'>
-                <label for='fullname' class='form-label'>Full Name <span class='text-danger'>*</span></label>
-                <input type='text' class='form-control' id='fullname' name='fullname' value='' required>
-                <div class='invalid-feedback'>
-                  Please provide your name so we know how to address you!
-                </div>
-              </div>
-              <div class='col-12 col-md-6'>
                 <label for='email' class='form-label'>Email <span class='text-danger'>*</span></label>
                 <div class='input-group'>
                   <span class='input-group-text'>
@@ -49,7 +43,11 @@
                     Please provide your email address so that we can contact you back!
                   </div>
                 </div>
+                <div class='invalid-feedback'>
+                  Please provide your email address so that we can contact you back!
+                </div>
               </div>
+              
               <div class='col-12 col-md-6'>
                 <label for='phone' class='form-label'>Phone Number</label>
                 <div class='input-group'>
@@ -64,6 +62,7 @@
                   </div>
                 </div>
               </div>
+
               <div class='col-12'>
                 <label for='message' class='form-label'>Message <span class='text-danger'>*</span></label>
                 <textarea class='form-control' id='message' name='message' rows='3' required></textarea>
@@ -71,11 +70,13 @@
                   Please provide the description of your message to us!
                 </div>
               </div>
+
               <div class='col-12'>
                 <div class='d-grid'>
                   <button class='btn btn-dark btn-lg' type='submit'>Submit</button>
                 </div>
               </div>
+              
             </div>
           </form>
 
