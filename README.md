@@ -45,6 +45,15 @@ To saving children's backs!
 
 <br />
 
+### Contributors
+
+- Team Leader: Alex @caffeine-addictt
+- Team Member: @AndrewAce
+- Team Member: @chloelkl
+- Team Member: @maann1
+
+<br />
+
 Live the live demo [here](https://edutecx.ngjx.org).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
