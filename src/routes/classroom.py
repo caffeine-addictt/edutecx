@@ -61,7 +61,7 @@ def classroom_edit(user: UserModel, id: str):
   form.title.data = classroom.title
   form.description.data = classroom.description
   form.inviteEnabled.data = classroom.invite_enabled
-  classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
+
   return render_template(
     '(classroom)/classroom_edit.html', form=form, classroom=classroom
   )
