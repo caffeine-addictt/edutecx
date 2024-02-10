@@ -74,12 +74,16 @@ def assignment_list_api(user: UserModel):
     ),
   ]
 
-  filtered = AssignmentModel.query.filter(
-    and_(
-      (AssignmentModel.classroom.members.contains(user)),
-      and_(*query) if req.criteria == 'and' else or_(*query),
+  filtered = (
+    AssignmentModel.query.join(ClassroomModel)
+    .filter(
+      and_(
+        ClassroomModel.members.contains(user),
+        and_(*query) if req.criteria == 'and' else or_(*query),
+      )
     )
-  ).paginate(page=req.page, error_out=False)
+    .paginate(page=req.page, error_out=False)
+  )
 
   return AssignmentListReply(
     message='Successfully fetched assignment list',
