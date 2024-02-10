@@ -4,12 +4,15 @@
 
 {# Body #}
 {% block mainContent %}
+<!-- Parallax Section 3 -->
+
   <div class='overlay-container' style="min-height: calc(100vh - 64px); max-height: calc(100vh - 64px);">
-    <img src='{{ url_for("static", filename = "assets/images/book1.png") }}' alt='image' class='img-fluid h-100 w-100'>
-    <div class='overlay-text'>
-      <h1 style='font-size:6em;'>EduTecX</h1>
-      <p style='font-size:1.5em;'>Your Choice of Learning</p>
-    </div>
+    <section id='section3' class='parallax' style='background-image: url("/static/assets/images/homebg.png"); font-family: var(--font); min-height: calc(100vh - 64px); max-height: calc(100vh - 64px);'>
+      <div class='parallax-text text-dark'>
+        <h1 style='font-size:6em;' class='fw-bold'>EduTecX</h1>
+        <p style='font-size:1.5em;'>Your Choice of Learning</p>
+      </div>
+    </section>
   </div>
 
   <!--About EduTecX-->
