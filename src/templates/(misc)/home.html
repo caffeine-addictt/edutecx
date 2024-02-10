@@ -10,15 +10,56 @@
 
 {# Body #}
 {% block mainContent %}
-  <div id="profile__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-    profile content
-  </div>
 
+{# My Profile #}
+<div class="container-fluid w-100 mt-5" style="font-family:--font;">
+  <div id="profile__container" class="d-flex justify-content-between gap-2 my-2 ratio-16x9" style="width:90%; margin-left:auto; margin-right:auto; padding:3rem 7rem; background-color:#faf9f5;">
+    <div>
+      <h1 class="fw-bold">Welcome back!</h1>
+      <h2>{{ g.user.username }}</h2>
+    </div>
+    <div class="mt-auto mb-auto">
+      <a class="btn btn-outline-dark btn-lg" href="/profile" role="button" style="padding:0.7rem 2rem">
+        View Profile
+      </a>
+    </div>
+  </div>
+</div>
+
+
+{# My Textbooks #}
+<div class="container-fluid my-4" style="font-family:--font;">
+  <div class="d-flex justify-content-between" style="width: 90%; margin-left: auto; margin-right: auto; padding: 3rem 7rem; background-color: #faf9f5;">
+    <div class="text-center">
+      <h1 class="fw-bold">My Textbooks</h1>
+    </div>
+    <div>
+      <a class="btn btn-outline-dark btn-lg" href="/textbooks" role="button" style="padding: 0.7rem 2rem">
+        View Textbooks
+      </a>
+    </div>
+  </div>
   {# Show Top 4 #}
   <div id="textbook__container" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-75 h-25"></div>
+</div>
 
+
+{# My Classrooms #}
+<div class="container-fluid" style="font-family:--font;">
+  <div class="d-flex justify-content-between" style="width: 90%; margin-left: auto; margin-right: auto; padding: 3rem 7rem; background-color: #faf9f5;">
+    <div class="text-center">
+      <h1 class="fw-bold">My Classrooms</h1>
+    </div>
+    <div>
+      <a class="btn btn-outline-dark btn-lg" href="/classrooms" role="button" style="padding: 0.7rem 2rem">
+        View Classrooms
+      </a>
+    </div>
+  </div>
   {# Show Top 4 #}
   <div id="classroom__container" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-75 h-25"></div>
+</div>
+
 {% endblock %}
 
 
