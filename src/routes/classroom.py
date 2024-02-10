@@ -9,26 +9,19 @@ from src.utils.http import HTTPStatusCode
 from src.utils.http import escape_id
 from src.utils.forms import ClassroomCreateForm, ClassroomEditForm
 
-from src.utils.api import ClassroomCreateResponse, GenericResponse
-
-import requests
-
 from flask import (
   flash,
   request,
   redirect,
-  make_response,
   render_template,
-  current_app as app
+  current_app as app,
 )
 
 
-
-
-@app.route('/classrooms', methods = ['GET'])
+@app.route('/classrooms', methods=['GET'])
 @auth_provider.require_login
 def classrooms(user: UserModel):
-  return render_template('(classroom)/classroom_list.html', user = user)
+  return render_template('(classroom)/classroom_list.html', user=user)
 
 
 @app.route('/classrooms/<string:id>')
@@ -39,36 +32,66 @@ def classroom(user: UserModel, id: str):
 
   if not isinstance(classroom, ClassroomModel):
     return render_template('(classroom)/classroom_error.html')
-  
+
   if not classroom.is_member(user) and (user.privilege != 'Admin'):
-    return render_template('(classroom)/classroom_error.html', message = 'You are not a member of this classroom!')
+    return render_template(
+      '(classroom)/classroom_error.html',
+      message='You are not a member of this classroom!',
+    )
 
-  return render_template('(classroom)/classroom.html', classroom = classroom)
+  return render_template('(classroom)/classroom.html', classroom=classroom)
 
 
-@app.route('/classrooms/edit/<string:id>', methods = ['GET'])
-@auth_provider.require_educator(unauthorized_redirect = '/pricing')
+@app.route('/classrooms/edit/<string:id>', methods=['GET'])
+@auth_provider.require_educator(unauthorized_redirect='/pricing')
 def classroom_edit(user: UserModel, id: str):
   id = escape_id(id)
   classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
 
   if not isinstance(classroom, ClassroomModel):
     return render_template('(classroom)/classroom_error.html')
-  
+
   if (not classroom.is_owner(user)) and (user.privilege != 'Admin'):
-    return render_template('(classroom)/classroom_error.html', message = 'You are not authorized to edit this classroom')
+    return render_template(
+      '(classroom)/classroom_error.html',
+      message='You are not authorized to edit this classroom',
+    )
 
   form = ClassroomEditForm(request.form)
   form.title.data = classroom.title
   form.description.data = classroom.description
   form.inviteEnabled.data = classroom.invite_enabled
   classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
-  return render_template('(classroom)/classroom_edit.html', form = form, classroom = classroom)
+  return render_template(
+    '(classroom)/classroom_edit.html', form=form, classroom=classroom
+  )
 
 
-@app.route('/classrooms/new', methods = ['GET'])
-@auth_provider.require_educator(unauthorized_redirect = '/pricing')
+@app.route('/classrooms/new', methods=['GET'])
+@auth_provider.require_educator(unauthorized_redirect='/pricing')
 def classroom_new(user: UserModel):
   form = ClassroomCreateForm(request.form)
-  return render_template('(classroom)/classroom_new.html', form = form)
+  return render_template('(classroom)/classroom_new.html', form=form)
 
+
+@app.route('/classrooms/join/<string:id>', methods=['GET'])
+@auth_provider.require_login
+def classroom_join(user: UserModel, id: str):
+  id = escape_id(id)
+  classroom = ClassroomModel.query.filter(ClassroomModel.id == id).first()
+
+  if not isinstance(classroom, ClassroomModel):
+    return render_template('(classroom)/classroom_error.html')
+
+  if not classroom.invite_enabled:
+    return render_template(
+      '(classroom)/classroom_error.html',
+      message='This classroom does not accept invites!',
+    )
+
+  classroom.students.append(user)
+  classroom.save()
+
+  flash('Joined classroom!')
+
+  return redirect('/classrooms/' + id, code=HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
