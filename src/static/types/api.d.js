@@ -92,3 +92,18 @@
  * @property {number} created_at
  * @property {number} updated_at
  */
+
+
+/**
+ * @typedef {Object} AssignmentGetData
+ * @property {string} id
+ * @property {string} classroom_id
+ * @property {string} title
+ * @property {string} description
+ * @property {string} due_date
+ * @property {string[]} textbooks
+ * @property {string} requirement
+ * @property {string[]} submissions
+ * @property {number} created_at
+ * @property {number} updated_at
+ */

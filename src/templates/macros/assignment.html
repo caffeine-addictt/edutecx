@@ -1,0 +1,13 @@
+{# Macros for assignment pages #}
+
+{# /assignments #}
+{% macro  render_assignment_entry() %}
+  <a href="/assignments/{id}" class="classtile">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{title}</h5>
+        <p class="card-text">{requirements}</p>
+      </div>
+    </div>
+  </a>
+{% endmacro %}
