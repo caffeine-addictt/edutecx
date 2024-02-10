@@ -1322,3 +1322,17 @@ UserDeleteResponse = GenericResponse
 # Admin Graph GET
 class AdminGraphGetRequest(_APIRequest):
   graphFor: Literal['User', 'Textbook', 'Revenue']
+
+
+
+
+
+
+
+
+# Contact Request
+class ContactRequest(_APIRequest):
+  type: Literal['General', 'Bug Report', 'Feature Request', 'Other']
+  email: str
+  subject: str
+  message: str
