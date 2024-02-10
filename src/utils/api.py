@@ -2,7 +2,6 @@
 API Parser
 """
 
-import inspect
 from .forcetype import recursiveValidation
 from typing import Any, Union, Literal, Optional, Mapping, get_origin, get_args
 
@@ -28,7 +27,7 @@ class _APIBase:
 
   def __str__(self) -> str:
     return str(self.__dict__)
-        
+
   def to_dict(self) -> dict[str, Any]:
     return {
       i: (
@@ -39,7 +38,7 @@ class _APIBase:
       )
       for i,v in self.__dict__.items()
     }
-  
+
   def get(self, name: Any, default = None) -> Any | None:
     return self.__dict__.get(name, default)
 
@@ -64,8 +63,10 @@ class _APIParser(_APIBase):
       try:
         annotationMap = { i:v for i,v in self.__dict__.items() if not i.startswith('__') }
         annotationMap.update(self.__annotations__.copy())
-      except Exception: annotationMap = annotationMap or dict()
-    else: annotationMap = req
+      except Exception:
+        annotationMap = annotationMap or dict()
+    else:
+      annotationMap = req
 
     if isResponse:
       annotationMap['status'] = int
@@ -73,7 +74,7 @@ class _APIParser(_APIBase):
 
 
     for variableName, variableType in annotationMap.items():
-      
+
       variable = None
       if isinstance(req, Request):
         try: variable = req.json.get(variableName, None) if req.is_json and req.json else None
@@ -84,7 +85,7 @@ class _APIParser(_APIBase):
 
         try: variable = variable if variable is not None else req.args.get(variableName, None)
         except Exception: pass
-        
+
       elif isinstance(req, FlaskResponse):
         try: variable = req.json.get(variableName, None) if req.json else None
         except Exception: pass
@@ -97,7 +98,7 @@ class _APIParser(_APIBase):
         try: variable = req.get(variableName, None)
         except Exception: pass
 
-      
+
       if variableType == '':
         self.__dict__[variableName] = recursiveValidation(variable, str) or ''
         continue
@@ -136,7 +137,7 @@ class _APIResponse(_APIParser):
 class _APIRequest(_APIParser):
   """
   API Request
-  
+
   For interpreting API requests
   """
 
@@ -155,7 +156,7 @@ class _APIReply(_APIBase):
 class _Files(dict[str, FileStorage]):
   def __init__(self, requestFiles: Mapping[str, FileStorage]):
     super().__init__(requestFiles)
-  
+
 
 
 
@@ -395,7 +396,7 @@ class StripeStatusReply(_APIReply):
 class StoreGetRequest(_APIRequest):
   """
   API Request for store
-  
+
   categories to be separated by ','
   """
   criteria: Literal['and', 'or']
@@ -461,7 +462,7 @@ class _AssignmentCreateData(_APIBase):
 class AssignmentCreateRequest(_APIRequest):
   """
   API Request for assignment creation
-  
+
   due_date: int (UNIX Millies) | str ('infinity')
   """
   classroom_id: str
@@ -647,7 +648,7 @@ ClassroomDeleteResponse = GenericResponse
 # Classroom JOIN
 class ClassroomJoinRequest(_APIRequest):
   """API Request for classroom joining"""
-  classroom_id: str
+  invite_id: str
 
 ClassroomJoinReply = GenericReply
 ClassroomJoinResponse = GenericResponse
@@ -1177,14 +1178,14 @@ class SubmissionCreateReply(_APIReply):
 class SubmissionCreateResponse(_APIResponse):
   """API Response for creating submission"""
   data: _SubmissionCreateData
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
 # Submission DELETE
 class SubmissionDeleteRequest(_APIRequest):
   """API Request for deleting submission"""
@@ -1200,7 +1201,7 @@ SubmissionDeleteResponse = GenericResponse
 
 
 
-# SubmissionSnipet GET
+# SubmissionSnippet GET
 @dataclass
 class _SubmissionSnippetGetData(_APIBase):
   id           : str

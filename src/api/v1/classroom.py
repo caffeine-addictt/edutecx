@@ -105,11 +105,11 @@ def classroom_create_api(user: UserModel):
   req = ClassroomCreateRequest(request)
 
   if (
-    (not req.title)
-    or (req.title == 'None')
-    or (not req.description)
-    or (req.description == 'None')
-  ):
+      (not req.title)
+      or (req.title == 'None')
+      or (not req.description)
+      or (req.description == 'None')
+      ):
     return GenericReply(
       message='Invalid title or description', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -179,7 +179,7 @@ def classroom_edit_api(user: UserModel):
     return GenericReply(
       message='Classroom could not be located', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
-  
+
   if (user.privilege != 'Admin') and not classroom.is_owner(user):
     return GenericReply(
       message='Unauthorized', status=HTTPStatusCode.BAD_REQUEST
@@ -207,7 +207,7 @@ def classroom_delete_api(user: UserModel):
     return GenericReply(
       message='Classroom could not be located', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
-  
+
   if (user.privilege != 'Admin') and not classroom.is_owner(user):
     return GenericReply(
       message='Unauthorized', status=HTTPStatusCode.BAD_REQUEST
@@ -225,7 +225,9 @@ def classroom_delete_api(user: UserModel):
 def classroom_join_api(user: UserModel):
   req = ClassroomJoinRequest(request)
 
-  classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
+  classroom = ClassroomModel.query.filter(
+    ClassroomModel.invite_id == req.invite_id
+  ).first()
   if not isinstance(classroom, ClassroomModel):
     return GenericReply(
       message='Classroom could not be located', status=HTTPStatusCode.BAD_REQUEST
