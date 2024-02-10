@@ -41,7 +41,7 @@ const fetchGraphURI = async (initialRender = false) => {
   }
   else {
     const svg = await response.text();
-  
+
     $('#svg-render').empty();
     $('#svg-render').append(htmlToElement(svg));
     console.log('Fetched SVG')
@@ -110,7 +110,7 @@ const fetchSaleData = async (initialRender = false) => {
   }
   else {
     $('#sale__container').empty();
-    
+
     response.data.forEach(sale => {
       const textbooks = sale.textbook_ids.map(textbookId => {
         return `
@@ -122,26 +122,26 @@ const fetchSaleData = async (initialRender = false) => {
       })
 
       const newSaleEntry = htmlToElement(formatString(deepCopy(saleTemplate), {
-        'sale_id'     : sale.sale_id,
-        'user_id'     : sale.user_id,
-        'discount_id' : sale.discount_id,
-        'paid'        : sale.paid ? (new Date(sale.paid_at)).toDateString() : 'False',
-        'total_cost'  : sale.total_cost,
-        'texbook_ids' : textbooks.join('')
+        'sale_id': sale.sale_id,
+        'user_id': sale.user_id,
+        'discount_id': sale.discount_id,
+        'paid': sale.paid ? (new Date(sale.paid_at)).toDateString() : 'False',
+        'total_cost': sale.total_cost,
+        'texbook_ids': textbooks.join('')
       }))
 
       const textbookIds = $(newSaleEntry).find('#sale__textbookids')
       sale.textbook_ids.forEach(textbookId => {
         textbookIds.append(htmlToElement(formatString(
           '<a href="/textbook/{textbook_id}" target="_blank" class="textbook__link">{textbook_id}</a>',
-          { 'textbook_id' : textbookId }
+          { 'textbook_id': textbookId }
         )))
       })
 
       $('#sale__container').append(newSaleEntry);
     });
   };
-  
+
   // Countdown
   let countdown;
   let iterations = 0;
@@ -162,14 +162,14 @@ const fetchSaleData = async (initialRender = false) => {
 
 
 // Run in parallel
-$(() => Promise.all([ fetchGraphURI(true), fetchSaleData(true) ])
+$(() => Promise.all([fetchGraphURI(true), fetchSaleData(true)])
   .then(values => console.log(values))
   .catch(err => console.log(err)));
 
 
 $(() => {
   // Hooks
-  $('#graph__button').on('click', async e => await fetchGraphURI());
-  $('#sale__button').on('click',  async e => await fetchSaleData());
-  $('#sale__export').on('click', () => {window.location.href = '/api/v1/admin/export/User';});
+  $('#graph__button').on('click', async () => await fetchGraphURI());
+  $('#sale__button').on('click', async () => await fetchSaleData());
+  $('#sale__export').on('click', () => { window.location.href = '/api/v1/admin/export/User'; });
 });

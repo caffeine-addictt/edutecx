@@ -1,20 +1,21 @@
 
 // Hooks
 $(() => {
-  $('#assignmentRequirements').on('input', e => {
-    e.target.value = e.target.value.replace(/([^0-9:]+)/gi, '') 
-  })
-
-
+  const classroom_id = (new URL(location.href)).searchParams.get('classroom_id');
+  const submitButton = $('#submit');
 
   $('#assignmentForm').on('submit', async e => {
     e.preventDefault();
+    e.stopPropagation();
+
+    submitButton.attr('disabled', true);
+    submitButton.text('Creating...');
+    renderToast('Creating assignment...', 'info');
 
     const data = Object.fromEntries((new FormData(e.target)).entries());
-    console.log(data);
+    if (data.due_date && (((new Date()).getTime() - (new Date(data.due_date)).getTime()) >= 0)) return renderToast('Date cannot be in the past!', 'danger');
+    data.due_date = data.due_date ? (new Date(data.due_date)).getTime() / 1000 : 'infinity';
 
-    if (!/^([0-9]+(:[0-9]+)?)$/.test(data.requirements)) return renderToast('Invalid Page Number(s)!', 'danger');
-    if (data.date && (((new Date()).now() - (new Date(data.date)).now()) >= 0)) return renderToast('Date cannot be in the past!', 'danger');
 
     /**
      * @type {{status: 200; message: string; data: { assignment_id: string }}?}
@@ -25,23 +26,16 @@ $(() => {
         'Content-Type': 'application/json',
         'X-CSRF-Token': getAccessToken()
       },
-      body: JSON.stringify({
-        classroom_id: data.Id,
-        title: data.Title,
-        description: data.Description,
-        due_date: data.date ? (new Date(data.date)).now() : null,
-        requirements: data.requirements
-      })
-    }).then(res => {
-      if (res.ok) {
-        return res.json();
-      };
-    });
+      body: JSON.stringify({ ...data, classroom_id: classroom_id })
+    }).then(res => res.json().catch(e => console.log(e)));
 
     if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
     else {
       renderToast(response.message, 'success');
       window.location.href = `/assignment/${response.data.assignment_id}`;
     };
+
+    submitButton.attr('disabled', false);
+    submitButton.text('Create Assignment');
   });
 });

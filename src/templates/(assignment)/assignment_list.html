@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
+{% from 'macros/assignment.html' import render_assignment_entry %}
 
 
 {# Title #}
@@ -17,7 +18,8 @@
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  <script>
+    var assignmentTemplate = `{{ render_assignment_entry() }}`;
+  </script>
   <script src="{{ url_for('static', filename = '(assignment)/assignment_list.js') }}"></script>
 {% endblock %}
