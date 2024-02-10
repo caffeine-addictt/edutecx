@@ -7,7 +7,7 @@ from src.service import auth_provider
 
 from src.utils.http import escape_id, HTTPStatusCode
 from src.utils.forms import ClassroomCreateForm, ClassroomEditForm
-from src.utils.api import ClassroomJoinResponse
+from src.utils.api import ClassroomJoinResponse, ClassroomLeaveResponse
 
 import requests
 from flask import (
@@ -91,7 +91,6 @@ def classroom_join(user: UserModel, id: str):
     return render_template(
       '(classroom)/classroom_error.html',
       message=response.json().get('message'),
-      HTTPStatusCode=response.status_code,
     )
 
   else:
@@ -100,3 +99,27 @@ def classroom_join(user: UserModel, id: str):
     return redirect(
       f'/classrooms/{body.data.classroom_id}', HTTPStatusCode.SEE_OTHER
     ), HTTPStatusCode.SEE_OTHER
+
+
+@app.route('/classroms/leave/<string:id>')
+@auth_provider.require_login
+def classroom_leave(_: UserModel, id: str):
+  id = escape_id(id)
+
+  response = requests.post(
+    f'{request.url_root}api/v1/classroom/leave',
+    headers={'Authorization': f'Bearer {request.cookies.get("access_token_cookie")}'},
+    json={'classroom_id': id},
+  )
+
+  if response.status_code != HTTPStatusCode.OK:
+    flash(response.json().get('message'), 'danger')
+    return render_template(
+      '(classroom)/classroom_error.html',
+      message=response.json().get('message'),
+    )
+
+  else:
+    body = ClassroomLeaveResponse(response)
+    flash(body.message, 'success')
+    return redirect('/classrooms', HTTPStatusCode.SEE_OTHER), HTTPStatusCode.SEE_OTHER
