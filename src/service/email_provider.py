@@ -59,7 +59,9 @@ def dns_check(email: str) -> bool:
 
 
 @overload
-def send_email(email: str, emailType: Literal['Verification'], data: 'VerificationEmailData') -> Literal[True] | tuple[Literal[False], str]:
+def send_email(
+  email: str, emailType: Literal['Verification'], data: 'VerificationEmailData'
+  ) -> Literal[True] | tuple[Literal[False], str]:
   """
   Send verification email
 
@@ -71,8 +73,11 @@ def send_email(email: str, emailType: Literal['Verification'], data: 'Verificati
   """
   ...
 
+
 @overload
-def send_email(email: str, emailType: Literal['Contact'], data: 'ContactEmailData') -> Literal[True] | tuple[Literal[False], str]:
+def send_email(
+  email: str, emailType: Literal['Contact'], data: 'ContactEmailData'
+  ) -> Literal[True] | tuple[Literal[False], str]:
   """
   Send contact email
 
@@ -84,9 +89,12 @@ def send_email(email: str, emailType: Literal['Contact'], data: 'ContactEmailDat
   """
   ...
 
+
 @_enforce_email
 def send_email(
-  email: str, emailType: EmailType, data: Union['VerificationEmailData', 'ContactEmailData']
+  email: str,
+  emailType: EmailType,
+  data: Union['VerificationEmailData', 'ContactEmailData'],
   ) -> Literal[True] | tuple[Literal[False], str]:
   try:
     match emailType:
@@ -111,7 +119,7 @@ def send_email(
             'html': render_template('email/verification.html', **data.to_dict()),
           }
         )
-      
+
       case 'Contact':
         assert isinstance(data, ContactEmailData)
 
@@ -119,10 +127,11 @@ def send_email(
         data.subject = data.subject.replace('<', '&lt;').replace('>', '&gt;')
         data.body = data.body.replace('<', '&lt;').replace('>', '&gt;')
 
-        # if os.getenv('ENV') == 'development':
-        #   from flask import current_app as app, request
-        #   app.logger.info('Emails are not sent in development.')
-        #   return True
+        if os.getenv('ENV') == 'development':
+          from flask import current_app as app, request
+
+          app.logger.info('Emails are not sent in development.')
+          return True
 
         resend.Emails.send(
           {
