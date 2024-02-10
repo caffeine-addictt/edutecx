@@ -28,11 +28,11 @@
         <div class='bg-white border rounded shadow-sm overflow-hidden'>
 
           <form id='contactUsForm' role='form' class='needs-validation' novalidate>
-            
+
             <div class='row gy-4 gy-xl-5 p-4 p-xl-5'>
               <div class="col-12">
                 <label for='type' class='form-label'>Type <span class='text-danger'>*</span></label>
-                <select id='type' class='form-select'>
+                <select id='type' name="type" class='form-select'>
                   <option value='General'>General</option>
                   <option value='Bug Report'>Bug Report</option>
                   <option value='Feature Request'>Feature Request</option>
@@ -81,7 +81,7 @@
 
               <div class='col-12'>
                 <div class='d-grid'>
-                  <button class='btn btn-dark btn-lg' type='submit'>Submit</button>
+                  <button id="submit" class='btn btn-dark btn-lg' type='submit'>Submit</button>
                 </div>
               </div>
 
