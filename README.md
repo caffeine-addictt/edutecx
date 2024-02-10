@@ -47,10 +47,10 @@ To saving children's backs!
 
 ### Contributors
 
-- Team Leader: Alex @caffeine-addictt
-- Team Member: @AndrewAce
-- Team Member: @chloelkl
-- Team Member: @maann1
+- Team Leader: Alex [@caffeine-addictt](https://github.com/caffeine-addictt)
+- Team Member: [@AndrewAce](https://github.com/AndrewAce)
+- Team Member: [@chloelkl](https://github.com/chloelkl)
+- Team Member: [@maann1](https://github.com/maann1)
 
 <br />
 
