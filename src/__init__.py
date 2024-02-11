@@ -1,5 +1,5 @@
 """
-Initalizes Flask Application
+Initializes Flask Application
 """
 
 from flask import Flask
@@ -22,50 +22,53 @@ convention = {
   'uq': 'uq_%(table_name)s_%(column_0_name)s',
   'ck': 'ck_%(table_name)s_%(constraint_name)s',
   'fk': 'fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s',
-  'pk': 'pk_%(table_name)s'
+  'pk': 'pk_%(table_name)s',
 }
-metadata = MetaData(naming_convention = convention)
+metadata = MetaData(naming_convention=convention)
 
 
-# Setup app init variables to be publically accessible
+# Setup app init variables to be publicly accessible
 thread.Settings.set_graceful_exit(False)
 
-db = SQLAlchemy(metadata = metadata)
+db = SQLAlchemy(metadata=metadata)
 jwt = JWTManager()
 limiter = Limiter(
-  key_func = util.get_remote_address,
-  default_limits = ['5 per second'],
-  storage_uri = 'memory://0.0.0.0:11211',
-  storage_options = {}
+  key_func=util.get_remote_address,
+  default_limits=['10 per second'],
+  storage_uri='memory://0.0.0.0:11211',
+  storage_options={},
 )
 
 
 # Setup Logging
-config.dictConfig({
-  'version': 1,
-  'formatters': {
-    'file_fmt': {'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'},
-    'console_fmt': {'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'}
-  },
-  'handlers': {
-    'error': {
-      'class': 'logging.handlers.RotatingFileHandler',
-      'filename': 'logs/error.log',
-      'formatter': 'file_fmt',
-      'level': 'ERROR'
+config.dictConfig(
+  {
+    'version': 1,
+    'formatters': {
+      'file_fmt': {
+        'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'
+      },
+      'console_fmt': {
+        'format': '%(asctime)s p%(process)s {%(pathname)s:%(lineno)d} [[%(levelname)s]] - %(message)s'
+      },
     },
-    'console': {
-      'class': 'logging.StreamHandler',
-      'formatter': 'console_fmt',
-      'stream': 'ext://sys.stdout',
-      'level': 'INFO',
-    }
-  },
-  'root': {
-    'level': 'DEBUG',
-    'handlers': ['error', 'console']
+    'handlers': {
+      'error': {
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': 'logs/error.log',
+        'formatter': 'file_fmt',
+        'level': 'ERROR',
+      },
+      'console': {
+        'class': 'logging.StreamHandler',
+        'formatter': 'console_fmt',
+        'stream': 'ext://sys.stdout',
+        'level': 'INFO',
+      },
+    },
+    'root': {'level': 'DEBUG', 'handlers': ['error', 'console']},
   }
-})
+)
 
 
 def init_app(testing: bool = False) -> Flask:
@@ -85,26 +88,26 @@ def init_app(testing: bool = False) -> Flask:
   print('\nImported environment variables')
 
   # Init DB
-  db.init_app(app = app)
+  db.init_app(app=app)
 
   # Init Limiting
-  limiter.init_app(app = app)
+  limiter.init_app(app=app)
 
   # Init Email
   resend.api_key = app.config.get('RESEND_API_KEY')
 
   # Init JWT
-  jwt.init_app(app = app)
+  jwt.init_app(app=app)
 
   # Init Stripe
   stripe.api_key = app.config.get('STRIPE_SECRET_KEY')
 
   # Init cloudinary
   cloudinary.config(
-    cloud_name = app.config.get('CLOUDINARY_CLOUD_NAME'),
-    api_key = app.config.get('CLOUDINARY_API_KEY'),
-    api_secret = app.config.get('CLOUDINARY_API_SECRET'),
-    secure = app.config.get('ENV') == 'production'
+    cloud_name=app.config.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=app.config.get('CLOUDINARY_API_KEY'),
+    api_secret=app.config.get('CLOUDINARY_API_SECRET'),
+    secure=app.config.get('ENV') == 'production',
   )
 
   with app.app_context():

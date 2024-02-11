@@ -19,8 +19,15 @@
     
 
 
-    <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarSupportedContent'
-      aria-controls='navbarSupportedContent' aria-expanded='false' aria-label='Toggle navigation'>
+    <button 
+      type='button'
+      class='navbar-toggler'
+      data-bs-toggle='collapse'
+      aria-controls='navbarSupportedContent'
+      data-bs-target='#navbarSupportedContent'
+      aria-expanded='false'
+      aria-label='Toggle navigation'
+    >
       <span class='navbar-toggler-icon'></span>
     </button>
 
@@ -45,15 +52,13 @@
       {% if not g.user %}
         <form class='d-flex'>
           <ul class='navbar-nav me-auto mb-2 mb-lg-0 gap-3 px-3'>
-
-          
             <li class='nav-item'>
               <a id="login-navlink" class='nav-link active text-decoration-underline' tabindex='-1' aria-disabled='true'>Login</a>
             </li>
 
             <li class='nav-item w-2'>
               <a id="register-navlink" class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true'>Register</a>
-            </li>        
+            </li>
           </ul>
         </form>
       {% endif %}
@@ -62,28 +67,20 @@
       {# Logged in #}
       {% if g.user %}
         <ul class='navbar-nav me-4 mb-2 mb-lg-0'>
+          <li class='nav-item'><a class='nav-link' href='/textbooks'>Textbooks</a></li>
+          <li class='nav-item'><a class='nav-link' href='/classrooms'>Classrooms</a></li>
 
-          <li class='nav-item'>
-            <a class='nav-link' href='/textbooks'>Textbooks</a>
-          </li>
-    
-          <li class='nav-item'>
-            <a class='nav-link' href='/classrooms'>Classrooms</a>
-          </li>
           {% if g.user.privilege == 'Admin' %}
             <li class='nav-item w-2'>
               <a class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true' href='/dashboard'>Dashboard</a>
             </li>
           {% endif %}
-            
         </ul>
+
         <a class='nav-link' href='/profile'>
           <img src='/static/assets/icons/profile_icon.png' alt='profile' width='30px' height='30px'>
         </a>
-            
       {% endif %}
-
-
     </div>
   </div>
 </nav>

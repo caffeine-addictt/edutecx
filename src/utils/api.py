@@ -420,6 +420,31 @@ class StoreGetReply(_APIReply):
 
 
 
+# Assignment LIST
+class AssignmentListRequest(_APIRequest):
+  """API Request for assignment listing"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class AssignmentListReply(_APIReply):
+  """API Reply for listing assignments"""
+  data: list['_AssignmentGetData']
+
+class AssignmentListResponse(_APIResponse):
+  """API Response for listing assignments"""
+  data: list['_AssignmentGetData']
+
+
+
+
+
+
+
+
 # Assignment GET
 @dataclass
 class _AssignmentGetData(_APIBase):
@@ -1323,3 +1348,17 @@ UserDeleteResponse = GenericResponse
 # Admin Graph GET
 class AdminGraphGetRequest(_APIRequest):
   graphFor: Literal['User', 'Textbook', 'Revenue']
+
+
+
+
+
+
+
+
+# Contact Request
+class ContactRequest(_APIRequest):
+  type: Literal['General', 'Bug Report', 'Feature Request', 'Other']
+  email: str
+  subject: str
+  message: str

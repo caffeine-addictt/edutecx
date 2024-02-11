@@ -23,8 +23,8 @@ from src.utils.api import (
   GenericReply,
 )
 
+import cloudinary
 from datetime import datetime
-from functools import lru_cache
 from sqlalchemy import or_, and_
 from werkzeug.datastructures import FileStorage
 from flask_limiter import util
@@ -42,7 +42,6 @@ DateRange = tuple[datetime, datetime] | datetime | None
 
 @app.route(f'{basePath}/list', methods=['GET'])
 @auth_limit
-# @lru_cache
 def textbooks_list_api():
   req = TextbookListRequest(request)
 
@@ -171,15 +170,21 @@ def textbook_create_api(user: UserModel):
       message='Missing upload', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  newTextbook = TextbookModel(
-    author=author,
-    file=upload,
-    title=req.title,
-    description=req.description,
-    price=req.price,
-    discount=req.discount,
-  )
-  newTextbook.save()
+  try:
+    newTextbook = TextbookModel(
+      author=author,
+      file=upload,
+      title=req.title,
+      description=req.description,
+      price=req.price,
+      discount=req.discount,
+    )
+    newTextbook.save()
+
+  except cloudinary.exceptions.Error as e:
+    return GenericReply(
+      message=str(e), status=HTTPStatusCode.INTERNAL_SERVER_ERROR
+    ).to_dict(), HTTPStatusCode.INTERNAL_SERVER_ERROR
 
   if cover_img := request.files.get('cover_img'):
     ImageModel(file=cover_img, textbook=newTextbook).save()
