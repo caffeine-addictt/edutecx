@@ -30,7 +30,7 @@ $(() => {
     };
 
     submitButton.attr('disabled', false);
-    submitButton.text('Submit');
+    submitButton.text('Register');
     form.classList.remove('was-validated');
   };
 
