@@ -7,18 +7,82 @@
   Classroom - EduTecX
 {% endblock %}
 
+{# Styles #}
+{% block styles %}
+  <link href='{{ url_for("static", filename = "/(classroom)/classroom.scss") }}' rel='stylesheet/less' />
+{% endblock %}
 
 {# Body #}
 {% block mainContent %}
-  <div id="classroom__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-    classroom content
+  <div id="main-container">
+    <div id="class-info" class="container-fluid mt-4 w-75">
+      <div class="row mr-4 h-100">
+        <div class="h-100 col-4 overflow-hidden d-flex justify-content-center align-items-center">
+          <img class="h-100 my-auto" src="https://img.freepik.com/free-vector/empty-classroom-interior-with-chalkboard_1308-65378.jpg" alt="class picture">
+        </div>
+        <div class="col-5 my-2">
+          <h3>{{ classroom.title }}</h3>
+            <p class="h-50 overflow-auto">{{ classroom.description }}</p>
+        </div>
+        <div class="col-3 d-flex justify-content-end" id="editcontainer">
+          <a href="/classrooms/edit/{{ classroom.id }}" id="editanchor" class="h-25">
+            <button class="btn custom-btn-2 align-middle" id="editbutton">Edit</button>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div id="class-work" class="container-fluid w-75">
+      <div class="row">
+        <div class="col-md-6 my-3">
+          <div class="card p-3">
+            {# Textbooks for class #}
+            <div>
+              <h5>Textbooks for {{ classroom.title }}</h5>
+              <hr>
+              <div class="my-5">
+                none selected
+              </div>
+            </div>
+            {# Announcements #}
+            <div>
+              <h5>Announcements</h5>
+              <hr>
+            </div>
+          </div>
+          
+        </div>
+
+        <div class="col-md-6 my-3">
+          {# Assignments #}
+          <div class="card p-3">
+            <div class="row">
+              <h5 class="col-8">Pending Assignments</h5>
+              <h5 class="col-4 text-center">Due</h5>
+            </div>
+            
+            <hr>
+            <div id="assignment-list">
+
+            </div>
+            <div>
+              <a href="/assignment/new">
+                <button class="btn custom-btn">Add Assignment</button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  {# injected macros to variables #}
+  <script>
+
+  </script>
   <script src="{{ url_for('static', filename = '(classroom)/classroom.js') }}"></script>
 {% endblock %}

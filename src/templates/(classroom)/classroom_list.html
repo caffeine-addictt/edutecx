@@ -9,44 +9,60 @@
 
 {# Styles #}
 {% block styles %}
-  <link href='{{ url_for("static", filename = "/(classroom)/classlist.scss") }}' rel='stylesheet/less' />
+  <link href='{{ url_for("static", filename = "/(classroom)/class_list.scss") }}' rel='stylesheet/less' />
 {% endblock %}
 
 {# Body #}
 {% block mainContent %}
-<div id="maincontainer">
+  <div id="maincontainer">
 
-  <div class="container">
-    <div class="row">
-      <div class="col-4"></div>
-      <div class="col-4" id="myclassroomstitle">
-        <h1>My Classrooms</h1>
-      </div>
-      <div class="col-4" id="createcontainer">
-        <a href="/classrooms/new" id="createanchor">
-          <button class="btn custom-btn .align-middle">Create</button>
-        </a>
+    <div class="container-fluid">
+      <div class="row mx-4">
+        <div class="col-3"></div>
+        <div class="col-6 d-flex justify-content-center" id="myclassroomstitle">
+          <h1>My Classrooms</h1>
+        </div>
+        <div class="col-3 d-flex justify-content-end" id="createcontainer">
+          <a href="/classrooms/new" id="createanchor">
+            <button class="btn custom-btn align-middle">Create</button>
+          </a>
+        </div>
       </div>
     </div>
+
+    <div class="container-fluid my-3">
+      <div class="row mx-4">
+        <div class="col-md-9 mx-auto">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Search..." aria-label="Search" id="searchbar">
+              <button class="btn btn-outline-secondary" type="button" id="searchButton">Search</button>
+            </div>
+        </div>
+        <div class="col-md-3 mx-auto">
+          <div class="input-group">
+            <label class="input-group-text" for="sortby">Sort By:</label>
+            <select class="form-select" id="sortby">
+              <option value="none">None</option>
+              <!-- <option value="date">Last Opened</option> -->
+              <option value="name">Name</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="listclass">
+      <div id="classroom__container" class="d-flex flex-row justify-content-between flex-wrap gap-2 my-2 mx-5 ratio-16x9"></div>
+    </div>
+
   </div>
-
-  <div id="searchbar">search bar</div>
-  <div id="sortby">sort by</div>
-
-  <div id="listclass">
-    <div id="classroom__container" class="d-flex flex-row justify-content-between flex-wrap gap-2 my-2 mx-5 ratio-16x9"></div>
-
-  </div>
-
-
-</div>
   
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
+  {# Injected macros to variables #}
   <script>
     var tile = `{{ render_tile() }}`;
   </script>

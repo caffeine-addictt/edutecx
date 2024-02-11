@@ -96,3 +96,34 @@
   color: #fff;
   text-align: center;
 }
+// Btns
+.custom-btn {
+  height: auto !important;
+  width: 100% !important;
+  margin: 20px auto !important;
+  background-color: none !important;
+  color: #003366 !important;
+  border: 2px solid #003366 !important;
+  line-height: 20px !important; 
+  
+  &:hover {
+    border: 2px solid #003366 !important;
+    color: #faf9f5 !important;
+    background-color: #003366 !important; 
+  }
+}
+.custom-btn-2 {
+  height: auto !important;
+  width: 100% !important;
+  margin: 20px auto !important;
+  background-color: none !important;
+  color: #faf9f5 !important;
+  border: 2px solid #faf9f5 !important;
+  line-height: 20px !important; 
+  
+  &:hover {
+    border: 2px solid #faf9f5 !important;
+    color: #003366 !important;
+    background-color: #faf9f5 !important; 
+  }
+}
