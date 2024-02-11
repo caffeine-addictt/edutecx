@@ -47,7 +47,7 @@ $(async () => {
   };
 
 
-  let counter = 0;
+  let counter = localStorage.getItem('cs_counter') || 0;
   while (true) {
     renderToast('Checking status...', 'info');
     stateController('Fetching');
@@ -67,7 +67,8 @@ $(async () => {
     };
 
     const start = (new Date()).getTime();
-    const maxWait = (2 ** counter++) + 5 + Math.random();
+    const maxWait = (2 ** counter) + 5 + Math.random();
+    localStorage.setItem('cs_counter', ++counter);
 
     while (true) {
       const diff = ((new Date()).getTime() - start) / 1000;
