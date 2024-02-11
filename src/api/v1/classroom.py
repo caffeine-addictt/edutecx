@@ -257,7 +257,7 @@ def classroom_join_api(user: UserModel):
   return ClassroomJoinReply(
     message='Successfully joined classroom',
     status=HTTPStatusCode.OK,
-    data=_ClassroomGetData(classroom_id=classroom.id),
+    data=_ClassroomCreateData(classroom_id=classroom.id),
   ).to_dict(), HTTPStatusCode.OK
 
 
