@@ -10,7 +10,7 @@ from src.database import UserModel, JWTBlocklistModel
 from src.utils.ext import utc_time
 from src.utils.http import HTTPStatusCode
 from src.utils.api import TokenRefreshResponse, LoginResponse
-from src.utils.forms import LoginForm, RegisterForm
+from src.utils.forms import LoginForm
 from src.service.auth_provider import optional_login, require_login, anonymous_required
 from src.utils.api import GenericResponse
 
@@ -306,29 +306,29 @@ def logout(user: UserModel):
 @app.route('/register', methods=['GET', 'POST'])
 @anonymous_required(use_path_callback=True, admin_override=False)
 def register():
-  form = RegisterForm(request.form)
-  if request.method == 'POST' and form.validate_on_submit():
-    response = requests.post(
-      f'{request.url_root}api/v1/register',
-      headers={'Content-Type': 'application/json'},
-      json={
-        'privilege': ['Student', 'Educator'][int(form.privilege.data)],
-        'email': form.email.data,
-        'username': form.username.data,
-        'password': form.password.data,
-      },
-    )
-    body = GenericResponse(response)
+  # form = RegisterForm(request.form)
+  # if request.method == 'POST' and form.validate_on_submit():
+  #   response = requests.post(
+  #     f'{request.url_root}api/v1/register',
+  #     headers={'Content-Type': 'application/json'},
+  #     json={
+  #       'privilege': ['Student', 'Educator'][int(form.privilege.data)],
+  #       'email': form.email.data,
+  #       'username': form.username.data,
+  #       'password': form.password.data,
+  #     },
+  #   )
+  #   body = GenericResponse(response)
+  #
+  #   if response.status_code != HTTPStatusCode.OK:
+  #     flash(body.message, 'danger')
+  #   else:
+  #     flash(body.message, 'success')
+  #
+  #     callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/login'))
+  #     return redirect(callbackURI, code=HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
 
-    if response.status_code != HTTPStatusCode.OK:
-      flash(body.message, 'danger')
-    else:
-      flash(body.message, 'success')
-
-      callbackURI: str = parse.unquote_plus(request.args.get('callbackURI', '/login'))
-      return redirect(callbackURI, code=HTTPStatusCode.FOUND), HTTPStatusCode.FOUND
-
-  return render_template('(auth)/register.html', form=form)
+  return render_template('(auth)/register.html')  # , form=form)
 
 
 @app.route('/verify', methods=['GET'])
