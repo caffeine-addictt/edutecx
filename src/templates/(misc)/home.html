@@ -12,42 +12,42 @@
 {# Body #}
 {% block mainContent %}
 
-{# My Profile #}
-<div class="container-fluid w-100 mt-5" style="font-family:--font;">
-  <div id="profile__container" class="d-flex justify-content-between gap-2 my-2 ratio-16x9" style="width:90%; margin-left:auto; margin-right:auto; padding:3rem 7rem; background-color:#faf9f5;">
-    <div>
-      <h1 class="fw-bold">Welcome back!</h1>
-      <h2>{{ g.user.username }}</h2>
-    </div>
-    <div class="mt-auto mb-auto">
-      <a class="btn btn-outline-dark btn-lg" href="/profile" role="button" style="padding:0.7rem 2rem">
-        View Profile
-      </a>
+  {# My Profile #}
+  <div class="container-fluid w-100 mt-5" style="font-family:--font;">
+    <div id="profile__container" class="d-flex justify-content-between gap-2 my-2 ratio-16x9" style="width:90%; margin-left:auto; margin-right:auto; padding:3rem 7rem; background-color:#faf9f5;">
+      <div>
+        <h1 class="fw-bold">Welcome back!</h1>
+        <h2>{{ g.user.username }}</h2>
+      </div>
+      <div class="mt-auto mb-auto">
+        <a class="btn btn-outline-dark btn-lg" href="/profile" role="button" style="padding:0.7rem 2rem">
+          View Profile
+        </a>
+      </div>
     </div>
   </div>
-</div>
 
 
-{# My Textbooks #}
-<div class="container-fluid my-4" style="font-family:--font;">
-  <div class="row justify-content-between align-items-center" style="width: 90%; margin: 0 auto; padding: 3rem 7rem 0rem; background-color: #faf9f5;">
-    <div class="col">
-      <h1 class="fw-bold">My Textbooks</h1>
+  {# My Textbooks #}
+  <div class="container-fluid my-4" style="font-family:--font;">
+    <div class="row justify-content-between align-items-center" style="width: 90%; margin: 0 auto; padding: 3rem 7rem 0rem; background-color: #faf9f5;">
+      <div class="col">
+        <h1 class="fw-bold">My Textbooks</h1>
+      </div>
+      <div class="col-auto p-0">
+        <a class="btn btn-outline-dark btn-lg" href="/textbooks" role="button" style="padding: 0.7rem 2rem; width: 100%; max-width: 200px;">View More</a>
+      </div>    
     </div>
-    <div class="col-auto p-0">
-      <a class="btn btn-outline-dark btn-lg" href="/textbooks" role="button" style="padding: 0.7rem 2rem; width: 100%; max-width: 200px;">View More</a>
-    </div>    
+    <!-- Textbooks Container -->
+    <div class="d-flex justify-content-center" style="width: 90%; margin: 0 auto; background-color: #faf9f5; padding-bottom: 3rem;">
+      <div id="textbook__container" class="d-flex flex-row gap-5 ratio-16x9 w-75 h-25 justify-content-center"></div>
+    </div>
   </div>
-  <!-- Textbooks Container -->
-  <div class="d-flex justify-content-center" style="width: 90%; margin: 0 auto; background-color: #faf9f5; padding-bottom: 3rem;">
-    <div id="textbook__container" class="d-flex flex-row gap-5 ratio-16x9 w-75 h-25 justify-content-center"></div>
-  </div>
-</div>
 
 
 
 
-{# My Classrooms #}
+  {# My Classrooms #}
   <div class="container-fluid my-4" style="font-family:--font;">
       <div class="row justify-content-between align-items-center" style="width: 90%; margin: 0 auto; padding: 3rem 7rem 0rem; background-color: #faf9f5;">
         <div class="col">
