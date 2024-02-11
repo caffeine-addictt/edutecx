@@ -78,9 +78,9 @@ def create_stripe_subscription_session_api(user: UserModel):
     line_items=[{'price': price['id'], 'quantity': 1}],
     mode='subscription',
     success_url=url_for('checkout_success', _external=True)
-      + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?t=subscription&session_id={CHECKOUT_SESSION_ID}',
     cancel_url=url_for('checkout_cancel', _external=True)
-      + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?t=subscription&session_id={CHECKOUT_SESSION_ID}',
   )
 
   SaleModel(
@@ -189,9 +189,9 @@ def create_stripe_checkout_session_api(user: UserModel):
     mode='payment',
     payment_method_types=['card'],
     success_url=url_for('checkout_success', _external=True)
-      + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?t=checkout&session_id={CHECKOUT_SESSION_ID}',
     cancel_url=url_for('checkout_cancel', _external=True)
-      + '?session_id={CHECKOUT_SESSION_ID}',
+      + '?t=checkout&session_id={CHECKOUT_SESSION_ID}',
   )
 
   # Generate SaleModel
