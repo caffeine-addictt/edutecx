@@ -40,8 +40,6 @@ $(() => {
   })
 
 
-
-
   // Delete Class Flow
   $('#delete-class-button').on('click', e => {
     $('#delete-class-modal').modal('show');

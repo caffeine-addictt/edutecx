@@ -6,8 +6,6 @@
 let classroomList = [];
 
 
-
-
 /**
  * Fetch Classrooms
  * @type {Promise<ClassroomGetData[]>}
@@ -30,8 +28,6 @@ const fetchClassrooms = async () => {
 
   return data.data
 }
-
-
 
 
 /**
@@ -87,8 +83,6 @@ const renderClassrooms = async (filteredList, searchQuery) => {
 };
 
 
-
-
 /**
  * Handle Filtering
  * @param {ClassroomGetData[]} classrooms
@@ -104,8 +98,6 @@ const filterClassrooms = (classrooms, searchQuery) => {
     classroom.owner_username.toLowerCase().includes(searchQuery.toLowerCase())
     );
 }
-
-
 
 
 // On DOM Render
@@ -135,8 +127,6 @@ $(async () => {
   // Event listener for sorting dropdown
   sortDropdown.on('change', () => {
     const sortOption = sortDropdown.val();
-
-    
 
     if (sortOption === 'none') {
       sortedClassrooms = null;
