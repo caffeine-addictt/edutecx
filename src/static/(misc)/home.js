@@ -22,9 +22,9 @@ const renderTextbookPage = async () => {
   // Render dummy
 
   let searchParams = ((new URL(location.href)).searchParams);
-  let tpage = searchParams.get('tpage');
-  tpage = tpage ? tpage : 1;
-  searchParams.set('tpage', tpage);
+  let page = searchParams.get('page');
+  page = page ? page : 1;
+  searchParams.set('page', page);
 
   textbookFetchController = new AbortController();
 
