@@ -60,16 +60,30 @@ const renderClassrooms = async (filteredList, searchQuery) => {
       </p>`
     ));
   }
-  else {
+  else if (!filteredList) {
     template = deepCopy(tile);
-    (filteredList || filteredClassrooms).forEach(classroomData => {
+    filteredClassrooms.forEach(classroomData => {
       container.append(htmlToElement(formatString(template, {
         title: classroomData.title,
         teacher: classroomData.owner_username,
         id: classroomData.id
       })));
     });
-  };
+  } else {
+    template = deepCopy(tile);
+    const commonClassrooms = filteredClassrooms.filter(classroom =>
+      filteredList.some(filtered => filtered.id === classroom.id)
+    );
+
+    commonClassrooms.forEach(classroomData => {
+      container.append(htmlToElement(formatString(template, {
+        title: classroomData.title,
+        teacher: classroomData.owner_username,
+        id: classroomData.id
+      })));
+    });
+  }
+
 };
 
 
@@ -101,20 +115,38 @@ $(async () => {
 
   const searchInput = $('#searchbar');
   const searchButton = $('#searchButton');
+  const sortDropdown = $('#sortby');
+  let sortedClassrooms;
 
   // Event listener for the search button
   searchButton.on('click', () => {
     const searchQuery = searchInput.val().trim();
-    renderClassrooms(null, searchQuery);
+    renderClassrooms(sortedClassrooms, searchQuery);
   });
 
   // Event listener for "Enter" key
   searchInput.on('keypress', (event) => {
     if (event.key === 'Enter') {
       const searchQuery = searchInput.val().trim();
-      renderClassrooms(null, searchQuery);
+      renderClassrooms(sortedClassrooms, searchQuery);
     }
   });
+
+  // Event listener for sorting dropdown
+  sortDropdown.on('change', () => {
+    const sortOption = sortDropdown.val();
+
+    
+
+    if (sortOption === 'none') {
+      sortedClassrooms = null;
+    } else if (sortOption === 'name') {
+      sortedClassrooms = [...classroomList].sort((a, b) => a.title.localeCompare(b.title));
+    }
+    renderClassrooms(sortedClassrooms, $('#searchbar').val().trim());
+  });
+
+
 });
 
 
