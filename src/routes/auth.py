@@ -287,7 +287,7 @@ def logout(user: UserModel):
       flash('Successfully logged out', 'info')
     else:
       flash(
-        'Your account has been locked, contact us at edutecx@ngjx.org for more information',
+        'Your account has been locked, contact us at contact@edutecx.ngjx.org for more information',
         'danger',
       )
 

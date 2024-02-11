@@ -79,7 +79,7 @@ def generateURI(defaultURI: str, usePathCallback: bool) -> str:
 def handleLockedRedirect() -> 'RouteResponse':
   if request.path.startswith('/api') or request.method == 'POST':
     return {
-      'message': 'Your account has been locked, contact us at edutecx@ngjx.org for more information',
+      'message': 'Your account has been locked, contact us at contact@edutecx.ngjx.org for more information',
       'status': HTTPStatusCode.UNAUTHORIZED
     }, HTTPStatusCode.UNAUTHORIZED
   
