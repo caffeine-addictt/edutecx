@@ -19,6 +19,11 @@ a {
     }
       
   }
+  & .classImage {
+    background-image: url(../assets/images/defaultClassImage.png);
+    background-size: auto 15vh;
+    background-position: center;
+  }
 }
 
 
@@ -39,3 +44,10 @@ a {
   width: 80%;
 }
 
+//media query
+@media only screen and (max-width: 950px) {
+  .classtile {
+    width: 80%;
+    margin: auto;
+  }
+}
