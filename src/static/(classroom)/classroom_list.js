@@ -37,13 +37,22 @@ const fetchClassrooms = async () => {
 /**
  * Render Classrooms
  * @param {ClassroomGetData[]?} filteredList
+ * @param {string} searchQuery
  * @returns {Promise<void>}
  */
-const renderClassrooms = async (filteredList) => {
+const renderClassrooms = async (filteredList, searchQuery) => {
   const container = $('#classroom__container');
   container.empty();
 
-  if ((filteredList || classroomList).length === 0) {
+  const filteredClassrooms = filterClassrooms(filteredList || classroomList, searchQuery);
+
+  if (filteredClassrooms.length === 0) {
+    container.append(htmlToElement(
+      `<p class="text-secondary fs-5 mb-0">
+        No classrooms found for the given search query.
+      </p>`
+    ));
+  } else if ((filteredList || classroomList).length === 0) {
     container.append(htmlToElement(
       `<p class="text-secondary fs-5 mb-0">
         You are not in any classrooms. 
@@ -53,7 +62,7 @@ const renderClassrooms = async (filteredList) => {
   }
   else {
     template = deepCopy(tile);
-    (filteredList || classroomList).forEach(classroomData => {
+    (filteredList || filteredClassrooms).forEach(classroomData => {
       container.append(htmlToElement(formatString(template, {
         title: classroomData.title,
         teacher: classroomData.owner_username,
@@ -68,11 +77,18 @@ const renderClassrooms = async (filteredList) => {
 
 /**
  * Handle Filtering
- * @returns {void}
+ * @param {ClassroomGetData[]} classrooms
+ * @param {string} searchQuery
+ * @returns {ClassroomGetData[]}
  */
-const handleFiltering = () => {
-  // TODO: Generate NEW array from `classroomList`
-  // TODO: Call renderClassrooms( newFilteredClassrooms );
+const filterClassrooms = (classrooms, searchQuery) => {
+  if (!searchQuery) {
+    return classrooms; //Returns all classrooms if there's no search
+  }
+  return classrooms.filter(classroom =>
+    classroom.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    classroom.owner_username.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 }
 
 
@@ -81,11 +97,25 @@ const handleFiltering = () => {
 // On DOM Render
 $(async () => {
   classroomList = await fetchClassrooms();
-  renderClassrooms();
+  renderClassrooms(null, ''); // Initialises render with no search
+
+  const searchInput = $('#searchbar');
+  const searchButton = $('#searchButton');
+
+  // Event listener for the search button
+  searchButton.on('click', () => {
+    const searchQuery = searchInput.val().trim();
+    renderClassrooms(null, searchQuery);
+  });
+
+  // Event listener for "Enter" key
+  searchInput.on('keypress', (event) => {
+    if (event.key === 'Enter') {
+      const searchQuery = searchInput.val().trim();
+      renderClassrooms(null, searchQuery);
+    }
+  });
 });
 
 
-// Hooks
-$(() => {
-  // TODO: Handle query and filtering
-})
+
