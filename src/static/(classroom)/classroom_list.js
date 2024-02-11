@@ -49,7 +49,7 @@ const renderClassrooms = async (filteredList, searchQuery) => {
   if (filteredClassrooms.length === 0) {
     container.append(htmlToElement(
       `<p class="text-secondary fs-5 mb-0">
-        No classrooms found for the given search query.
+        No classrooms found for the given search.
       </p>`
     ));
   } else if ((filteredList || classroomList).length === 0) {
