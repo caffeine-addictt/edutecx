@@ -55,7 +55,7 @@ def classroom_list_api(user: UserModel):
         cover_image=classroom.cover_image.id if classroom.cover_image else None,
         created_at=classroom.created_at.timestamp(),
       )
-      for classroom in user.classrooms
+      for classroom in (user.classrooms + user.owned_classrooms)
     ],
   ).to_dict(), HTTPStatusCode.OK
 
@@ -105,16 +105,16 @@ def classroom_create_api(user: UserModel):
   req = ClassroomCreateRequest(request)
 
   if (
-    (not req.title)
-    or (req.title == 'None')
-    or (not req.description)
-    or (req.description == 'None')
-  ):
+      (not req.title)
+      or (req.title == 'None')
+      or (not req.description)
+      or (req.description == 'None')
+      ):
     return GenericReply(
       message='Invalid title or description', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  if (user.id != req.owner_id) and (user.privilege != 'Admin'):
+  if req.owner_id and (user.id != req.owner_id) and (user.privilege != 'Admin'):
     return GenericReply(
       message='Unauthorized',
       status=HTTPStatusCode.UNAUTHORIZED,
@@ -180,7 +180,7 @@ def classroom_edit_api(user: UserModel):
       message='Classroom could not be located', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  if (user.privilege != 'Admin') and classroom.is_owner(user):
+  if (user.privilege != 'Admin') and not classroom.is_owner(user):
     return GenericReply(
       message='Unauthorized', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -208,7 +208,7 @@ def classroom_delete_api(user: UserModel):
       message='Classroom could not be located', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  if (user.privilege != 'Admin') and classroom.is_owner(user):
+  if (user.privilege != 'Admin') and not classroom.is_owner(user):
     return GenericReply(
       message='Unauthorized', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
@@ -225,7 +225,9 @@ def classroom_delete_api(user: UserModel):
 def classroom_join_api(user: UserModel):
   req = ClassroomJoinRequest(request)
 
-  classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
+  classroom = ClassroomModel.query.filter(
+    ClassroomModel.invite_id == req.invite_id
+  ).first()
   if not isinstance(classroom, ClassroomModel):
     return GenericReply(
       message='Classroom could not be located', status=HTTPStatusCode.BAD_REQUEST
@@ -253,7 +255,9 @@ def classroom_join_api(user: UserModel):
   classroom.save()
 
   return ClassroomJoinReply(
-    message='Successfully joined classroom', status=HTTPStatusCode.OK
+    message='Successfully joined classroom',
+    status=HTTPStatusCode.OK,
+    data=_ClassroomCreateData(classroom_id=classroom.id),
   ).to_dict(), HTTPStatusCode.OK
 
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
+{% from 'macros/form.html' import render_text_field, render_checkbox_field, render_submit %}
 
 
 {# Title #}
@@ -7,23 +8,58 @@
   Edit Classroom - EduTecX
 {% endblock %}
 
+{# Styles #}
+{% block styles %}
+  <link href='{{ url_for("static", filename = "/(classroom)/class_form.scss") }}' rel='stylesheet/less' />
+{% endblock %}
 
 {# Body #}
 {% block mainContent %}
   <form
     id='classroomForm'
     role='form'
-    class='d-flex flex-column gap-3 align-items-center'
+    class='d-flex flex-column gap-3 align-items-center py-5'
   >
-    
-    {# Behviour can be copied from (misc)/profile.js #}
+    {{ render_text_field(form.title) }}
+    {{ render_text_field(form.description) }}
+    {{ render_checkbox_field(form.inviteEnabled) }}
+    {{ render_submit(form.confirmchange) }}
+    <button type="button" class="btn btn-danger" id="delete-class-button"> Delete </button>
   
   </form>
+
+
+
+
+  {# Delete Classroom Modal #}
+  <div class="modal fade" id="delete-class-modal" tabindex="-1" aria-labelledby="deleteClassModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Delete Classroom</h5>
+          <button type="button" class="close" aria-label="Close" id="close-delete-class-modal-small">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete your classroom?</p>
+          <p class="text-secondary">This action cannot be undone</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="close-delete-class-modal-big">Close</button>
+          <button type="button" class="btn btn-primary" id="confirmed-delete-class">Delete Classroom</button>
+        </div>
+      </div>
+    </div>
+
 {% endblock %}
+  
 
-
-{# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
+
+  <script>
+    var classroom_id = `{{ classroom.id }}`;
+  </script>
   <script src="{{ url_for('static', filename = '(classroom)/classroom_edit.js') }}"></script>
+
 {% endblock %}
