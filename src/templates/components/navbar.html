@@ -40,7 +40,7 @@
         </li>
 
         <li class='nav-item'>
-          <a class='nav-link' href='/privacy-policy'>Policy</a>
+          <a class='nav-link' href='/pricing'>Pricing</a>
         </li>
         
         <li class='nav-item'>
@@ -66,7 +66,7 @@
 
       {# Logged in #}
       {% if g.user %}
-        <ul class='navbar-nav me-4 mb-2 mb-lg-0'>
+        <ul class='navbar-nav me-4 mb-2 mb-lg-0 align-items-center'>
           <li class='nav-item'><a class='nav-link' href='/textbooks'>Textbooks</a></li>
           <li class='nav-item'><a class='nav-link' href='/classrooms'>Classrooms</a></li>
 
@@ -75,11 +75,13 @@
               <a class='nav-link active register btn btn-outline-dark text-white px-3' tabindex='-1' aria-disabled='true' href='/dashboard'>Dashboard</a>
             </li>
           {% endif %}
-        </ul>
 
-        <a class='nav-link' href='/profile'>
-          <img src='/static/assets/icons/profile_icon.png' alt='profile' width='30px' height='30px'>
-        </a>
+          <li class='nav-item'>
+            <a href='/profile' class='nav-link'>
+              <img src='/static/assets/icons/profile_icon.png' alt='profile' width='30px' height='30px'>
+            </a>
+          </li>
+        </ul>
       {% endif %}
     </div>
   </div>

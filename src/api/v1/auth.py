@@ -73,7 +73,7 @@ def apiv1_Login():
   # Check for locked account
   if user.status == 'Locked':
     return GenericReply(
-      message='Your account has been locked, contact us at edutecx@ngjx.org for more information',
+      message='Your account has been locked, contact us at contact@edutecx.ngjx.org for more information',
       status=HTTPStatusCode.FORBIDDEN,
     ).to_dict(), HTTPStatusCode.FORBIDDEN
 
@@ -207,7 +207,7 @@ def apiV1SendVerificationEmail(user: UserModel):
   # Check for locked account
   if user.status == 'Locked':
     return GenericReply(
-      message='Your account has been locked, contact us at edutecx@ngjx.org for more information',
+      message='Your account has been locked, contact us at contact@edutecx.ngjx.org for more information',
       status=HTTPStatusCode.FORBIDDEN,
     ).to_dict(), HTTPStatusCode.FORBIDDEN
 
@@ -257,7 +257,7 @@ def apiV1VerifyEmail(user: UserModel):
   # Check for locked account
   if user.status == 'Locked':
     return GenericReply(
-      message='Your account has been locked, contact us at edutecx@ngjx.org for more information',
+      message='Your account has been locked, contact us at contact@edutecx.ngjx.org for more information',
       status=HTTPStatusCode.FORBIDDEN,
     ).to_dict(), HTTPStatusCode.FORBIDDEN
 
