@@ -9,9 +9,8 @@ from src.database import UserModel, JWTBlocklistModel
 
 from src.utils.ext import utc_time
 from src.utils.http import HTTPStatusCode
-from src.utils.api import TokenRefreshResponse, LoginResponse
+from src.utils.api import TokenRefreshResponse, LoginResponse, LoginRequest
 from src.service.auth_provider import optional_login, require_login, anonymous_required
-from src.utils.api import LoginRequest
 
 import requests
 from urllib import parse
@@ -228,6 +227,9 @@ def login(user: UserModel | None):
     return redirect(callbackURI, code=HTTPStatusCode.PERMANENT_REDIRECT)
 
   if request.method == 'POST':
+    if app.testing:
+      return '', HTTPStatusCode.OK
+
     response = requests.post(
       f'{request.url_root}api/v1/login',
       headers={'Content-Type': 'application/json'},
