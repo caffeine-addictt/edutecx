@@ -7,22 +7,116 @@
   Register - EduTecX
 {% endblock %}
 
+{% block styles %}
+    {# Register SCSS #}
+    <link href = '{{ url_for("static", filename = "(auth)/register.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
+{% endblock %}
+
 {# Body #}
 {% block mainContent %}
-  <form
-    id='registerForm'
-    action=''
-    method='POST'
-    role='form'
-    class='d-flex flex-column gap-3 align-items-center needs-validation mb-5 mt-5'
-  >
-    {{ form.hidden_tag() }}
-    {{ render_checkbox_field(form.privilege) }}
-    {{ render_text_field(form.username) }}
-    {{ render_text_field(form.email) }}
-    {{ render_text_field(form.password) }}
-    {{ render_text_field(form.confirm) }}
-    {{ render_checkbox_field(form.agree) }}
-    {{ render_submit(form.submit) }}
-  </form>
+  <div class="container mt-5 rounded" style="font-family: var(--font);">
+    <div class="signup-content">
+      <div class="signup-form w-50 ms-auto me-auto">
+        <h2 class="form-title mt-5" style="text-align: center;">Sign Up</h2>
+        <form id='registerForm' role='form' class='d-flex flex-column align-items-center needs-validation mb-5 mt-5' novalidate>
+          
+          <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
+            <label for="name" class="form-label"><i class="zmdi zmdi-account material-icons-name"></i></label>
+            <input type="text" name="name" id="name" placeholder="Your Name" class="form-control" required>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please choose a username.
+            </div>
+          </div>
+
+          <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
+            <label for="email" class="form-label"><i class="zmdi zmdi-email"></i></label>
+            <input type="email" name="email" id="email" placeholder="Your Email" class="form-control" required>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please provide your email address.
+            </div>
+          </div>
+
+          <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
+            <label for="pass" class="form-label"><i class="zmdi zmdi-lock"></i></label>
+            <input type="password" name="pass" id="pass" placeholder="Password" aria-autocomplete="list" class="form-control" required>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please create a password.
+            </div>
+          </div>
+
+          <div class="form-group mb-" style="min-width:232px; min-height:88px;">
+            <label for="re-pass" class="form-label"><i class="zmdi zmdi-lock-outline"></i></label>
+            <input type="password" name="re_pass" id="re_pass" placeholder="Repeat your password" class="form-control" required>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please confirm you password.
+            </div>
+          </div>
+
+          <div class="form-group mb-1" style="min-width:232px; min-height:90px;">
+            <label for="disabledSelect" class="form-label">I am a</label>
+            <select class="form-select" aria-label="Default select example" required>
+              <option selected>Student / Educator</option>
+              <option value="1">Student</option>
+              <option value="2">Educator</option>
+            </select>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please select an option.
+            </div>
+          </div>
+
+          <div class="form-group form-check mb-0" style="min-width:250px; min-height:55px;">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1" required>
+            <label class="form-check-label" for="exampleCheck1">I agree to the Terms 	&amp; Conditions</label>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please agree to the Terms &amp; Conditions.
+            </div>
+          </div>
+          <div class="form-group form-check mb-0" style="min-width:250px; min-height:55px;">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1" required>
+            <label class="form-check-label" for="exampleCheck1">I agree to the Terms 	&amp; Conditions</label>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please agree to the Terms &amp; Conditions.
+            </div>
+          </div>
+
+          <div class="form-group form-button">
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+        </form>
+        <div class="signup-image" style="text-align: center;">
+          <a href="#" class="signup-image-link">I am already member</a>
+        </div>
+      </div>
+    </div>
+      </div>
+
+      
+{% endblock %}
+
+
+{% block scripts %}
+  <script>
+  </script>
+  <script src='{{ url_for("static", filename = "(auth)/register.js") }}'></script>
 {% endblock %}
