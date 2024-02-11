@@ -2,7 +2,6 @@
 API Parser
 """
 
-import inspect
 from .forcetype import recursiveValidation
 from typing import Any, Union, Literal, Optional, Mapping, get_origin, get_args
 
@@ -64,8 +63,10 @@ class _APIParser(_APIBase):
       try:
         annotationMap = { i:v for i,v in self.__dict__.items() if not i.startswith('__') }
         annotationMap.update(self.__annotations__.copy())
-      except Exception: annotationMap = annotationMap or dict()
-    else: annotationMap = req
+      except Exception:
+        annotationMap = annotationMap or dict()
+    else:
+      annotationMap = req
 
     if isResponse:
       annotationMap['status'] = int
@@ -672,10 +673,10 @@ ClassroomDeleteResponse = GenericResponse
 # Classroom JOIN
 class ClassroomJoinRequest(_APIRequest):
   """API Request for classroom joining"""
-  classroom_id: str
+  invite_id: str
 
-ClassroomJoinReply = GenericReply
-ClassroomJoinResponse = GenericResponse
+ClassroomJoinReply = ClassroomCreateReply
+ClassroomJoinResponse = ClassroomCreateResponse
 
 
 
@@ -1225,7 +1226,7 @@ SubmissionDeleteResponse = GenericResponse
 
 
 
-# SubmissionSnipet GET
+# SubmissionSnippet GET
 @dataclass
 class _SubmissionSnippetGetData(_APIBase):
   id           : str
