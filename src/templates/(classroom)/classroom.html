@@ -22,12 +22,19 @@
         </div>
         <div class="col-5 my-2">
           <h3>{{ classroom.title }}</h3>
-            <p class="h-50 overflow-auto">{{ classroom.description }}</p>
+          <p class="h-50 overflow-auto">{{ classroom.description }}</p>
+
         </div>
         <div class="col-3 d-flex justify-content-end" id="editcontainer">
-          <a href="/classrooms/edit/{{ classroom.id }}" id="editanchor" class="h-25">
-            <button class="btn custom-btn-2 align-middle" id="editbutton">Edit</button>
-          </a>
+          {% if g.user.privilege == 'Educator' %}
+            <div>
+              <a href="/classrooms/edit/{{ classroom.id }}" id="editanchor" class="h-25">
+              <button class="btn custom-btn-2 align-middle mb-2" id="editbutton">Edit</button>
+            </a>
+            <button class="btn custom-btn-2 align-middle my-0" id="invitebutton">Invite</button>
+            </div>
+          {% endif %}
+          
         </div>
       </div>
     </div>
@@ -37,7 +44,7 @@
           <div class="card p-3">
             {# Textbooks for class #}
             <div>
-              <h5>Textbooks for {{ classroom.title }}</h5>
+              <h5>Textbooks for <b>{{ classroom.title }}</b></h5>
               <hr>
               <div class="my-5">
                 none selected
@@ -64,16 +71,42 @@
             <div id="assignment-list">
 
             </div>
-            <div>
-              <a href="/assignment/new">
-                <button class="btn custom-btn">Add Assignment</button>
-              </a>
-            </div>
+            {% if g.user.privilege == 'Educator' %}
+              <div>
+                <a href="/assignment/new">
+                  <button class="btn custom-btn">Add Assignment</button>
+                </a>
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  {# Invite LinkModal #}
+  {% if g.user.privilege == 'Educator' %}
+    <div class="modal fade" id="invite-link-modal" tabindex="-1" aria-labelledby="inviteLinkModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Invite Students / Educators</h5>
+            <button type="button" class="close" aria-label="Close" id="close-invite-link-modal-small">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="p-2">Copy and share the link to invite students / educators to <b>{{ classroom.title }}</b></p>
+            <p class="text-secondary overflow-auto bg-light p-2" id="invite-link"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="confirm-copy-invite-link">Copy Link</button>
+            <button type="button" class="btn btn-secondary" id="close-invite-link-modal-big">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
 {% endblock %}
 
@@ -82,7 +115,7 @@
 {% block scripts %}
   {# injected macros to variables #}
   <script>
-
+    var invite_id = `{{ classroom.invite_id }}`;
   </script>
   <script src="{{ url_for('static', filename = '(classroom)/classroom.js') }}"></script>
 {% endblock %}
