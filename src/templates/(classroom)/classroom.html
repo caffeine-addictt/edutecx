@@ -22,8 +22,7 @@ Classroom - EduTecX
       </div>
       <div class="col-5 my-2">
         <h3>{{ classroom.title }}</h3>
-          <p>{{ classroom.description }}</p>
-          <p></p>
+          <p class="h-50 overflow-auto">{{ classroom.description }}</p>
       </div>
       <div class="col-3 d-flex justify-content-end" id="editcontainer">
         <a href="/classrooms/edit/{{ classroom.id }}" id="editanchor" class="h-25">
@@ -63,6 +62,15 @@ Classroom - EduTecX
           </div>
           
           <hr>
+          <div id="assignment-list">
+
+          </div>
+          <div>
+            <a href="/assignment/new">
+              <button class="btn custom-btn">Add Assignment</button>
+            </a>
+            
+          </div>
         </div>
       </div>
     </div>
