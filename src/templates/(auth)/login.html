@@ -8,19 +8,60 @@
 {% endblock %}
 
 
+{% block styles %} 
+  <link href = '{{ url_for("static", filename = "(auth)/login-register.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
+{% endblock %}
+
+
 {# Body #}
 {% block mainContent %}
-  <form
-    id='loginForm'
-    action=''
-    method='POST'
-    role='form'
-    class='d-flex flex-column gap-3 align-items-center mb-5 mt-5'
-  >
-    {{ form.hidden_tag() }}
-    {{ render_text_field(form.email) }}
-    {{ render_text_field(form.password) }}
-    {{ render_checkbox_field(form.remember_me) }}
-    {{ render_submit(form.submit) }}
-  </form>
+  <div class="container mt-5 rounded" style="font-family: var(--font);">
+    <div class="signup-content">
+      <div class="signup-form w-50 ms-auto me-auto">
+        <h2 class="form-title mt-5" style="text-align: center;">Log In</h2>
+        <form id='registerForm' role='form' method='post' class='d-flex flex-column align-items-center needs-validation mb-5 mt-5' novalidate> 
+
+          <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
+            <label for="email" class="form-label"><i class="zmdi zmdi-email"></i></label>
+            <input type="email" name="email" id="email" placeholder="Your Email" class="form-control" required>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please provide your email address.
+            </div>
+          </div>
+
+          <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
+            <label for="pass" class="form-label"><i class="zmdi zmdi-lock"></i></label>
+            <input type="password" name="password" id="pass" placeholder="Password" aria-autocomplete="list" class="form-control" required>
+            <div class="valid-feedback">
+              Looks good!
+            </div>
+            <div class="invalid-feedback">
+              Please provide your password.
+            </div>
+          </div>
+
+          <div class="form-group form-check mb-0" style="min-width:250px; min-height:55px;">
+            <input type="checkbox" class="form-check-input" name="remember_me" id="exampleCheck1">
+            <label class="form-check-label" for="exampleCheck1">Remember me for 1 month</label>
+          </div>
+
+          <div class="form-group form-button mt-3">
+            <button type="submit" class="btn btn-primary">Login</button>
+          </div>
+        </form>
+        <div class="signup-image" style="text-align: center;">
+          <a href="/register" class="signup-image-link">Not a member?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+
+{# Scripts #}
+{% block scripts %}
+  <script src='{{ url_for("static", filename = "(auth)/login.js") }}'></script>
 {% endblock %}
