@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
+{% from 'macros/misc.html' import render_textbook_entry, render_classroom_entry %}
 
 
 {# Title #}
@@ -65,7 +66,9 @@
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  <script>
+    var textbookTemplate = `{{ render_textbook_entry() }}`;
+    var classroomTemplate = `{{ render_classroom_entry() }}`;
+  </script>
   <script src="{{ url_for('static', filename = '(misc)/home.js') }}"></script>
 {% endblock %}
