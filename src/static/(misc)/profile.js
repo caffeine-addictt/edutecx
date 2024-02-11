@@ -5,34 +5,38 @@ let defaultValues = {};
 
 
 
-const handleChange = e => {
+const handleChange = () => {
+  const profileImage = $('#profile__image');
+  if (profileImage.attr('src') !== '') {
+    $('#pfp-icon').addClass('visually-hidden');
+  }
+  else {
+    $('#pfp-icon').removeClass('visually-hidden');
+  };
+
   for (const key in defaultValues) {
     if (
       ((defaultValues[key] || '') !== $(`[id='${key}']`).val())
       ||
       (key === 'profile__image' && (defaultValues[key] || '') !== $(`[id='${key}']`).attr('src'))
-     ) {
+    ) {
 
       // Animate "Cancel Changes" button to visible
-      $('#cancel-changes-button').removeClass('opacity-0');
+      $('#cancel-changes-button').removeClass('opacity-0 disabled');
       $('#cancel-changes-button').addClass('opacity-100');
 
       // Ungrey save button
       $('#submit').attr('disabled', false);
-
-      console.log('Changes detected');
       return;
     };
   };
 
   // Animate "Cancel Changes" button to not visible
   $('#cancel-changes-button').removeClass('opacity-100');
-  $('#cancel-changes-button').addClass('opacity-0');
+  $('#cancel-changes-button').addClass('opacity-0 disabled');
 
   // Grey save button
   $('#submit').attr('disabled', true);
-
-  console.log('No changes');
 };
 
 
@@ -41,21 +45,24 @@ const handleChange = e => {
 // Hooks
 $(() => {
   defaultValues = {
-    'Username'            : $('#Username').val() || '',
-    'Email'               : $('#Email').val() || '',
-    'Change Password'     : $('#Change Password').val() || '',
-    'Confirm New Password': $('#Confirm New Password').val() || '',
-    'profile__image'      : $('#profile__image').attr('src') || '',
+    'username': $('#username').val() || '',
+    'email': $('#email').val() || '',
+    'password': $('#password').val() || '',
+    'confirmPassword': $('#confirmPassword').val() || '',
+    'profile__image': $('#profile__image').attr('src') || '',
   }
 
   for (const key in defaultValues) {
-    $(`[id='${key}']`).on('change', handleChange);
+    $(`[id='${key}']`).on('input', handleChange);
   };
 
   $(`[id='profile__input']`).on('change', e => {
+    let currentSrc = $('#profile__image').attr('src');
+
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
       reader.onload = a => {
+        currentSrc = a.target.result;
         $('#profile__image').attr('src', a.target.result);
         handleChange();
       };
@@ -69,7 +76,7 @@ $(() => {
 
 // Event Listeners
 $(() => {
-  $('#cancel-changes-button').on('click', e => {
+  $('#cancel-changes-button').on('click', () => {
     for (const key in defaultValues) {
       $(`[id='${key}']`).val(defaultValues[key]);
     };
@@ -86,19 +93,19 @@ $(() => {
     $('#update-account-modal').modal('show');
   });
 
-  $('#close-update-account-modal-big').on('click', e => $('#update-account-modal').modal('hide'));
-  $('#close-update-account-modal-small').on('click', e => $('#update-account-modal').modal('hide'));
+  $('#close-update-account-modal-big').on('click', () => $('#update-account-modal').modal('hide'));
+  $('#close-update-account-modal-small').on('click', () => $('#update-account-modal').modal('hide'));
 
-  $('#confirmed-update-account').on('click', async e => {
+  $('#confirmed-update-account').on('click', async () => {
     $('#update-account-modal').modal('hide');
     renderToast('Updating account...', 'info');
 
     // Generate formData
     const formattedData = new FormData();
     formattedData.append('user_id', `${user_id}`);
-    if (defaultValues['Username'] !== ($('#Username').val() || '')) formattedData.append('username', $('#Username').val());
-    if (defaultValues['Email'] !== ($('#Email').val() || '')) formattedData.append('email', $('#Email').val());
-    if (defaultValues['Change Password'] !== ($('#Change Password').val() || '')) formattedData.append('password', $('#Change Password').val());
+    if (defaultValues['username'] !== ($('#username').val() || '')) formattedData.append('username', $('#username').val());
+    if (defaultValues['email'] !== ($('#email').val() || '')) formattedData.append('email', $('#email').val());
+    if (defaultValues['password'] !== ($('#password').val() || '')) formattedData.append('password', $('#password').val());
     if (defaultValues['profile__image'] !== ($('#profile__image').attr('src') || '')) formattedData.append('upload', $('#profile__input')[0].files[0]);
 
     /**
@@ -130,17 +137,17 @@ $(() => {
 
 
   // Delete Account Flow
-  $('#delete-account-button').on('click', e => {
+  $('#delete-account-button').on('click', () => {
     $('#delete-account-modal').modal('show');
   });
 
-  $('#close-delete-account-modal-big').on('click', e => $('#delete-account-modal').modal('hide'));
-  $('#close-delete-account-modal-small').on('click', e => $('#delete-account-modal').modal('hide'));
+  $('#close-delete-account-modal-big').on('click', () => $('#delete-account-modal').modal('hide'));
+  $('#close-delete-account-modal-small').on('click', () => $('#delete-account-modal').modal('hide'));
 
-  $('#confirmed-delete-account').on('click', async e => {
+  $('#confirmed-delete-account').on('click', async () => {
     $('#delete-account-modal').modal('hide');
     renderToast('Deleting account...', 'info');
-    
+
     /**
      * Delete account
      * @type {{status: number; message: string;}}

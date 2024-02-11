@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
+{% from 'macros/misc.html' import render_textbook_entry, render_classroom_entry %}
 
 
 {# Title #}
@@ -10,21 +11,66 @@
 
 {# Body #}
 {% block mainContent %}
-  <div id="profile__container" class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-    profile content
+
+  {# My Profile #}
+  <div class="container-fluid w-100 mt-5" style="font-family:--font;">
+    <div id="profile__container" class="d-flex justify-content-between gap-2 my-2 ratio-16x9" style="width:90%; margin-left:auto; margin-right:auto; padding:3rem 7rem; background-color:#faf9f5;">
+      <div>
+        <h1 class="fw-bold">Welcome back!</h1>
+        <h2>{{ g.user.username }}</h2>
+      </div>
+      <div class="mt-auto mb-auto">
+        <a class="btn btn-outline-dark btn-lg" href="/profile" role="button" style="padding:0.7rem 2rem">
+          View Profile
+        </a>
+      </div>
+    </div>
   </div>
 
-  {# Show Top 4 #}
-  <div id="textbook__container" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-75 h-25"></div>
 
-  {# Show Top 4 #}
-  <div id="classroom__container" class="d-flex flex-row gap-2 my-2 ratio-16x9 w-75 h-25"></div>
+  {# My Textbooks #}
+  <div class="container-fluid my-4" style="font-family:--font;">
+    <div class="row justify-content-between align-items-center" style="width: 90%; margin: 0 auto; padding: 3rem 7rem 0rem; background-color: #faf9f5;">
+      <div class="col">
+        <h1 class="fw-bold">My Textbooks</h1>
+      </div>
+      <div class="col-auto p-0">
+        <a class="btn btn-outline-dark btn-lg" href="/textbooks" role="button" style="padding: 0.7rem 2rem; width: 100%; max-width: 200px;">View More</a>
+      </div>    
+    </div>
+    <!-- Textbooks Container -->
+    <div class="d-flex justify-content-center" style="width: 90%; margin: 0 auto; background-color: #faf9f5; padding-bottom: 3rem;">
+      <div id="textbook__container" class="d-flex flex-row gap-5 ratio-16x9 w-75 h-25 justify-content-center"></div>
+    </div>
+  </div>
+
+
+
+
+  {# My Classrooms #}
+  <div class="container-fluid my-4" style="font-family:--font;">
+      <div class="row justify-content-between align-items-center" style="width: 90%; margin: 0 auto; padding: 3rem 7rem 0rem; background-color: #faf9f5;">
+        <div class="col">
+          <h1 class="fw-bold">My Classrooms</h1>
+        </div>
+        <div class="col-auto p-0">
+          <a class="btn btn-outline-dark btn-lg" href="/classrooms" role="button" style="padding: 0.7rem 2rem; width: 100%; max-width: 200px;">View More</a>
+        </div>    
+      </div>
+      <!-- Classrooms Container -->
+      <div class="d-flex justify-content-center" style="width: 90%; margin: 0 auto; background-color: #faf9f5; padding-bottom: 3rem;">
+        <div id="classroom__container" class="d-flex flex-row gap-5 ratio-16x9 w-75 h-25 justify-content-center"></div>
+      </div>
+    </div>
+
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
-  {# Write injected macros to variables #}
-  {# <script></script> #}
+  <script>
+    var textbookTemplate = `{{ render_textbook_entry() }}`;
+    var classroomTemplate = `{{ render_classroom_entry() }}`;
+  </script>
   <script src="{{ url_for('static', filename = '(misc)/home.js') }}"></script>
 {% endblock %}
