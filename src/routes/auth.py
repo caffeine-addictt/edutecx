@@ -10,9 +10,8 @@ from src.database import UserModel, JWTBlocklistModel
 from src.utils.ext import utc_time
 from src.utils.http import HTTPStatusCode
 from src.utils.api import TokenRefreshResponse, LoginResponse
-from src.utils.forms import LoginForm
 from src.service.auth_provider import optional_login, require_login, anonymous_required
-from src.utils.api import GenericResponse
+from src.utils.api import LoginRequest
 
 import requests
 from urllib import parse
@@ -228,16 +227,11 @@ def login(user: UserModel | None):
 
     return redirect(callbackURI, code=HTTPStatusCode.PERMANENT_REDIRECT)
 
-  form = LoginForm(request.form)
-  if request.method == 'POST' and form.validate_on_submit():
+  if request.method == 'POST':
     response = requests.post(
       f'{request.url_root}api/v1/login',
       headers={'Content-Type': 'application/json'},
-      json={
-        'email': form.email.data,
-        'password': form.password.data,
-        'remember_me': form.remember_me.data,
-      },
+      json=LoginRequest(request).to_dict(),
     )
 
     if response.status_code != HTTPStatusCode.OK:
@@ -257,7 +251,7 @@ def login(user: UserModel | None):
       flash('Welcome back!', 'success')
 
       return successfulLogin
-  return render_template('(auth)/login.html', form=form)
+  return render_template('(auth)/login.html')
 
 
 @app.route('/logout', methods=['GET', 'POST'])

@@ -19,7 +19,7 @@
     <div class="signup-content">
       <div class="signup-form w-50 ms-auto me-auto">
         <h2 class="form-title mt-5" style="text-align: center;">Log In</h2>
-        <form id='registerForm' role='form' class='d-flex flex-column align-items-center needs-validation mb-5 mt-5' novalidate> 
+        <form id='registerForm' role='form' method='post' class='d-flex flex-column align-items-center needs-validation mb-5 mt-5' novalidate> 
 
           <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
             <label for="email" class="form-label"><i class="zmdi zmdi-email"></i></label>
@@ -63,5 +63,5 @@
 
 {# Scripts #}
 {% block scripts %}
-  <script src='{{ url_for("static", filename = "(auth)/register.js") }}'></script>
+  <script src='{{ url_for("static", filename = "(auth)/login.js") }}'></script>
 {% endblock %}
