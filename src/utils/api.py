@@ -28,7 +28,7 @@ class _APIBase:
 
   def __str__(self) -> str:
     return str(self.__dict__)
-        
+
   def to_dict(self) -> dict[str, Any]:
     return {
       i: (
@@ -39,7 +39,7 @@ class _APIBase:
       )
       for i,v in self.__dict__.items()
     }
-  
+
   def get(self, name: Any, default = None) -> Any | None:
     return self.__dict__.get(name, default)
 
@@ -73,7 +73,7 @@ class _APIParser(_APIBase):
 
 
     for variableName, variableType in annotationMap.items():
-      
+
       variable = None
       if isinstance(req, Request):
         try: variable = req.json.get(variableName, None) if req.is_json and req.json else None
@@ -84,7 +84,7 @@ class _APIParser(_APIBase):
 
         try: variable = variable if variable is not None else req.args.get(variableName, None)
         except Exception: pass
-        
+
       elif isinstance(req, FlaskResponse):
         try: variable = req.json.get(variableName, None) if req.json else None
         except Exception: pass
@@ -97,7 +97,7 @@ class _APIParser(_APIBase):
         try: variable = req.get(variableName, None)
         except Exception: pass
 
-      
+
       if variableType == '':
         self.__dict__[variableName] = recursiveValidation(variable, str) or ''
         continue
@@ -136,7 +136,7 @@ class _APIResponse(_APIParser):
 class _APIRequest(_APIParser):
   """
   API Request
-  
+
   For interpreting API requests
   """
 
@@ -155,7 +155,7 @@ class _APIReply(_APIBase):
 class _Files(dict[str, FileStorage]):
   def __init__(self, requestFiles: Mapping[str, FileStorage]):
     super().__init__(requestFiles)
-  
+
 
 
 
@@ -395,7 +395,7 @@ class StripeStatusReply(_APIReply):
 class StoreGetRequest(_APIRequest):
   """
   API Request for store
-  
+
   categories to be separated by ','
   """
   criteria: Literal['and', 'or']
@@ -411,6 +411,31 @@ class StoreGetRequest(_APIRequest):
 class StoreGetReply(_APIReply):
   """API Reply for store"""
   data: list['_TextbookGetData']
+
+
+
+
+
+
+
+
+# Assignment LIST
+class AssignmentListRequest(_APIRequest):
+  """API Request for assignment listing"""
+  criteria: Literal['and', 'or']
+  query = ''
+  page = 1
+  createdLower = 0.0
+  createdUpper = float('inf')
+
+@dataclass
+class AssignmentListReply(_APIReply):
+  """API Reply for listing assignments"""
+  data: list['_AssignmentGetData']
+
+class AssignmentListResponse(_APIResponse):
+  """API Response for listing assignments"""
+  data: list['_AssignmentGetData']
 
 
 
@@ -461,7 +486,7 @@ class _AssignmentCreateData(_APIBase):
 class AssignmentCreateRequest(_APIRequest):
   """
   API Request for assignment creation
-  
+
   due_date: int (UNIX Millies) | str ('infinity')
   """
   classroom_id: str
@@ -1177,14 +1202,14 @@ class SubmissionCreateReply(_APIReply):
 class SubmissionCreateResponse(_APIResponse):
   """API Response for creating submission"""
   data: _SubmissionCreateData
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
 # Submission DELETE
 class SubmissionDeleteRequest(_APIRequest):
   """API Request for deleting submission"""
@@ -1322,3 +1347,17 @@ UserDeleteResponse = GenericResponse
 # Admin Graph GET
 class AdminGraphGetRequest(_APIRequest):
   graphFor: Literal['User', 'Textbook', 'Revenue']
+
+
+
+
+
+
+
+
+# Contact Request
+class ContactRequest(_APIRequest):
+  type: Literal['General', 'Bug Report', 'Feature Request', 'Other']
+  email: str
+  subject: str
+  message: str
