@@ -25,7 +25,6 @@ const fetchClassrooms = async () => {
     if (data) console.log(data.message);
     return data?.data || new Array();
   };
-
   return data.data
 }
 
@@ -41,22 +40,21 @@ const renderClassrooms = async (filteredList, searchQuery) => {
   container.empty();
 
   const filteredClassrooms = filterClassrooms(filteredList || classroomList, searchQuery);
-
-  if (filteredClassrooms.length === 0) {
-    container.append(htmlToElement(
-      `<p class="text-secondary fs-5 mb-0">
-        No classrooms found for the given search.
-      </p>`
-    ));
-  } else if ((filteredList || classroomList).length === 0) {
+  
+  if ((filteredList || classroomList).length === 0) {
     container.append(htmlToElement(
       `<p class="text-secondary fs-5 mb-0">
         You are not in any classrooms. 
         Join with an invite link or <a href='/classrooms/new'>create one</a>!
       </p>`
     ));
-  }
-  else if (!filteredList) {
+  } else if (filteredClassrooms.length === 0) {
+    container.append(htmlToElement(
+      `<p class="text-secondary fs-5 mb-0">
+        No classrooms found for the given search.
+      </p>`
+    ));
+  } else if (!filteredList) {
     template = deepCopy(tile);
     filteredClassrooms.forEach(classroomData => {
       container.append(htmlToElement(formatString(template, {
