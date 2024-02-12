@@ -195,7 +195,7 @@ def classroom_edit_api(user: UserModel):
     isChanged = True
 
   if req.textbook_ids is not None:
-    newIDs: list[TextbookModel] = []
+    newTextbooks: list[TextbookModel] = []
 
     for newID in req.textbook_ids:
       txtbook = TextbookModel.query.filter(TextbookModel.id == escape_id(newID)).first()
@@ -203,8 +203,9 @@ def classroom_edit_api(user: UserModel):
         return GenericReply(
           message=f'Invalid textbook id: {newID}', status=HTTPStatusCode.BAD_REQUEST
         ).to_dict(), HTTPStatusCode.BAD_REQUEST
+      newTextbooks.append(txtbook)
 
-    classroom.textbooks = newIDs
+    classroom.textbooks = newTextbooks
     isChanged = True
 
   if req.invite_enabled is not None:
