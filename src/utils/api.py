@@ -638,7 +638,6 @@ class ClassroomCreateResponse(_APIResponse):
 # Classroom EDIT
 class ClassroomEditRequest(_APIRequest):
   """API Request for classroom editing"""
-  ignore_none   = True
   classroom_id  : Optional[str]
   title         : Optional[str]
   description   : Optional[str]
