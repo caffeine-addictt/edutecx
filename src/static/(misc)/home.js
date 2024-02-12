@@ -1,56 +1,58 @@
 
-
 /**
- * Textbook fetch controller to stop fetch request
- * @type {AbortController | null}
- */
-let textbookFetchController;
-
-
-
-
-/**
- * Render textbook page based on `tpage` searchparams
+ * Render textbook page
  * @returns {Promise<void>}
  */
-const renderTextbookPage = async () => {
-  // Disable forward/previous button
-
-  textbookFetchController?.abort();
+const renderTextbooks = async () => {
   $('#textbook__container').empty();
 
-  // Render dummy
-
-  let searchParams = ((new URL(location.href)).searchParams);
-  let tpage = searchParams.get('tpage');
-  tpage = tpage ? tpage : 1;
-  searchParams.set('tpage', tpage);
-
-  textbookFetchController = new AbortController();
-
-  /**
-   * @type {APIJSON<TextbookGetData[]>}
-   */
-  const response = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
-    method: 'GET',
-    signal: textbookFetchController.signal
-  }).then(res => res.json()).catch(err => console.log(err));
+  /** @type {APIJSON<TextbookGetData[]>} */
+  const response = await fetch('/api/v1/textbook/list?per_page=4&criteria=or')
+    .then(res => res.json())
+    .catch(err => console.log(err));
 
   if (!response || response.status !== 200) {
-    renderToast(response ? response.message : 'Something went wrong!', 'danger');
+    renderToast(response ? response.message : 'Something went wrong fetching textbooks!', 'danger');
   }
   else {
     response.data.forEach((item) => {
-      $('#textbook__container').append(htmlToElement(`${item.uri}`));
+      $('#textbook__container').append(htmlToElement(formatString(deepCopy(textbookTemplate), {
+        title: item.title,
+        description: item.description,
+        uri: item.cover_image
+      })))
     });
   };
-
-  // Undisable forward/previous button
 };
 
 
+/**
+ * Render classroom page
+ * @returns {Promise<void>}
+ */
+const renderClassrooms = async () => {
+  $('#classroom__container').empty();
+
+  /** @type {APIJSON<ClassroomGetData[]>} */
+  const response = await fetch('/api/v1/classroom/list?per_page=4&criteria=or')
+    .then(res => res.json())
+    .catch(err => console.log(err));
+
+  if (!response || response.status !== 200) {
+    renderToast(response ? response.message : 'Something went wrong fetching classrooms!', 'danger');
+  }
+  else {
+    response.data.forEach((item) => {
+      $('#classroom__container').append(htmlToElement(formatString(deepCopy(classroomTemplate), {
+        title: item.title,
+      })))
+    });
+  };
+};
+
 
 // Initial Render
-$(() => {
-  renderTextbookPage();
-});
+$(() => Promise.all([
+  renderTextbooks().then(() => console.log('Fetched and rendered textbooks')).catch(err => console.log('Failed to fetch textbooks: ' + err)),
+  renderClassrooms().then(() => console.log('Fetched and rendered classrooms')).catch(err => console.log('Failed to fetch classrooms: ' + err)),
+]).then(() => console.log('Fetched and rendered!')).catch(err => console.log(err)));
