@@ -2,21 +2,20 @@
 
 {# /store #}
 {% macro render_textbookListing() %}
-  <div class='col-3 mw-25 mh-25 p-2'>
+  <div class='col-md-3 col-sm-6 p-2'>
     <a href='/store/{id}' class='storeList h-auto d-flex flex-column text-decoration-none' style='min-width:200px;'>
-      <div class='col'>
-        <div class='card mb-3 w-100 h-auto'>
-          <div class='card-body w-100'>
-            <div class='d-flex w-75 h-100 align-self-center mb-5'>
-              <img alt='textbookCover' src='{cover_image}' class='w-100 h-100 ms-4 d-flex align-items-center justify-content-center'/>
-            </div>
-            <h5 class='card-title text-dark' style='text-align:right;float:left;'>
-              {title}
-            </h5>
-            <h5 class='card-title text-dark fw-bold' style='text-align:right;float:right;'>
-              <span>$</span>{price}
-            </h5>
+      <div class='card mb-3'>
+        <div class='card-body'>
+          <div class='d-flex justify-content-center mb-3'>
+            <img alt='textbookCover' src='{cover_image}' class='img-fluid' style='max-width:160px; max-height:200px; min-width:160px; min-height:200px;'/>
           </div>
+          <h5 class='card-title text-dark text-center'>
+            {title}
+          </h5>
+          <h5 class='card-title text-dark fw-bold text-center'>
+            <span>$</span>{price}
+          </h5>
+        </div>
       </div>
     </a>
   </div>
@@ -25,7 +24,17 @@
 
 {# /cart #}
 {% macro render_cartItem() %}
-  <div>
-    {title}
-  </div>
+  <tr>
+    <th id="item__id" class="w-25 h-auto" scope="row">{cart_count}</td>
+    <td id="item_name" class="w-25 h-auto">
+      <img src="{image}" width="100" height="100"/>
+      <br>
+      {title} 
+    </td>
+    <td id="item_name" class="w-25 h-auto">{price}</td>
+
+    <td class="w-25 h-auto">
+      <button class="btn btn-danger" id="delete-button"><i class="bi bi-trash3-fill"></i></button>
+    </td>
+  </tr>
 {% endmacro %}
