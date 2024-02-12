@@ -86,7 +86,6 @@ def classroom_join(user: UserModel, id: str):
     json={'invite_id': id},
   )
 
-  
   if response.status_code != HTTPStatusCode.OK:
     flash(response.json().get('message'), 'danger')
     return render_template(
