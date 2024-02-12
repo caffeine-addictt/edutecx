@@ -42,7 +42,7 @@
               {% endif %}
 
               {% if (g.user and (g.user.subscription_status == 'Active')) %}
-                <button id="cancel-subscription" class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto w-full'>
+                <button id="cancel-subscription" class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto w-100'>
                   Back to Free Plan
                 </button>
               {% endif %}
@@ -74,7 +74,7 @@
               {% endif %}
 
               {% if (g.user and (g.user.subscription_status == 'Inactive')) %}
-                <button id="upgrade-subscription" class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto' style='background-color:#003366;color:white;'>
+                <button id="upgrade-subscription" class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto w-100' style='background-color:#003366;color:white;'>
                   Upgrade Now!
                 </button>
               {% endif %}
