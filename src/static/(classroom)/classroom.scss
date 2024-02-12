@@ -14,3 +14,15 @@
 #class-work .card {
   height: 80vh;
 }
+
+.selected-textbooks {
+  text-decoration: none;
+  & .card-body {
+    transition: all 0.2s linear;
+  }
+  &:hover {
+    .card-body {
+      background-color: lightgrey;
+    }
+  }
+}

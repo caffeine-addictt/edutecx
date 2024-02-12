@@ -147,11 +147,11 @@ def user_edit_api(user: UserModel):
   req = UserEditRequest(request)
 
   if (
-    req.user_id
-    and (req.user_id != 'None')
-    and (user.privilege != 'Admin')
-    and (user.id != req.user_id)
-  ):
+      req.user_id
+      and (req.user_id != 'None')
+      and (user.privilege != 'Admin')
+      and (user.id != req.user_id)
+      ):
     return GenericReply(
       message='Unauthorized', status=HTTPStatusCode.UNAUTHORIZED
     ).to_dict(), HTTPStatusCode.UNAUTHORIZED
@@ -177,12 +177,12 @@ def user_edit_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.UNAUTHORIZED
 
   if (
-    req.password
-    and (req.password != 'None')
-    and not re.fullmatch(
-      r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[?!@$%^#&*-]).{8,20}$', req.password
-    )
-  ):
+      req.password
+      and (req.password != 'None')
+      and not re.fullmatch(
+        r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[?!@$%^#&*-]).{8,20}$', req.password
+      )
+      ):
     return GenericReply(
       message='Password has to be between 8 to 20 characters inclusive, contain at least 1 upper and lower case letter, \
                 contain at least 1 digit and contain at least 1 {!@$%^#&*-} special character',
@@ -190,12 +190,12 @@ def user_edit_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   if (
-    req.username
-    and (req.username != 'None')
-    and not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{4,20}$', req.username)
-  ):
+      req.username
+      and (req.username != 'None')
+      and not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9_-]{4,20}$', req.username)
+      ):
     return GenericReply(
-      message='Username has to be between 5 to 20 charcters inclusive, start with a letter and only {_-} special characters are allowed',
+      message='Username has to be between 5 to 20 characters inclusive, start with a letter and only {_-} special characters are allowed',
       status=HTTPStatusCode.BAD_REQUEST,
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 

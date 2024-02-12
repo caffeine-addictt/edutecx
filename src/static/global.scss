@@ -97,6 +97,13 @@
   text-align: center;
 }
 // Btns
+.btn-primary {
+  background-color: #003366 !important;
+  transition: all 0.15s ease-in-out !important;
+  &:hover {
+    background-color: #011d3a !important;
+  }
+}
 .custom-btn {
   height: auto !important;
   width: 100% !important;

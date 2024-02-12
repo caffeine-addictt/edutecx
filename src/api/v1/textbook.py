@@ -23,7 +23,7 @@ from src.utils.api import (
   GenericReply,
 )
 
-import cloudinary
+import cloudinary.exceptions
 from datetime import datetime
 from sqlalchemy import or_, and_
 from werkzeug.datastructures import FileStorage
@@ -34,7 +34,7 @@ from flask import request, current_app as app
 # Routes
 basePath: str = '/api/v1/textbook'
 auth_limit = limiter.shared_limit(
-  '100 per hour', scope=lambda _: request.host, key_func=util.get_remote_address
+  '20 per second', scope=lambda _: request.host, key_func=util.get_remote_address
 )
 
 DateRange = tuple[datetime, datetime] | datetime | None
