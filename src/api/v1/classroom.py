@@ -3,7 +3,7 @@ Classroom Endpoint
 """
 
 from src import limiter
-from src.database import ClassroomModel, UserModel, TextbookModel
+from src.database import ClassroomModel, UserModel, TextbookModel, ImageModel
 from src.utils.http import HTTPStatusCode, escape_id
 from src.service.auth_provider import require_login
 from src.utils.ext import utc_time
@@ -161,24 +161,11 @@ def classroom_create_api(user: UserModel):
 @require_login
 def classroom_edit_api(user: UserModel):
   req = ClassroomEditRequest(request)
-  toChange = {
-    key: '' if not i or i == 'None' else i
-    for key in [
-      'classroom_id',
-      'title',
-      'description',
-      'textbook_ids',
-      'cover_image',
-      'invite_enabled',
-    ]
-    if (
-      (i := req.get(key, None)) and (i not in [None, 'None']) or (not req.ignore_none)
-    )
-  }
 
-  if not any(toChange.values()):
+  # Validate
+  if req.classroom_id in [None, '', 'None']:
     return GenericReply(
-      message='No change supplied', status=HTTPStatusCode.BAD_REQUEST
+      message='ClassroomID is required', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   classroom = ClassroomModel.query.filter(ClassroomModel.id == req.classroom_id).first()
@@ -192,26 +179,43 @@ def classroom_edit_api(user: UserModel):
       message='Unauthorized', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  for key, value in toChange.items():
-    if key == 'textbook_ids':
-      newTextbooks: list[TextbookModel] = []
-      for newID in value:
-        txtbook = TextbookModel.query.filter(
-          TextbookModel.id == escape_id(newID)
-        ).first()
-        if not isinstance(txtbook, TextbookModel):
-          return GenericReply(
-            message=f'Invalid textbook id: {newID}', status=HTTPStatusCode.BAD_REQUEST
-          ).to_dict(), HTTPStatusCode.BAD_REQUEST
-        newTextbooks.append(txtbook)
+  isChanged = False
+  if upload := request.files.get('upload'):
+    if classroom.cover_image:
+      classroom.cover_image.delete()
+    ImageModel(upload, classroom=classroom).save()
+    isChanged = True
 
-      classroom.textbooks = newTextbooks
+  if req.title not in [None, '', 'None']:
+    classroom.title = req.title
+    isChanged = True
 
-    elif key == 'invite_enabled':
-      classroom.invite_enabled = value in [True, 'y']
+  if req.description not in [None, '', 'None']:
+    classroom.description = req.description
+    isChanged = True
 
-    else:
-      classroom.__setattr__(key, value)
+  if req.textbook_ids is not None:
+    newIDs = []
+
+    for newID in req.textbook_ids:
+      txtbook = TextbookModel.query.filter(TextbookModel.id == escape_id(newID)).first()
+      if not isinstance(txtbook, TextbookModel):
+        return GenericReply(
+          message=f'Invalid textbook id: {newID}', status=HTTPStatusCode.BAD_REQUEST
+        ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+    classroom.textbook_ids = newIDs
+    isChanged = True
+
+  if req.invite_enabled is not None:
+    classroom.invite_enabled = req.invite_enabled in [True, 'y']
+    isChanged = True
+
+  # update
+  if not isChanged:
+    return GenericReply(
+      message='No change supplied', status=HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
   classroom.updated_at = utc_time.get()
   classroom.save()
@@ -267,7 +271,7 @@ def classroom_join_api(user: UserModel):
   if classroom.is_member(user):
     return GenericReply(
       message='You are already a member of this classroom',
-      status=HTTPStatusCode.FORBIDDEN
+      status=HTTPStatusCode.FORBIDDEN,
     ).to_dict(), HTTPStatusCode.FORBIDDEN
 
   elif (classroom.owner.membership == 'Free') and (len(classroom.members) > 5):
