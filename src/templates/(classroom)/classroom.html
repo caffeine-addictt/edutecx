@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
-
+{% from 'macros/classroom.html' import render_textbooks %}
 
 {# Title #}
 {% block title %}
@@ -49,6 +49,7 @@
               <div class="my-5">
                 none selected
               </div>
+              <button class="btn custom-btn" id="textbookbutton">Add Textbooks</button>
             </div>
             {# Announcements #}
             <div>
@@ -84,8 +85,9 @@
     </div>
   </div>
 
-  {# Invite LinkModal #}
+  
   {% if g.user.privilege == 'Educator' %}
+    {# Invite LinkModal #}
     <div class="modal fade" id="invite-link-modal" tabindex="-1" aria-labelledby="inviteLinkModal" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
@@ -106,6 +108,29 @@
         </div>
       </div>
     </div>
+    
+    {# Select Textbook Modal #}
+    <div class="modal fade" id="textbook-modal" tabindex="-1" aria-labelledby="textbookModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Add Textbooks to <b>{{ classroom.title }}</b></h5>
+            <button type="button" class="close" aria-label="Close" id="close-textbook-modal-small">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body container">
+            <div class="row" id="textbook-select-list">
+
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="close-textbook-modal-big">Close</button>
+            <button type="button" class="btn btn-primary" id="confirm-textbook">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
   {% endif %}
 
 {% endblock %}
@@ -116,6 +141,7 @@
   {# injected macros to variables #}
   <script>
     var invite_id = `{{ classroom.invite_id }}`;
+    var textbookTemplate = `{{ render_textbooks() }}`;
   </script>
   <script src="{{ url_for('static', filename = '(classroom)/classroom.js') }}"></script>
 {% endblock %}

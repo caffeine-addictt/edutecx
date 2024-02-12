@@ -40,7 +40,11 @@ def classroom(user: UserModel, id: str):
       message='You are not a member of this classroom!',
     )
 
-  return render_template('(classroom)/classroom.html', classroom=classroom)
+  return render_template(
+    '(classroom)/classroom.html', 
+    classroom=classroom, 
+    textbook_ids=[i.id for i in classroom.textbooks]
+  )
 
 
 @app.route('/classrooms/edit/<string:id>', methods=['GET'])
