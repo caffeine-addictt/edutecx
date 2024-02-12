@@ -186,16 +186,16 @@ def classroom_edit_api(user: UserModel):
     ImageModel(upload, classroom=classroom).save()
     isChanged = True
 
-  if req.title not in [None, '', 'None']:
+  if req.title and req.title != 'None':
     classroom.title = req.title
     isChanged = True
 
-  if req.description not in [None, '', 'None']:
+  if req.description and req.description != 'None':
     classroom.description = req.description
     isChanged = True
 
   if req.textbook_ids is not None:
-    newIDs = []
+    newIDs: list[TextbookModel] = []
 
     for newID in req.textbook_ids:
       txtbook = TextbookModel.query.filter(TextbookModel.id == escape_id(newID)).first()
@@ -204,7 +204,7 @@ def classroom_edit_api(user: UserModel):
           message=f'Invalid textbook id: {newID}', status=HTTPStatusCode.BAD_REQUEST
         ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-    classroom.textbook_ids = newIDs
+    classroom.textbooks = newIDs
     isChanged = True
 
   if req.invite_enabled is not None:
