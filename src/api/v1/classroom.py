@@ -207,6 +207,9 @@ def classroom_edit_api(user: UserModel):
 
       classroom.textbooks = newTextbooks
 
+    elif key == 'invite_enabled':
+      classroom.invite_enabled = value in [True, 'y']
+
     else:
       classroom.__setattr__(key, value)
 
@@ -262,11 +265,10 @@ def classroom_join_api(user: UserModel):
 
   # Impose limitations
   if classroom.is_member(user):
-    return ClassroomJoinReply(
+    return GenericReply(
       message='You are already a member of this classroom',
-      status=HTTPStatusCode.OK,
-      data=_ClassroomCreateData(classroom_id=classroom.id),
-    ).to_dict(), HTTPStatusCode.OK
+      status=HTTPStatusCode.FORBIDDEN
+    ).to_dict(), HTTPStatusCode.FORBIDDEN
 
   elif (classroom.owner.membership == 'Free') and (len(classroom.members) > 5):
     return GenericReply(
