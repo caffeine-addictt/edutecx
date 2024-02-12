@@ -642,6 +642,7 @@ class ClassroomEditRequest(_APIRequest):
   classroom_id  : Optional[str]
   title         : Optional[str]
   description   : Optional[str]
+  textbook_ids  : Optional[list[str]]
   cover_image   : Optional[str]
   invite_enabled: Optional[bool]
 
