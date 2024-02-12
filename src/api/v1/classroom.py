@@ -239,7 +239,7 @@ def classroom_join_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.FORBIDDEN
 
   # Impose limitations
-  if user in classroom.members:
+  if classroom.is_member(user):
     return GenericReply(
       message='You are already a member of this classroom',
       status=HTTPStatusCode.FORBIDDEN,
