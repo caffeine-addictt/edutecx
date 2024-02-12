@@ -53,12 +53,37 @@ $(async () => {
   console.log(responses);
 
   // Populate HTML
-  responses.forEach(res => {
+  responses.forEach((res, cart_count) => {
     if (res.status === 200) {
-      $('#cart__items').append(htmlToElement(formatString(deepCopy(itemTemplate), {
-        title: res.data.title
-      })));
-    }
+      const newElement = htmlToElement(formatString(deepCopy(itemTemplate), {
+        title: res.data.title,
+        price: res.data.price,
+        id: res.data.id,
+        image: res.data.cover_image,
+        cart_count: cart_count + 1
+      }));
+      
+      $(newElement).find('#delete-button').on('click', () => {
+        removeCartItem(res.data.id, true);
+        renderToast(`Removed ${res.data.title}`, "info");
+      });
+      
+      $('#cart__items').append(newElement);
+    };
   });
+
+  $('#delete-button').on('click', () => {
+    clearCart(true);
+    renderToast('Cleared Cart', "info");
+  });
+
+  $('#payment-button').on('click', async () => await proceedToPayment());
+
+  if (getCartItems().length === 0) {
+    $('#payment-button').addClass('visually-hidden');
+    $('#cart__items').append(htmlToElement(
+      '<p class="h1 mt-5">No items added into cart.</p>'
+    ));
+  };
 
 });
