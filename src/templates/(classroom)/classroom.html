@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% extends 'layout.html' %}
-{% from 'macros/classroom.html' import render_textbooks %}
+{% from 'macros/classroom.html' import render_textbooks, render_selectedTextbooks, render_assignments %}
 
 {# Title #}
 {% block title %}
@@ -46,16 +46,17 @@
             <div>
               <h5>Textbooks for <b>{{ classroom.title }}</b></h5>
               <hr>
-              <div class="my-5">
-                none selected
+              <div class="container">
+                <div class="row" id="selected-list">
+
+                </div>
+                
               </div>
+              {% if g.user.privilege == 'Educator' %}
               <button class="btn custom-btn" id="textbookbutton">Add Textbooks</button>
+              {% endif %}
             </div>
-            {# Announcements #}
-            <div>
-              <h5>Announcements</h5>
-              <hr>
-            </div>
+            
           </div>
           
         </div>
@@ -69,12 +70,12 @@
             </div>
             
             <hr>
-            <div id="assignment-list">
-
+            <div id="assignment-list" class="container-fluid">
+              
             </div>
             {% if g.user.privilege == 'Educator' %}
               <div>
-                <a href="/assignment/new">
+                <a href="/assignments/new?classroomID={{ classroom.id }}">
                   <button class="btn custom-btn">Add Assignment</button>
                 </a>
               </div>
@@ -143,6 +144,8 @@
     var invite_id = `{{ classroom.invite_id }}`;
     var classroom_id = `{{ classroom.id }}`;
     var textbookTemplate = `{{ render_textbooks() }}`;
+    var chosenTextbooksTemplate = `{{ render_selectedTextbooks() }}`
+    var assignmentTemplate = `{{ render_assignments() }}`
     var textbooks = eval(`{{ textbook_ids | safe }}`);
   </script>
   <script src="{{ url_for('static', filename = '(classroom)/classroom.js') }}"></script>
