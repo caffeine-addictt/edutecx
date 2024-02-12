@@ -30,18 +30,18 @@
 
 {# /classrooms textbooks to select #}
 {% macro render_textbooks() %}
-<div class='col-lg-3 col-md-4 col-sm-6 col-12' id="{textbook_id}" onclick="toggleSelection('{textbook_id}')">
-  <div class='card mb-3'>
-    <div class='card-body d-flex flex-column' style='height: 100%;'>
-      <div class='d-flex align-items-center justify-content-center mb-3'>
-        <img alt='textbookCover' src='{cover_image}' class='w-100 h-100' style='object-fit: cover;'>
+  <div class='col-lg-3 col-md-4 col-sm-6 col-12' id="{textbook_id}" onclick="toggleSelection('{textbook_id}')">
+    <div class='card mb-3'>
+      <div class='card-body d-flex flex-column' style='height: 100%;'>
+        <div class='d-flex align-items-center justify-content-center mb-3'>
+          <img alt='textbookCover' src='{cover_image}' class='w-100 h-100' style='object-fit: cover;'>
+        </div>
+        <h5 class='card-title text-dark mt-auto'>
+          {title}
+        </h5>
       </div>
-      <h5 class='card-title text-dark mt-auto'>
-        {title}
-      </h5>
     </div>
   </div>
-</div>
 {% endmacro %}
 
 {# /classrooms textbooks #}
@@ -60,7 +60,6 @@
       </div>
     </div>
   </a>
-
 {% endmacro %}
 
 {# /classrooms assignments #}
@@ -69,5 +68,4 @@
     <h6 class="col-8">{title}</h6>
     <h6 class="col-4 text-center">{duedate}</h6>
   </div>
-
 {% endmacro %}

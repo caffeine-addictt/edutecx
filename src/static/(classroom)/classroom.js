@@ -68,9 +68,9 @@ const renderTextbooks = async (textbookTemplate, div, selected, filteredList = f
         textbook_id: textbookData.id,
         cover_image: textbookData.cover_image
       })));
-      }
-    });
     }
+    });
+  }
     
   } else {
     (filteredList || textbookList).forEach(textbookData => {
@@ -231,7 +231,6 @@ $(async () => {
   })
 
 
-  console.log(textbooks);
   textbookList = await fetchTextbooks();
   renderTextbooks(chosenTextbooksTemplate, 'selected-list', textbooks)
   
