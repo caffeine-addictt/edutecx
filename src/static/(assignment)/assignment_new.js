@@ -1,7 +1,7 @@
 
 // Hooks
 $(() => {
-  const classroom_id = (new URL(location.href)).searchParams.get('classroom_id');
+  const classroom_id = (new URL(location.href)).searchParams.get('classroomID');
   const submitButton = $('#submit');
 
   $('#assignmentForm').on('submit', async e => {
@@ -32,7 +32,7 @@ $(() => {
     if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
     else {
       renderToast(response.message, 'success');
-      window.location.href = `/assignment/${response.data.assignment_id}`;
+      window.location.href = `/assignments/${response.data.assignment_id}`;
     };
 
     submitButton.attr('disabled', false);

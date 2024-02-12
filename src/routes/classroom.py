@@ -40,7 +40,11 @@ def classroom(user: UserModel, id: str):
       message='You are not a member of this classroom!',
     )
 
-  return render_template('(classroom)/classroom.html', classroom=classroom)
+  return render_template(
+    '(classroom)/classroom.html', 
+    classroom=classroom, 
+    textbook_ids=[i.id for i in classroom.textbooks]
+  )
 
 
 @app.route('/classrooms/edit/<string:id>', methods=['GET'])
@@ -80,6 +84,13 @@ def classroom_new(user: UserModel):
 def classroom_join(user: UserModel, id: str):
   id = escape_id(id)
 
+  for classroom in (user.classrooms + user.owned_classrooms):
+    if classroom.invite_id == id:
+      flash('You are already in this classroom', 'danger')
+      return redirect(
+        f'/classrooms/{classroom.id}', HTTPStatusCode.SEE_OTHER
+      ), HTTPStatusCode.SEE_OTHER
+
   response = requests.post(
     f'{request.url_root}api/v1/classroom/join',
     headers={'Authorization': f'Bearer {request.cookies.get("access_token_cookie")}'},
@@ -101,7 +112,7 @@ def classroom_join(user: UserModel, id: str):
     ), HTTPStatusCode.SEE_OTHER
 
 
-@app.route('/classroms/leave/<string:id>')
+@app.route('/classrooms/leave/<string:id>')
 @auth_provider.require_login
 def classroom_leave(_: UserModel, id: str):
   id = escape_id(id)
