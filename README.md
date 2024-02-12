@@ -1,334 +1,158 @@
-# Important
-`DO NOT commit directly to main`
-<br><br>
-Before doing anything:<br>
-
-> 1. `git branch`<br>
->       Make sure you are on the correct feature branch
->
-> 2. `git status`<br>
-        Make sure your files are up-to-date
->
-> 3. `git pull/merge`<br>
->       If you are not up-to-date (step2)
-
-<br><br><br><br><br>
-
-# SETUP
-How to setup your project for this?
-<br><br><br>
-
-## 1. Python Version
-Make sure you're running v3.10.11+
-<br><br>
-
-## 2. Code Editor
-Lets stick to VScode
-<br><br>
-
-## 3. Extensions
-`README.md Markdown`<br>
-https://marketplace.visualstudio.com/items?itemName=bierner.markdown-preview-github-styles
-
-`Basic IntelliSense`<br>
-https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.vscodeintellicode
-https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.intellicode-api-usage-examples
-https://marketplace.visualstudio.com/items?itemName=Zignd.html-css-class-completion
-https://marketplace.visualstudio.com/items?itemName=wholroyd.jinja
-
-`Python`<br>
-https://marketplace.visualstudio.com/items?itemName=ms-python.python
-https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance
-https://marketplace.visualstudio.com/items?itemName=ms-python.isort
-
-`SQLite Viewer`<br>
-https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer
-<br><br>
-
-## 4. Getting the project
-Install git
-<br><br>
-Ensure that you install both git CLI and git desktop<br>
-https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
-
-Clone github repository<br>
-If successful, you should see a new folder appear
-```sh
-git clone https://github.com/caffeine-addictt/NYP_Sem2_AppDev
-```
-<br><br>
-
-## 5a. Setup WSL (Windows)
-Open CMD and run the following and restart your machine
-```bash
-wsl --install -d Debian
-```
-
-Open CMD and enter WSL
-```bash
-wsl
-```
-
-Install dependencies
-```sh
-sudo apt update
-sudo apt upgrade
-sudo apt install git nano python3 python3-pip
-```
-
-Open VSCode in Debian WSL and continue.
-<br><br>
-
-## 5. Virturalize
-Create virtualenv
-```sh
-// !!IMPORTANT!!
-//
-// Ensure you `cd` into the project root folder
-// If successfuly, you should see a new folder apepar in your project root
-
-python3 -m venv venv
-```
-
-Start virtualenv<br>
-If successful, you should see `(venv)` in your terminal
-```sh
-source venv/bin/activate
-```
-
-Install python packages
-```sh
-pip install -r requirements.txt
-```
-<br><br>
+<a name="readme-top"></a>
 
-## 6. Creating a feature
-Ensure there isn't already an exisitng branch for it by running:<br>
-```sh
-// Globally lists branches
-git branch -r
-```
 
-If there is an existing branch, move on to **Step 7**<br>
-<br>
-Else, choose an all-encompassing name `(UserLoginPage, DatabaseHandler, etc.)`<br>
-Then create a branch;<br><br>
-If successful, running `git branch` will show your branch name.
 
-```sh
-// **from** > sub branch for structure:
-//   master:
-//     from:
-//       newFeature
-//
-// Leave blank if its a direct branch:
-//   master:
-//      newFeature
+<!-- PROJECT SHIELDS -->
+<div align="center">
 
+  <a href="[contributors-url]">[![Contributors][contributors-shield]][contributors-url]</a>
+  <a href="[forks-url]">[![Forks][forks-shield]][forks-url]</a>
+  <a href="[stars-url]">[![Stargazers][stars-shield]][stars-url]</a>
+  <a href="[issues-url]">[![Issues][issues-shield]][issues-url]</a>
+  <a href="[license-url]">[![BSD-3-Clause License][license-shield]][license-url]</a>
 
-// Creates branch and auto checkout(s) to branch
-git checkout -b <Your Feature Branch Name> <from>
+</div>
 
-// OR //
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <h3 align="center">EduTecX</h3>
 
-// Creates a branch
-git branch <Your Feature Branch Name> <from>
+  <p align="center">
+    Paving sustainable education pathways
+    <br />
+    <a href="https://github.com/caffeine-addictt/edutecx/issues">Report Bug</a>
+    ·
+    <a href="https://edutecx.ngjx.org">Live Demo</a>
+  </p>
+</div>
 
-// Checkout(s) to branch
-// **If it is a sub branch, checkout to the sub branch first**
-git checkout <Your Feature Branch Name> <from>
-```
 
-Next push your branch
 
-```sh
-// Sets up origin remote for new branch
-git push -u origin <Your Feature Branch Name>
-```
-<br><br>
+<!-- ABOUT THE PROJECT -->
+## About The Project
+> Application Development project @ Nanyang Polytechnic Singapore
 
-# 7. Accessing a feature
-Search for the feature's branch name with:
+This project aims to provide more environmental-friendly education materials.
+By bridging the gap between vendors, educators and students, we aim to make the learning process more sustainable and accessible.
 
-```sh
-// Globally lists branches
-git branch -r
-```
+To saving children's backs!
 
-Checkout the branch
-```sh
-// Checkout the whole branch trace from master if not successful
-git checkout <Feature Branch Name>
-```
+<br />
 
-Next push your branch
+> ![WARNING]
+> This project will not be maintained after 12/02/2024. However, issues and pull requests will still be accepted.
 
-```sh
-// Sets up origin remote for new branch
-git push -u origin <Your Feature Branch Name>
-```
+<br />
 
+### Contributors
 
-<br><br>
+- Team Leader: Alex [@caffeine-addictt](https://github.com/caffeine-addictt)
+- Team Member: [@AndrewAce](https://github.com/AndrewAce)
+- Team Member: [@chloelkl](https://github.com/chloelkl)
+- Team Member: [@maann1](https://github.com/maann1)
 
-# 8. Running Files
-Set environment variables
-```sh
-echo "ENV=development" >> .env
-```
+<br />
 
-Start server
-```sh
-gunicorn --bind=0.0.0.0:8000 --threads=3 --workers=3 --reload run:app
-```
+Live the live demo [here](https://edutecx.ngjx.org).
 
-Run with `--preload` and not `--reload` if the workers fail to boot for the error message
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
-<br><br>
+<!-- GETTING STARTED -->
+## Getting Started
 
-# 9. Clean Up
-After running, you may notice generation of pycache folders.
-These folders are useful as they speed up runtime execution through caching.
+This is an example of how you may set up your project locally.
+To get a local copy up and running follow these simple example steps.
 
-If you wish to remove them, Run the following:
-  - (etc) Between testing or cache issues
-  - Note that it will not remove pytest cache in proj root
+### Prerequisites
 
-```sh
-python -B -m clear_pycache.py
-```
-<br><br>
+* Python 3.11.2+
 
-# 10. Running production build locally
-```sh
-// Login on docker
-docker login --username <github-username> --password <github-accesstoken> ghcr.io
+### Installation
 
-// Pull remote docker image
-docker pull ghcr.io/caffeine-addictt-edutecx-build:latest
+_Below is an example of how you can install and set up your app._
 
-// List existing docker images
-docker images ls
+1. Clone the repository
+   ```sh
+   git clone https://github.com/caffeine-addictt/edutecx
+   cd edutecx
+   ```
+2. Install dependencies
+   ```sh
+   pip install -r requirements.txt
+   ```
+3. Write environment variables
+   ```sh
+   echo "ENV=development" >> .env
+   ```
+4. Start the server
+   ```sh
+   gunicorn --bind 0.0.0.0:8080 --workers=2 --threads=2 --worker-class=gthread --reload run:app
+   ```
 
-// Run docker image
-docker run -p 8080:8080 <first 3 characters of image ID>
-```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<br><br><br><br><br>
 
-# Coding Conventions
-`Here is what we will follow to keep our code organized`
-<br>
 
+<!-- ROADMAP -->
+## Roadmap
 
-<br>
-Indentation should be 2 spaces
+- [x] Release
 
-```py
-def testFunc():
-**testString = 'aa'
-**
-**for i in testString:
-****print(i)
-```
+See the [open issues](https://github.com/caffeine-addictt/edutecx/issues) for a full list of proposed features (and known issues).
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<br>
-Paranthesis () should immediately follow
 
-```py
-def myFunc(): ...  // YES
-print()            // YES
 
-print ()           // NO
-def myFunc (): ... // NO
-```
+<!-- CONTRIBUTING -->
+## Contributing
 
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. ( ˶ˆᗜˆ˵ )
 
-<br>
-Brackets "() {} []" with more than 4 elements or with elements long enough should be spread across lines
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
 
-```py
-doThis = {
-  'params': ['return_response'],
-  'data': [
-    'myData_key_23424feuifhfwerr3rdfsie8'
-  ]
-}
-```
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<br>
-Functions and variable names should be in camel case
 
-```py
-myVariable = 'hi'           // YES
-def myFunctionForAPI(): ... // YES
-def myFunctionForAPI(): ... // YES
 
-MyVariable = 'hi'           // NO
-def MyFunctionForAPI(): ... // NO
-```
+<!-- LICENSE -->
+## License
 
+Distributed under the GNU GENERAL PUBLIC LICENSE. See [`LICENSE`](./LICENSE) for more information.
 
-<br>
-Type and Class declarations should be in title case
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-```py
-class Vehicles: ...         // YES
-class MyVehicles: ...       // YES
-Registration = NewType(str) // YES
 
-class vehicles: ...         // NO
-class myVehicles: ...       // NO
-registration = NewType(str) // NO
-```
 
+<!-- CONTACT -->
+## Contact
 
-<br>
-Doc strings should follow this convention
+- Alex - contact@edutecx.ngjx.org
+- Project Link: [https://github.com/caffeine-addictt/edutecx](https://github.com/caffeine-addictt/edutecx)
 
-```py
-HashedPassword = str
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-def hashingPassword(
-  password: str,
-  encryption: str = 'sha256'
-) -> HashedPassword:
-  """
-  Hashes Password
-  Follows encryption conventions with sha256
 
-  Parameters
-  ----------
-  `password : str`, required
-    Should utilise sha256 if larger than 72 characaters
 
-  `encryption : str`, optional (default is 'sha256')
-    The encryption algorithm used to encode the password
-  
-    
-  Returns
-  -------
-  `HashedPassword : str`
-    The fully salted hash
-    
-
-  Raises
-  ------
-  `NotImplementedError`
-    If encryption algorithm is invalid
-
-
-  Examples
-  --------
-  >>> hashingPassword('myPass', 'sha256')
-  hash: wdjUW8w8dh8awhd83dj
-  >>> hashingPassword('myPass')
-  hash: wdjUW8w8dh8awhd83dj
-  """
-  ...
-  return hashed
-```
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/caffeine-addictt/edutecx.svg?style=for-the-badge
+[contributors-url]: https://github.com/caffeine-addictt/edutecx/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/caffeine-addictt/edutecx.svg?style=for-the-badge
+[forks-url]: https://github.com/caffeine-addictt/edutecx/network/members
+[stars-shield]: https://img.shields.io/github/stars/caffeine-addictt/edutecx.svg?style=for-the-badge
+[stars-url]: https://github.com/caffeine-addictt/edutecx/stargazers
+[issues-shield]: https://img.shields.io/github/issues/caffeine-addictt/edutecx.svg?style=for-the-badge
+[issues-url]: https://github.com/caffeine-addictt/edutecx/issues
+[license-shield]: https://img.shields.io/github/license/caffeine-addictt/edutecx.svg?style=for-the-badge
+[license-url]: https://github.com/caffeine-addictt/edutecx/blob/master/LICENSE
