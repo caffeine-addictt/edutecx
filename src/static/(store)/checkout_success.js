@@ -48,6 +48,12 @@ $(async () => {
 
 
   let counter = localStorage.getItem('cs_counter') || 0;
+  let counter_expiry = localStorage.getItem('cs_expiry') || 0;
+
+  if (counter_expiry < (new Date()).getTime()) {
+    counter = 0;
+  };
+
   while (true) {
     renderToast('Checking status...', 'info');
     stateController('Fetching');
@@ -69,6 +75,7 @@ $(async () => {
     const start = (new Date()).getTime();
     const maxWait = (2 ** counter) + 5 + Math.random();
     localStorage.setItem('cs_counter', ++counter);
+    localStorage.setItem('cs_expiry', start + 24 * 60 * 60 * 1000); // 1 day
 
     while (true) {
       const diff = ((new Date()).getTime() - start) / 1000;
