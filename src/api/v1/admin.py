@@ -98,14 +98,12 @@ def drawGraph(
   -------
   svg: StringIO
   """
-  XValue = datetime
-
   fetched: list[_TModel] = fetchAll(model, dateRange).all()
-  processed: list[Tuple[XValue, _TYValue | int]] = []
+  processed: list[Tuple[datetime, _TYValue | int]] = []
 
   try:
 
-    def _processor(m: _TModel) -> Tuple[XValue, _TYValue]:
+    def _processor(m: _TModel) -> Tuple[datetime, _TYValue]:
       return (m.created_at, axisY(m))
 
     process = ParallelProcessing(

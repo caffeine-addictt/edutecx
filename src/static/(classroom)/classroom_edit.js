@@ -24,7 +24,7 @@ $(() => {
         classroom_id: classroom_id,
         title: data.Title,
         description: data.Description,
-        invite_enabled: data['Invite Enabled'] || 'n'
+        invite_enabled: data['Invite Enabled'] ? 'y' : 'n'
       })
     }).then(res => {
       if (res.ok) {

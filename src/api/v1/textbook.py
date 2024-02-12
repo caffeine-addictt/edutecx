@@ -23,7 +23,7 @@ from src.utils.api import (
   GenericReply,
 )
 
-import cloudinary
+import cloudinary.exceptions
 from datetime import datetime
 from sqlalchemy import or_, and_
 from werkzeug.datastructures import FileStorage

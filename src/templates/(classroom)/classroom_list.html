@@ -23,9 +23,11 @@
           <h1>My Classrooms</h1>
         </div>
         <div class="col-3 d-flex justify-content-end" id="createcontainer">
-          <a href="/classrooms/new" id="createanchor">
-            <button class="btn custom-btn align-middle">Create</button>
-          </a>
+          {% if g.user.privilege == 'Educator' %}
+            <a href="/classrooms/new" id="createanchor">
+              <button class="btn custom-btn align-middle">Create</button>
+            </a>
+          {% endif %}
         </div>
       </div>
     </div>

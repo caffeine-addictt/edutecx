@@ -19,14 +19,13 @@ def assignments(user: UserModel):
 @auth_provider.require_login
 def assignment(user: UserModel, id: str):
   id = escape_id(id)
-  assignment = AssignmentModel.query.filter_by(AssignmentModel.id == id).first()
+  assignment = AssignmentModel.query.filter(AssignmentModel.id == id).first()
 
   if not isinstance(assignment, AssignmentModel):
     return render_template(
       '(assignment)/assignment_error.html', message='Assignment does not exist'
     )
-
-  if (user.privilege != 'Admin') or not assignment.classroom.is_member(user):
+  if (user.privilege != 'Admin') and not assignment.classroom.is_member(user):
     return render_template(
       '(assignment)/assignment_error.html',
       message='You do not have access to this assignment',
@@ -47,7 +46,7 @@ def assignment_new(_: UserModel):
 
   classroom = (
     classroomID
-    and ClassroomModel.query.filter_by(ClassroomModel.id == classroomID).first()
+    and ClassroomModel.query.filter(ClassroomModel.id == classroomID).first()
   )
   if not isinstance(classroom, ClassroomModel):
     return render_template(

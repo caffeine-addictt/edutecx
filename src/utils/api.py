@@ -638,12 +638,12 @@ class ClassroomCreateResponse(_APIResponse):
 # Classroom EDIT
 class ClassroomEditRequest(_APIRequest):
   """API Request for classroom editing"""
-  ignore_none   = True
   classroom_id  : Optional[str]
   title         : Optional[str]
   description   : Optional[str]
+  textbook_ids  : Optional[list[str]]
   cover_image   : Optional[str]
-  invite_enabled: Optional[bool]
+  invite_enabled: Optional[Boolean]
 
 ClassroomEditReply = GenericReply
 ClassroomEditResponse = GenericResponse
