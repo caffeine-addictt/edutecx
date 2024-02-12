@@ -239,20 +239,22 @@ def classroom_join_api(user: UserModel):
     ).to_dict(), HTTPStatusCode.FORBIDDEN
 
   # Impose limitations
-  if user in classroom.members:
-    return GenericReply(
+  if (user in classroom.members) or (user == classroom.owner):
+    return ClassroomJoinReply(
       message='You are already a member of this classroom',
-      status=HTTPStatusCode.FORBIDDEN,
-    ).to_dict(), HTTPStatusCode.FORBIDDEN
+      status=HTTPStatusCode.OK,
+      data=_ClassroomCreateData(classroom_id=classroom.id),
+    ).to_dict(), HTTPStatusCode.OK
 
-  if (classroom.owner.membership == 'Free') and (len(classroom.members) > 5):
+  elif (classroom.owner.membership == 'Free') and (len(classroom.members) > 5):
     return GenericReply(
       message='The classroom owner has reached the classroom limit',
       status=HTTPStatusCode.FORBIDDEN,
     ).to_dict(), HTTPStatusCode.FORBIDDEN
 
-  classroom.add_students(user)
-  classroom.save()
+  else:
+    classroom.add_students(user)
+    classroom.save()
 
   return ClassroomJoinReply(
     message='Successfully joined classroom',
