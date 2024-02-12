@@ -108,7 +108,7 @@
         </div>
       </div>
     </div>
-    
+
     {# Select Textbook Modal #}
     <div class="modal fade" id="textbook-modal" tabindex="-1" aria-labelledby="textbookModal" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -141,7 +141,9 @@
   {# injected macros to variables #}
   <script>
     var invite_id = `{{ classroom.invite_id }}`;
+    var classroom_id = `{{ classroom.id }}`;
     var textbookTemplate = `{{ render_textbooks() }}`;
+    var textbooks = eval(`{{ textbook_ids | safe }}`);
   </script>
   <script src="{{ url_for('static', filename = '(classroom)/classroom.js') }}"></script>
 {% endblock %}
