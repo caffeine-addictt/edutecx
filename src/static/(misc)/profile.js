@@ -47,8 +47,8 @@ $(() => {
   defaultValues = {
     'username': $('#username').val() || '',
     'email': $('#email').val() || '',
-    'password': $('#password').val() || '',
-    'confirmPassword': $('#confirmPassword').val() || '',
+    'password': '',
+    'confirmPassword': '',
     'profile__image': $('#profile__image').attr('src') || '',
   }
 
