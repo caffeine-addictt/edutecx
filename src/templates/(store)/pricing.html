@@ -28,9 +28,30 @@
                 <li>Limited to 5 students a classroom</li>
                 <li>Limited to 5 classrooms creation</li>
               </ul>
-              <a href='/register' class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto'>
-              Sign Up for Free
-              </a>
+
+              {% if not g.user %}
+                <a href='/register' class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto'>
+                  Sign Up for Free
+                </a>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Inactive')) %}
+                <a href='' class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto disabled'>
+                  Current plan
+                </a>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Active')) %}
+                <button id="cancel-subscription" class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto w-100'>
+                  Back to Free Plan
+                </button>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Cancelled')) %}
+                <a class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto disabled'>
+                  Back to Free Plan
+                </a>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -40,25 +61,76 @@
               <h4 class='my-0 fw-normal'>Read Plan</h4>
             </div>
             <div class='card-body'>
-              <h1 class='card-title pricing-card-title'>$29<small class='text-muted fw-light'>/mo</small></h1>
+              <h1 class='card-title pricing-card-title'>$49.99<small class='text-muted fw-light'>/mo</small></h1>
               <ul class='list-unstyled mt-3 mb-4'>
                 <li>Unlimited students in a classroom</li>
                 <li>Unlimited classroom creation</li>
               </ul>
-              <a href='/register' class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto' style='background-color:#003366;color:white;'>
-                Upgrade Now
-              </a>
+
+              {% if not g.user %}
+                <a href='/register' class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto' style='background-color:#003366;color:white;'>
+                  Sign Up Now!
+                </a>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Inactive')) %}
+                <button id="upgrade-subscription" class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto w-100' style='background-color:#003366;color:white;'>
+                  Upgrade Now!
+                </button>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Active')) %}
+                <a class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto disabled' style='background-color:#003366;color:white;'>
+                  Current Plan
+                </a>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Cancelled')) %}
+                <a class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto disabled' style='background-color:#003366;color:white;'>
+                  Cancels at the end of the month
+                </a>
+              {% endif %}
             </div>
           </div>
         </div>
       </div>
     </main>
+
+
+    {# Cancel Subscription Modal #}
+    <div class="modal fade" id="cancel-subscription-modal" tabindex="-1" aria-labelledby="cancelSubscriptionModal" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modal-long-title">Cancel Subscription</h5>
+            <button type="button" class="close btn" aria-label="Close" id="close-cancel-subscription-modal-small">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-0">
+              This action is <span class="text-danger">IRREVERSIBLE!</span>
+              <p class="text-secondary">Are you sure you want to continue?</p>
+            </p>
+
+            <div id="cancel-subscription-error-parent" class="bg-danger text-white rounded p-2 d-none"><span id="cancel-subscription-error"></span></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="close-cancel-subscription-modal-big">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirmed-cancel-subscription">Cancel Subscription</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 {% endblock %}
 
 
 {# Scripts #}
 {% block scripts %}
+  <script>
+    var subID = `{{ g.user and g.user.subscription_id }}`;
+  </script>
   <script src="https://js.stripe.com/v3"></script>
   <script src="{{ url_for('static', filename = '(store)/pricing.js') }}"></script>
 {% endblock %}
