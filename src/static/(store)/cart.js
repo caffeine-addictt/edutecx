@@ -55,9 +55,9 @@ $(async () => {
   // Populate HTML
   responses.forEach(res => {
     if (res.status === 200) {
-      $('#cart__items').append(
-        `<div> <a href="/store/${res.data.id}">${res.data.title}</a> </div>`
-      );
+      $('#cart__items').append(htmlToElement(formatString(deepCopy(itemTemplate), {
+        title: res.data.title
+      })));
     }
   });
 

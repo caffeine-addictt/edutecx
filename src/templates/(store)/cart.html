@@ -1,5 +1,6 @@
 <!doctype html>
 {% extends 'layout.html' %}
+{% from 'macros/store.html' import render_cartItem %}
 
 
 {# Title #}
@@ -30,9 +31,9 @@
 
 {# Scripts #}
 {% block scripts %}
+  <script>
+    var itemTemplate = `{{ render_cartItem() }}`;
+  </script>
   <script src="https://js.stripe.com/v3"></script>
-
-  {# Render injected macros to variables #}
-  {# <script></script> #}
   <script src="{{ url_for('static', filename = '(store)/cart.js') }}"></script>
 {% endblock %}
