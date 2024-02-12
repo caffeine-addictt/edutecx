@@ -80,6 +80,11 @@ def classroom_new(user: UserModel):
 def classroom_join(user: UserModel, id: str):
   id = escape_id(id)
 
+  if any([i.id == id for i in user.classrooms]):
+    return redirect(
+      f'/classrooms/{id}', HTTPStatusCode.SEE_OTHER
+    ), HTTPStatusCode.SEE_OTHER
+
   response = requests.post(
     f'{request.url_root}api/v1/classroom/join',
     headers={'Authorization': f'Bearer {request.cookies.get("access_token_cookie")}'},
