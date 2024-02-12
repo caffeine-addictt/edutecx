@@ -86,6 +86,7 @@ def classroom_join(user: UserModel, id: str):
     json={'invite_id': id},
   )
 
+  
   if response.status_code != HTTPStatusCode.OK:
     flash(response.json().get('message'), 'danger')
     return render_template(
@@ -101,7 +102,7 @@ def classroom_join(user: UserModel, id: str):
     ), HTTPStatusCode.SEE_OTHER
 
 
-@app.route('/classroms/leave/<string:id>')
+@app.route('/classrooms/leave/<string:id>')
 @auth_provider.require_login
 def classroom_leave(_: UserModel, id: str):
   id = escape_id(id)
