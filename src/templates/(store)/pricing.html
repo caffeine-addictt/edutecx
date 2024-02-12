@@ -28,9 +28,30 @@
                 <li>Limited to 5 students a classroom</li>
                 <li>Limited to 5 classrooms creation</li>
               </ul>
-              <a href='/register' class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto'>
-              Sign Up for Free
-              </a>
+
+              {% if not g.user %}
+                <a href='/register' class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto'>
+                  Sign Up for Free
+                </a>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Inactive')) %}
+                <a href='' class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto disabled'>
+                  Current plan
+                </a>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Active')) %}
+                <button id="cancel-subscription" class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto w-full'>
+                  Back to Free Plan
+                </button>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Cancelled')) %}
+                <a class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto disabled'>
+                  Back to Free Plan
+                </a>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -45,9 +66,30 @@
                 <li>Unlimited students in a classroom</li>
                 <li>Unlimited classroom creation</li>
               </ul>
-              <a href='/register' class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto' style='background-color:#003366;color:white;'>
-                Upgrade Now
-              </a>
+
+              {% if not g.user %}
+                <a href='/register' class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto' style='background-color:#003366;color:white;'>
+                  Sign Up Now!
+                </a>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Inactive')) %}
+                <button id="upgrade-subscription" class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto' style='background-color:#003366;color:white;'>
+                  Upgrade Now!
+                </button>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Active')) %}
+                <a class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto disabled' style='background-color:#003366;color:white;'>
+                  Current Plan
+                </a>
+              {% endif %}
+
+              {% if (g.user and (g.user.subscription_status == 'Cancelled')) %}
+                <a class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto disabled' style='background-color:#003366;color:white;'>
+                  Cancels at the end of the month
+                </a>
+              {% endif %}
             </div>
           </div>
         </div>
