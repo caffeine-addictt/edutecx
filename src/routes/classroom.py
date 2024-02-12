@@ -84,10 +84,12 @@ def classroom_new(user: UserModel):
 def classroom_join(user: UserModel, id: str):
   id = escape_id(id)
 
-  if any([i.id == id for i in user.classrooms]):
-    return redirect(
-      f'/classrooms/{id}', HTTPStatusCode.SEE_OTHER
-    ), HTTPStatusCode.SEE_OTHER
+  for classroom in (user.classrooms + user.owned_classrooms):
+    if classroom.invite_id == id:
+      flash('You are already in this classroom', 'danger')
+      return redirect(
+        f'/classrooms/{classroom.id}', HTTPStatusCode.SEE_OTHER
+      ), HTTPStatusCode.SEE_OTHER
 
   response = requests.post(
     f'{request.url_root}api/v1/classroom/join',
