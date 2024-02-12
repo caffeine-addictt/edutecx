@@ -40,7 +40,7 @@ To saving children's backs!
 
 <br />
 
-> ![WARNING]
+> [!WARNING]
 > This project will not be maintained after 12/02/2024. However, issues and pull requests will still be accepted.
 
 <br />
