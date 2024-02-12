@@ -10,16 +10,18 @@
 
 {# Body #}
 {% block mainContent %}
-  <div id="verify__container" class="d-flex flex-column gap-2 mx-auto my-2 ratio-16x9 w-50 h-50">
-    Verify Your Email
+  <div id="verify__container" class="d-flex flex-column gap-2 mx-auto my-2 ratio-16x9 w-50 shadow p-3 mb-5 bg-body rounded p-5 mt-5" style="font-family:--font;">
+    <h2 class="text-center fw-bold">Verify Your Email</h2>
 
     {# Form to enter verification code #}
-    <form action="" submit="e => e.preventDefault()">
-      <input type="text" id="verification-code" class="form-control" placeholder="Enter verification code"/>
-      <button id="verify-email-button" type="button" class="btn btn-primary" > Verify Email </button>
+    <form action="" submit="e => e.preventDefault()" class="mx-auto">
+      <div class="mb-3">
+        <input type="text" id="verification-code" class="form-control" placeholder="Enter verification code"/>
+      </div>
+      <button id="verify-email-button" type="button" class="btn btn-primary w-100 mt-3">Verify Email</button>
     </form>
 
-    <button id="resend-email-button" type="button" class="text-decoration-underline" > Resend Email </button>
+    <button id="resend-email-button" type="button" class="btn btn-link text-decoration-none mx-auto">Resend Email</button>
   </div>
 {% endblock %}
 
