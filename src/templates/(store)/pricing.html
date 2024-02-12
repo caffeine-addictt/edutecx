@@ -10,50 +10,49 @@
 
 {# Body #}
 {% block mainContent %}
-  <h1>Our Pricing Models</h1>
-
-  <div id="pricing__container" class="d-flex flex-row gap-2 mx-auto my-2 ratio-16x9 w-50 h-50">
-
-    {# Free Tier #}
-    <div class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-      <h2>Free Tier</h2>
-
-      {# Benefits #}
-      <div class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-        <span>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </span>
-        <span>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </span>
-      </div>
-
-      {# Button greyed out and disabled #}
-      <button id="free-button" type="button" class="btn btn-primary" disabled>
-        Get
-      </button>
+  <div class='container py-3 my-5' style='font-family: var(--font)'>
+    <div class='pricing-header p-3 pb-md-4 mx-auto text-center'>
+      <h1 class='display-4 fw-normal'>Our Membership</h1>
+      <p class='fs-5 text-muted'>Want access to more privileges?</p>
     </div>
-
-    {# Unlimited Tier #}
-    <div class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-      <h2>Unlimited Tier</h2>
-
-      {# Benefits #}
-      <div class="d-flex flex-column gap-2 my-2 ratio-16x9 w-50 h-50">
-        <span>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </span>
-        <span>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </span>
+    <main>
+      <div class='row row-cols-1 row-cols-md-2 mb-2 text-center'>
+        <div class='col'>
+          <div class='card mb-4 rounded-3 shadow-sm'>
+            <div class='card-header py-3'>
+              <h4 class='my-0 fw-normal'>Free</h4>
+            </div>
+            <div class='card-body'>
+              <h1 class='card-title pricing-card-title'>$0<small class='text-muted fw-light'>/mo</small></h1>
+              <ul class='list-unstyled mt-3 mb-4'>
+                <li>Limited to 5 students a classroom</li>
+                <li>Limited to 5 classrooms creation</li>
+              </ul>
+              <a href='/register' class='btn btn-white btn-lg border border-dark px-4 gap-3 px-5y d-block mx-auto'>
+              Sign Up for Free
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class='col'>
+          <div class='card mb-4 rounded-3 shadow-sm'>
+            <div class='card-header py-3 text-white' style='background-color:#003366;color:white;'>
+              <h4 class='my-0 fw-normal'>Read Plan</h4>
+            </div>
+            <div class='card-body'>
+              <h1 class='card-title pricing-card-title'>$29<small class='text-muted fw-light'>/mo</small></h1>
+              <ul class='list-unstyled mt-3 mb-4'>
+                <li>Unlimited students in a classroom</li>
+                <li>Unlimited classroom creation</li>
+              </ul>
+              <a href='/register' class='btn btn-lg px-4 gap-3 px-5y d-block mx-auto' style='background-color:#003366;color:white;'>
+                Upgrade Now
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {# Button #}
-      <button id="unlimited_button" type="button" class="btn btn-primary">
-        Get
-      </button>
-    </div>
-
+    </main>
   </div>
 {% endblock %}
 
