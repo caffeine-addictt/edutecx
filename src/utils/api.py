@@ -644,7 +644,7 @@ class ClassroomEditRequest(_APIRequest):
   description   : Optional[str]
   textbook_ids  : Optional[list[str]]
   cover_image   : Optional[str]
-  invite_enabled: Optional[bool]
+  invite_enabled: Optional[Boolean]
 
 ClassroomEditReply = GenericReply
 ClassroomEditResponse = GenericResponse
