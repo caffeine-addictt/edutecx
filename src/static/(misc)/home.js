@@ -7,7 +7,7 @@ const renderTextbooks = async () => {
   $('#textbook__container').empty();
 
   /** @type {APIJSON<TextbookGetData[]>} */
-  const response = await fetch('/api/v1/textbook/list?per_page=4&criteria=or')
+  const response = await fetch('/api/v1/textbook/list?per_page=4&max_per_page=4&criteria=or')
     .then(res => res.json())
     .catch(err => console.log(err));
 
@@ -15,7 +15,7 @@ const renderTextbooks = async () => {
     renderToast(response ? response.message : 'Something went wrong fetching textbooks!', 'danger');
   }
   else {
-    response.data.forEach((item) => {
+    response.data.slice(0, 4).forEach((item) => {
       $('#textbook__container').append(htmlToElement(formatString(deepCopy(textbookTemplate), {
         title: item.title,
         description: item.description,
@@ -34,7 +34,7 @@ const renderClassrooms = async () => {
   $('#classroom__container').empty();
 
   /** @type {APIJSON<ClassroomGetData[]>} */
-  const response = await fetch('/api/v1/classroom/list?per_page=4&criteria=or')
+  const response = await fetch('/api/v1/classroom/list?per_page=4&max_per_page=4&criteria=or')
     .then(res => res.json())
     .catch(err => console.log(err));
 
@@ -42,7 +42,7 @@ const renderClassrooms = async () => {
     renderToast(response ? response.message : 'Something went wrong fetching classrooms!', 'danger');
   }
   else {
-    response.data.forEach((item) => {
+    response.data.slice(0, 3).forEach((item) => {
       $('#classroom__container').append(htmlToElement(formatString(deepCopy(classroomTemplate), {
         title: item.title,
       })))
