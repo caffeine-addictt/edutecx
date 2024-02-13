@@ -8,8 +8,8 @@
 {% endblock %}
 
 {% block styles %}
-    {# Register SCSS #}
-    <link href = '{{ url_for("static", filename = "(auth)/login-register.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
+  {# Register SCSS #}
+  <link href = '{{ url_for("static", filename = "(auth)/login-register.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
 {% endblock %}
 
 {# Body #}
@@ -103,7 +103,5 @@
 
 
 {% block scripts %}
-  <script>
-  </script>
   <script src='{{ url_for("static", filename = "(auth)/register.js") }}'></script>
 {% endblock %}
