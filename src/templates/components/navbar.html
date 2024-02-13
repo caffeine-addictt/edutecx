@@ -78,7 +78,13 @@
 
           <li class='nav-item'>
             <a href='/profile' class='nav-link'>
-              <img src='/static/assets/icons/profile_icon.png' alt='profile' width='30px' height='30px'>
+              <img
+                src='{{ g.user.profile_image and g.user.profile_image.uri or "/static/assets/icons/profile_icon.png" }}'
+                alt=''
+                width='30px'
+                height='30px'
+                class="rounded-circle"
+              />
             </a>
           </li>
         </ul>
