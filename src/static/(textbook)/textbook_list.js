@@ -94,7 +94,7 @@ $(async () => {
 
   // 500ms debounce for search inputs
   searchInput.on('input', (/** @type {JQuery.Input} */e) => {
-    searchInput.text(e.target.value);
+    searchInput.text(e.target.value.trim());
 
     if (queryToRun) {clearTimeout(queryToRun); console.log('clearing');};
     queryToRun = setTimeout(async () => {
