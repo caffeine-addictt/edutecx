@@ -6,6 +6,7 @@ Setup Flask Environment Variables
 
 import os
 import inspect
+from datetime import timedelta
 from typing import Literal, Optional, Mapping, Callable, Any, overload
 
 from dotenv import load_dotenv
@@ -91,9 +92,11 @@ class ConfigBase:
   # \\\\\\ JWT ////// #
   # Docs https://flask-jwt-extended.readthedocs.io/en/3.0.0_release/options/
   JWT_SECRET_KEY: SecretVar
+  JWT_SESSION_COOKIE: bool = False
+  JWT_COOKIE_SECURE: bool = False
   JWT_TOKEN_LOCATION: list[str] = ['headers', 'cookies', 'json']
-  JWT_ACCESS_TOKEN_EXPIRES: int = 60 * 60 # 1h in seconds
-  JWT_REFRESH_TOKEN_EXPIRES: int = 30 * 24 * 60 * 60 #30 days in seconds
+  JWT_ACCESS_TOKEN_EXPIRES: int | timedelta = timedelta(minutes=15)
+  JWT_REFRESH_TOKEN_EXPIRES: int | timedelta = timedelta(days=30)
   PROPAGATE_EXCEPTIONS: bool = True
 
 
@@ -148,6 +151,7 @@ class ProductionConfig(ConfigBase):
   DEBUG = False
   SECRET_KEY = lambda: getEnv('SECRET_KEY', strict = True)
 
+  JWT_COOKIE_SECURE = True
   JWT_SECRET_KEY = lambda: getEnv('JWT_SECRET_KEY', strict = True)
 
   RESEND_API_KEY = lambda: getEnv('RESEND_API_KEY', strict = True)
