@@ -1365,6 +1365,25 @@ class AdminGraphGetRequest(_APIRequest):
 
 
 
+# Admin Stats GET
+@dataclass
+class _AdminStatsGetData(_APIBase):
+  user_count: int
+  textbook_count: int
+  revenue: float
+
+@dataclass
+class AdminStatsGetReply(_APIReply):
+  """API Reply for fetching admin stats"""
+  data: _AdminStatsGetData
+
+
+
+
+
+
+
+
 # Contact Request
 class ContactRequest(_APIRequest):
   type: Literal['General', 'Bug Report', 'Feature Request', 'Other']

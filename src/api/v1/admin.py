@@ -6,7 +6,7 @@ import numpy
 import logging
 from io import StringIO
 from sqlalchemy import and_
-from functools import cache
+from functools import cache, lru_cache
 from datetime import datetime
 import matplotlib.pyplot as plt
 from thread import ParallelProcessing
@@ -23,7 +23,7 @@ from src.database import UserModel, SaleModel, TextbookModel
 from src.utils.http import HTTPStatusCode
 from src.service import auth_provider
 from src.utils.ext import utc_time
-from src.utils.api import AdminGraphGetRequest, GenericReply
+from src.utils.api import AdminGraphGetRequest, AdminStatsGetReply, _AdminStatsGetData, GenericReply
 
 
 # Mute matplotlib INFO stdout
@@ -263,3 +263,26 @@ def admin_export_api(_: UserModel | None, exportFor: str):
       'Content-Disposition': f'attachment; filename={exportFor}-{datetime.now().isoformat()}.csv'
     },
   )
+
+
+@app.route(f'{basePath}/stats', methods=['GET'])
+@auth_provider.require_admin
+@lru_cache(maxsize=1)
+def admin_stats_api(_: UserModel):
+  users: list[UserModel] = fetchAll(UserModel).all()
+  textbooks: list[TextbookModel] = fetchAll(TextbookModel).all()
+  sales: list[SaleModel] = fetchAll(SaleModel).all()
+
+  userCount = len(users)
+  textbookCount = len(textbooks)
+  revenue = sum([ i.total_cost for i in sales if i.paid ])
+
+  return AdminStatsGetReply(
+    message='Successfully fetched stats',
+    status=HTTPStatusCode.OK,
+    data = _AdminStatsGetData(
+      user_count = userCount,
+      textbook_count = textbookCount,
+      revenue = revenue
+    )
+  ).to_dict(), HTTPStatusCode.OK
