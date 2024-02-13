@@ -7,10 +7,12 @@
   Admin Homepage - EduTecX
 {% endblock %}
 
+
 {% block styles %}
   {# Admin SCSS #}
   <link href = '{{ url_for("static", filename = "(admin)/index.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
 {% endblock %}
+
 
 <!-- Body -->
 {% block mainContent %}
@@ -37,21 +39,21 @@
         <h2>Number</h2>
         <h5>Active Users</h5>
         <p>Text<p>
-        <button class="btn btn-outline-dark">View Users</button>
+        <a class="btn btn-outline-dark" href="/dashboard/users">View Users</a>
       </div>
       <div class="col-md-4 custom-column rounded">
         <i class="bi bi-bar-chart-line-fill fs-1"></i>
         <h2>Number</h2>
         <h5>Total Revenue</h5>
         <p>Text<p>
-        <button class="btn btn-outline-dark">View Revenue</button>
+        <a class="btn btn-outline-dark" href="/dashboard/revenue">View Revenue</a>
       </div>
       <div class="col-md-4 custom-column rounded">
         <i class="bi bi-book-fill fs-1"></i>
         <h2>Number</h2>
         <h5>Textbooks Published</h5>
         <p>Text<p>
-        <button class="btn btn-outline-dark">View Textbooks</button>
+        <a class="btn btn-outline-dark" href="/dashboard/textbooks">View Textbooks</a>
       </div>
     </div>
   </div>
