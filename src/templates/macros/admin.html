@@ -3,9 +3,16 @@
 
 {# User Entry Template #}
 {% macro render_user_entry() %}
+  <style>
+    .private:not(:hover) {
+      color: transparent;
+      text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    };
+  </style>
+
   <tr>
     <th id="user__id" class="w-25 h-auto" scope="row">{user_id}</td>
-    <td id="user__email" class="w-25 h-auto">{user_email}</td>
+    <td id="user__email" class="w-25 h-auto private">{user_email}</td>
     <td id="user__type" class="w-25 h-auto">{user_type}</td>
     <td id="user__status" class="w-25 h-auto">{user_status}</td>
 
