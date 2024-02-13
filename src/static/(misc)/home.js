@@ -16,7 +16,7 @@ const renderTextbooks = async () => {
   } else if (response.data == 0) {
     $('#textbook__container').append(htmlToElement(
       `
-      <a class="col text-decoration-none" href="/store">
+      <a class="col text-decoration-none" href="/store" style="max-width:15rem;">
         <div class="card mb-3 mt-5">
           <div class="card-body d-flex flex-column align-items-center justify-content-center">
             <img alt="Add textbooks" src="/static/assets/icons/add_icon.png" class="img-fluid mb-4" style="min-width:200px; max-width:200px; min-height:220px; max-height:220px;">
@@ -58,7 +58,7 @@ const renderClassrooms = async () => {
   } else if (response.data == 0) {
     $('#classroom__container').append(htmlToElement(
       `
-      <a class="col text-decoration-none" href="/classrooms/new">
+      <a class="col text-decoration-none" href="/classrooms/new" style="max-width:25rem;">
         <div class="card mb-3 mt-5">
           <div class="card-body d-flex flex-column align-items-center justify-content-center">
             <img alt="Add Class" src="/static/assets/icons/add_icon.png" class="img-fluid mb-4" style="min-width:200px; max-width:200px; min-height:220px; max-height:220px;">

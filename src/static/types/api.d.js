@@ -107,3 +107,11 @@
  * @property {number} created_at
  * @property {number} updated_at
  */
+
+
+/**
+ * @typedef {Object} AdminStatsGetData
+ * @property {number} user_count
+ * @property {number} textbook_count
+ * @property {number} revenue
+ */

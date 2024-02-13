@@ -7,10 +7,12 @@
   Admin Homepage - EduTecX
 {% endblock %}
 
+
 {% block styles %}
   {# Admin SCSS #}
   <link href = '{{ url_for("static", filename = "(admin)/index.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
 {% endblock %}
+
 
 <!-- Body -->
 {% block mainContent %}
@@ -34,26 +36,29 @@
     <div class="row" style="width:90%; margin-left:auto; margin-right:auto; padding:3rem 7rem; background-color:#faf9f5;">
       <div class="col-md-4 custom-column rounded">
         <i class="bi bi-people-fill fs-1"></i>
-        <h2>Number</h2>
-        <h5>Active Users</h5>
-        <p>Text<p>
-        <button class="btn btn-outline-dark">View Users</button>
+        <h3>Active Users</h3>
+        <p id="active-users">0<p>
+        <a class="btn btn-outline-dark" href="/dashboard/users">View Users</a>
       </div>
       <div class="col-md-4 custom-column rounded">
         <i class="bi bi-bar-chart-line-fill fs-1"></i>
-        <h2>Number</h2>
-        <h5>Total Revenue</h5>
-        <p>Text<p>
-        <button class="btn btn-outline-dark">View Revenue</button>
+        <h3>Total Revenue</h3>
+        <p id="total-revenue">$0<p>
+        <a class="btn btn-outline-dark" href="/dashboard/revenue">View Revenue</a>
       </div>
       <div class="col-md-4 custom-column rounded">
         <i class="bi bi-book-fill fs-1"></i>
-        <h2>Number</h2>
-        <h5>Textbooks Published</h5>
-        <p>Text<p>
-        <button class="btn btn-outline-dark">View Textbooks</button>
+        <h3>Textbooks Published</h3>
+        <p id="total-textbooks">0<p>
+        <a class="btn btn-outline-dark" href="/dashboard/textbooks">View Textbooks</a>
       </div>
     </div>
   </div>
 
+{% endblock %}
+
+
+{# Scripts #}
+{% block scripts %}
+  <script src="{{ url_for('static', filename = '(admin)/index.js') }}"></script>
 {% endblock %}
