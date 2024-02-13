@@ -50,6 +50,9 @@ def user_list_api(user: UserModel):
   req = UserListRequest(request)
 
   # Handle query
+  req.createdLower = float(req.createdLower or 0)
+  req.createdUpper = float(req.createdUpper or 0)
+
   dateRange: DateRange = (
     datetime.fromtimestamp(req.createdLower)
     if float('inf') != req.createdLower
@@ -65,7 +68,7 @@ def user_list_api(user: UserModel):
       status=HTTPStatusCode.BAD_REQUEST,
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  if req.query == 'None':
+  if not req.query or req.query == 'None':
     req.query = ''
 
   # Build query
@@ -74,10 +77,7 @@ def user_list_api(user: UserModel):
       dateRange[0] <= UserModel.created_at,
       UserModel.created_at <= dateRange[1],
     ),
-    or_(
-      UserModel.id.contains(req.query),
-      UserModel.username.contains(req.query),
-    ),
+    UserModel.username.contains(req.query)
   ]
 
   filtered = UserModel.query.filter(
