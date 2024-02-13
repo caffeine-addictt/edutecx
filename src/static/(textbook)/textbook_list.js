@@ -86,7 +86,39 @@ $(async () => {
 
   // Hooks
   const searchInput = $('#searchbar');
-  searchInput.on('input', () => {
-    renderTextbooks(filterTextbooks(textbookList, searchInput.val()));
+  searchInput.text((new URL(location.href)).searchParams.get('query') || '');
+
+  /** @type {ReturnType<setTimeout>?} */
+  let queryToRun;
+
+
+  // 500ms debounce for search inputs
+  searchInput.on('input', (/** @type {JQuery.Input} */e) => {
+    searchInput.text(e.target.value);
+
+    if (queryToRun) {clearTimeout(queryToRun); console.log('clearing');};
+    queryToRun = setTimeout(async () => {
+      const searchParams = ((new URL(location.href)).searchParams);
+      if (searchInput.text()) searchParams.set('query', searchInput.text());
+      else searchParams.delete('query');
+
+      const stringifiedParams = searchParams.toString();
+      if (stringifiedParams === location.search) return;
+
+      // Modify URL
+      const newURL = `${location.pathname}${stringifiedParams ? `?${stringifiedParams}` : ''}`;
+      if (newURL === location.href) return;
+
+      // Modify URL if possible else Reload
+      if (window?.history?.pushState) {
+        window.history.pushState({}, '', newURL);
+
+        textbookList = await fetchTextbooks();
+        renderTextbooks();
+      }
+      else {
+        location.href = newURL;
+      };
+    }, 500);
   });
 });
