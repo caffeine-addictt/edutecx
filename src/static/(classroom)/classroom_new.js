@@ -21,11 +21,7 @@ $(() => {
         description: data.Description,
         invite_enabled: data['Invite Enabled'] || 'n'
       })
-    }).then(res => {
-      if (res.ok) {
-        return res.json();
-      };
-    });
+    }).then(res => res.json()).catch(err => console.log(err));
 
     if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
     else {
