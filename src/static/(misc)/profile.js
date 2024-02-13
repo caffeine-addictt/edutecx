@@ -15,20 +15,20 @@ const handleChange = () => {
   };
 
   for (const key in defaultValues) {
-    if (
-      ((defaultValues[key] || '') !== $(`[id='${key}']`).val())
-      ||
-      (key === 'profile__image' && (defaultValues[key] || '') !== $(`[id='${key}']`).attr('src'))
-    ) {
-
-      // Animate "Cancel Changes" button to visible
-      $('#cancel-changes-button').removeClass('opacity-0 disabled');
-      $('#cancel-changes-button').addClass('opacity-100');
-
-      // Ungrey save button
-      $('#submit').attr('disabled', false);
-      return;
+    if (key === 'profile__image' && ($(`[id='${key}']`).attr('src') === defaultValues[key])) {
+      continue;
+    }
+    else if ((defaultValues[key] || '') === $(`[id='${key}']`).val()) {
+      continue;
     };
+
+    // Animate "Cancel Changes" button to visible
+    $('#cancel-changes-button').removeClass('opacity-0 disabled');
+    $('#cancel-changes-button').addClass('opacity-100');
+
+    // Ungrey save button
+    $('#submit').attr('disabled', false);
+    return;
   };
 
   // Animate "Cancel Changes" button to not visible

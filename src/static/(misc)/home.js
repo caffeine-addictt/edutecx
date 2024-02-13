@@ -19,8 +19,8 @@ const renderTextbooks = async () => {
       $('#textbook__container').append(htmlToElement(formatString(deepCopy(textbookTemplate), {
         title: item.title,
         description: item.description,
-        uri: item.cover_image,
-        id: item.id
+        id: item.id,
+        uri: item.cover_image ?? ''
       })))
     });
   };
