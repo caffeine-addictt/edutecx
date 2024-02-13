@@ -99,6 +99,8 @@ $(async () => {
     searchInput.text(e.target.value.trim());
 
     if (queryToRun) clearTimeout(queryToRun);
+    if (fetchController) fetchController.abort();
+
     queryToRun = setTimeout(async () => {
       const searchParams = ((new URL(location.href)).searchParams);
       if (searchInput.text()) searchParams.set('query', searchInput.text());
