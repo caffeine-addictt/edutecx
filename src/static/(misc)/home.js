@@ -19,7 +19,7 @@ const renderTextbooks = async () => {
       $('#textbook__container').append(htmlToElement(formatString(deepCopy(textbookTemplate), {
         title: item.title,
         description: item.description,
-        uri: item.cover_image
+        uri: item.cover_image ?? ''
       })))
     });
   };
