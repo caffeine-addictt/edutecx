@@ -7,52 +7,53 @@
   Admin Homepage - EduTecX
 {% endblock %}
 
+{% block styles %}
+    {# Admin SCSS #}
+    <link href = '{{ url_for("static", filename = "(admin)/index.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
+{% endblock %}
 
 <!-- Body -->
 {% block mainContent %}
-  <div class="d-flex gap-5 flex-wrap align-items-center justify-content-center mx-auto my-auto" style="min-height: calc(100vh - 64px)">
-
-    <div class="card px-3 py-2" style="width: fit-content; max-width: 30rem;">
-      <div class="card-header">
-        Users
+  {# Users #}
+  <div class="container-fluid w-100 mt-5" style="font-family:--font;">
+    <div id="profile__container" class="d-flex justify-content-between gap-2 my-2 ratio-16x9" style="width:90%; margin-left:auto; margin-right:auto; padding:3rem 7rem; background-color:#faf9f5;">
+      <div>
+        <h1 class="fw-bold">Welcome back! <span class="fw-bold h3">(Admin)</span></h1>
+        {# Admin Username#}
+        <h2> {{ g.user.username }}</h2>
       </div>
-      <div class="card-body">
-        <ol>
-          <li>Manage User accounts</li>
-          <li>View User statistics</li>
-        </ol>
+      <div class="mt-auto mb-auto">
+        <a class="btn btn-outline-dark btn-lg" href="/dashboard/users" role="button" style="padding:0.7rem 2rem">
+          View Profile
+        </a>
       </div>
-
-      <a href="/dashboard/users" class="btn btn-primary">View Users</a>
-    </div>
-
-    <div class="card px-3 py-2" style="width: fit-content; max-width: 30rem;">
-      <div class="card-header">
-        Textbooks
-      </div>
-
-      <div class="card-body">
-        <ol>
-          <li>Manage Textbook information</li>
-          <li>View Textbook statistics</li>
-        </ol>
-      </div>
-
-      <a href="/dashboard/textbooks" class="btn btn-primary">View Textbooks</a>
-    </div>
-
-    <div class="card px-3 py-2" style="width: fit-content; max-width: 30rem;">
-      <div class="card-header">
-        Revenue
-      </div>
-
-      <div class="card-body">
-        <ol>
-          <li>View Revenue statistics</li>
-        </ol>
-      </div>
-
-      <a href="/dashboard/revenue" class="btn btn-primary">View Revenue</a>
     </div>
   </div>
+
+  <div class="container-fluid custom-container w-100 mt-3">
+    <div class="row" style="width:90%; margin-left:auto; margin-right:auto; padding:3rem 7rem; background-color:#faf9f5;">
+      <div class="col-md-4 custom-column rounded">
+        <i class="bi bi-people-fill fs-1"></i>
+        <h2>Number</h2>
+        <h5>Active Users</h5>
+        <p>Text<p>
+        <button class="btn btn-outline-dark">View Users</button>
+      </div>
+      <div class="col-md-4 custom-column rounded">
+        <i class="bi bi-bar-chart-line-fill fs-1"></i>
+        <h2>Number</h2>
+        <h5>Total Revenue</h5>
+        <p>Text<p>
+        <button class="btn btn-outline-dark">View Revenue</button>
+      </div>
+      <div class="col-md-4 custom-column rounded">
+        <i class="bi bi-book-fill fs-1"></i>
+        <h2>Number</h2>
+        <h5>Textbooks Published</h5>
+        <p>Text<p>
+        <button class="btn btn-outline-dark">View Textbooks</button>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
