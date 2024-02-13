@@ -49,8 +49,6 @@ def serve(
     if not uploadData:
       raise NotFound()
 
-    print(uploadData)
-
     return send_file(
       requests.get(uploadData['secure_url'], stream=True).raw,
       mimetype=f'{uploadData["resource_type"] if location != "textbook-uploads" else "application"}/{uploadData["format"]}',
