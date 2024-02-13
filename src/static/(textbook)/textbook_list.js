@@ -5,6 +5,9 @@
  */
 let textbookList = [];
 
+/** @type {AbortController?} */
+let fetchController;
+
 
 
 
@@ -13,6 +16,10 @@ let textbookList = [];
  * @returns {Promise<Array.<TextbookGetData>>}
  */
 const fetchTextbooks = async () => {
+  // Abort previous
+  if (fetchController) fetchController.abort();
+  fetchController = new AbortController();
+
   let searchParams = ((new URL(location.href)).searchParams);
   let criteria = searchParams.get('criteria');
   criteria = ['or', 'and'].includes(criteria) ? criteria : 'or';
@@ -23,7 +30,8 @@ const fetchTextbooks = async () => {
   /** @type {APIJSON<TextbookGetData[]> | void} */
   const data = await fetch(`/api/v1/textbook/list?${searchParams.toString()}`, {
     method: 'GET',
-    headers: { 'X-CSRF-TOKEN': getAccessToken() }
+    headers: { 'X-CSRF-TOKEN': getAccessToken() },
+    signal: fetchController.signal
   }).then(res => res.json()).catch(e => console.log(e));
 
   if (!data || data.status !== 200) {
@@ -77,4 +85,8 @@ $(async () => {
 
 
   // Hooks
+  const searchInput = $('#searchbar');
+  searchInput.on('input', () => {
+    renderTextbooks(filterTextbooks(textbookList, searchInput.val()));
+  });
 });
