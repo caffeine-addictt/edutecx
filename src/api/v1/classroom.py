@@ -8,6 +8,7 @@ from src.utils.http import HTTPStatusCode, escape_id
 from src.service.auth_provider import require_login
 from src.utils.ext import utc_time
 from src.utils.api import (
+  ClassroomListRequest,
   ClassroomListReply,
   _ClassroomListData,
   ClassroomGetRequest,
@@ -27,6 +28,7 @@ from src.utils.api import (
   GenericReply,
 )
 
+from datetime import datetime
 from flask_limiter import util
 from flask import request, current_app as app
 
@@ -37,11 +39,37 @@ auth_limit = limiter.shared_limit(
   '100 per hour', scope=lambda _: request.host, key_func=util.get_remote_address
 )
 
+DateRange = tuple[datetime, datetime] | datetime | None
+
 
 @app.route(f'{basePath}/list', methods=['GET'])
 @auth_limit
 @require_login
 def classroom_list_api(user: UserModel):
+  req = ClassroomListRequest(request)
+
+  # Handle query
+  req.createdLower = float(req.createdLower or 0)
+  req.createdUpper = float(req.createdUpper or 0)
+
+  dateRange: DateRange = (
+    datetime.fromtimestamp(req.createdLower)
+    if float('inf') != req.createdLower
+    else utc_time.skip('1day'),
+    datetime.fromtimestamp(req.createdUpper)
+    if float('inf') != req.createdUpper
+    else utc_time.skip('1day'),
+  )
+
+  if dateRange[0] > dateRange[1]:
+    return GenericReply(
+      message='createdLower is larger than createdUpper',
+      status=HTTPStatusCode.BAD_REQUEST,
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if not req.query or req.query == 'None':
+    req.query = ''
+
   return ClassroomListReply(
     message='Successfully fetched classrooms',
     status=HTTPStatusCode.OK,
@@ -56,6 +84,21 @@ def classroom_list_api(user: UserModel):
         created_at=classroom.created_at.timestamp(),
       )
       for classroom in (user.classrooms + user.owned_classrooms)
+      if (
+        (
+          (req.criteria == 'and') and (
+            (dateRange[0] <= classroom.created_at)
+            and (classroom.created_at <= dateRange[1])
+            and (req.query in classroom.title)
+          )
+        )
+        or (
+          (req.criteria == 'or') and (
+            (dateRange[0] <= classroom.created_at and classroom.created_at <= dateRange[1])
+            or (req.query in classroom.title)
+          )
+        )
+      )
     ],
   ).to_dict(), HTTPStatusCode.OK
 
