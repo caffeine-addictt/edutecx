@@ -19,7 +19,8 @@ const renderTextbooks = async () => {
       $('#textbook__container').append(htmlToElement(formatString(deepCopy(textbookTemplate), {
         title: item.title,
         description: item.description,
-        uri: item.cover_image
+        uri: item.cover_image,
+        id: item.id
       })))
     });
   };
@@ -45,6 +46,7 @@ const renderClassrooms = async () => {
     response.data.slice(0, 3).forEach((item) => {
       $('#classroom__container').append(htmlToElement(formatString(deepCopy(classroomTemplate), {
         title: item.title,
+        id: item.id
       })))
     });
   };
