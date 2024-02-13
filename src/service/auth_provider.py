@@ -450,6 +450,15 @@ def require_educator(
         verification_redirect % parse.quote_plus(request.path),
         code = HTTPStatusCode.SEE_OTHER
       ), HTTPStatusCode.SEE_OTHER
+    
+    if user.privilege not in ['Educator', 'Admin']:
+      if unauthorized_redirect:
+        return redirect(
+          unauthorized_redirect,
+          code = HTTPStatusCode.SEE_OTHER
+        ), HTTPStatusCode.SEE_OTHER
+      else:
+        raise Unauthorized()
 
     return __function(user, *args, **kwargs)
   return wrapper
