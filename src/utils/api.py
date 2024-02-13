@@ -424,10 +424,10 @@ class StoreGetReply(_APIReply):
 class AssignmentListRequest(_APIRequest):
   """API Request for assignment listing"""
   criteria: Literal['and', 'or']
-  query = ''
-  page = 1
-  createdLower = 0.0
-  createdUpper = float('inf')
+  query: Optional[str]
+  page: Optional[int]
+  createdLower: Optional[float]
+  createdUpper: Optional[float | Literal['inf']]
 
 @dataclass
 class AssignmentListReply(_APIReply):
@@ -704,12 +704,12 @@ ClassroomLeaveResponse = GenericResponse
 class TextbookListRequest(_APIRequest):
   """API Request for textbook listing"""
   criteria: Literal['and', 'or']
-  query = ''
-  page = 1
-  priceLower = 0.0
-  priceUpper = float('inf')
-  createdLower = 0.0
-  createdUpper = float('inf')
+  query: Optional[str]
+  page: Optional[int]
+  priceLower: Optional[float]
+  priceUpper: Optional[float | Literal['inf']]
+  createdLower: Optional[float]
+  createdUpper: Optional[float | Literal['inf']]
 
 @dataclass
 class TextbookListReply(_APIReply):
@@ -1082,12 +1082,12 @@ ImageDeleteResponse = GenericResponse
 class SaleListRequest(_APIRequest):
   """API Request for sale listing"""
   criteria: Literal['and', 'or']
-  query = ''
-  page = 1
-  priceLower = 0.0
-  priceUpper = float('inf')
-  createdLower = 0.0
-  createdUpper = float('inf')
+  query: Optional[str]
+  page: Optional[int]
+  priceLower: Optional[float]
+  priceUpper: Optional[float | Literal['inf']]
+  createdLower: Optional[float]
+  createdUpper: Optional[float | Literal['inf']]
 
 @dataclass
 class SaleListReply(_APIReply):
@@ -1137,10 +1137,10 @@ class SaleaGetResponse(_APIResponse):
 class SubmissionListRequest(_APIRequest):
   """API Request for listing submissions"""
   criteria: Literal['and', 'or']
-  query = ''
-  page = 1
-  createdLower = 0.0
-  createdUpper = float('inf')
+  query: Optional[str]
+  page: Optional[int]
+  createdLower: Optional[float]
+  createdUpper: Optional[float | Literal['inf']]
 
 @dataclass
 class SubmissionListReply(_APIReply):
@@ -1260,10 +1260,10 @@ class SubmissionSnippetGetResponse(_APIResponse):
 class UserListRequest(_APIRequest):
   """API Request for fetching user list"""
   criteria: Literal['and', 'or']
-  query = ''
-  page = 1
-  createdLower = 0.0
-  createdUpper = float('inf')
+  query: Optional[str]
+  page: Optional[int]
+  createdLower: Optional[float]
+  createdUpper: Optional[float | Literal['inf']]
 
 @dataclass
 class UserListReply(_APIReply):

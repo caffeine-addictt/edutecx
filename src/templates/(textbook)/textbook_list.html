@@ -9,8 +9,8 @@
 {% endblock %}
 
 {% block styles %}
-    {# Store SCSS #}
-    <link href = '{{ url_for("static", filename = "(textbook)/textbook_list.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
+  {# Store SCSS #}
+  <link href = '{{ url_for("static", filename = "(textbook)/textbook_list.scss") }}' rel = 'stylesheet/less' type = 'text/css' />
 {% endblock %}
 
 {# Body #}
@@ -19,7 +19,7 @@
 
     <div class="d-flex flex-column justify-content-center w-50" style="margin-left:auto;margin-right:auto;">
       <h1 style="font-family: var(--font); text-align: center;" class="my-4">My Textbooks</h1>
-      <input type="text" class="searchBar rounded-3 px-4" value="" placeholder="Search..."/>
+      <input id="searchbar" type="text" class="searchBar rounded-3 px-4" style="min-height: 50px" value="" placeholder="Search..."/>
       <a style="font-family: var(--font); text-align: center;" class="my-4 text-decoration-underline text-dark h5" href="/store">Get Textbooks</a>
     </div>
     

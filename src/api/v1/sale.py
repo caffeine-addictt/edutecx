@@ -39,6 +39,11 @@ def sale_list_api(user: UserModel):
   req = SaleListRequest(request)
 
   # Handle query
+  req.createdLower = float(req.createdLower or 0)
+  req.createdUpper = float(req.createdUpper or 0)
+  req.priceLower = float(req.priceLower or 0)
+  req.priceUpper = float(req.priceUpper or 0)
+
   dateRange: DateRange = (
     datetime.fromtimestamp(req.createdLower)
     if float('inf') != req.createdLower
@@ -60,7 +65,7 @@ def sale_list_api(user: UserModel):
       message='priceLower is larger than priceUpper', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  if req.query == 'None':
+  if not req.query or req.query == 'None':
     req.query = ''
 
   # Build query
