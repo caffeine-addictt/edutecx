@@ -39,7 +39,6 @@ const fetchTextbooks = async () => {
 
   if (!data || data.status !== 200) {
     renderToast('Failed to fetch textbooks', 'danger');
-    if (data) console.log(data.message);
     return data?.data || new Array();
   };
 
@@ -99,7 +98,7 @@ $(async () => {
   searchInput.on('input', (/** @type {JQuery.Input} */e) => {
     searchInput.text(e.target.value.trim());
 
-    if (queryToRun) {clearTimeout(queryToRun); console.log('clearing');};
+    if (queryToRun) clearTimeout(queryToRun);
     queryToRun = setTimeout(async () => {
       const searchParams = ((new URL(location.href)).searchParams);
       if (searchInput.text()) searchParams.set('query', searchInput.text());
