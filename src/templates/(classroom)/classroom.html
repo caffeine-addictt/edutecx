@@ -23,6 +23,13 @@
         <div class="col-5 my-2">
           <h3>{{ classroom.title }}</h3>
           <p class="h-50 overflow-auto">{{ classroom.description }}</p>
+          <div class="overflow-auto">
+            <p>Classroom Owner: {{ classroom.owner.username }}</p>
+            <p> 
+              Classroom Member(s): {{ classroom.members | map(attribute = 'username') | join(', ')}}
+            </p>
+            
+          </div>
 
         </div>
         <div class="col-3 d-flex justify-content-end" id="editcontainer">
