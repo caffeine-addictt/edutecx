@@ -548,6 +548,15 @@ AssignmentDeleteResponse = GenericResponse
 
 
 # Classroom LIST
+class ClassroomListRequest(_APIRequest):
+  """API Request for classroom listing"""
+  criteria: Literal['and', 'or']
+  query: Optional[str]
+  page: Optional[int]
+  createdLower: Optional[float]
+  createdUpper: Optional[float | Literal['inf']]
+
+
 @dataclass
 class _ClassroomListData(_APIBase):
   id            : str
