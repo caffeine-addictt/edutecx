@@ -18,10 +18,10 @@
     <div class="signup-content">
       <div class="signup-form w-50 ms-auto me-auto">
         <h2 class="form-title mt-5" style="text-align: center;">Register</h2>
-        <form id='registerForm' role='form' class='d-flex flex-column align-items-center needs-validation mb-5 mt-5' novalidate>
+        <form id='registerForm' role='form' class='d-flex flex-column gap-2 needs-validation mb-5 mt-5 mx-auto' style="max-width: 60%;" novalidate>
           
-          <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
-            <label for="name" class="form-label"><i class="zmdi zmdi-account material-icons-name"></i></label>
+          <div class="form-group mb-0 mx-auto w-100" style="min-height:63px;">
+            <!-- <label for="name" class="form-label"><i class="zmdi zmdi-account material-icons-name"></i></label> -->
             <input type="text" name="username" id="name" placeholder="Your Name" class="form-control" required>
             <div class="valid-feedback">
               Looks good!
@@ -31,19 +31,19 @@
             </div>
           </div>
 
-          <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
-            <label for="email" class="form-label"><i class="zmdi zmdi-email"></i></label>
+          <div class="form-group mb-0 mx-auto w-100" style="min-height:63px;">
+            <!-- <label for="email" class="form-label"><i class="zmdi zmdi-email"></i></label> -->
             <input type="email" name="email" id="email" placeholder="Your Email" class="form-control" required>
-            <div class="valid-feedback">
+            <div class="valid-feedback mb-0">
               Looks good!
             </div>
-            <div class="invalid-feedback">
+            <div class="invalid-feedback mb-0">
               Please provide your email address.
             </div>
           </div>
 
-          <div class="form-group mb-0" style="min-width:232px; min-height:88px;">
-            <label for="pass" class="form-label"><i class="zmdi zmdi-lock"></i></label>
+          <div class="form-group mb-0 mx-auto w-100" style="min-height:63px;">
+            <!-- <label for="pass" class="form-label"><i class="zmdi zmdi-lock"></i></label> -->
             <input type="password" name="password" id="pass" placeholder="Password" aria-autocomplete="list" class="form-control" required>
             <div class="valid-feedback">
               Looks good!
@@ -53,8 +53,8 @@
             </div>
           </div>
 
-          <div class="form-group mb-" style="min-width:232px; min-height:88px;">
-            <label for="re-pass" class="form-label"><i class="zmdi zmdi-lock-outline"></i></label>
+          <div class="form-group mb-0 mx-auto w-100" style="min-height:63px;">
+            <!-- <label for="re-pass" class="form-label"><i class="zmdi zmdi-lock-outline"></i></label> -->
             <input type="password" name="re_pass" id="re_pass" placeholder="Repeat your password" class="form-control" required>
             <div class="valid-feedback">
               Looks good!
@@ -64,7 +64,7 @@
             </div>
           </div>
 
-          <div class="form-group mb-1" style="min-width:232px; min-height:90px;">
+          <div class="form-group mb-0 mx-auto w-100" style="min-height:95px;">
             <label for="disabledSelect" class="form-label">I am a</label>
             <select name="privilege" class="form-select" aria-label="Default select example" required>
               <option value="Student">Student</option>
@@ -78,7 +78,7 @@
             </div>
           </div>
 
-          <div class="form-group form-check mb-0" style="min-width:250px; min-height:55px;">
+          <div class="form-group form-check mb-2 mx-auto" style="min-height:55px;">
             <input type="checkbox" class="form-check-input" id="exampleCheck1" required>
             <label class="form-check-label" for="exampleCheck1">I agree to the Terms 	&amp; Conditions</label>
             <div class="valid-feedback">
@@ -89,10 +89,13 @@
             </div>
           </div>
 
-          <div class="form-group form-button">
+          <div class="form-group form-button mx-auto">
             <button type="submit" class="btn btn-primary">Register</button>
           </div>
         </form>
+
+
+        {# Redirect #}
         <div class="signup-image" style="text-align: center;">
           <a href="/login" class="signup-image-link">I am already a member!</a>
         </div>
