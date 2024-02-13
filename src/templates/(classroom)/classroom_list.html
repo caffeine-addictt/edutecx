@@ -44,9 +44,13 @@
           <div class="input-group">
             <label class="input-group-text" for="sortby">Sort By:</label>
             <select class="form-select" id="sortby">
-              <option value="none">None</option>
-              <!-- <option value="date">Last Opened</option> -->
-              <option value="name">Name</option>
+              <option value="Name-AZ">Name (A-Z)</option>
+              <option value="Name-ZA">Name (Z-A)</option>
+              <option value="Created-Newest">Created (newest first)</option>
+              <option value="Created-Least">Created (oldest first)</option>
+              <option value="Updated-Newest">Updated (newest first)</option>
+              <option value="Updated-Least">Updated (oldest first)</option>
+              <option value="Owned">Owned By Me</option>
             </select>
           </div>
         </div>
@@ -67,6 +71,7 @@
   {# Injected macros to variables #}
   <script>
     var tile = `{{ render_tile() }}`;
+    var user_id = `{{ g.user.id }}`;
   </script>
   <script src="{{ url_for('static', filename = '(classroom)/classroom_list.js') }}"></script>
 {% endblock %}

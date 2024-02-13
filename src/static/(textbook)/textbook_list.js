@@ -34,9 +34,11 @@ const fetchTextbooks = async () => {
     signal: fetchController.signal
   }).then(res => res.json()).catch(e => console.log(e));
 
+  // Ignore aborted
+  if (fetchController?.signal?.aborted) return textbookList;
+
   if (!data || data.status !== 200) {
     renderToast('Failed to fetch textbooks', 'danger');
-    if (data) console.log(data.message);
     return data?.data || new Array();
   };
 
@@ -94,9 +96,11 @@ $(async () => {
 
   // 500ms debounce for search inputs
   searchInput.on('input', (/** @type {JQuery.Input} */e) => {
-    searchInput.text(e.target.value);
+    searchInput.text(e.target.value.trim());
 
-    if (queryToRun) {clearTimeout(queryToRun); console.log('clearing');};
+    if (queryToRun) clearTimeout(queryToRun);
+    if (fetchController) fetchController.abort();
+
     queryToRun = setTimeout(async () => {
       const searchParams = ((new URL(location.href)).searchParams);
       if (searchInput.text()) searchParams.set('query', searchInput.text());
