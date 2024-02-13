@@ -96,16 +96,21 @@ def refresh_token(response):
       f'{request.url_root}api/v1/refresh',
       headers={'Authorization': f'Bearer {refresh_token}'},
     )
-    data = TokenRefreshResponse(refresh_response)
 
-    if data.status != HTTPStatusCode.OK:
-      raise Exception(f'{data.message}')
+    try:
+      data = TokenRefreshResponse(refresh_response)
+    except Exception:
+      data = False
+
+    if (refresh_response.status_code != HTTPStatusCode.OK) or (not data):
+      raise Exception(f'{data and data.message or "Endpoint returned Code"} [{refresh_response.status_code}]')
 
     set_access_cookies(response, str(data.data.get('access_token')))
-    app.logger.info('Successfully Auto-Refreshed expiring access token')
+    app.logger.error('Successfully Auto-Refreshed expiring access token')
 
   except IgnoreException:
     pass
+
   except Exception as e:
     app.logger.error(f'Failed to auto-refresh after request expiring access token: {e}')
 

@@ -20,12 +20,22 @@
         <div class="h-100 col-4 overflow-hidden d-flex justify-content-center align-items-center">
           <img class="h-100 my-auto" src="https://img.freepik.com/free-vector/empty-classroom-interior-with-chalkboard_1308-65378.jpg" alt="class picture">
         </div>
-        <div class="col-5 my-2">
+        <div class="col-6 my-2">
           <h3>{{ classroom.title }}</h3>
           <p class="h-50 overflow-auto">{{ classroom.description }}</p>
+          <div class="">
+            <p class="my-0">Classroom Owner: {{ classroom.owner.username }}</p>
+            <p class="w-100 my-0"> 
+              Classroom Member(s): {{ classroom.members | map(attribute = 'username') | join(', ')}} 
+              {% if not classroom.members %}
+                No members. Invite to let others join!
+              {% endif %}
+            </p>
+            
+          </div>
 
         </div>
-        <div class="col-3 d-flex justify-content-end" id="editcontainer">
+        <div class="col-2 d-flex justify-content-end" id="editcontainer">
           {% if g.user.privilege == 'Educator' %}
             <div>
               <a href="/classrooms/edit/{{ classroom.id }}" id="editanchor" class="h-25">
