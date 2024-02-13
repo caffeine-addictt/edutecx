@@ -49,7 +49,7 @@ const renderTextbooks = async (filteredList) => {
 
   if ((filteredList || textbookList).length === 0) {
     container.append(htmlToElement(
-      `<p class="text-secondary fs-5 mb-0">
+      `<p class="text-secondary fs-5 mb-0" style="text-align:center;">
         You do not have any textbooks.
         Purchase one <a href='/store'>here</a>!
       </p>`

@@ -52,7 +52,7 @@ const renderTextbooks = async (filteredList = false) => {
 
   if ((filteredList || textbookList).length === 0) {
     container.append(htmlToElement(
-      `<p class="text-secondary fs-5 mb-0">
+      `<p class="text-secondary fs-5 mb-0" style="text-align:center;">
         No textbooks available.
       </p>`
     ));
