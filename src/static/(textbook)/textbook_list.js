@@ -34,6 +34,9 @@ const fetchTextbooks = async () => {
     signal: fetchController.signal
   }).then(res => res.json()).catch(e => console.log(e));
 
+  // Ignore aborted
+  if (fetchController?.signal?.aborted) return textbookList;
+
   if (!data || data.status !== 200) {
     renderToast('Failed to fetch textbooks', 'danger');
     if (data) console.log(data.message);
