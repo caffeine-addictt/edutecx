@@ -7,7 +7,7 @@ const renderTextbooks = async () => {
   $('#textbook__container').empty();
 
   /** @type {APIJSON<TextbookGetData[]>} */
-  const response = await fetch('/api/v1/textbook/list?per_page=4&max_per_page=4&criteria=or')
+  const response = await fetch('/api/v1/textbook/owned?per_page=4&max_per_page=4&criteria=or')
     .then(res => res.json())
     .catch(err => console.log(err));
 

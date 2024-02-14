@@ -109,6 +109,79 @@ def textbooks_list_api():
   ).to_dict(), HTTPStatusCode.OK
 
 
+@app.route(f'{basePath}/owned', methods=['GET'])
+@auth_limit
+@require_login
+def textbooks_owned_api(user: UserModel):
+  req = TextbookListRequest(request)
+
+  # Handle query
+  req.createdLower = float(req.createdLower or 0)
+  req.createdUpper = float(req.createdUpper or 0)
+  req.priceLower = float(req.priceLower or 0)
+  req.priceUpper = float(req.priceUpper or 0)
+
+  dateRange: DateRange = (
+    datetime.fromtimestamp(req.createdLower)
+    if float('inf') != req.createdLower
+    else utc_time.skip('1day'),
+    datetime.fromtimestamp(req.createdUpper)
+    if float('inf') != req.createdUpper
+    else utc_time.skip('1day'),
+  )
+  priceRange = (req.priceLower, req.priceUpper)
+
+  if dateRange[0] > dateRange[1]:
+    return GenericReply(
+      message='createdLower is larger than createdUpper',
+      status=HTTPStatusCode.BAD_REQUEST,
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if priceRange[0] > priceRange[1]:
+    return GenericReply(
+      message='priceLower is larger than priceUpper', status=HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
+
+  if not req.query or req.query == 'None':
+    req.query = ''
+
+  return TextbookListReply(
+    message='Successfully fetched textbook list',
+    status=HTTPStatusCode.OK,
+    data=[
+      _TextbookGetData(
+        id=i.id,
+        author_id=i.author_id,
+        title=i.title,
+        description=i.description,
+        categories=i.categories.split('|'),
+        price=i.price,
+        uri=i.uri,
+        status=i.status,
+        cover_image=i.cover_image.uri if i.cover_image else None,
+        created_at=i.created_at.timestamp(),
+        updated_at=i.updated_at.timestamp(),
+      )
+      for i in user.textbooks + user.owned_textbooks
+      if (
+        (
+          (req.criteria == 'and') and (
+            (dateRange[0] <= i.created_at)
+            and (i.created_at <= dateRange[1])
+            and (req.query in (i.title + i.author.username))
+          )
+        )
+        or (
+          (req.criteria == 'or') and (
+            (dateRange[0] <= i.created_at and i.created_at <= dateRange[1])
+            or (req.query in (i.title + i.author.username))
+          )
+        )
+      )
+    ],
+  ).to_dict(), HTTPStatusCode.OK
+
+
 @app.route(f'{basePath}/get', methods=['GET'])
 @auth_limit
 def textbooks_get_api():
