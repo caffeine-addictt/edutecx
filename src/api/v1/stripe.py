@@ -358,7 +358,6 @@ def stripe_webhook_api():
         ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
       sale.paid = True
-      sale.session_id = None
       sale.paid_at = datetime.utcnow()
 
       if sale.type == 'Subscription':
