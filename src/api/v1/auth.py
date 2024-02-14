@@ -182,7 +182,7 @@ def apiV1Register():
 
 
 @app.route(f'{basePath}/refresh', methods=['POST'])
-@limiter.limit('10/hour', key_func=util.get_remote_address)
+@auth_limit
 @jwt_required(refresh=True)
 def apiV1Refresh():
   identity = get_current_user()

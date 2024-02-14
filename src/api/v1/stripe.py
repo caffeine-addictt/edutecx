@@ -5,6 +5,7 @@ Stripe Endpoint'
 from src import limiter
 from flask_limiter import util
 
+from sqlalchemy import and_, func
 from src.database import UserModel, TextbookModel, SaleModel, SaleInfo, DiscountModel
 from src.service.auth_provider import require_login
 from src.utils.http import HTTPStatusCode
@@ -306,29 +307,28 @@ def stripe_status_api(user: UserModel):
     return GenericReply(
       message='Invalid session id', status=HTTPStatusCode.BAD_REQUEST
     ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  
+  transaction = SaleModel.query.filter(and_(func.lower(SaleModel.session_id) == req.session_id, SaleModel.user_id == user.id)).first()
+  if not isinstance(transaction, SaleModel):
+    return GenericReply(
+      message='Transaction not found', status=HTTPStatusCode.BAD_REQUEST
+    ).to_dict(), HTTPStatusCode.BAD_REQUEST
 
-  transactions = set([*user.pending_transactions, *user.transactions])
-  for transaction in transactions:
-    if transaction.session_id == req.session_id:
-      return StripeStatusReply(
-        message='Fetched checkout status',
-        status=HTTPStatusCode.OK,
-        data=_StripeStatusData(
-          paid=transaction.paid,
-          total_cost=transaction.total_cost,
-          user_id=user.id,
-          transaction_id=transaction.id,
-          used_discount=transaction.used_discount.code
-          if transaction.used_discount
-          else None,
-          paid_at=transaction.paid_at.timestamp(),
-          created_at=transaction.created_at.timestamp(),
-        ),
-      ).to_dict(), HTTPStatusCode.OK
-
-  return GenericReply(
-    message='Transaction not found', status=HTTPStatusCode.BAD_REQUEST
-  ).to_dict(), HTTPStatusCode.BAD_REQUEST
+  return StripeStatusReply(
+    message='Fetched checkout status',
+    status=HTTPStatusCode.OK,
+    data=_StripeStatusData(
+      paid=transaction.paid,
+      total_cost=transaction.total_cost,
+      user_id=user.id,
+      transaction_id=transaction.id,
+      used_discount=transaction.used_discount.code
+      if transaction.used_discount
+      else None,
+      paid_at=transaction.paid_at.timestamp(),
+      created_at=transaction.created_at.timestamp(),
+    ),
+  ).to_dict(), HTTPStatusCode.OK
 
 
 @app.route(f'{basePath}/webhook', methods=['POST'])
