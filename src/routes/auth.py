@@ -72,6 +72,7 @@ def refresh_token(response):
       request.method != 'GET'
       or request.path.startswith('/api/')
       or request.path.startswith('/static')
+      or request.path == '/login'
       ):
     return response
 
