@@ -29,7 +29,7 @@ const renderTextbooks = async () => {
       `
     ))
   } else {
-    response.data.slice(0, 4).forEach((item) => {
+    response.data.slice(0, 3).forEach((item) => {
       $('#textbook__container').append(htmlToElement(formatString(deepCopy(textbookTemplate), {
         title: item.title,
         description: item.description,

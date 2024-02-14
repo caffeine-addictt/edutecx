@@ -165,6 +165,27 @@ def drawGraph(
   return f
 
 
+@lru_cache(maxsize=1)
+def getStats():
+  users: list[UserModel] = fetchAll(UserModel).all()
+  textbooks: list[TextbookModel] = fetchAll(TextbookModel).all()
+  sales: list[SaleModel] = fetchAll(SaleModel).all()
+
+  userCount = len(users)
+  textbookCount = len(textbooks)
+  revenue = sum([ i.total_cost for i in sales if i.paid ])
+
+  return AdminStatsGetReply(
+    message='Successfully fetched stats',
+    status=HTTPStatusCode.OK,
+    data = _AdminStatsGetData(
+      user_count = userCount,
+      textbook_count = textbookCount,
+      revenue = revenue
+    )
+  ).to_dict(), HTTPStatusCode.OK
+
+
 @app.route(f'{basePath}/draw', methods=['POST'])
 @auth_provider.require_admin
 def admin_draw_api(_: UserModel):
@@ -267,22 +288,5 @@ def admin_export_api(_: UserModel | None, exportFor: str):
 
 @app.route(f'{basePath}/stats', methods=['GET'])
 @auth_provider.require_admin
-@lru_cache(maxsize=1)
 def admin_stats_api(_: UserModel):
-  users: list[UserModel] = fetchAll(UserModel).all()
-  textbooks: list[TextbookModel] = fetchAll(TextbookModel).all()
-  sales: list[SaleModel] = fetchAll(SaleModel).all()
-
-  userCount = len(users)
-  textbookCount = len(textbooks)
-  revenue = sum([ i.total_cost for i in sales if i.paid ])
-
-  return AdminStatsGetReply(
-    message='Successfully fetched stats',
-    status=HTTPStatusCode.OK,
-    data = _AdminStatsGetData(
-      user_count = userCount,
-      textbook_count = textbookCount,
-      revenue = revenue
-    )
-  ).to_dict(), HTTPStatusCode.OK
+  return getStats()
