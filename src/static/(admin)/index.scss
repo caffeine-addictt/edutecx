@@ -1,10 +1,11 @@
 
 /* Custom CSS for columns */
 .custom-column {
-  margin: 10px;
-  width: 450px;
+  margin: auto;
+  width: 30%;
   border: 0.5px solid black; /* Add border to each column */
   padding: 15px; /* Add padding to each column */
   text-align: center; /* Center align content */
   background-color: white;
+  height: 250px
 }
