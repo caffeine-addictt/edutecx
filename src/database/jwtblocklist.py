@@ -17,7 +17,7 @@ from sqlalchemy import (
 )
 
 JWTType = Literal['access', 'refresh']
-EnumJWTType = Enum('access', 'refresh', name='TokenType')
+EnumJWTType = Enum('access', 'refresh', name='JWTType')
 
 
 class JWTBlocklistModel(db.Model):
