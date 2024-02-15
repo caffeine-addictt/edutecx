@@ -89,7 +89,7 @@ def refresh_token(response):
     if refresh_decoded['exp'] <= utc_time.get().timestamp():
       raise IgnoreException('Refresh token expired')
 
-    if utc_time.skip('1h').timestamp() < access_decoded['exp']:
+    if utc_time.skip('5mins').timestamp() < access_decoded['exp']:
       raise IgnoreException('Access token not close to being expired')
 
     # Try to refresh access token
