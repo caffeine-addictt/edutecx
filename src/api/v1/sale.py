@@ -91,9 +91,7 @@ def sale_list_api(user: UserModel):
         sale_id=i.id,
         user_id=i.user_id,
         discount_id=i.discount_id if i.discount_id else None,
-        textbook_ids=[i.split(':')[0] for i in (i.textbook_ids).split(',')]
-        if i.textbook_ids
-        else [],
+        textbook_ids=[a.textbook_id for a in i.data],
         paid=i.paid,
         paid_at=i.paid_at,
         total_cost=i.total_cost,
