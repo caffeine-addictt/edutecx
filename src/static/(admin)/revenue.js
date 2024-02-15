@@ -112,31 +112,21 @@ const fetchSaleData = async (initialRender = false) => {
     $('#sale__container').empty();
 
     response.data.forEach(sale => {
-      const textbooks = sale.textbook_ids.map(textbookId => {
-        return `
-          <option value="${textbookId}">
-            <a href="/textbook/${textbookId}" target="_blank" class="textbook__link">
-              ${textbookId}
-            </a>
-          </option>`;
-      })
-
       const newSaleEntry = htmlToElement(formatString(deepCopy(saleTemplate), {
         'sale_id': sale.sale_id,
         'user_id': sale.user_id,
         'discount_id': sale.discount_id,
         'paid': sale.paid ? (new Date(sale.paid_at)).toDateString() : 'False',
-        'total_cost': sale.total_cost,
-        'texbook_ids': textbooks.join('')
-      }))
+        'total_cost': sale.total_cost
+      }));
 
       const textbookIds = $(newSaleEntry).find('#sale__textbookids')
       sale.textbook_ids.forEach(textbookId => {
         textbookIds.append(htmlToElement(formatString(
-          '<a href="/textbook/{textbook_id}" target="_blank" class="textbook__link">{textbook_id}</a>',
+          '<option value="{textbook_id}"><a href="/textbook/{textbook_id}" target="_blank" class="textbook__link">{textbook_id}</a></option>',
           { 'textbook_id': textbookId }
-        )))
-      })
+        )));
+      });
 
       $('#sale__container').append(newSaleEntry);
     });
