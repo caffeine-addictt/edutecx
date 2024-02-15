@@ -89,7 +89,7 @@ def refresh_token(response):
     if refresh_decoded['exp'] <= utc_time.get().timestamp():
       raise IgnoreException('Refresh token expired')
 
-    if utc_time.skip('1h').timestamp() < access_decoded['exp']:
+    if utc_time.skip('5mins').timestamp() < access_decoded['exp']:
       raise IgnoreException('Access token not close to being expired')
 
     # Try to refresh access token
@@ -107,7 +107,7 @@ def refresh_token(response):
       raise Exception(f'{data and data.message or "Endpoint returned Code"} [{refresh_response.status_code}]')
 
     set_access_cookies(response, str(data.data.get('access_token')))
-    app.logger.error('Successfully Auto-Refreshed expiring access token')
+    app.logger.info('Successfully Auto-Refreshed expiring access token')
 
   except IgnoreException:
     pass
