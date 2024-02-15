@@ -37,8 +37,6 @@ jobs:
     steps:
       - name: Install packages
         run: |
-          sudo apt upgrade
-          sudo apt update
           sudo apt install -y curl
       
       - name: Trigger deployment
