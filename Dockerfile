@@ -1,17 +1,25 @@
-FROM python:3.11.6-alpine3.18
+FROM python:3.11.9-alpine
 
-# Set working directory
+
+# Set PWD
 WORKDIR /app
 
-RUN apk add --no-cache git
+# Cache requirements
+COPY requirements.txt .
 
-# Install dependencies
-RUN pip install --upgrade pip
-COPY ./requirements.txt /app
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+# Install deps
+RUN \
+  pip install --upgrade pip \
+  pip install --no-cache-dir --upgrade -r requirements.txt
 
-# Copy scripts
-COPY . /app
+
+# Copy source over
+COPY . .
+
+
+# Expose
+EXPOSE 3000
+
 
 # Start server
 CMD ["gunicorn", "--bind=0.0.0.0:8080", "--worker-class=gthread", "--workers=2", "--threads=4",  "run:app"]
