@@ -22,4 +22,4 @@ EXPOSE 3000
 
 
 # Start server
-CMD ["gunicorn", "--bind=0.0.0.0:3000", "--worker-class=gthread", "--workers=2", "--threads=4",  "run:app"]
+CMD ["gunicorn", "--bind=0.0.0.0:3000", "--workers=2", "--threads=4",  "run:app"]
