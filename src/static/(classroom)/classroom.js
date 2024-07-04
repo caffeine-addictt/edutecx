@@ -28,7 +28,7 @@ const fetchTextbooks = async () => {
       return res.json();
     };
   });
-  
+
   if (!data || data.status !== 200) {
     renderToast('Failed to fetch textbooks', 'danger');
     if (data) console.log(data.message);
@@ -62,16 +62,16 @@ const renderTextbooks = async (textbookTemplate, div, selected, filteredList = f
       ));
     } else {
       (filteredList || textbookList).forEach(textbookData => {
-      if (selected.includes(textbookData.id)) {
-        container.append(htmlToElement(formatString(deepCopy(textbookTemplate), {
-        title: textbookData.title,
-        textbook_id: textbookData.id,
-        cover_image: textbookData.cover_image
-      })));
+        if (selected.includes(textbookData.id)) {
+          container.append(htmlToElement(formatString(deepCopy(textbookTemplate), {
+            title: textbookData.title,
+            textbook_id: textbookData.id,
+            cover_image: textbookData.cover_image
+          })));
+        }
+      });
     }
-    });
-  }
-    
+
   } else {
     (filteredList || textbookList).forEach(textbookData => {
       container.append(htmlToElement(formatString(deepCopy(textbookTemplate), {
@@ -137,7 +137,7 @@ const renderAssignments = async (filteredList) => {
     ));
   }
   else {
-    template = deepCopy(assignmentTemplate);
+    const template = deepCopy(assignmentTemplate);
     (filteredList || assignmentList).forEach(assignmentData => {
       container.append(htmlToElement(formatString(template, {
         title: assignmentData.title,
@@ -187,12 +187,12 @@ $(async () => {
   // Textbooks
   $('#textbookbutton').on('click', async (e) => {
     $('#textbook-modal').modal('show');
-      textbookList = await fetchTextbooks();
-      renderTextbooks(textbookTemplate, 'textbook-select-list', null);
-      for (chosen of selected) {
-        console.log(chosen);
-        $(`#${chosen}`).find('.card-body').addClass('border border-dark');
-      }
+    textbookList = await fetchTextbooks();
+    renderTextbooks(textbookTemplate, 'textbook-select-list', null);
+    for (const chosen of selected) {
+      console.log(chosen);
+      $(`#${chosen}`).find('.card-body').addClass('border border-dark');
+    }
   });
 
   $('#close-textbook-modal-big').on('click', e => $('#textbook-modal').modal('hide'));
@@ -201,43 +201,43 @@ $(async () => {
   $('#confirm-textbook').on('click', async e => {
     e.preventDefault();
     renderToast('Updating class textbooks...', 'info');
-  
+
     const data = selected;
-      console.log(data);
-  
+    console.log(data);
+
     /**
      * @type {{status: 200; message: string; data: { classroom_id: string }}?}
      */
-      const response = await fetch('/api/v1/classroom/edit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': getAccessToken()
-        },
-        body: JSON.stringify({
-          classroom_id: classroom_id,
-          textbook_ids: selected 
-        })
-      }).then(res => {
-        if (res.ok) {
-          return res.json();
-        };
-      });
-      if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
-      else {
-        renderToast(response.message, 'success');
-        window.location.reload();
+    const response = await fetch('/api/v1/classroom/edit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': getAccessToken()
+      },
+      body: JSON.stringify({
+        classroom_id: classroom_id,
+        textbook_ids: selected
+      })
+    }).then(res => {
+      if (res.ok) {
+        return res.json();
       };
+    });
+    if (!response || response.status !== 200) renderToast(response ? response.message : 'Something went wrong!', 'danger');
+    else {
+      renderToast(response.message, 'success');
+      window.location.reload();
+    };
   })
 
 
   textbookList = await fetchTextbooks();
   renderTextbooks(chosenTextbooksTemplate, 'selected-list', textbooks)
-  
+
   assignmentList = await fetchAssignments();
   renderAssignments();
-  
 
-  
+
+
 
 })
