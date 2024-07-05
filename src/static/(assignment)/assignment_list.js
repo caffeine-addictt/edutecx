@@ -53,7 +53,7 @@ const renderAssignments = async (filteredList) => {
     ));
   }
   else {
-    template = deepCopy(assignmentTemplate);
+    const template = deepCopy(assignmentTemplate);
     (filteredList || assignmentList).forEach(assignmentData => {
       container.append(htmlToElement(formatString(template, {
         title: assignmentData.title,

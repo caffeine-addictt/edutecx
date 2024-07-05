@@ -51,7 +51,7 @@ const renderSubmissionList = async (filteredList) => {
     ));
   }
   else {
-    template = deepCopy(cardTemplate);
+    const template = deepCopy(cardTemplate);
     (filteredList || submissionList).forEach(submissionData => {
       container.append(htmlToElement(formatString(template, {
         id: submissionData.submission_id,

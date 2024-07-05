@@ -66,7 +66,7 @@ const renderTextbooks = async (filteredList) => {
     ));
   }
   else {
-    template = deepCopy(cardTemplate);
+    const template = deepCopy(cardTemplate);
     (filteredList || textbookList).forEach(textbookData => {
       container.append(htmlToElement(formatString(template, {
         title: textbookData.title,
