@@ -9,7 +9,7 @@ from sqlalchemy import and_
 from functools import cache, lru_cache
 from datetime import datetime
 import matplotlib.pyplot as plt
-from thread import ParallelProcessing
+from thread import ConcurrentProcessing
 from flask_sqlalchemy.query import Query
 from typing import Callable, Tuple, TypeVar
 from flask import (
@@ -106,8 +106,8 @@ def drawGraph(
     def _processor(m: _TModel) -> Tuple[datetime, _TYValue]:
       return (m.created_at, axisY(m))
 
-    process = ParallelProcessing(
-      _processor, dataset=fetched, max_threads=4, daemon=True
+    process = ConcurrentProcessing(
+      function=_processor, dataset=fetched, max_threads=4, daemon=True
     )
     process.start()
     processed = process.get_return_values()
